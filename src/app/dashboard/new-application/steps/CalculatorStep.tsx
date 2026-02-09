@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+
 
 interface CalculatorStepProps {
     onNext: (data: any) => void;
@@ -51,7 +53,20 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
         // Priority 1: Appraisal Price (from AI/Collateral Step) - 90% LTV
         if (formData && formData.appraisalPrice > 0) {
-            calculatedMax = Math.floor(formData.appraisalPrice * 0.90);
+            const ltvRate = 0.90;
+            const approvedLimit = Math.floor(formData.appraisalPrice * ltvRate);
+
+            // Adjust based on Legal Status
+            if (formData.legalStatus === 'pawned') {
+                // Pawned: (Appraisal * LTV) - Remaining Debt
+                calculatedMax = approvedLimit - (Number(formData.pawnedRemainingDebt) || 0);
+            } else if (formData.legalStatus === 'lease') {
+                // Lease: (Appraisal * LTV) - Payoff Balance - Fees/Tax (Assume 0 for now as per plan)
+                calculatedMax = approvedLimit - (Number(formData.leasePayoffBalance) || 0);
+            } else {
+                // Free: Appraisal * LTV
+                calculatedMax = approvedLimit;
+            }
         }
         // Priority 2: Income Multiplier (Fallback)
         else if (formData && formData.income > 0) {
@@ -66,13 +81,16 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             calculatedMax = Math.floor(formData.income * multiplier);
         }
 
-        setMaxLoanAmount(calculatedMax);
+        // Ensure max is not negative (Negative Equity Case)
+        setMaxLoanAmount(Math.max(0, calculatedMax));
 
         // Adjust current amount if it exceeds max
-        if (amount > calculatedMax) {
+        if (amount > calculatedMax && calculatedMax > 0) {
             setAmount(calculatedMax);
+        } else if (calculatedMax <= 0) {
+            setAmount(0);
         }
-    }, [formData?.income, formData?.appraisalPrice, selectedProduct]);
+    }, [formData?.income, formData?.appraisalPrice, formData?.legalStatus, formData?.pawnedRemainingDebt, formData?.leasePayoffBalance, selectedProduct]);
 
     useEffect(() => {
         calculateLoan();
@@ -163,7 +181,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
             <div className="grid lg:grid-cols-12 gap-10 max-w-7xl mx-auto">
                 {/* Input Section - Minimal Styling */}
-                <div className="lg:col-span-5 space-y-6 lg:order-2">
+                <div className="lg:col-span-5 space-y-6 lg:order-1">
                     {/* Product Selection */}
                     <div className="space-y-4 animate-in fade-in duration-500">
                         {/* Show Summary if ReadOnly OR if we already have a collateral type from previous steps */}
@@ -180,9 +198,14 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     (() => { const Icon = PRODUCTS.find(p => p.id === selectedProduct)!.icon; return <Icon className="w-5 h-5" /> })() : <Car className="w-5 h-5" />}
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-bold text-foreground text-sm">
-                                                    {PRODUCTS.find(p => p.id === selectedProduct)?.label}
-                                                </p>
+                                                <div className="flex justify-between items-start">
+                                                    <p className="font-bold text-foreground text-sm">
+                                                        {PRODUCTS.find(p => p.id === selectedProduct)?.label}
+                                                    </p>
+                                                    <Badge variant="outline" className="text-[9px] h-4 bg-white">
+                                                        {formData.legalStatus === 'pawned' ? 'ติดจำนำ' : formData.legalStatus === 'lease' ? 'ติดเช่าซื้อ' : 'ปลอดภาระ'}
+                                                    </Badge>
+                                                </div>
                                                 <p className="text-xs text-muted">
                                                     {selectedProduct === 'land'
                                                         ? `โฉนดเลขที่: ${formData.deedNumber || '-'}`
@@ -194,41 +217,19 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                         <div className="h-px bg-gray-200/60" />
 
-                                        <div className="flex justify-between items-center pl-1">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                                                <span className="text-xs font-bold text-muted-foreground">ราคาประเมิน (บาท)</span>
-                                            </div>
-                                            <span className="text-sm font-mono font-bold text-emerald-700">
-                                                {formData.appraisalPrice ? Number(formData.appraisalPrice).toLocaleString() : '0'}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* 2. Net Income Card (Same Style) */}
-                                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm text-blue-600">
-                                                <Banknote className="w-5 h-5" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-bold text-foreground text-sm">รายได้สุทธิ</p>
-                                                <p className="text-xs text-muted">เกณฑ์พิจารณาสินเชื่อ</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="h-px bg-gray-200/60" />
 
                                         <div className="flex justify-between items-center pl-1">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                                                <span className="text-xs font-bold text-muted-foreground">รายได้ต่อเดือนสุทธิ (บาท)</span>
+                                                <span className="text-xs font-bold text-muted-foreground">  วงเงินสูงสุด:</span>
                                             </div>
                                             <span className="text-sm font-mono font-bold text-blue-700">
-                                                {formData.income ? Number(formData.income).toLocaleString() : '0'}
+                                                ฿{maxLoanAmount.toLocaleString()}
                                             </span>
                                         </div>
+
                                     </div>
+
+
                                 </div>
                             </div>
                         ) : (
@@ -266,35 +267,48 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             <div className="flex justify-between items-baseline">
                                 <Label className="text-sm font-bold">สินเชื่อที่ต้องการ (บาท)</Label>
                                 {formData && (
-                                    <div className="inline-flex items-center px-2 py-0.5 gap-1 bg-blue-50 text-blue-700 rounded-full text-[9px] font-bold">
+                                    <div className={cn(
+                                        "inline-flex items-center px-2 py-0.5 gap-1 rounded-full text-[9px] font-bold",
+                                        maxLoanAmount <= 0 ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"
+                                    )}>
                                         <AlertCircle className="w-2.5 h-2.5" />
                                         วงเงินสูงสุด: {maxLoanAmount.toLocaleString()}
                                     </div>
                                 )}
                             </div>
-                            <div className="relative">
-                                <Input
-                                    type="text"
-                                    value={amount.toLocaleString()}
-                                    onChange={(e) => {
-                                        const numericValue = Number(e.target.value.replace(/,/g, ''));
-                                        if (!isNaN(numericValue) && numericValue <= maxLoanAmount) setAmount(numericValue);
-                                    }}
-                                    className="pl-9 pr-4 text-lg font-semibold font-mono h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all text-right"
-                                />
-                            </div>
-                            <Slider
-                                value={[amount]}
-                                min={10000}
-                                max={maxLoanAmount}
-                                step={5000}
-                                onValueChange={(val) => setAmount(val[0])}
-                                className="w-full py-4"
-                            />
-                            <div className="flex justify-between text-[10px] text-muted">
-                                <span>10,000</span>
-                                <span>{maxLoanAmount.toLocaleString()}</span>
-                            </div>
+
+                            {maxLoanAmount <= 0 ? (
+                                <div className="p-4 bg-red-50 border border-red-100 rounded-xl space-y-2">
+                                    <p className="text-red-700 text-sm font-bold">ไม่สามารถกู้เพิ่มได้ (Negative Equity)</p>
+                                    <p className="text-red-600 text-[11px]">ยอดหนี้คงเหลือสูงกว่าราคาประเมินทรัพย์สิน กรุณาติดต่อเจ้าหน้าที่เพื่อขอคำปรึกษาเพิ่มเติม</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="relative">
+                                        <Input
+                                            type="text"
+                                            value={amount.toLocaleString()}
+                                            onChange={(e) => {
+                                                const numericValue = Number(e.target.value.replace(/,/g, ''));
+                                                if (!isNaN(numericValue) && numericValue <= maxLoanAmount) setAmount(numericValue);
+                                            }}
+                                            className="pl-9 pr-4 text-lg font-semibold font-mono h-12 bg-gray-50/50 border-gray-200 focus:bg-white transition-all text-right"
+                                        />
+                                    </div>
+                                    <Slider
+                                        value={[amount]}
+                                        min={Math.min(10000, maxLoanAmount)}
+                                        max={maxLoanAmount}
+                                        step={5000}
+                                        onValueChange={(val) => setAmount(val[0])}
+                                        className="w-full py-4"
+                                    />
+                                    <div className="flex justify-between text-[10px] text-muted">
+                                        <span>{Math.min(10000, maxLoanAmount).toLocaleString()}</span>
+                                        <span>{maxLoanAmount.toLocaleString()}</span>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className="space-y-4">
@@ -303,12 +317,14 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 {COMPARISON_DURATIONS.map((m) => (
                                     <button
                                         key={m}
+                                        disabled={maxLoanAmount <= 0}
                                         onClick={() => setMonths(m)}
                                         className={cn(
                                             "py-2 px-1 rounded-lg text-[11px] font-bold border transition-all duration-200",
                                             months === m
                                                 ? "bg-chaiyo-blue text-white border-chaiyo-blue shadow-md"
-                                                : "bg-white text-foreground border-border-subtle hover:border-chaiyo-blue/50 hover:bg-blue-50/30"
+                                                : "bg-white text-foreground border-border-subtle hover:border-chaiyo-blue/50 hover:bg-blue-50/30",
+                                            maxLoanAmount <= 0 && "opacity-50 cursor-not-allowed"
                                         )}
                                     >
                                         {m}
@@ -320,10 +336,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                 </div>
 
                 {/* Output Container with Chart */}
-                <Card className="lg:col-span-7 bg-[#001080] text-white border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex flex-col h-full lg:sticky lg:top-6 lg:order-1">
+                <Card className="lg:col-span-7 bg-[#001080] text-white border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex flex-col h-full lg:sticky lg:top-6 lg:order-2">
                     <CardContent className="p-8 flex flex-col h-full relative items-center">
                         {/* 1. Main Payment Display (Replacing Header & Separator) */}
-                        {/* 1. Header: Title Left, Result Right */}
                         <div className="flex justify-between items-start w-full mb-6 pt-2">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center">
@@ -349,14 +364,17 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 {COMPARISON_DURATIONS.map(m => {
                                     const mPayment = getMonthlyForDuration(m);
                                     const maxPayment = getMonthlyForDuration(Math.min(...COMPARISON_DURATIONS));
-                                    const heightPercentage = (mPayment / maxPayment) * 100;
+                                    const heightPercentage = maxPayment > 0 ? (mPayment / maxPayment) * 100 : 0;
                                     const isSelected = m === months;
 
                                     return (
                                         <div
                                             key={m}
-                                            onClick={() => setMonths(m)}
-                                            className="flex flex-col items-center h-full flex-1 group cursor-pointer relative"
+                                            onClick={() => maxLoanAmount > 0 && setMonths(m)}
+                                            className={cn(
+                                                "flex flex-col items-center h-full flex-1 group relative",
+                                                maxLoanAmount > 0 ? "cursor-pointer" : "cursor-default"
+                                            )}
                                         >
                                             {/* Bar Area */}
                                             <div className="relative flex-1 w-full flex flex-col justify-end items-center gap-2 pb-1">
@@ -364,20 +382,22 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 <div
                                                     className={cn(
                                                         "w-full rounded-t-lg transition-all duration-500 relative",
-                                                        isSelected
+                                                        isSelected && maxLoanAmount > 0
                                                             ? "bg-chaiyo-gold shadow-[0_0_25px_rgba(255,193,7,0.6)]"
                                                             : "bg-white/10 group-hover:bg-white/20"
                                                     )}
                                                     style={{ height: `${heightPercentage}%` }}
                                                 >
-                                                    {/* Tooltip on Hover (Inside Bar for local positioning) */}
-                                                    <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-white text-[#001080] text-[10px] font-bold py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-2xl z-20 transform translate-y-2 group-hover:translate-y-0">
-                                                        ฿{Math.ceil(mPayment).toLocaleString()}
-                                                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
-                                                    </div>
+                                                    {/* Tooltip on Hover */}
+                                                    {maxLoanAmount > 0 && (
+                                                        <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-white text-[#001080] text-[10px] font-bold py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap shadow-2xl z-20 transform translate-y-2 group-hover:translate-y-0">
+                                                            ฿{Math.ceil(mPayment).toLocaleString()}
+                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rotate-45"></div>
+                                                        </div>
+                                                    )}
 
-                                                    {isSelected && (
-                                                        <div className="absolute top-0 left-0 w-full h-[3px] bg-white/40 rounded-t-lg"></div>
+                                                    {isSelected && maxLoanAmount > 0 && (
+                                                        <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/40 "></div>
                                                     )}
                                                 </div>
                                             </div>
@@ -386,7 +406,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                             <div className="flex flex-col items-center pt-2 border-t border-white/5 w-full">
                                                 <span className={cn(
                                                     "text-[11px] font-black transition-all duration-300",
-                                                    isSelected ? "text-chaiyo-gold scale-125" : "text-white/40 group-hover:text-white/70"
+                                                    isSelected && maxLoanAmount > 0 ? "text-chaiyo-gold scale-125" : "text-white/40 group-hover:text-white/70"
                                                 )}>
                                                     {m}
                                                 </span>
@@ -398,26 +418,84 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </div>
                         </div>
 
-                        {/* 3. Extra White Space (Gap) */}
-                        <div className="h-10 w-full" />
-
-                        {/* Summary Content */}
-                        <div className="w-full space-y-6 bg-white/5 p-6 rounded-2xl border border-white/10 relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-1 h-full transition-opacity"></div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-white/60">วงเงินกู้ (เงินต้น):</span>
-                                <span className="text-xl font-bold font-mono text-white">฿{amount.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-white/60">ดอกเบี้ยรวมทั้งหมด:</span>
-                                <span className="text-xl font-bold font-mono text-chaiyo-gold">+{Math.ceil(totalInterest).toLocaleString()}</span>
-                            </div>
-                            <div className="h-[1px] bg-white/10"></div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-lg font-medium text-white/80">ยอดชำระทั้งหมด:</span>
-                                <span className="text-3xl font-bold font-mono text-white">฿{(amount + totalInterest).toLocaleString()}</span>
+                        {/* 3. Detailed Summary Table */}
+                        <div className="w-full space-y-4 pt-8">
+                            <div className="bg-white/5 p-5 rounded-2xl border border-white/10 space-y-3">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-white/60">วงเงินกู้ (เงินต้น):</span>
+                                    <span className="font-bold text-white">฿{amount.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-white/60">ดอกเบี้ยรวม:</span>
+                                    <span className="font-bold text-chaiyo-gold">฿{Math.ceil(totalInterest).toLocaleString()}</span>
+                                </div>
+                                <div className="h-[1px] bg-white/10 my-1"></div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-lg font-bold text-white/80">ยอดชำระทั้งหมด:</span>
+                                    <span className="text-2xl font-bold text-white">฿{(amount + totalInterest).toLocaleString()}</span>
+                                </div>
                             </div>
                         </div>
+
+                        {/* 4. Affordability Summary (Net Income vs Repay) */}
+                        <div className="w-full mt-4">
+                            <div className="bg-white/5 p-5 rounded-2xl border border-white/10 space-y-3 relative overflow-hidden">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-white/60 text-xs font-bold uppercase tracking-wider">ความสามารถในการชำระหนี้</p>
+
+                                    </div>
+
+                                    {/* Affinity Indicator */}
+                                    {(() => {
+                                        const incomeUsed = Number(formData?.netIncome || formData?.income) || 0;
+                                        const payment = Math.ceil(monthlyPayment);
+                                        const dsr = incomeUsed > 0 ? (payment / incomeUsed) * 100 : 0;
+                                        const isSafe = dsr <= 60; // Standard DSR limit
+
+                                        return (
+                                            <div className={cn(
+                                                "flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase transition-colors",
+                                                isSafe ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"
+                                            )}>
+                                                <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isSafe ? "bg-emerald-400" : "bg-red-400")} />
+                                                {isSafe ? "Affordable" : "High DSR Warning"}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <p className="text-[9px] text-white/40 font-bold uppercase">ยอดผ่อน / รายได้สุทธิ</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                <div
+                                                    className={cn(
+                                                        "h-full transition-all duration-500",
+                                                        (Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100 <= 60 ? "bg-emerald-400" : "bg-red-400"
+                                                    )}
+                                                    style={{ width: `${Math.min(100, (Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100)}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs font-mono font-bold text-white">
+                                                {((Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100).toFixed(0)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[9px] text-white/40 font-bold uppercase">ยอดผ่อน / รายได้สุทธิ</p>
+                                        <p className="text-sm font-bold text-white">
+                                            ฿{Math.ceil(monthlyPayment).toLocaleString()}
+                                            <span className="text-sm font-bold text-white"> / {(formData?.netIncome || formData?.income || 0).toLocaleString()}</span>
+
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
 
                         <div className="w-full space-y-4 pt-4">
                             <p className="text-[10px] text-white/40 italic">
@@ -435,10 +513,12 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         </Button>
                                     )}
                                     <Button
+                                        disabled={maxLoanAmount <= 0}
                                         onClick={handleNext}
                                         className={cn(
                                             "h-14 text-lg font-bold bg-chaiyo-gold hover:bg-chaiyo-gold/90 text-[#001080] rounded-xl shadow-xl transition-all transform hover:scale-[1.02]",
-                                            onBack ? "flex-[2]" : "w-full"
+                                            onBack ? "flex-[2]" : "w-full",
+                                            maxLoanAmount <= 0 && "opacity-50 grayscale cursor-not-allowed"
                                         )}
                                     >
                                         {formData ? "ยืนยันและถัดไป" : "สรุปยอดสินเชื่อ"} <ChevronRight className="w-5 h-5 ml-2" />

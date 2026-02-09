@@ -162,7 +162,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Car className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">หลักประกัน</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(2)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(3)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -177,6 +177,13 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
                         {formData.collateralType === 'land' ? (
                             <>
+                                <div className="flex justify-between">
+                                    <span className="text-muted">สถานะทางกฎหมาย</span>
+                                    <span className="font-medium text-right">
+                                        {formData.legalStatus === 'pawned' ? 'ติดจำนำ' :
+                                            formData.legalStatus === 'lease' ? 'ติดเช่าซื้อ' : 'ปลอดภาระ'}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted">เลขที่โฉนด</span>
                                     <span className="font-medium text-right">{formData.deedNumber || "-"}</span>
@@ -197,6 +204,19 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                         ) : (
                             <>
                                 <div className="flex justify-between">
+                                    <span className="text-muted">สถานะทางกฎหมาย</span>
+                                    <span className="font-medium text-right">
+                                        {formData.legalStatus === 'pawned' ? 'ติดจำนำ' :
+                                            formData.legalStatus === 'lease' ? 'ติดเช่าซื้อ' : 'ปลอดภาระ'}
+                                    </span>
+                                </div>
+                                {(formData.legalStatus === 'pawned' || formData.legalStatus === 'lease') && (
+                                    <div className="flex justify-between text-red-500">
+                                        <span className="text-red-500">{formData.legalStatus === 'pawned' ? 'ยอดหนี้คงเหลือ' : 'ยอดปิดบัญชี (Payoff)'}</span>
+                                        <span className="font-medium text-right">฿{Number(formData.legalStatus === 'pawned' ? formData.pawnedRemainingDebt : formData.leasePayoffBalance).toLocaleString()}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
                                     <span className="text-muted">ปีจดทะเบียน</span>
                                     <span className="font-medium text-right">{formData.year || "-"}</span>
                                 </div>
@@ -211,8 +231,12 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     </div>
                                 )}
                                 <div className="flex justify-between">
-                                    <span className="text-muted">ทะเบียน</span>
-                                    <span className="font-medium text-right">{formData.licensePlate || "-"}</span>
+                                    <span className="text-muted">ทะเบียน / จังหวัด</span>
+                                    <span className="font-medium text-right">{formData.licensePlate || "-"} {formData.registrationProvince && `/ ${formData.registrationProvince}`}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted">เลขไมล์</span>
+                                    <span className="font-medium text-right">{formData.mileage ? `${Number(formData.mileage).toLocaleString()} กม.` : "-"}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted">เลขตัวถัง (VIN)</span>
@@ -221,11 +245,37 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             </>
                         )}
                         <hr className="border-dashed border-gray-200 my-2" />
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted">ราคาประเมิน (AI)</span>
-                            <span className="font-bold text-right text-chaiyo-blue">฿{(formData.appraisalPrice || 0).toLocaleString()}</span>
+
+                        {/* Financial Breakdown Section */}
+                        <div className="space-y-2.5 bg-gray-50/50 p-4 rounded-xl border border-gray-100 mt-2">
+                            <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">สรุปวงเงินประเมิน</p>
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted text-xs">ราคาประเมิน:</span>
+                                <span className="font-bold text-foreground">฿{(formData.appraisalPrice || 0).toLocaleString()}</span>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted text-xs">วงเงินกู้ (90% LTV):</span>
+                                <span className="font-bold text-emerald-600">฿{Math.floor((formData.appraisalPrice || 0) * 0.9).toLocaleString()}</span>
+                            </div>
+
+                            {(formData.legalStatus === 'pawned' || formData.legalStatus === 'lease') && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-red-500 text-xs">หัก{formData.legalStatus === 'pawned' ? 'ส่วนต่างจำนำ' : 'ปิดบัญชี'}:</span>
+                                    <span className="font-bold text-red-500">- ฿{Number(formData.legalStatus === 'pawned' ? formData.pawnedRemainingDebt : formData.leasePayoffBalance).toLocaleString()}</span>
+                                </div>
+                            )}
+
+                            <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
+                                <span className="text-muted text-[11px] font-bold">วงเงินกู้สุทธิสูงสุด:</span>
+                                <span className="font-black text-chaiyo-blue text-base">
+                                    ฿{Math.max(0, Math.floor((formData.appraisalPrice || 0) * 0.9) - (Number(formData.legalStatus === 'pawned' ? formData.pawnedRemainingDebt : formData.leasePayoffBalance) || 0)).toLocaleString()}
+                                </span>
+                            </div>
                         </div>
-                        <div className="bg-blue-50/50 p-3 rounded-xl flex items-center gap-3 mt-2">
+
+                        <div className="bg-blue-50/50 p-3 rounded-xl flex items-center gap-3 mt-4">
                             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
                                 <FileCheck className="w-4 h-4 text-chaiyo-blue" />
                             </div>
@@ -233,7 +283,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <p className="text-xs font-bold text-chaiyo-blue">เอกสารและรูปภาพ</p>
                                 <p className="text-[10px] text-muted-foreground">แนบแล้ว {docCount} รายการ</p>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => onEdit(5)} className="ml-auto h-7 text-xs text-chaiyo-blue">ดู</Button>
+                            <Button variant="ghost" size="sm" onClick={() => onEdit(6)} className="ml-auto h-7 text-xs text-chaiyo-blue">ดู</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -245,7 +295,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Banknote className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">ข้อมูลทางการเงิน</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(3)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(4)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -286,7 +336,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Banknote className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">รายละเอียดสินเชื่อ</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(4)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(5)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -309,6 +359,38 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                         <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl mt-2">
                             <span className="text-muted text-xs">ค่างวดโดยประมาณ</span>
                             <span className="font-bold text-right text-emerald-600 text-lg">฿{Math.ceil(formData.estimatedMonthlyPayment || 0).toLocaleString()} / เดือน</span>
+                        </div>
+
+                        {/* Post-Loan DSR / Payment Capacity Summary */}
+                        <div className="pt-4 border-t border-dashed border-border-subtle mt-4">
+                            <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-[11px] font-bold text-indigo-900/60 uppercase tracking-wider">ความสามารถในการชำระหนี้รวม</span>
+                                    {(() => {
+                                        const totalExp = (formData.expenses || 0) + (formData.estimatedMonthlyPayment || 0);
+                                        const dsr = formData.income > 0 ? (totalExp / formData.income) * 100 : 0;
+                                        const isSafe = dsr <= 60;
+                                        return (
+                                            <div className={cn(
+                                                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase transition-colors shrink-0",
+                                                isSafe ? "bg-emerald-500/20 text-emerald-700 border border-emerald-500/30" : "bg-red-500/20 text-red-700 border border-red-500/30"
+                                            )}>
+                                                <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", isSafe ? "bg-emerald-500" : "bg-red-500")} />
+                                                {isSafe ? "Affordable" : "High DSR Warning"}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                                <div className="flex justify-between items-baseline">
+                                    <span className="text-xs text-indigo-900/70">DSR หลังกู้ครั้งนี้ (เทียบรายได้):</span>
+                                    <span className="text-xl font-black text-indigo-900">
+                                        {Math.round((((formData.expenses || 0) + (formData.estimatedMonthlyPayment || 0)) / (formData.income || 1)) * 100)}%
+                                    </span>
+                                </div>
+                                <p className="text-[10px] text-indigo-900/40 mt-1 italic">
+                                    * รวมภาระหนี้เดิม ฿{(formData.expenses || 0).toLocaleString()} และงวดปัจจุบัน
+                                </p>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

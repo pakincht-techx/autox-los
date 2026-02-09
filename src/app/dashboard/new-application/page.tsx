@@ -58,8 +58,9 @@ export default function NewApplicationPage() {
         income: 0,
         requestedAmount: 0,
         requestedDuration: 0,
-        loanPurpose: "", // [NEW]
-        collateralTypeInterest: "", // [NEW]
+        loanPurpose: "",
+        collateralType: "",
+        existingAssetId: null,
     });
 
     // New State for Branching Logic
@@ -67,11 +68,47 @@ export default function NewApplicationPage() {
     const [existingProfile, setExistingProfile] = useState<any>(null);
     const [isIdentityVerified, setIsIdentityVerified] = useState(false);
 
-    // Mock Existing Collaterals
-    const MOCK_EXISTING_COLLATERALS = [
-        { id: "C001", type: "car", brand: "Toyota", model: "Camry", year: "2020", licensePlate: "9กข 9999", vin: "MR053K1923002", status: "Pledged" },
-        { id: "C002", type: "moto", brand: "Honda", model: "Wave 125i", year: "2022", licensePlate: "1กค 1234", vin: "MLH32423098", status: "Free" }
+    // Mock Assets & Loans - Shared for Existing Customers
+    const assetsWithLoans = [
+        {
+            id: "A-001",
+            type: "Toyota Camry 2020",
+            plate: "9กข 9999",
+            assetType: "car",
+            estimatedValue: 750000,
+            maxLtvLimit: 675000, // 90% LTV
+            loans: [
+                { id: "L-2566001", type: "สินเชื่อจำนำทะเบียนรถ", balance: 145000, status: "Normal", installment: 6500, totalMonths: 48, paidMonths: 12, totalAmount: 312000, nextPaymentDate: "15 ก.พ. 69" },
+            ]
+        },
+        {
+            id: "A-002",
+            type: "Honda Wave 125i",
+            plate: "1กค 1234",
+            assetType: "moto",
+            estimatedValue: 45000,
+            maxLtvLimit: 40500,
+            loans: []
+        },
+        {
+            id: "UNSECURED",
+            type: "สินเชื่อไม่มีหลักประกัน",
+            assetType: "unsecured",
+            loans: [
+                { id: "L-2565089", type: "สินเชื่อส่วนบุคคล", balance: 12000, status: "Normal", installment: 2100, totalMonths: 24, paidMonths: 18, totalAmount: 50400, nextPaymentDate: "28 ก.พ. 69" },
+                { id: "L-2566110", type: "สินเชื่อนาโนไฟแนนซ์", balance: 8500, status: "Normal", installment: 1200, totalMonths: 18, paidMonths: 10, totalAmount: 21600, nextPaymentDate: "05 มี.ค. 69" },
+            ]
+        }
     ];
+
+    const MOCK_EXISTING_COLLATERALS = assetsWithLoans.filter(a => a.assetType !== 'unsecured').map(a => ({
+        id: a.id,
+        type: a.assetType,
+        brand: a.type.split(" ")[0],
+        model: a.type.split(" ").slice(1).join(" "),
+        licensePlate: a.plate,
+        status: a.loans.length > 0 ? "Pledged" : "Free"
+    }));
 
     // Dynamic Steps Calculation
     const getVisibleSteps = () => {
@@ -182,7 +219,8 @@ export default function NewApplicationPage() {
             zipCode: "10230",
 
             // Collateral (Use one of the existing ones as default)
-            collateralType: "car",
+            existingAssetId: "A-002",
+            collateralType: "moto",
             collateralBrand: "Honda",
             collateralModel: "Wave 125i",
             collateralYear: "2020",
@@ -255,6 +293,7 @@ export default function NewApplicationPage() {
                             {(isIdentityVerified && isExistingCustomer) && (
                                 <ExistingCustomerView
                                     profile={existingProfile}
+                                    assetsWithLoans={assetsWithLoans}
                                     onProceed={startApplication}
                                     onSkipToCalculator={handleSkipToCalculator}
                                 />
@@ -328,6 +367,8 @@ export default function NewApplicationPage() {
                                         <CustomerNeedsStep
                                             formData={formData}
                                             setFormData={setFormData}
+                                            isExistingCustomer={isExistingCustomer}
+                                            existingAssets={assetsWithLoans}
                                         />
                                     )}
 

@@ -26,12 +26,13 @@ export function IncomeStep({ formData, setFormData }: IncomeStepProps) {
         setFormData({
             ...formData,
             income: totalIncome,
+            netIncome: netIncome,
             baseSalary: baseSalary,
             otherIncome: otherIncome,
             expenses: expenses,
             dsr: debtServiceRatio
         });
-    }, [totalIncome, expenses, debtServiceRatio]);
+    }, [totalIncome, netIncome, baseSalary, otherIncome, expenses, debtServiceRatio]);
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-2">
@@ -39,7 +40,7 @@ export function IncomeStep({ formData, setFormData }: IncomeStepProps) {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* Left Column: Summary Output (Moved from Right) */}
-                <div className="lg:col-span-12 xl:col-span-5 order-last lg:order-first"> {/* Allow responsive reordering if needed, but per request moving to Left */}
+                <div className="lg:col-span-12 xl:col-span-5 order-last lg:order-last"> {/* Allow responsive reordering if needed, but per request moving to Left */}
                     <div className="sticky top-6">
                         <div className="bg-chaiyo-blue text-white p-8 rounded-[2.5rem] space-y-8 shadow-xl shadow-blue-900/10">
                             <div>

@@ -15,13 +15,35 @@ interface CollateralPhotoStepProps {
 }
 
 export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyzing }: CollateralPhotoStepProps) {
-    // Mock upload state
-    const [photos, setPhotos] = useState<Record<string, string>>({});
+    const existingAssetId = formData.existingAssetId;
+    const isExisting = existingAssetId && existingAssetId !== 'new';
+
+    // Mock existing records data
+    const MOCK_EXISTING_RECORDS: Record<string, string> = {
+        'reg_book': 'https://images.unsplash.com/photo-1554224155-169641357599?auto=format&fit=crop&q=80&w=400',
+        'front': 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=400',
+        'back': 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=400',
+        'side': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=400',
+        'deed_front': 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=400',
+    };
+
+    // State tracks { url, isVerified }
+    const [photos, setPhotos] = useState<Record<string, { url: string; isVerified: boolean }>>(() => {
+        const initial: Record<string, { url: string; isVerified: boolean }> = {};
+        if (isExisting) {
+            // Load mock verified photos for existing asset
+            const config = getPhotoConfig(formData.collateralType || 'car');
+            config.forEach(item => {
+                if (MOCK_EXISTING_RECORDS[item.id]) {
+                    initial[item.id] = { url: MOCK_EXISTING_RECORDS[item.id], isVerified: true };
+                }
+            });
+        }
+        return initial;
+    });
 
     // Dynamic config based on type
-    const getPhotoConfig = () => {
-        const type = formData.collateralType || 'car';
-
+    function getPhotoConfig(type: string) {
         switch (type) {
             case 'moto':
                 return [
@@ -50,19 +72,21 @@ export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyz
                     { id: 'plate', label: 'ป้ายทะเบียน', icon: Camera },
                 ];
         }
-    };
+    }
 
-    const config = getPhotoConfig();
+    const config = getPhotoConfig(formData.collateralType || 'car');
     const uploadedCount = Object.keys(photos).length;
     const isComplete = uploadedCount >= Math.min(3, config.length); // Allow proceed if at least 3 photos
 
     // Bulk Upload Simulation
     const handleBulkUpload = () => {
-        // Automatically find missing required items and "upload" them
         const newPhotos = { ...photos };
         config.forEach(item => {
             if (!newPhotos[item.id]) {
-                newPhotos[item.id] = `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.label)}`;
+                newPhotos[item.id] = {
+                    url: `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.label)}`,
+                    isVerified: false
+                };
             }
         });
         setPhotos(newPhotos);
@@ -85,6 +109,18 @@ export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyz
                     อัปโหลดรูปภาพและเอกสารที่เกี่ยวข้อง (Upload photos and documents)
                 </p>
             </div>
+
+            {isExisting && (
+                <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4 animate-in fade-in duration-700">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-5 h-5 text-chaiyo-blue" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-chaiyo-blue">พบข้อมูลรูปภาพเดิมในระบบ</p>
+                        <p className="text-xs text-blue-800/60">ระบบได้ดึงรูปภาพและเอกสารล่าสุดจากฐานข้อมูล คุณสามารถใช้ข้อมูลเดิมหรืออัปโหลดใหม่เพื่ออัปเดตสถานะทรัพย์สินได้</p>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* LEFT: Checklist Sidebar */}
@@ -149,7 +185,7 @@ export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyz
                                 if (!photos[item.id]) return null;
                                 return (
                                     <div key={item.id} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white group hover:shadow-md transition-all">
-                                        <img src={photos[item.id]} alt={item.label} className="w-full h-full object-cover" />
+                                        <img src={photos[item.id].url} alt={item.label} className="w-full h-full object-cover" />
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
                                             <span className="text-white text-xs font-bold truncate">{item.label}</span>
@@ -162,9 +198,15 @@ export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyz
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
 
-                                        <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1">
-                                            <Check className="w-2.5 h-2.5" /> Uploaded
-                                        </div>
+                                        {photos[item.id].isVerified ? (
+                                            <div className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1">
+                                                <Check className="w-2.5 h-2.5" /> System Verified
+                                            </div>
+                                        ) : (
+                                            <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm flex items-center gap-1">
+                                                <Upload className="w-2.5 h-2.5" /> New Upload
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -196,7 +238,15 @@ export function CollateralPhotoStep({ formData, setFormData, onAnalyze, isAnalyz
 
             <div className="pt-4 flex justify-end">
                 <Button
-                    onClick={onAnalyze}
+                    onClick={() => {
+                        // Flatten photos to just URLs for formData
+                        const photoUrls: Record<string, string> = {};
+                        Object.keys(photos).forEach(k => {
+                            photoUrls[k] = photos[k].url;
+                        });
+                        setFormData((prev: any) => ({ ...prev, photos: photoUrls }));
+                        onAnalyze();
+                    }}
                     disabled={!isComplete || isAnalyzing}
                     className="h-12 px-8 text-lg rounded-xl bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white min-w-[200px]"
                 >
