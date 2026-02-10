@@ -271,7 +271,14 @@ export default function NewApplicationPage() {
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    {/* Save Draft Removed */}
+                    {/* Save Draft Button */}
+                    <Button
+                        variant="outline"
+                        onClick={() => alert("บันทึกแบบร่างเรียบร้อยแล้ว")}
+                        className="bg-white border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                    >
+                        <Save className="w-4 h-4 mr-2" /> บันทึกแบบร่าง
+                    </Button>
                 </div>
             </div>
 

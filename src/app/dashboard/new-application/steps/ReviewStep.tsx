@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, ShieldCheck, User, Banknote, Car, FileText, X, Phone, Briefcase, MessageSquare, RefreshCcw, Loader2, MapPin, Calendar, Mail, FileCheck, DollarSign } from "lucide-react";
+import { Check, ShieldCheck, User, Banknote, Car, FileText, X, Phone, Briefcase, MessageSquare, RefreshCcw, Loader2, MapPin, Calendar, Mail, FileCheck, DollarSign, CheckCircle2, XCircle, AlertCircle, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -25,6 +25,10 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
     const [isVerifying, setIsVerifying] = useState(false);
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
+
+    // Submission & Approval State
+    const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'analyzing' | 'approved' | 'rejected' | 'manual_review'>('idle');
+    const [approvalResult, setApprovalResult] = useState<any>(null);
 
     // Personal Info Edit State
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
@@ -53,13 +57,51 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
         setCanResend(false);
     };
 
+    const simulateApproval = () => {
+        setSubmissionStatus('analyzing');
+
+        // Calculate DSR
+        const totalExp = (formData.expenses || 0) + (formData.estimatedMonthlyPayment || 0);
+        const dsr = formData.income > 0 ? (totalExp / formData.income) * 100 : 0;
+
+        let status: 'approved' | 'rejected' | 'manual_review' = 'manual_review';
+        let message = "";
+
+        if (dsr <= 50) {
+            status = 'approved';
+        } else if (dsr > 70) {
+            status = 'rejected';
+            message = "ภาระหนี้สินต่อรายได้ (DSR) สูงเกินเกณฑ์ที่กำหนด";
+        } else {
+            status = 'manual_review';
+            message = "พิจารณาเพิ่มเติมเนื่องจาก DSR อยู่ในเกณฑ์ต้องตรวจสอบ";
+        }
+
+        // Mock Result Data
+        const result = {
+            status,
+            approvedAmount: status === 'approved' ? formData.requestedAmount : 0,
+            interestRate: formData.interestRate,
+            monthlyPayment: formData.estimatedMonthlyPayment,
+            reason: message
+        };
+
+        setApprovalResult(result);
+
+        // Simulate Delay
+        setTimeout(() => {
+            setSubmissionStatus(status);
+        }, 3000);
+    };
+
     const handleVerifyOTP = async () => {
         setIsVerifying(true);
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         setIsVerifying(false);
         if (otp === "123456") {
-            onSubmit();
+            setShowOTP(false); // Close OTP Modal
+            simulateApproval(); // Start Analysis
         } else {
             alert("รหัส OTP ไม่ถูกต้อง (ใช้ 123456)");
         }
@@ -617,9 +659,6 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             <InputOTPSlot index={0} />
                                             <InputOTPSlot index={1} />
                                             <InputOTPSlot index={2} />
-                                        </InputOTPGroup>
-                                        <InputOTPSeparator />
-                                        <InputOTPGroup>
                                             <InputOTPSlot index={3} />
                                             <InputOTPSlot index={4} />
                                             <InputOTPSlot index={5} />
@@ -662,6 +701,132 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             </div>
                         </div>
                     </Card>
+                </div>
+            )}
+
+            {/* Analysis & Result States Overlay */}
+            {submissionStatus !== 'idle' && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-white/95 backdrop-blur-xl" />
+
+                    {/* Analyzing State */}
+                    {submissionStatus === 'analyzing' && (
+                        <div className="relative z-10 text-center space-y-8 animate-in fade-in zoom-in-95 duration-500 max-w-md w-full">
+                            <div className="relative mx-auto w-32 h-32">
+                                <div className="absolute inset-0 border-4 border-gray-100 rounded-full" />
+                                <div className="absolute inset-0 border-4 border-chaiyo-gold border-t-transparent rounded-full animate-spin" />
+                                <div className="absolute inset-4 bg-white rounded-full shadow-lg flex items-center justify-center">
+                                    <ShieldCheck className="w-12 h-12 text-chaiyo-blue animate-pulse" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-2xl font-bold text-foreground">กำลังประมวลผลการสมัคร</h3>
+                                <p className="text-muted text-sm">ระบบกำลังตรวจสอบข้อมูลเครดิตและวิเคราะห์สินเชื่อ...</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Approved State */}
+                    {submissionStatus === 'approved' && (
+                        <Card className="relative z-10 w-full max-w-lg border-none shadow-2xl rounded-[2.5rem] overflow-hidden animate-in zoom-in-95 duration-500">
+                            <div className="bg-emerald-500 p-8 text-center text-white relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 to-transparent" />
+                                <div className="relative z-10">
+                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/20">
+                                        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-1">อนุมัติเบื้องต้น!</h3>
+                                    <p className="text-emerald-50 opacity-90 text-sm">สินเชื่อของคุณผ่านการพิจารณาแล้ว</p>
+                                </div>
+                            </div>
+                            <CardContent className="p-8 space-y-6">
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                        <span className="text-sm text-muted font-medium">วงเงินที่ได้รับอนุมัติ</span>
+                                        <span className="text-2xl font-black text-chaiyo-blue">฿{(approvalResult?.approvedAmount || 0).toLocaleString()}</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                            <span className="text-xs text-muted block mb-1">อัตราดอกเบี้ย</span>
+                                            <span className="text-lg font-bold text-foreground">{((approvalResult?.interestRate || 0) * 100).toFixed(2)}%</span>
+                                        </div>
+                                        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                            <span className="text-xs text-muted block mb-1">ค่างวด/เดือน</span>
+                                            <span className="text-lg font-bold text-foreground">฿{(approvalResult?.monthlyPayment || 0).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-emerald-50 p-4 rounded-xl flex gap-3">
+                                    <Check className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                                    <p className="text-xs text-emerald-800 leading-relaxed">
+                                        กรุณาตรวจสอบเอกสารสัญญาที่ระบบส่งให้ทาง SMS และลงนามเพื่อรับเงินโอนเข้าบัญชีภายใน 24 ชม.
+                                    </p>
+                                </div>
+                                <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-chaiyo-blue hover:bg-chaiyo-blue/90" onClick={onSubmit}>
+                                    ดำเนินการต่อ <ArrowRight className="w-5 h-5 ml-2" />
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Rejected State */}
+                    {submissionStatus === 'rejected' && (
+                        <Card className="relative z-10 w-full max-w-lg border-none shadow-2xl rounded-[2.5rem] overflow-hidden animate-in zoom-in-95 duration-500">
+                            <div className="bg-red-500 p-8 text-center text-white relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 to-transparent" />
+                                <div className="relative z-10">
+                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-900/20">
+                                        <XCircle className="w-10 h-10 text-red-500" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-1">ไม่ผ่านการพิจารณา</h3>
+                                    <p className="text-red-50 opacity-90 text-sm">ขออภัยในความไม่สะดวก</p>
+                                </div>
+                            </div>
+                            <CardContent className="p-8 space-y-6">
+                                <div className="bg-red-50 p-5 rounded-2xl border border-red-100 text-center space-y-2">
+                                    <span className="text-xs font-bold text-red-500 uppercase tracking-wider">เหตุผลการปฏิเสธ</span>
+                                    <p className="text-red-900 font-medium">{approvalResult?.reason || "คุณสมบัติไม่ผ่านเกณฑ์ของบริษัท"}</p>
+                                </div>
+                                <p className="text-sm text-center text-muted leading-relaxed px-4">
+                                    ท่านสามารถลองยื่นขอสินเชื่อใหม่ได้อีกครั้งเมื่อมีความพร้อม หรือติดต่อเจ้าหน้าที่เพื่อขอคำแนะนำเพิ่มเติม
+                                </p>
+                                <Button variant="outline" className="w-full h-14 text-lg font-bold rounded-2xl border-gray-200" onClick={() => window.location.reload()}>
+                                    กลับสู่หน้าหลัก
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Manual Review State */}
+                    {submissionStatus === 'manual_review' && (
+                        <Card className="relative z-10 w-full max-w-lg border-none shadow-2xl rounded-[2.5rem] overflow-hidden animate-in zoom-in-95 duration-500">
+                            <div className="bg-amber-400 p-8 text-center text-amber-950 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 to-transparent" />
+                                <div className="relative z-10">
+                                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-900/10">
+                                        <AlertCircle className="w-10 h-10 text-amber-500" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-1">รอผลการพิจารณา</h3>
+                                    <p className="text-amber-900/80 text-sm">ใบคำขอของท่านต้องได้รับการตรวจสอบเพิ่มเติม</p>
+                                </div>
+                            </div>
+                            <CardContent className="p-8 space-y-6">
+                                <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 space-y-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-600 font-bold text-xs">1</div>
+                                        <p className="text-sm text-amber-900">เจ้าหน้าที่จะทำการตรวจสอบข้อมูลเพิ่มเติมและติดต่อกลับภายใน <span className="font-bold">1 วันทำการ</span></p>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-600 font-bold text-xs">2</div>
+                                        <p className="text-sm text-amber-900">กรุณารับสายจากเจ้าหน้าที่เพื่อยืนยันข้อมูล</p>
+                                    </div>
+                                </div>
+                                <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-amber-500 hover:bg-amber-600 text-white" onClick={onSubmit}>
+                                    รับทราบนัดหมาย
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             )}
         </div>

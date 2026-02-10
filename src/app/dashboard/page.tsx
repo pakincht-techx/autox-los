@@ -30,9 +30,9 @@ const kpiData = [
 
 const recentApps = [
     { id: "APP-001", name: "สมชาย ใจดี", amount: "฿250,000", status: "อนุมัติ", time: "10:30", type: "รถกระบะ" },
-    { id: "APP-002", name: "มานะ รักชาติ", amount: "฿120,000", status: "รอพิจารณา", time: "11:15", type: "รถเก๋ง" },
-    { id: "APP-003", name: "สุดา มีสุข", amount: "฿50,000", status: "ปฏิเสธ", time: "09:45", type: "มอเตอร์ไซค์" },
-    { id: "APP-004", name: "ปิติ พอเพียง", amount: "฿300,000", status: "อนุมัติ", time: "09:00", type: "รถกระบะ" },
+    { id: "APP-002", name: "มานะ รักชาติ", amount: "฿120,000", status: "รอตรวจสอบ", time: "11:15", type: "รถเก๋ง" },
+    { id: "APP-003", name: "สุดา มีสุข", amount: "฿50,000", status: "ถูกปฎิเสธ", time: "09:45", type: "มอเตอร์ไซค์" },
+    { id: "APP-004", name: "ปิติ พอเพียง", amount: "-", status: "แบบร่าง", time: "09:00", type: "รถกระบะ" },
 ];
 
 export default function DashboardPage() {
@@ -157,8 +157,9 @@ export default function DashboardPage() {
                                             <span className={cn(
                                                 "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border",
                                                 app.status === 'อนุมัติ' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                    app.status === 'รอพิจารณา' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                                        'bg-red-50 text-red-700 border-red-200'
+                                                    app.status === 'รอตรวจสอบ' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                                        app.status === 'แบบร่าง' ? 'bg-gray-50 text-gray-600 border-gray-200' :
+                                                            'bg-red-50 text-red-700 border-red-200'
                                             )}>
                                                 {app.status}
                                             </span>
