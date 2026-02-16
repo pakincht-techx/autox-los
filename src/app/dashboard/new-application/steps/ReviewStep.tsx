@@ -10,6 +10,15 @@ import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ReviewStepProps {
     formData: any;
@@ -32,7 +41,12 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
     // Personal Info Edit State
     const [isEditingPersonal, setIsEditingPersonal] = useState(false);
-    const [editPersonalData, setEditPersonalData] = useState<any>({});
+    const [editPersonalData, setEditPersonalData] = useState<any>(null);
+    const [alertDialog, setAlertDialog] = useState({
+        isOpen: false,
+        title: "",
+        description: ""
+    });
 
     useEffect(() => {
         let interval: any;
@@ -103,7 +117,11 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
             setShowOTP(false); // Close OTP Modal
             simulateApproval(); // Start Analysis
         } else {
-            alert("รหัส OTP ไม่ถูกต้อง (ใช้ 123456)");
+            setAlertDialog({
+                isOpen: true,
+                title: "รหัส OTP ไม่ถูกต้อง",
+                description: "กรุณากรอกรหัส OTP ให้ถูกต้อง (ใช้ 123456 สำหรับ Demo)"
+            });
         }
     };
 
@@ -194,6 +212,60 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 {formData.addressLine1} {formData.subDistrict} {formData.district} {formData.province} {formData.zipCode}
                             </span>
                         </div>
+
+                        {/* Co-Borrower Summary */}
+                        {formData.coBorrowers && formData.coBorrowers.length > 0 && (
+                            <>
+                                <hr className="border-dashed border-chaiyo-blue/20 my-2" />
+                                <div className="space-y-2">
+                                    {formData.coBorrowers.map((person: any, index: number) => (
+                                        <div key={index} className="bg-blue-50/50 p-3 rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-chaiyo-blue"></div>
+                                                <span className="font-bold text-chaiyo-blue text-xs">
+                                                    ผู้กู้ร่วม {formData.coBorrowers.length > 1 ? `#${index + 1}` : ''}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-muted text-xs shrink-0">ชื่อ-นามสกุล</span>
+                                                <span className="font-medium text-xs text-right">{person.firstName} {person.lastName}</span>
+                                            </div>
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-muted text-xs shrink-0">ความสัมพันธ์</span>
+                                                <span className="font-medium text-xs text-right">{person.relationship}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {/* Guarantor Summary */}
+                        {formData.guarantors && formData.guarantors.length > 0 && (
+                            <>
+                                <hr className="border-dashed border-chaiyo-orange/20 my-2" />
+                                <div className="space-y-2">
+                                    {formData.guarantors.map((person: any, index: number) => (
+                                        <div key={index} className="bg-orange-50/50 p-3 rounded-lg space-y-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-chaiyo-orange"></div>
+                                                <span className="font-bold text-chaiyo-orange text-xs">
+                                                    ผู้ค้ำประกัน {formData.guarantors.length > 1 ? `#${index + 1}` : ''}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-muted text-xs shrink-0">ชื่อ-นามสกุล</span>
+                                                <span className="font-medium text-xs text-right">{person.firstName} {person.lastName}</span>
+                                            </div>
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-muted text-xs shrink-0">ความสัมพันธ์</span>
+                                                <span className="font-medium text-xs text-right">{person.relationship}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -204,7 +276,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Car className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">หลักประกัน</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(3)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(2)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -242,6 +314,10 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted">เนื้อที่</span>
                                     <span className="font-medium text-right">{formData.rai || 0} ไร่ {formData.ngan || 0} งาน {formData.wah || 0} ตร.วา</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted">พิกัด</span>
+                                    <span className="font-medium text-right font-mono text-xs">{formData.coordinates || "-"}</span>
+                                </div>
                             </>
                         ) : (
                             <>
@@ -266,6 +342,39 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted">ยี่ห้อ / รุ่น</span>
                                     <span className="font-medium text-right">{formData.brand} {formData.model}</span>
                                 </div>
+                                {formData.subModel && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted">รุ่นย่อย</span>
+                                        <span className="font-medium text-right">{formData.subModel}</span>
+                                    </div>
+                                )}
+
+                                {formData.collateralType === 'truck' && (
+                                    <>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted">จำนวนล้อ / ตัวถัง</span>
+                                            <span className="font-medium text-right">{formData.wheels} ล้อ / {formData.bodyType}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted">น้ำหนักบรรทุก</span>
+                                            <span className="font-medium text-right">{formData.loadCapacity} ตัน</span>
+                                        </div>
+                                    </>
+                                )}
+
+                                {formData.collateralType === 'agri' && (
+                                    <>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted">แรงม้า / อุปกรณ์</span>
+                                            <span className="font-medium text-right">{formData.horsepower} HP / {formData.attachments}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted">ชั่วโมงการทำงาน</span>
+                                            <span className="font-medium text-right">{formData.workingHours} ชม.</span>
+                                        </div>
+                                    </>
+                                )}
+
                                 {formData.color && (
                                     <div className="flex justify-between">
                                         <span className="text-muted">สีรถ</span>
@@ -276,10 +385,12 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted">ทะเบียน / จังหวัด</span>
                                     <span className="font-medium text-right">{formData.licensePlate || "-"} {formData.registrationProvince && `/ ${formData.registrationProvince}`}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted">เลขไมล์</span>
-                                    <span className="font-medium text-right">{formData.mileage ? `${Number(formData.mileage).toLocaleString()} กม.` : "-"}</span>
-                                </div>
+                                {formData.collateralType !== 'agri' && (
+                                    <div className="flex justify-between">
+                                        <span className="text-muted">เลขไมล์</span>
+                                        <span className="font-medium text-right">{formData.mileage ? `${Number(formData.mileage).toLocaleString()} กม.` : "-"}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between">
                                     <span className="text-muted">เลขตัวถัง (VIN)</span>
                                     <span className="font-medium text-right font-mono text-[10px]">{formData.vin || "-"}</span>
@@ -325,7 +436,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <p className="text-xs font-bold text-chaiyo-blue">เอกสารและรูปภาพ</p>
                                 <p className="text-[10px] text-muted-foreground">แนบแล้ว {docCount} รายการ</p>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => onEdit(6)} className="ml-auto h-7 text-xs text-chaiyo-blue">ดู</Button>
+                            <Button variant="ghost" size="sm" onClick={() => onEdit(4)} className="ml-auto h-7 text-xs text-chaiyo-blue">ดู</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -337,7 +448,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Banknote className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">ข้อมูลทางการเงิน</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(4)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(1)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -378,7 +489,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <Banknote className="w-4 h-4 text-muted" />
                             <h4 className="font-bold text-sm text-foreground">รายละเอียดสินเชื่อ</h4>
                         </div>
-                        <Button variant="link" size="sm" onClick={() => onEdit(5)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
+                        <Button variant="link" size="sm" onClick={() => onEdit(3)} className="text-chaiyo-blue h-auto p-0">แก้ไข</Button>
                     </div>
                     <CardContent className="p-6 text-sm space-y-3">
                         <div className="flex justify-between">
@@ -829,6 +940,26 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                     )}
                 </div>
             )}
+            <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                                <AlertCircle className="w-5 h-5 text-red-600" />
+                            </div>
+                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
+                        </div>
+                        <AlertDialogDescription className="text-base mt-2">
+                            {alertDialog.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90">
+                            ลองอีกครั้ง
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

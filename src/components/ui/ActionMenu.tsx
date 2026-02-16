@@ -106,7 +106,7 @@ export function ActionMenu({ onView, onEdit, onNewApplication, onDelete, items }
                                 setIsOpen(false);
                             }}
                             className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-left transition-colors",
+                                "w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-left transition-colors",
                                 item.variant === 'destructive'
                                     ? "text-red-600 hover:bg-red-50"
                                     : item.variant === 'primary'

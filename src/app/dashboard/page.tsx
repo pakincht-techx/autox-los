@@ -12,27 +12,33 @@ import {
     Search,
     Filter,
     Download,
-    MoreVertical
+    MoreVertical,
+    AlertTriangle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { SLATimer } from "@/components/dashboard/SLATimer";
 
 const tabs = ["ทั้งหมด", "วันนี้", "เมื่อวาน", "เดือนนี้", "กำหนดเอง"];
 
+const minutesAgo = (m: number) => new Date(Date.now() - m * 60000).toISOString();
+
 const kpiData = [
+    { label: "งานที่เสี่ยงหลุด SLA", value: "3", sub: "เหลือ < 5 นาที", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
     { label: "คำขอใหม่ (วันนี้)", value: "12", sub: "+2 รายการ", icon: Files, color: "text-blue-600" },
-    { label: "รอการพิจารณา", value: "8", sub: "เฉลี่ย 15 นาที", icon: Clock, color: "text-amber-600" },
-    { label: "อนุมัติรวม", value: "฿4.2M", sub: "เป้าหมาย: ฿5M", icon: Banknote, color: "text-emerald-600" },
+    { label: "เวลาเฉลี่ย/เคส", value: "14m", sub: "เป้าหมาย: 20m", icon: Clock, color: "text-emerald-600" },
 ];
 
 const recentApps = [
-    { id: "APP-001", name: "สมชาย ใจดี", amount: "฿250,000", status: "อนุมัติ", time: "10:30", type: "รถกระบะ" },
-    { id: "APP-002", name: "มานะ รักชาติ", amount: "฿120,000", status: "รอพิจารณา", time: "11:15", type: "รถเก๋ง" },
-    { id: "APP-003", name: "สุดา มีสุข", amount: "฿50,000", status: "ถูกปฎิเสธ", time: "09:45", type: "มอเตอร์ไซค์" },
-    { id: "APP-004", name: "ปิติ พอเพียง", amount: "-", status: "แบบร่าง", time: "09:00", type: "รถกระบะ" },
+    { id: "APP-001", name: "สมชาย ใจดี", amount: "฿250,000", status: "อนุมัติ", time: "10:30", type: "รถกระบะ", createdAt: minutesAgo(45) },
+    { id: "APP-002", name: "มานะ รักชาติ", amount: "฿120,000", status: "รอพิจารณา", time: "11:15", type: "รถเก๋ง", createdAt: minutesAgo(12) }, // 12m elapsed (Safe)
+    { id: "APP-003", name: "สุดา มีสุข", amount: "฿50,000", status: "ถูกปฎิเสธ", time: "09:45", type: "มอเตอร์ไซค์", createdAt: minutesAgo(60) },
+    { id: "APP-004", name: "ปิติ พอเพียง", amount: "-", status: "แบบร่าง", time: "09:00", type: "รถกระบะ", createdAt: minutesAgo(120) },
+    { id: "APP-005", name: "วีระ ยิ่งยง", amount: "฿300,000", status: "รอพิจารณา", time: "11:20", type: "รถบรรทุก", createdAt: minutesAgo(25) }, // 25m elapsed (Breached)
+    { id: "APP-006", name: "อารี มีนา", amount: "฿150,000", status: "รอพิจารณา (HQ)", time: "09:00", type: "รถเก๋ง", createdAt: minutesAgo(150) }, // 150m elapsed (HQ - Info only)
 ];
 
 export default function DashboardPage() {
@@ -56,8 +62,7 @@ export default function DashboardPage() {
                     </Link>
                     <Link href="/dashboard/new-application">
                         <Button className="shadow-lg shadow-chaiyo-blue/20 font-semibold active:scale-95 transition-transform">
-                            <Plus className="w-4 h-4 mr-2" />
-                            สร้างใบคำขอใหม่
+                            ตรวจสอบสถานะลูกค้า
                         </Button>
                     </Link>
                 </div>
@@ -96,15 +101,15 @@ export default function DashboardPage() {
                 {kpiData.map((kpi, i) => {
                     const Icon = kpi.icon;
                     return (
-                        <Card key={i} className="group hover:border-chaiyo-blue/20 transition-all cursor-default overflow-hidden relative border-border-subtle">
+                        <Card key={i} className={cn("group hover:border-chaiyo-blue/20 transition-all cursor-default overflow-hidden relative border-border-subtle", kpi.bg)}>
                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
                                 <Icon className="w-16 h-16" />
                             </div>
                             <CardContent className="p-6">
-                                <p className="text-[13px] font-medium text-muted mb-2">{kpi.label}</p>
+                                <p className={cn("text-[13px] font-medium mb-2", kpi.bg ? "text-red-800" : "text-muted")}>{kpi.label}</p>
                                 <div className="flex items-baseline gap-2">
-                                    <h3 className="text-2xl font-bold tracking-tight text-foreground">{kpi.value}</h3>
-                                    <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                    <h3 className={cn("text-2xl font-bold tracking-tight", kpi.bg ? "text-red-900" : "text-foreground")}>{kpi.value}</h3>
+                                    <span className={cn("text-[11px] font-semibold px-1.5 py-0.5 rounded", kpi.bg ? "bg-red-100 text-red-700" : "text-emerald-600 bg-emerald-50")}>
                                         {kpi.sub}
                                     </span>
                                 </div>
@@ -134,7 +139,7 @@ export default function DashboardPage() {
                                 <th className="px-6 py-4">ลูกค้า / ประเภท</th>
                                 <th className="px-6 py-4">รหัสอ้างอิง</th>
                                 <th className="px-6 py-4">วงเงินสินเชื่อ</th>
-                                <th className="px-6 py-4">เวลาทำงาน</th>
+                                <th className="px-6 py-4">เวลาที่ใช้ไป (SLA)</th>
                                 <th className="px-6 py-4 text-right">สถานะ</th>
                             </tr>
                         </thead>
@@ -157,7 +162,9 @@ export default function DashboardPage() {
                                     </td>
                                     <td className="px-6 py-4 font-mono text-xs text-muted tracking-tight">{app.id}</td>
                                     <td className="px-6 py-4 font-bold text-foreground">{app.amount}</td>
-                                    <td className="px-6 py-4 text-muted text-[12px]">{app.time} น.</td>
+                                    <td className="px-6 py-4 text-muted text-[12px]">
+                                        <SLATimer startTime={app.createdAt} status={app.status} />
+                                    </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-3">
                                             <span className={cn(

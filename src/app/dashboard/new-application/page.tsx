@@ -4,32 +4,37 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
-import { ArrowLeft, Check, ChevronRight, User, FileText, Banknote, ShieldCheck, ChevronLeft, Save, Car, CreditCard, MessageSquare, Calculator, Camera } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, User, FileText, Banknote, ShieldCheck, ChevronLeft, Save, Car, CreditCard, MessageSquare, Calculator, Camera, CheckCircle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Steps
+// Steps
 import { IdentityCheckStep } from "./steps/IdentityCheckStep";
-import { CollateralPhotoStep } from "./steps/CollateralPhotoStep";
-// import { PersonalInfoStep } from "./steps/PersonalInfoStep"; // Merged into others or unused? Keeping commented to avoid break if user wants it later
-import { CollateralStep } from "./steps/CollateralStep";
-import { IncomeStep } from "./steps/IncomeStep";
+import { CustomerInfoStep } from "./steps/CustomerInfoStep";
+import { CollateralStep } from "./steps/CollateralStepNew"; // New merged step
 import { CalculatorStep } from "./steps/CalculatorStep";
 import { DocumentUploadStep } from "./steps/DocumentUploadStep";
 import { ReviewStep } from "./steps/ReviewStep";
-import { CustomerNeedsStep } from "./steps/CustomerNeedsStep"; // [NEW]
 import { ExistingCustomerView } from "./components/ExistingCustomerView";
 
 // NOTE: Step 1 (Identity) is Screening.
-// Application Flow starts at Step 1 (Customer Needs).
+// Application Flow starts at Step 1 (Customer Info).
 const ALL_STEPS = [
-    { id: 1, title: 'ความต้องการลูกค้า', description: 'Customer Needs', icon: MessageSquare }, // [NEW]
-    { id: 2, title: 'ถ่ายภาพทรัพย์สิน', description: 'Collateral Photos', icon: Camera },
-    { id: 3, title: 'ข้อมูลหลักประกัน', description: 'Collateral Info', icon: Car },
-    { id: 4, title: 'รายได้/อาชีพ', description: 'Income', icon: Banknote }, // Moved up before Calculator
-    { id: 5, title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
-    { id: 6, title: 'เอกสาร', description: 'Documents', icon: FileText },
-    { id: 7, title: 'ตรวจสอบ', description: 'Review', icon: Check },
+    { id: 1, title: 'ข้อมูลผู้กู้', description: 'Customer Info', icon: User },
+    { id: 2, title: 'หลักประกัน', description: 'Collateral', icon: Car }, // Merged step
+    { id: 3, title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
+    { id: 4, title: 'เอกสาร', description: 'Documents', icon: FileText },
+    { id: 5, title: 'ตรวจสอบ', description: 'Review', icon: Check },
 ];
 
 export default function NewApplicationPage() {
@@ -42,13 +47,55 @@ export default function NewApplicationPage() {
     // Flag to check if we skipped steps (Existing Customer)
     const [isSkipped, setIsSkipped] = useState(false);
 
-    const [currentStep, setCurrentStep] = useState(1); // Start at 1 (Customer Needs)
+    const [currentStep, setCurrentStep] = useState(1); // Start at 1 (Customer Info)
+
+    const [alertDialog, setAlertDialog] = useState({
+        isOpen: false,
+        title: "",
+        description: "",
+        variant: "default" as "default" | "success"
+    });
 
     useEffect(() => {
         const state = searchParams.get('state');
         if (state === 'draft') {
             setIsApplicationStarted(true);
             // Optionally set other state here if needed
+        }
+
+        // Check for prefilled data from Sales Talk (Calculator)
+        const salesTalkDataStr = localStorage.getItem('salesTalkData');
+        if (salesTalkDataStr) {
+            try {
+                const salesTalkData = JSON.parse(salesTalkDataStr);
+                setFormData((prev: any) => ({
+                    ...prev,
+                    // Collateral Info
+                    collateralType: salesTalkData.collateralType || prev.collateralType,
+                    appraisalPrice: salesTalkData.appraisalPrice || prev.appraisalPrice,
+                    // Vehicle
+                    brand: salesTalkData.brand || prev.brand,
+                    model: salesTalkData.model || prev.model,
+                    year: salesTalkData.year || prev.year,
+                    // Land
+                    landRai: salesTalkData.landRai || prev.landRai,
+                    landNgan: salesTalkData.landNgan || prev.landNgan,
+                    landWah: salesTalkData.landWah || prev.landWah,
+
+                    registrationProvince: salesTalkData.province || prev.registrationProvince,
+
+                    // Financial Info
+                    income: salesTalkData.income || prev.income,
+                    requestedAmount: salesTalkData.loanAmount || salesTalkData.requestedAmount || prev.requestedAmount,
+                    requestedDuration: salesTalkData.duration || salesTalkData.requestedDuration || prev.requestedDuration,
+                    monthlyDebt: salesTalkData.monthlyDebt || prev.monthlyDebt,
+                    occupation: salesTalkData.occupation || prev.occupation,
+                }));
+                localStorage.removeItem('salesTalkData');
+            } catch (e) {
+                console.error("Failed to parse sales talk data", e);
+                localStorage.removeItem('salesTalkData');
+            }
         }
     }, [searchParams]);
 
@@ -59,17 +106,24 @@ export default function NewApplicationPage() {
         firstName: "",
         lastName: "",
         birthDate: "",
+        phone: "",
         addressLine1: "",
         subDistrict: "",
         district: "",
         province: "",
         zipCode: "",
+        fullAddress: "", // From Identity Check
+
         income: 0,
         requestedAmount: 0,
         requestedDuration: 0,
         loanPurpose: "",
         collateralType: "",
         existingAssetId: null,
+
+        // Co-borrower & Guarantor
+        coBorrowers: [],
+        guarantors: [],
     });
 
     // New State for Branching Logic
@@ -123,12 +177,6 @@ export default function NewApplicationPage() {
     const getVisibleSteps = () => {
         if (isSkipped) {
             // If skipped, maybe hide Needs/Collateral?
-            // For now, keep logic consistent with user request or simplify.
-            // If existing customer skipped, they probably went straight to Calculator (Step 2).
-            // Let's assume skipping hides CustomerNeeds (1) and Collateral (3)?
-            // User request logic: "Existing Customer... skip to Calculator".
-
-            // If skipped to Calculator (Step 2), we might hide Step 1?
             return ALL_STEPS; // For simplicity, show all but jump.
         }
         return ALL_STEPS;
@@ -170,16 +218,16 @@ export default function NewApplicationPage() {
                 lastName: profile.fullName.split(" ")[2] || "",
             }));
         } else {
-            // "Create Profile" clicked -> Start Application (Go to Customer Needs)
+            // "Create Profile" clicked -> Start Application
             setIsApplicationStarted(true);
-            setCurrentStep(1); // Start at Customer Needs
+            setCurrentStep(1); // Start at Customer Info
         }
         setIsIdentityVerified(true);
     };
 
     const startApplication = () => {
         setIsApplicationStarted(true);
-        setCurrentStep(1); // Start at Customer Needs
+        setCurrentStep(1); // Start at Customer Info
         setIsSkipped(false);
     };
 
@@ -209,7 +257,7 @@ export default function NewApplicationPage() {
             }));
 
             setIsAnalyzing(false);
-            setCurrentStep(3); // Move to Collateral Info
+            setCurrentStep(4); // Move to Collateral Info (Step 4)
         }, 3000); // 3 seconds delay
     };
 
@@ -249,7 +297,7 @@ export default function NewApplicationPage() {
 
         setIsSkipped(true);
         setIsApplicationStarted(true);
-        setCurrentStep(2); // Jump to Calculator (Step 2 now)
+        setCurrentStep(3); // Jump to Calculator (Step 3 now)
     };
 
     const isStepValid = () => {
@@ -257,8 +305,13 @@ export default function NewApplicationPage() {
     };
 
     const handleSubmit = () => {
-        alert("ใบคำขอสินเชื่อถูกส่งเรียบร้อยแล้ว! (Demo)");
-        router.push("/dashboard/applications");
+        setAlertDialog({
+            isOpen: true,
+            title: "ส่งคำขอสำเร็จ",
+            description: "ใบคำขอสินเชื่อถูกส่งเรียบร้อยแล้ว! ระบบกำลังดำเนินการพิจารณา",
+            variant: "success"
+        });
+        setTimeout(() => router.push("/dashboard/applications"), 1500);
     };
 
     return (
@@ -284,7 +337,12 @@ export default function NewApplicationPage() {
                     {isApplicationStarted && (
                         <Button
                             variant="outline"
-                            onClick={() => alert("บันทึกแบบร่างเรียบร้อยแล้ว")}
+                            onClick={() => setAlertDialog({
+                                isOpen: true,
+                                title: "บันทึกสำเร็จ",
+                                description: "บันทึกแบบร่างเรียบร้อยแล้ว คุณสามารถกลับมาดำเนินการต่อได้ภายหลัง",
+                                variant: "success"
+                            })}
                             className="bg-white border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
                         >
                             <Save className="w-4 h-4 mr-2" /> บันทึกแบบร่าง
@@ -380,28 +438,16 @@ export default function NewApplicationPage() {
                                 </CardHeader>
                                 <CardContent className="px-8 py-8 w-full">
 
-                                    {/* Step 1: Customer Needs */}
+                                    {/* Step 1: Customer Info */}
                                     {currentStep === 1 && (
-                                        <CustomerNeedsStep
+                                        <CustomerInfoStep
                                             formData={formData}
                                             setFormData={setFormData}
-                                            isExistingCustomer={isExistingCustomer}
-                                            existingAssets={assetsWithLoans}
                                         />
                                     )}
 
-                                    {/* Step 2: [NEW] Collateral Photos */}
+                                    {/* Step 2: Collateral (Merged: Type Selection + Document Upload + Info) */}
                                     {currentStep === 2 && (
-                                        <CollateralPhotoStep
-                                            formData={formData}
-                                            setFormData={setFormData}
-                                            onAnalyze={handleAnalyzePhotos}
-                                            isAnalyzing={isAnalyzing}
-                                        />
-                                    )}
-
-                                    {/* Step 3: Collateral Info (Pre-filled) */}
-                                    {currentStep === 3 && (
                                         <CollateralStep
                                             formData={formData}
                                             setFormData={setFormData}
@@ -410,11 +456,8 @@ export default function NewApplicationPage() {
                                         />
                                     )}
 
-                                    {/* Step 4: Income (Moved before Calculator) */}
-                                    {currentStep === 4 && <IncomeStep formData={formData} setFormData={setFormData} />}
-
-                                    {/* Step 5: Calculator */}
-                                    {currentStep === 5 && (
+                                    {/* Step 3: Calculator */}
+                                    {currentStep === 3 && (
                                         <CalculatorStep
                                             onNext={nextStep}
                                             formData={formData}
@@ -425,11 +468,11 @@ export default function NewApplicationPage() {
                                         />
                                     )}
 
-                                    {/* Step 6: Documents */}
-                                    {currentStep === 6 && <DocumentUploadStep formData={formData} setFormData={setFormData} />}
+                                    {/* Step 4: Documents */}
+                                    {currentStep === 4 && <DocumentUploadStep formData={formData} setFormData={setFormData} />}
 
-                                    {/* Step 7: Review */}
-                                    {currentStep === 7 && (
+                                    {/* Step 5: Review */}
+                                    {currentStep === 5 && (
                                         <ReviewStep
                                             formData={formData}
                                             setFormData={setFormData}
@@ -441,12 +484,12 @@ export default function NewApplicationPage() {
                             </Card>
 
                             {/* Footer / Navigation */}
-                            {(currentStep !== 7) && (
+                            {(currentStep !== 5) && (
                                 <div className="flex justify-between items-center py-6 mt-2">
                                     <Button
                                         variant="ghost"
                                         onClick={prevStep}
-                                        disabled={currentStep === 1} // Disabled at Step 1 (Customer Needs)
+                                        disabled={currentStep === 1} // Disabled at Step 1 (Customer Info)
                                         className="w-32 text-muted hover:bg-gray-100"
                                     >
                                         <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
@@ -466,6 +509,34 @@ export default function NewApplicationPage() {
                     </div>
                 </div>
             )}
+
+            <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <div className="flex items-center gap-3">
+                            <div className={cn(
+                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
+                                alertDialog.variant === "success" ? "bg-green-100" : "bg-red-100"
+                            )}>
+                                {alertDialog.variant === "success" ? (
+                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                ) : (
+                                    <AlertCircle className="w-5 h-5 text-red-600" />
+                                )}
+                            </div>
+                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
+                        </div>
+                        <AlertDialogDescription className="text-base mt-2">
+                            {alertDialog.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90">
+                            ตกลง
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

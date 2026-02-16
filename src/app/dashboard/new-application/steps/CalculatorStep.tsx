@@ -18,9 +18,10 @@ interface CalculatorStepProps {
     onBack?: () => void;
     hideNavigation?: boolean;
     readOnlyProduct?: boolean;
+    paymentMethod?: 'installment' | 'bullet';
 }
 
-export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavigation, readOnlyProduct }: CalculatorStepProps) {
+export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavigation, readOnlyProduct, paymentMethod = 'installment' }: CalculatorStepProps) {
     const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 100000);
     const [months, setMonths] = useState<number>(formData?.requestedDuration || 24);
     const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
@@ -50,28 +51,35 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     // Calculate Max Loan based on formData (if available)
     useEffect(() => {
         let calculatedMax = 1000000; // Default Max Loan
+        // Logic: Appraisal * LTV - Deductions
 
-        // Priority 1: Appraisal Price (from AI/Collateral Step) - 90% LTV
-        if (formData && formData.appraisalPrice > 0) {
-            const ltvRate = 0.90;
-            const approvedLimit = Math.floor(formData.appraisalPrice * ltvRate);
+        // Priority 1: Appraisal Price (from AI/Collateral Step)
+        const appraisalPrice = Number(formData?.appraisalPrice) || Number(formData?.aiAppraisal) || 0;
+        if (formData && appraisalPrice > 0) {
+            // LTV Logic: Land 70%, Others 90% (Matching Collateral Step)
+            const isLand = selectedProduct === 'land' || formData.collateralType === 'land';
+            const ltvRate = isLand ? 0.70 : 0.90;
+            const approvedLimit = Math.floor(appraisalPrice * ltvRate);
 
-            // Adjust based on Legal Status
-            if (formData.legalStatus === 'pawned') {
-                // Pawned: (Appraisal * LTV) - Remaining Debt
-                calculatedMax = approvedLimit - (Number(formData.pawnedRemainingDebt) || 0);
-            } else if (formData.legalStatus === 'lease') {
-                // Lease: (Appraisal * LTV) - Payoff Balance - Fees/Tax (Assume 0 for now as per plan)
-                calculatedMax = approvedLimit - (Number(formData.leasePayoffBalance) || 0);
-            } else {
-                // Free: Appraisal * LTV
-                calculatedMax = approvedLimit;
+            // Deductions Logic
+            let deduction = 0;
+
+            if (formData.legalStatus === 'mortgaged') {
+                // Mortgage: Deduct 30% of Appraisal
+                deduction = appraisalPrice * 0.30;
+            } else if (formData.legalStatus === 'pawned' || formData.possessionStatus === 'pawn') {
+                // Pawned: Deduct Remaining Debt
+                deduction = Number(formData.pawnedRemainingDebt) || Number(formData.existingDebt) || 0;
+            } else if (formData.legalStatus === 'lease' || formData.possessionStatus === 'finance') {
+                // Lease: Deduct Payoff Balance
+                deduction = Number(formData.leasePayoffBalance) || 0;
             }
+
+            calculatedMax = Math.max(0, approvedLimit - deduction);
         }
         // Priority 2: Income Multiplier (Fallback)
         else if (formData && formData.income > 0) {
             // Mock Logic: Max Loan = Income * Multiplier
-            // Multiplier varies by collateral type
             let multiplier = 20; // Default
             if (selectedProduct === 'land') multiplier = 50;
             if (selectedProduct === 'car') multiplier = 30;
@@ -81,20 +89,23 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             calculatedMax = Math.floor(formData.income * multiplier);
         }
 
-        // Ensure max is not negative (Negative Equity Case)
+        // Ensure max is not negative
         setMaxLoanAmount(Math.max(0, calculatedMax));
 
-        // Adjust current amount if it exceeds max
-        if (amount > calculatedMax && calculatedMax > 0) {
-            setAmount(calculatedMax);
+        // Default Loan Amount Logic
+        // If user hasn't actively set a requested amount (or it's just the default 100k placeholder),
+        // OR if the current amount is invalid (> max), sync to max.
+        // We check if formData.requestedAmount exists to respect previous user input if they navigated back.
+        if (!formData?.requestedAmount || amount > calculatedMax) {
+            if (calculatedMax > 0) setAmount(calculatedMax);
         } else if (calculatedMax <= 0) {
             setAmount(0);
         }
-    }, [formData?.income, formData?.appraisalPrice, formData?.legalStatus, formData?.pawnedRemainingDebt, formData?.leasePayoffBalance, selectedProduct]);
+    }, [formData?.income, formData?.appraisalPrice, formData?.aiAppraisal, formData?.legalStatus, formData?.pawnedRemainingDebt, formData?.leasePayoffBalance, formData?.existingDebt, selectedProduct, formData?.collateralType, formData?.requestedAmount]);
 
     useEffect(() => {
         calculateLoan();
-    }, [amount, months, selectedProduct]);
+    }, [amount, months, selectedProduct, paymentMethod]);
 
     // Sync state to formData continuously to support external navigation
     useEffect(() => {
@@ -104,7 +115,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                 requestedDuration: months,
                 estimatedMonthlyPayment: monthlyPayment,
                 totalInterest: totalInterest,
-                interestRate: INTEREST_RATES[selectedProduct] || 0.2399
+                interestRate: INTEREST_RATES[selectedProduct] || 0.2399,
+                paymentMethod: paymentMethod // Sync payment method back
             };
 
             // Only sync collateralType if NOT in read-only mode
@@ -114,7 +126,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
             setFormData((prev: any) => ({ ...prev, ...data }));
         }
-    }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct]);
+    }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct, paymentMethod]);
 
     const calculateLoan = () => {
         if (amount <= 0 || months <= 0) {
@@ -126,9 +138,16 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         const years = months / 12;
         const totalInt = amount * rate * years;
         const total = amount + totalInt;
-        const monthly = total / months;
 
-        setMonthlyPayment(monthly);
+        if (paymentMethod === 'bullet') {
+            // Bullet: Pay total at end. Monthly = 0 (or technically interest only, but request said pay once)
+            // Let's set monthly to 0 and handle display logic to show "Pay at end"
+            setMonthlyPayment(0);
+        } else {
+            const monthly = total / months;
+            setMonthlyPayment(monthly);
+        }
+
         setTotalInterest(totalInt);
     };
 
@@ -139,7 +158,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             estimatedMonthlyPayment: monthlyPayment,
             totalInterest: totalInterest,
             interestRate: INTEREST_RATES[selectedProduct] || 0.2399,
-            collateralType: selectedProduct
+            collateralType: selectedProduct,
+            paymentMethod: paymentMethod
         };
 
         // If part of the main flow (formData present), update it
@@ -311,10 +331,36 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             )}
                         </div>
 
+
+                        {/* Payment Method Toggle (Moved here - ABOVE Loan Term) */}
+                        <div className="space-y-4">
+                            <Label className="text-sm font-bold">รูปแบบการผ่อนชำระ</Label>
+                            <div className="flex p-1 bg-gray-100/50 border border-gray-200 rounded-xl">
+                                <button
+                                    onClick={() => setFormData && setFormData({ ...formData, paymentMethod: 'installment' })}
+                                    className={cn(
+                                        "flex-1 py-2 text-xs font-bold rounded-lg transition-all",
+                                        paymentMethod !== 'bullet' ? "bg-white shadow-sm text-chaiyo-blue border border-gray-100" : "text-gray-400 hover:text-gray-600"
+                                    )}
+                                >
+                                    ผ่อนรายเดือน
+                                </button>
+                                <button
+                                    onClick={() => setFormData && setFormData({ ...formData, paymentMethod: 'bullet' })}
+                                    className={cn(
+                                        "flex-1 py-2 text-xs font-bold rounded-lg transition-all",
+                                        paymentMethod === 'bullet' ? "bg-white shadow-sm text-chaiyo-blue border border-gray-100" : "text-gray-400 hover:text-gray-600"
+                                    )}
+                                >
+                                    โปะงวดสุดท้าย
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="space-y-4">
                             <Label className="text-sm font-bold">ระยะเวลาผ่อนชำระ (เดือน)</Label>
                             <div className="grid grid-cols-4 gap-2">
-                                {COMPARISON_DURATIONS.map((m) => (
+                                {(paymentMethod === 'bullet' ? [1, 2, 3, 4, 5, 6] : COMPARISON_DURATIONS).map((m) => (
                                     <button
                                         key={m}
                                         disabled={maxLoanAmount <= 0}
@@ -335,6 +381,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     </div>
                 </div>
 
+
                 {/* Output Container with Chart */}
                 <Card className="lg:col-span-7 bg-[#001080] text-white border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex flex-col h-full lg:sticky lg:top-6 lg:order-2">
                     <CardContent className="p-8 flex flex-col h-full relative items-center">
@@ -346,21 +393,39 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </div>
                                 <div>
                                     <p className="text-sm font-bold text-white">เปรียบเทียบระยะเวลาผ่อน</p>
-                                    <p className="text-[10px] text-white/50">(บาท/เดือน)</p>
+                                    <p className="text-[10px] text-white/50">
+                                        {paymentMethod === 'bullet' ? '(ชำระครั้งเดียว)' : '(บาท/เดือน)'}
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="text-right">
-                                <p className="text-white/70 text-xs font-medium mb-1">ค่างวดต่อเดือน ({months} งวด)</p>
+                                <p className="text-white/70 text-xs font-medium mb-1">
+                                    {paymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : `ค่างวดต่อเดือน (${months} งวด)`}
+                                </p>
                                 <h3 className="text-4xl font-bold tracking-tight text-white">
-                                    ฿{Math.ceil(monthlyPayment).toLocaleString()}
+                                    ฿{paymentMethod === 'bullet' ? (amount + totalInterest).toLocaleString() : Math.ceil(monthlyPayment).toLocaleString()}
                                 </h3>
                             </div>
                         </div>
 
                         {/* 2. Chart Comparison */}
-                        <div className="w-full">
-                            <div className="flex justify-between items-end h-[220px] gap-2 px-1">
+                        <div className={cn("w-full", paymentMethod === 'bullet' && "opacity-50 pointer-events-none grayscale")}>
+                            {/* Hide Chart for Bullet because it's irrelevant (only 1 option usually, or just confusing to compare monthly bars) 
+                                Actually, keep it but maybe disable interaction or show it visualizing total cost? 
+                                For simplicity/time, just greying it out or hiding it is safest. 
+                                Let's keep it visible but disabled with an overlay explaining. 
+                            */}
+
+                            <div className="flex justify-between items-end h-[220px] gap-2 px-1 relative">
+                                {paymentMethod === 'bullet' && (
+                                    <div className="absolute inset-0 z-10 flex items-center justify-center">
+                                        <div className="bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg text-white text-xs font-bold">
+                                            การผ่อนชำระแบบครั้งเดียว (ไม่แสดงกราฟเปรียบเทียบรายเดือน)
+                                        </div>
+                                    </div>
+                                )}
+
                                 {COMPARISON_DURATIONS.map(m => {
                                     const mPayment = getMonthlyForDuration(m);
                                     const maxPayment = getMonthlyForDuration(Math.min(...COMPARISON_DURATIONS));
@@ -448,7 +513,12 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                     {/* Affinity Indicator */}
                                     {(() => {
-                                        const incomeUsed = Number(formData?.netIncome || formData?.income) || 0;
+                                        // Calculate Net Income consistent with Sales Talk Step 1
+                                        const income = Number(formData?.income) || 0;
+                                        const debt = Number(formData?.monthlyDebt) || 0;
+                                        const netIncome = income - debt;
+                                        const incomeUsed = netIncome > 0 ? netIncome : 0; // Prevent negative division
+
                                         const payment = Math.ceil(monthlyPayment);
                                         const dsr = incomeUsed > 0 ? (payment / incomeUsed) * 100 : 0;
                                         const isSafe = dsr <= 60; // Standard DSR limit
@@ -473,13 +543,18 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 <div
                                                     className={cn(
                                                         "h-full transition-all duration-500",
-                                                        (Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100 <= 60 ? "bg-emerald-400" : "bg-red-400"
+                                                        (() => {
+                                                            const income = Number(formData?.income) || 0;
+                                                            const debt = Number(formData?.monthlyDebt) || 0;
+                                                            const netIncome = Math.max(0, income - debt);
+                                                            return (Math.ceil(monthlyPayment) / (netIncome || 1)) * 100 <= 60;
+                                                        })() ? "bg-emerald-400" : "bg-red-400"
                                                     )}
-                                                    style={{ width: `${Math.min(100, (Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100)}%` }}
+                                                    style={{ width: `${Math.min(100, (Math.ceil(monthlyPayment) / (Math.max(1, (Number(formData?.income) || 0) - (Number(formData?.monthlyDebt) || 0)))) * 100)}%` }}
                                                 />
                                             </div>
                                             <span className="text-xs font-mono font-bold text-white">
-                                                {((Math.ceil(monthlyPayment) / (Number(formData?.netIncome || formData?.income) || 1)) * 100).toFixed(0)}%
+                                                {((Math.ceil(monthlyPayment) / (Math.max(1, (Number(formData?.income) || 0) - (Number(formData?.monthlyDebt) || 0)))) * 100).toFixed(0)}%
                                             </span>
                                         </div>
                                     </div>
@@ -487,7 +562,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         <p className="text-[9px] text-white/40 font-bold uppercase">ยอดผ่อน / รายได้สุทธิ</p>
                                         <p className="text-sm font-bold text-white">
                                             ฿{Math.ceil(monthlyPayment).toLocaleString()}
-                                            <span className="text-sm font-bold text-white"> / {(formData?.netIncome || formData?.income || 0).toLocaleString()}</span>
+                                            <span className="text-sm font-bold text-white"> / {Math.max(0, (Number(formData?.income) || 0) - (Number(formData?.monthlyDebt) || 0)).toLocaleString()}</span>
 
                                         </p>
                                     </div>
@@ -529,6 +604,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 }

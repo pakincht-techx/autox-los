@@ -108,8 +108,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
             const yearMod = formData.year ? (new Date().getFullYear() - Number(formData.year)) * 25000 : 0;
 
-            // Mileage impact: -0.5% for every 1000km
-            const mileageMod = formData.mileage ? (Number(formData.mileage) / 1000) * (basePrice * 0.005) : 0;
+            // Mileage/Hours impact:
+            let usageValue = Number(formData.mileage) || 0;
+            if (selectedType === 'agri') {
+                // Assume 1 hour = roughly equivalent depreciation to 50km for this mock
+                usageValue = (Number(formData.workingHours) || 0) * 50;
+            }
+
+            // -0.5% for every 1000 units (km or equivalent)
+            const mileageMod = usageValue ? (usageValue / 1000) * (basePrice * 0.005) : 0;
 
             // Province impact: BKK gets 5% bonus
             const provinceBonus = formData.registrationProvince?.includes('กรุงเทพ') ? (basePrice * 0.05) : 0;
@@ -315,18 +322,9 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         {!isLand && (
                             <div className="grid gap-x-10 gap-y-6 md:grid-cols-2 animate-in fade-in duration-500">
                                 <div className="space-y-2">
-                                    <Label className="text-[13px] font-bold text-muted ml-1">ปีจดทะเบียน</Label>
-                                    <Input
-                                        placeholder="เช่น 2020"
-                                        className="font-mono h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
-                                        value={formData.year || ""}
-                                        onChange={(e) => handleChange("year", e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">ยี่ห้อ</Label>
                                     <Input
-                                        placeholder="Toyota, Honda..."
+                                        placeholder={selectedType === 'agri' ? "Kubota, Yanmar..." : "Toyota, Honda..."}
                                         className="h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
                                         value={formData.brand || ""}
                                         onChange={(e) => handleChange("brand", e.target.value)}
@@ -335,12 +333,36 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 <div className="space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">รุ่น</Label>
                                     <Input
-                                        placeholder="Hilux Revo..."
+                                        placeholder="Standard..."
                                         className="h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
                                         value={formData.model || ""}
                                         onChange={(e) => handleChange("model", e.target.value)}
                                     />
                                 </div>
+
+                                {/* Car/Moto Specific: Sub-model */}
+                                {['car', 'moto'].includes(selectedType) && (
+                                    <div className="space-y-2">
+                                        <Label className="text-[13px] font-bold text-muted ml-1">รุ่นย่อย</Label>
+                                        <Input
+                                            placeholder="E / G / Sport..."
+                                            className="h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                            value={formData.subModel || ""}
+                                            onChange={(e) => handleChange("subModel", e.target.value)}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label className="text-[13px] font-bold text-muted ml-1">ปีจดทะเบียน</Label>
+                                    <Input
+                                        placeholder="เช่น 2020"
+                                        className="font-mono h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                        value={formData.year || ""}
+                                        onChange={(e) => handleChange("year", e.target.value)}
+                                    />
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">สี</Label>
                                     <Input
@@ -350,6 +372,86 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         onChange={(e) => handleChange("color", e.target.value)}
                                     />
                                 </div>
+
+                                {/* Truck Specifics */}
+                                {selectedType === 'truck' && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">จำนวนล้อ</Label>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {['4', '6', '10', '18'].map((w) => (
+                                                    <div
+                                                        key={w}
+                                                        onClick={() => handleChange("wheels", w)}
+                                                        className={cn(
+                                                            "h-14 flex items-center justify-center rounded-xl border cursor-pointer font-bold transition-all",
+                                                            formData.wheels === w
+                                                                ? "bg-chaiyo-blue text-white border-chaiyo-blue"
+                                                                : "bg-white border-gray-200 text-gray-500 hover:border-chaiyo-blue"
+                                                        )}
+                                                    >
+                                                        {w}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">ลักษณะตัวถัง</Label>
+                                            <Input
+                                                placeholder="ตู้ทึบ, กระบะ..."
+                                                className="h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.bodyType || ""}
+                                                onChange={(e) => handleChange("bodyType", e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">น้ำหนักบรรทุก (ตัน)</Label>
+                                            <Input
+                                                type="number"
+                                                placeholder="0"
+                                                className="h-14 rounded-xl text-lg text-center disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.loadCapacity || ""}
+                                                onChange={(e) => handleChange("loadCapacity", e.target.value)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Agri Specifics */}
+                                {selectedType === 'agri' && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">แรงม้า</Label>
+                                            <Input
+                                                type="number"
+                                                placeholder="50 HP"
+                                                className="h-14 rounded-xl text-lg text-center disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.horsepower || ""}
+                                                onChange={(e) => handleChange("horsepower", e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">อุปกรณ์ต่อพ่วง</Label>
+                                            <Input
+                                                placeholder="ผานไถ, โรตารี่..."
+                                                className="h-14 rounded-xl text-lg disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.attachments || ""}
+                                                onChange={(e) => handleChange("attachments", e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[13px] font-bold text-muted ml-1">ชั่วโมงการทำงาน</Label>
+                                            <Input
+                                                type="number"
+                                                placeholder="0"
+                                                className="h-14 rounded-xl text-lg text-right font-mono disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.workingHours || ""}
+                                                onChange={(e) => handleChange("workingHours", e.target.value)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className="space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">เลขทะเบียน</Label>
                                     <Input
@@ -368,23 +470,27 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         onChange={(e) => handleChange("registrationProvince", e.target.value)}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[13px] font-bold text-muted ml-1">เลขไมล์</Label>
-                                    <div className="relative">
-                                        <Input
-                                            placeholder="0"
-                                            className="h-14 rounded-xl text-lg pr-12 text-right font-mono disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
-                                            value={formData.mileage ? formatNumber(formData.mileage) : ""}
-                                            onChange={(e) => {
-                                                const rawValue = e.target.value.replace(/,/g, "");
-                                                if (rawValue === "" || /^\d+$/.test(rawValue)) {
-                                                    handleChange("mileage", rawValue === "" ? 0 : Number(rawValue));
-                                                }
-                                            }}
-                                        />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold text-xs">กม.</span>
+
+                                {selectedType !== 'agri' && (
+                                    <div className="space-y-2">
+                                        <Label className="text-[13px] font-bold text-muted ml-1">เลขไมล์</Label>
+                                        <div className="relative">
+                                            <Input
+                                                placeholder="0"
+                                                className="h-14 rounded-xl text-lg pr-12 text-right font-mono disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                                value={formData.mileage ? formatNumber(formData.mileage) : ""}
+                                                onChange={(e) => {
+                                                    const rawValue = e.target.value.replace(/,/g, "");
+                                                    if (rawValue === "" || /^\d+$/.test(rawValue)) {
+                                                        handleChange("mileage", rawValue === "" ? 0 : Number(rawValue));
+                                                    }
+                                                }}
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted font-bold text-xs">กม.</span>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
+
                                 <div className="md:col-span-2 space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">เลขตัวถัง (VIN)</Label>
                                     <Input
@@ -400,6 +506,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         {/* 2. Land Form */}
                         {isLand && (
                             <div className="grid gap-x-10 gap-y-8 md:grid-cols-2 animate-in fade-in duration-500">
+                                <div className="md:col-span-2 space-y-2">
+                                    <Label className="text-[13px] font-bold text-muted ml-1">พิกัด (Lat, Long)</Label>
+                                    <Input
+                                        placeholder="13.7563, 100.5018"
+                                        className="h-14 rounded-xl text-lg font-mono disabled:opacity-100 disabled:bg-gray-50 disabled:text-gray-600"
+                                        value={formData.coordinates || ""}
+                                        onChange={(e) => handleChange("coordinates", e.target.value)}
+                                    />
+                                </div>
                                 <div className="space-y-2">
                                     <Label className="text-[13px] font-bold text-muted ml-1">เลขที่โฉนด</Label>
                                     <Input

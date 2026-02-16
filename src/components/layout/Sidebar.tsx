@@ -79,7 +79,7 @@ export function Sidebar() {
             {/* Collapse Toggle */}
             <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute -right-3 top-24 w-6 h-6 rounded-full bg-white border border-border-color flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-sm"
+                className="absolute -right-3 top-17 w-6 h-6 rounded-full bg-white border border-border-color flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-sm"
             >
                 {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
             </button>
