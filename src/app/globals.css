@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-chaiyo-blue: #001275;
+  --color-chaiyo-gold: #FFB909;
+
+  /* Status Colors */
+  --color-status-approved: #10B981;
+  --color-status-pending: #F59E0B;
+  --color-status-rejected: #EF4444;
+
+  /* Structural Base */
+  --color-background: #F9FAFB;
+  /* Subtle Gray */
+  --color-panel-bg: #FFFFFF;
+  --color-foreground: #111827;
+  --color-muted: #6B7280;
+
+  /* Surfaces */
+  --color-card-bg: #FFFFFF;
+  --color-sidebar-bg: #F9FAFB;
+
+  /* Borders */
+  --color-border-color: #E5E7EB;
+  /* Gray 200 */
+  --color-border-subtle: #F3F4F6;
+  /* Gray 100 */
+  --color-border-strong: #D1D5DB;
+  /* Gray 300 */
+
+  /* Typography */
+  --font-sans: var(--font-ibm-plex-thai), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-ibm-plex-thai: var(--font-ibm-plex-thai);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+
+  /* Animations */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes zoom-in {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes zoom-out {
+    from {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    to {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slide-in-from-top {
+    from {
+      transform: translateY(-4px);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(4px);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-from-right {
+    from {
+      transform: translateX(100%);
+    }
+
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes calm-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 185, 9, 0.7);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 185, 9, 0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 185, 9, 0);
+    }
+  }
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-fade-out: fade-out 0.2s ease-in;
+  --animate-zoom-in: zoom-in 0.2s ease-out;
+  --animate-zoom-out: zoom-out 0.2s ease-in;
+  --animate-slide-in-from-right: slide-in-from-right 0.3s ease-out;
+  --animate-calm-pulse: calm-pulse 2s infinite;
+}
+
+/* Animation Utilities for Radix */
+.animate-in {
+  animation-duration: 0.2s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.fade-in-0 {
+  animation-name: fade-in;
+}
+
+.zoom-in-95 {
+  animation-name: zoom-in;
+}
+
+[data-state='open'].animate-in {
+  animation-name: zoom-in;
+}
+
+[data-state='closed'].animate-out {
+  animation-name: zoom-out;
+}
+
+:root {
+  /* shadcn/ui CSS Variables - Mapped to Chaiyo Brand */
+  --background: 210 20% 98%;
+  /* #F9FAFB */
+  --foreground: 221 39% 11%;
+  /* #111827 */
+
+  --card: 0 0% 100%;
+  /* White */
+  --card-foreground: 221 39% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 221 39% 11%;
+
+  --primary: 234 100% 23%;
+  /* Chaiyo Blue #001275 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 221 39% 11%;
+
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  --accent: 44 100% 52%;
+  /* Chaiyo Gold #FFB909 */
+  --accent-foreground: 0 0% 0%;
+
+  --destructive: 0 84% 60%;
+  /* Status Rejected #EF4444 */
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 235 33% 92%;
+  /* Subtle Chaiyo Blue for generic borders */
+  --input: 231 28% 77%;
+  /* Stronger Chaiyo Blue for inputs (~30% opacity match) */
+  --ring: 234 100% 23%;
+  /* Chaiyo Blue for focus rings */
+
+  --radius: 0.375rem;
+
+  /* Status colors */
+  --status-approved: 160 84% 39%;
+  /* #10B981 */
+  --status-pending: 38 92% 50%;
+  /* #F59E0B */
+  --status-rejected: 0 84% 60%;
+  /* #EF4444 */
+}
+
+body {
+  background: #F9FAFB;
+  color: #111827;
+  font-family: var(--font-ibm-plex-thai), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Structural Utilities */
+.border-b-1 {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.border-r-1 {
+  border-right: 1px solid #E5E7EB;
+}
+
+/* Custom Scrollbar for clean look */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media print {
+
+  /* Hide Next.js debug/dev tools if any */
+  nextjs-portal,
+  [data-nextjs-toast] {
+    display: none !important;
+  }
+
+  /* Hide specific dashboard elements - assuming they have these classes or I can target sidebar/nav */
+  /* Better to add a utility class 'print:hidden' to the layout components if possible, 
+     but here we can try to target generic structural elements if we know them. 
+     For now, let's just ensure body background is white and scrollbars are gone. 
+     The page.tsx specific hiding will be done via Tailwind 'print:hidden' classes on the elements there. */
+
+  body {
+    background: white;
+  }
+
+  /* Force print background graphics */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide Sidebar and Header by default if they don't have print:hidden */
+  /* Note: It's safer to add 'print:hidden' to the actual components in the layout, 
+     but user didn't ask me to edit layout.tsx yet. I'll rely on page.tsx structure first. */
+}
+
+/* Standard Table Row Hover */
+.table-row-hover:hover {
+  background-color: rgb(249 250 251);
+  /* bg-gray-50 */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
