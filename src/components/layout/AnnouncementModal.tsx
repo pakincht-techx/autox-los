@@ -33,7 +33,7 @@ export function AnnouncementModal() {
             <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden gap-0">
                 <div className="relative w-full h-48 bg-gray-100">
                     <Image
-                        src="/images/headquarters-announcement.png"
+                        src="/images/autox-chaiyo-w.jpg"
                         alt="Announcement Banner"
                         fill
                         className="object-cover"
