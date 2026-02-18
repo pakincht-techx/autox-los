@@ -44,7 +44,7 @@ export function DashboardHeader() {
                 <div className="flex items-center gap-3 pl-2">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <div className="hidden sm:flex items-center gap-2 cursor-pointer bg-white hover:bg-gray-50 px-3 py-1.5 rounded-lg border border-border-subtle shadow-sm transition-all group">
+                            <div className="hidden sm:flex items-center gap-2 cursor-pointer hover:bg-white/50 px-3 py-1.5 rounded-lg transition-colors group">
                                 <div className="text-right">
                                     <p className="text-xs font-semibold group-hover:text-chaiyo-blue transition-colors">{branchInfo.name}</p>
                                     <p className="text-[10px] text-muted">รหัส {branchInfo.code}</p>
