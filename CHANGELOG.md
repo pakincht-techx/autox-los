@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2026-02-18
+
+### Added
+- **Dashboard Header**:
+    - Introduced `DashboardHeader` component for better modularity.
+    - Added interactive branch information dialog showing Code, Name, District, and Region.
+    - Styled branch info trigger as a distinct button for better visibility.
+- **Role-Based Navigation**:
+    - Implemented `allowedRoles` filtering in Sidebar for 'Maker', 'Checker', and 'Approver'.
+    - Updated user profile section to display current user role.
+- **Design Documentation**: Added `design-rules.md` to standardize UI patterns.
+
+### Changed
+- **UI Styling**:
+    - Updated `DropdownMenu` hover colors to neutral gray (`#F3F4F6`).
+    - Enhanced `Dialog` overlays with `backdrop-blur-sm` and lower opacity (`bg-black/10`).
+    - Standardized border colors to `border-border-subtle` or `gray-200`.
+
 ## [Unreleased] - 2026-02-16
 
 ### Added
