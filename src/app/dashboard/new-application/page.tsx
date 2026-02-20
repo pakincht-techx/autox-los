@@ -20,6 +20,7 @@ import {
 // Steps
 // Steps
 import { IdentityCheckStep } from "./steps/IdentityCheckStep";
+import { PrivacyConsentStep } from "./steps/PrivacyConsentStep";
 import { CustomerInfoStep } from "./steps/CustomerInfoStep";
 import { CollateralStep } from "./steps/CollateralStepNew"; // New merged step
 import { CalculatorStep } from "./steps/CalculatorStep";
@@ -130,6 +131,7 @@ export default function NewApplicationPage() {
     const [isExistingCustomer, setIsExistingCustomer] = useState(false);
     const [existingProfile, setExistingProfile] = useState<any>(null);
     const [isIdentityVerified, setIsIdentityVerified] = useState(false);
+    const [isConsentAccepted, setIsConsentAccepted] = useState(false);
 
     // Mock Assets & Loans - Shared for Existing Customers
     const assetsWithLoans = [
@@ -321,7 +323,7 @@ export default function NewApplicationPage() {
                 <div>
                     <Button
                         variant="ghost"
-                        onClick={() => !isApplicationStarted ? router.push('/dashboard/calculator?step=5') : router.push('/dashboard')}
+                        onClick={() => !isApplicationStarted ? router.push('/dashboard/pre-question?step=4') : router.push('/dashboard')}
                         className="pl-0 text-muted hover:text-foreground mb-2"
                     >
                         <ArrowLeft className="w-4 h-4 mr-2" /> {!isApplicationStarted ? "กลับไปหน้าเสนอผลิตภัณฑ์" : "กลับไปหน้าแดชบอร์ด"}
@@ -360,8 +362,15 @@ export default function NewApplicationPage() {
                 <div className="animate-in fade-in zoom-in-95 duration-500">
                     <Card className="min-h-[500px] border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] bg-white overflow-hidden">
                         <CardContent className="p-10">
-                            {/* 1. Identity Check */}
-                            {!isIdentityVerified && (
+                            {/* 0. Privacy Consent (First Step) */}
+                            {!isConsentAccepted && (
+                                <PrivacyConsentStep
+                                    onAccept={() => setIsConsentAccepted(true)}
+                                />
+                            )}
+
+                            {/* 1. Identity Check (After Consent) */}
+                            {(isConsentAccepted && !isIdentityVerified) && (
                                 <IdentityCheckStep
                                     formData={formData}
                                     setFormData={setFormData}

@@ -1,6 +1,9 @@
 "use client";
 
-import { Search, Bell, HelpCircle, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AnnouncementModal } from "@/components/layout/AnnouncementModal";
+
+import { Search, Megaphone, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
     Dialog,
@@ -28,6 +31,17 @@ const branchInfo = {
 };
 
 export function DashboardHeader() {
+    const [showAnnouncement, setShowAnnouncement] = useState(false);
+
+    useEffect(() => {
+        const hasSeenSession = sessionStorage.getItem("announcementSeen");
+        const hideForever = localStorage.getItem("hideAnnouncement");
+
+        if (!hasSeenSession && !hideForever) {
+            setShowAnnouncement(true);
+        }
+    }, []);
+
     return (
         <header className="h-16 px-8 flex items-center justify-between shrink-0 z-10 print:hidden">
             <div className="flex items-center gap-4 flex-1">
@@ -45,7 +59,7 @@ export function DashboardHeader() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-muted hover:bg-white hover:shadow-sm h-9 w-9 relative group">
-                            <HelpCircle className="w-4.5 h-4.5 group-hover:text-foreground transition-colors" />
+                            <Megaphone className="w-4.5 h-4.5 group-hover:text-foreground transition-colors" />
                             <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
                         </Button>
                     </DropdownMenuTrigger>
@@ -53,7 +67,10 @@ export function DashboardHeader() {
                         <DropdownMenuLabel className="font-semibold text-foreground">ประกาศ</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-gray-100" />
                         <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-gray-50">
+                            <DropdownMenuItem
+                                className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-gray-50"
+                                onClick={() => setShowAnnouncement(true)}
+                            >
                                 <span className="font-medium text-sm text-chaiyo-blue">ประกาศสำคัญจากสำนักงานใหญ่</span>
                                 <span className="text-xs text-muted line-clamp-2">
                                     แจ้งเปลี่ยนแปลงนโยบายการอนุมัติสินเชื่อและปรับอัตราดอกเบี้ย มีผล 1 มี.ค. 67
@@ -120,6 +137,7 @@ export function DashboardHeader() {
                     </Dialog>
                 </div>
             </div>
+            <AnnouncementModal open={showAnnouncement} onOpenChange={setShowAnnouncement} />
         </header>
     );
 }

@@ -54,7 +54,7 @@ export default function DashboardPage() {
                     <p className="text-sm text-muted mt-1">ยินดีต้อนรับกลับมา, คุณสมหญิง</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Link href="/dashboard/calculator">
+                    <Link href="/dashboard/pre-question">
                         <Button className="shadow-lg shadow-chaiyo-blue/20 font-semibold active:scale-95 transition-transform">
                             <Calculator className="w-4 h-4 mr-2" />
                             แนะนำผลิตภัณฑ์

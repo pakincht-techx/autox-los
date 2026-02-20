@@ -1,6 +1,5 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
-import { AnnouncementModal } from "@/components/layout/AnnouncementModal";
 
 export default function DashboardLayout({
     children,
@@ -15,7 +14,6 @@ export default function DashboardLayout({
             <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
                 {/* Top Header - Now outside the white panel */}
-                <AnnouncementModal />
                 <DashboardHeader />
 
                 {/* Main Content Area - Housing the Floating Panel */}

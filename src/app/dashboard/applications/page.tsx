@@ -94,9 +94,8 @@ export default function ApplicationsPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground font-sans">รายการคำขอ</h1>
-                    <p className="text-sm text-muted">จัดการและติดตามสถานะคำขอสินเชื่อทั้งหมด</p>
                 </div>
-                <Link href="/dashboard/calculator">
+                <Link href="/dashboard/pre-question">
                     <Button className="w-full sm:w-auto bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-semibold shadow-md active:scale-95 transition-transform">
                         <Calculator className="w-4 h-4 mr-2" />
                         แนะนำผลิตภัณฑ์

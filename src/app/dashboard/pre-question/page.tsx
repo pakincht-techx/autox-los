@@ -8,57 +8,20 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, X, ChevronRight, Plus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote } from "lucide-react";
+import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, X, ChevronRight, Plus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote, ShieldCheck } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import {
+    CAR_BRANDS,
+    MOTO_BRANDS,
+    TRUCK_BRANDS,
+    AGRI_BRANDS,
+    MODELS_BY_BRAND,
+    YEARS
+} from "@/data/vehicle-data";
 
-const CAR_BRANDS = [
-    { value: "toyota", label: "Toyota" },
-    { value: "honda", label: "Honda" },
-    { value: "isuzu", label: "Isuzu" },
-    { value: "mitsubishi", label: "Mitsubishi" },
-    { value: "nissan", label: "Nissan" },
-    { value: "mazda", label: "Mazda" },
-    { value: "ford", label: "Ford" },
-    { value: "suzuki", label: "Suzuki" },
-    { value: "mg", label: "MG" },
-    { value: "byd", label: "BYD" },
-    { value: "gwm", label: "GWM" },
-    { value: "bmw", label: "BMW" },
-    { value: "mercedes", label: "Mercedes-Benz" },
-];
-
-const CAR_MODELS = [
-    { value: "yaris", label: "Yaris" },
-    { value: "vios", label: "Vios" },
-    { value: "altis", label: "Corolla Altis" },
-    { value: "camry", label: "Camry" },
-    { value: "hilux", label: "Hilux Revo" },
-    { value: "fortuner", label: "Fortuner" },
-    { value: "city", label: "City" },
-    { value: "civic", label: "Civic" },
-    { value: "crv", label: "CR-V" },
-    { value: "hrv", label: "HR-V" },
-    { value: "accord", label: "Accord" },
-    { value: "dmax", label: "D-Max" },
-    { value: "mux", label: "MU-X" },
-    { value: "triton", label: "Triton" },
-    { value: "pajero", label: "Pajero Sport" },
-    { value: "ranger", label: "Ranger" },
-    { value: "everest", label: "Everest" },
-    { value: "attrage", label: "Attrage" },
-    { value: "mirage", label: "Mirage" },
-    { value: "swift", label: "Swift" },
-    { value: "ciaz", label: "Ciaz" },
-];
-
-const YEARS = Array.from({ length: 30 }, (_, i) => {
-    const year = new Date().getFullYear() - i;
-    return { value: year.toString(), label: year.toString() };
-});
-
-export default function CalculatorPage() {
+export default function PreQuestionPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const initialStep = searchParams.get('step') ? parseInt(searchParams.get('step')!) : 1;
@@ -69,22 +32,33 @@ export default function CalculatorPage() {
         collateralType: 'car',
         appraisalPrice: 0,
         income: 0,
+        // New Preliminary Fields
+        loanPurpose: '',
+        requestedAmount: '',
+        collateralStatus: '',
+        occupationGroup: '',
+        jobTitle: '',
+        salary: '',
+        otherIncome: '',
+
+        nationality: '',
         // Defaults for CalculatorStep
-        requestedAmount: 0,
         requestedDuration: 24,
+
+        // Collateral Questions
+        collateralQuestions: {},
     });
 
-    // Step 1: Select Type
+    // Step 1: Preliminary Questionnaire (Inc. Collateral Type)
     // Step 2: Upload / Analyze
     // Step 3: Info
-    // Step 4: Calculate (Result)
     // Step 4: Calculate (Result)
     const [currentStep, setCurrentStep] = useState(initialStep);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // Load state from localStorage on mount
     useEffect(() => {
-        const savedState = localStorage.getItem('calculatorState');
+        const savedState = localStorage.getItem('preQuestionState');
         if (savedState) {
             try {
                 const parsed = JSON.parse(savedState);
@@ -98,14 +72,14 @@ export default function CalculatorPage() {
                     setCurrentStep(parsed.currentStep);
                 }
             } catch (e) {
-                console.error("Failed to load calculator state", e);
+                console.error("Failed to load pre-question state", e);
             }
         }
     }, [searchParams]);
 
     // Save state to localStorage
     useEffect(() => {
-        localStorage.setItem('calculatorState', JSON.stringify({
+        localStorage.setItem('preQuestionState', JSON.stringify({
             formData,
             currentStep
         }));
@@ -172,6 +146,32 @@ export default function CalculatorPage() {
         land: { name: 'โฉนดที่ดิน', description: 'หน้าแรก - ครุฑ' },
     };
 
+    // Mock Questions for Collateral Assessment
+    const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
+        car: [
+            { id: 'q1', text: 'มีการดัดแปลงสภาพรถหรือไม่?' },
+            { id: 'q2', text: 'มีประวัติอุบัติเหตุหนักหรือไม่?' },
+            { id: 'q3', text: 'เล่มทะเบียนมีผู้ครอบครองมากกว่า 1 คนหรือไม่?' },
+        ],
+        moto: [
+            { id: 'q1', text: 'มีการดัดแปลงสภาพรถหรือไม่?' },
+            { id: 'q2', text: 'รถใช้งานรับจ้างสาธารณะหรือไม่?' },
+        ],
+        truck: [
+            { id: 'q1', text: 'มีการดัดแปลงต่อเติมกระบะ/โครงเหล็กหรือไม่?' },
+            { id: 'q2', text: 'รถวิ่งงานข้ามจังหวัดเป็นหลักหรือไม่?' },
+        ],
+        agri: [
+            { id: 'q1', text: 'เครื่องจักรมีการใช้งานหนักต่อเนื่องหรือไม่?' },
+            { id: 'q2', text: 'มีอุปกรณ์ต่อพ่วงครบชุดหรือไม่?' },
+        ],
+        land: [
+            { id: 'q1', text: 'ที่ดินติดถนนสาธารณะหรือไม่?' },
+            { id: 'q2', text: 'มีสิ่งปลูกสร้างบนที่ดินหรือไม่?' },
+            { id: 'q3', text: 'ที่ดินอยู่ในเขตพื้นที่สีเขียวหรือไม่?' },
+        ],
+    };
+
     const handlePrint = () => {
         let pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
         if (formData.collateralType === 'land') {
@@ -220,7 +220,7 @@ export default function CalculatorPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                        localStorage.removeItem('calculatorState');
+                        localStorage.removeItem('preQuestionState');
                         router.push("/dashboard/applications");
                     }}
                     className="text-muted hover:text-foreground -ml-2"
@@ -238,17 +238,16 @@ export default function CalculatorPage() {
                         <div
                             className="h-full bg-chaiyo-blue transition-all duration-500 ease-in-out"
                             style={{
-                                width: `${((currentStep - 1) / 4) * 100}%`
+                                width: `${((currentStep - 1) / 3) * 100}%`
                             }}
                         ></div>
                     </div>
 
                     {[
-                        { id: 1, label: "เลือกประเภท", icon: Car },
+                        { id: 1, label: "แบบสอบถาม", icon: FileText },
                         { id: 2, label: "อัปโหลดเอกสาร", icon: Camera },
                         { id: 3, label: "ข้อมูลหลักประกัน", icon: Briefcase },
-                        { id: 4, label: "ข้อมูลลูกค้า", icon: User },
-                        { id: 5, label: "แนะนำสินค้า", icon: Sparkles }
+                        { id: 4, label: "แนะนำสินค้า", icon: Sparkles }
                     ].map((step) => {
                         const isActive = currentStep === step.id;
                         const isCompleted = currentStep > step.id;
@@ -283,55 +282,257 @@ export default function CalculatorPage() {
                 </div>
             </div>
 
-            {/* STEP 1: Type Selection (Redesigned) */}
+            {/* STEP 1: Preliminary Questionnaire (New) */}
             {currentStep === 1 && (
-                <div className="max-w-5xl mx-auto print:hidden space-y-8 animate-in slide-in-from-right-8 duration-300">
+                <div className="max-w-4xl mx-auto print:hidden space-y-8 animate-in slide-in-from-right-8 duration-300">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <Sparkles className="w-6 h-6 text-chaiyo-blue fill-current" />
-                            <h2 className="text-2xl font-bold text-gray-800">เลือกประเภทหลักประกัน</h2>
+                            <FileText className="w-6 h-6 text-chaiyo-blue fill-current" />
+                            <h2 className="text-2xl font-bold text-gray-800">แบบสอบถามเบื้องต้น</h2>
                         </div>
-                        <p className="text-gray-500 pl-8">กรุณาเลือกประเภททรัพย์สินที่ต้องการใช้เป็นหลักประกัน</p>
+                        <p className="text-gray-500 pl-8">กรุณากรอกข้อมูลเบื้องต้นเพื่อประเมินสินเชื่อที่เหมาะสม</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {PRODUCTS.map((p) => {
-                            const Icon = p.icon;
-                            return (
-                                <div
-                                    key={p.id}
-                                    onClick={() => {
-                                        setFormData({ ...formData, collateralType: p.id });
-                                        setTimeout(nextStep, 200);
-                                    }}
-                                    className={cn(
-                                        "cursor-pointer bg-white rounded-2xl border transition-all p-8 flex flex-col items-center justify-center gap-4 hover:shadow-xl group relative overflow-hidden h-[240px]",
-                                        formData.collateralType === p.id
-                                            ? "border-chaiyo-blue ring-2 ring-chaiyo-blue/20"
-                                            : "border-gray-200 hover:border-chaiyo-blue/30"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "w-20 h-20 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
-                                        p.color
-                                    )}>
-                                        <Icon className="w-10 h-10" />
-                                    </div>
-                                    <div className="text-center space-y-2 relative z-10">
-                                        <h3 className="font-bold text-xl text-gray-800">{p.label}</h3>
-                                        <p className="text-sm text-gray-400">{p.desc}</p>
-                                    </div>
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
-                                    {/* Hover Effect Background */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-gray-50 opacity-0 group-hover:opacity-100 transition-opacity -z-0" />
+                        {/* Section 1: General Info */}
+                        <div className="px-4 md:px-6 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-gray-100 bg-gray-50/50 -mx-8 px-8 py-3 mb-4">
+                                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">1</span>
+                                ข้อมูลทั่วไป
+                            </h3>
+
+                            <div className="space-y-0 divide-y divide-gray-100">
+                                {/* Row 1: Purpose */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">วัตถุประสงค์ในการใช้เงิน</Label>
+                                    <div className="md:col-span-2">
+                                        <Select
+                                            value={formData.loanPurpose}
+                                            onValueChange={(val) => setFormData({ ...formData, loanPurpose: val })}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกวัตถุประสงค์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="business">ลงทุนในธุรกิจ</SelectItem>
+                                                <SelectItem value="consumption">อุปโภคบริโภค</SelectItem>
+                                                <SelectItem value="refinance">รีไฟแนนซ์ / ปิดหนี้เดิม</SelectItem>
+                                                <SelectItem value="treatment">รักษาพยาบาล</SelectItem>
+                                                <SelectItem value="education">การศึกษา</SelectItem>
+                                                <SelectItem value="other">อื่นๆ</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                            );
-                        })}
+
+                                {/* Row 2: Amount */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">วงเงินสินเชื่อที่ต้องการ (บาท)</Label>
+                                    <div className="md:col-span-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="ระบุจำนวนเงิน"
+                                            value={formData.requestedAmount ? Number(formData.requestedAmount).toLocaleString() : ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/,/g, '');
+                                                if (!isNaN(Number(value))) {
+                                                    setFormData({ ...formData, requestedAmount: value });
+                                                }
+                                            }}
+                                            className="h-12 bg-white text-right"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 2: Collateral Info */}
+                        <div className="px-4 md:px-6 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-gray-100 bg-gray-50/50 -mx-8 px-8 py-3 mb-4">
+                                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">2</span>
+                                ข้อมูลเกี่ยวกับหลักทรัพย์ค้ำประกัน
+                            </h3>
+
+                            <div className="space-y-0 divide-y divide-gray-100">
+                                {/* Row 1: Collateral Type (New) */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">ประเภทหลักทรัพย์</Label>
+                                    <div className="md:col-span-2">
+                                        <Select
+                                            value={formData.collateralType}
+                                            onValueChange={(val) => setFormData({ ...formData, collateralType: val })}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกประเภทหลักทรัพย์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {PRODUCTS.map((p) => (
+                                                    <SelectItem key={p.id} value={p.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            <p.icon className="w-4 h-4 text-muted-foreground" />
+                                                            {p.label}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Status (Conditional) */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">
+                                        {formData.collateralType === 'land' ? 'สถานะของที่ดิน' : 'สถานะของหลักทรัพย์'}
+                                    </Label>
+                                    <div className="md:col-span-2">
+                                        <Select
+                                            value={formData.collateralStatus}
+                                            onValueChange={(val) => setFormData({ ...formData, collateralStatus: val })}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder={formData.collateralType === 'land' ? "เลือกสถานะที่ดิน" : "เลือกสถานะหลักทรัพย์"} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {formData.collateralType === 'land' ? (
+                                                    <>
+                                                        <SelectItem value="own_free">เป็นเจ้าของกรรมสิทธิ์ (ปลอดภาระ)</SelectItem>
+                                                        <SelectItem value="mortgaged">จำนองอยู่ (ติดภาระ)</SelectItem>
+                                                        <SelectItem value="kai_fak">ขายฝากอยู่</SelectItem>
+                                                        <SelectItem value="other">อื่นๆ</SelectItem>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <SelectItem value="own_free">เป็นเจ้าของกรรมสิทธิ์ (ปลอดภาระ)</SelectItem>
+                                                        <SelectItem value="own_financed">กำลังผ่อนชำระ (ติดไฟแนนซ์)</SelectItem>
+                                                        <SelectItem value="family_free">เป็นของบุคคลในครอบครัว</SelectItem>
+                                                        <SelectItem value="other">อื่นๆ</SelectItem>
+                                                    </>
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 3: Customer Info */}
+                        <div className="px-4 md:px-6 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-gray-100 bg-gray-50/50 -mx-8 px-8 py-3 mb-4">
+                                <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">3</span>
+                                ข้อมูลลูกค้า
+                            </h3>
+
+                            <div className="space-y-0 divide-y divide-gray-100">
+                                {/* Row 1: Nationality */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">สัญชาติ</Label>
+                                    <div className="md:col-span-2">
+                                        <Select
+                                            value={formData.nationality}
+                                            onValueChange={(val) => setFormData({ ...formData, nationality: val })}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกสัญชาติ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="thai">ไทย</SelectItem>
+                                                <SelectItem value="foreigner">ต่างชาติ</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Occupation Group */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">กลุ่มอาชีพ</Label>
+                                    <div className="md:col-span-2">
+                                        <Select
+                                            value={formData.occupationGroup}
+                                            onValueChange={(val) => setFormData({ ...formData, occupationGroup: val })}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกกลุ่มอาชีพ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="salary">พนักงานประจำ / ข้าราชการ</SelectItem>
+                                                <SelectItem value="business">เจ้าของกิจการ / ธุรกิจส่วนตัว</SelectItem>
+                                                <SelectItem value="freelance">อาชีพอิสระ / ฟรีแลนซ์</SelectItem>
+                                                <SelectItem value="farmer">เกษตรกร</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Row 3: Job Title */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">ระบุอาชีพ</Label>
+                                    <div className="md:col-span-2">
+                                        <Input
+                                            placeholder="เช่น พนักงานบัญชี, ค้าขาย"
+                                            value={formData.jobTitle}
+                                            onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
+                                            className="h-12 bg-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 4: Salary */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">รายได้เฉลี่ยต่อเดือน (บาท)</Label>
+                                    <div className="md:col-span-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="ระบุรายได้"
+                                            value={formData.salary ? Number(formData.salary).toLocaleString() : ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/,/g, '');
+                                                if (!isNaN(Number(value))) {
+                                                    setFormData({ ...formData, salary: value });
+                                                }
+                                            }}
+                                            className="h-12 bg-white text-right"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Row 5: Other Income */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 items-center">
+                                    <Label className="text-gray-600 font-medium md:col-span-1">รายได้อื่นๆ (ถ้ามี)</Label>
+                                    <div className="md:col-span-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="ระบุรายได้อื่นๆ"
+                                            value={formData.otherIncome ? Number(formData.otherIncome).toLocaleString() : ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/,/g, '');
+                                                if (!isNaN(Number(value))) {
+                                                    setFormData({ ...formData, otherIncome: value });
+                                                }
+                                            }}
+                                            className="h-12 bg-white text-right"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 md:p-6 pt-0 flex justify-end">
+                            <Button
+                                onClick={nextStep}
+                                className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white min-w-[150px] h-12 shadow-md rounded-xl"
+                                disabled={!formData.loanPurpose || !formData.requestedAmount || !formData.occupationGroup || !formData.collateralType || !formData.nationality}
+                            >
+                                ถัดไป <ChevronRight className="w-5 h-5 ml-2" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* STEP 2: Upload Documents (Type-specific) */}
+            {/* REMOVED Step 2: Select Type */}
+
+            {/* STEP 2: Upload Documents (Type-specific) (Was Step 3) */}
             {currentStep === 2 && (() => {
                 const docReq = DOCUMENT_REQUIREMENTS[formData.collateralType] || DOCUMENT_REQUIREMENTS.car;
                 const selectedProduct = PRODUCTS.find(p => p.id === formData.collateralType);
@@ -404,13 +605,20 @@ export default function CalculatorPage() {
                             )}
                         </div>
 
-                        <div className="flex justify-center">
+                        <div className="flex justify-between items-center pt-8">
+                            <Button
+                                variant="ghost"
+                                onClick={prevStep}
+                                className="text-gray-500 hover:text-gray-900"
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
+                            </Button>
                             <Button
                                 variant="ghost"
                                 onClick={() => setCurrentStep(3)}
                                 className="text-gray-400 hover:text-chaiyo-blue hover:bg-transparent"
                             >
-                                ข้ามการอัปโหลดเอกสาร
+                                ข้ามการอัปโหลดเอกสาร <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         </div>
                     </div>
@@ -418,7 +626,7 @@ export default function CalculatorPage() {
             })()}
 
 
-            {/* STEP 3: Verify Info & Result Preview */}
+            {/* STEP 3: Verify Info & Result Preview (Was Step 4) */}
             {
                 currentStep === 3 && (
                     <div className="max-w-6xl mx-auto print:hidden animate-in slide-in-from-right-8 duration-300 pb-20">
@@ -487,7 +695,7 @@ export default function CalculatorPage() {
                                         variant="outline"
                                         onClick={() => {
                                             setFormData({ ...formData, collateralType: 'car' }); // Reset minimal
-                                            setCurrentStep(1);
+                                            setCurrentStep(2);
                                         }}
                                         className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                                     >
@@ -512,72 +720,89 @@ export default function CalculatorPage() {
 
                                 {/* Form Fields */}
                                 {/* Form Fields — Type-specific (matches CollateralStepNew.tsx) */}
-                                {(formData.collateralType === 'car' || formData.collateralType === 'moto' || formData.collateralType === 'truck') && (
+                                {/* Form Fields based on Type */}
+                                {(formData.collateralType === 'car' || formData.collateralType === 'moto' || formData.collateralType === 'truck' || formData.collateralType === 'agri') && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">ทะเบียนรถ</Label>
-                                            <Input value={formData.licensePlate || ''} onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })} className="bg-white h-12" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">จังหวัด</Label>
-                                            <Input value={formData.province || ''} onChange={(e) => setFormData({ ...formData, province: e.target.value })} className="bg-white h-12" />
-                                        </div>
+                                        {formData.collateralType !== 'agri' && (
+                                            <>
+                                                <div className="space-y-2">
+                                                    <Label className="text-gray-500">ทะเบียนรถ</Label>
+                                                    <Input
+                                                        value={formData.licensePlate || ''}
+                                                        onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                                                        className="bg-white h-12"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-gray-500">จังหวัด</Label>
+                                                    <Input value={formData.province || ''} onChange={(e) => setFormData({ ...formData, province: e.target.value })} className="bg-white h-12" />
+                                                </div>
+                                            </>
+                                        )}
                                         <div className="space-y-2">
                                             <Label className="text-gray-500">ยี่ห้อ</Label>
-                                            <Combobox options={CAR_BRANDS} value={formData.brand} onValueChange={(val) => setFormData({ ...formData, brand: val })} placeholder="เลือกยี่ห้อ..." searchPlaceholder="ค้นหายี่ห้อ..." emptyText="ไม่พบยี่ห้อที่ค้นหา" />
+                                            <Combobox
+                                                options={
+                                                    formData.collateralType === 'moto' ? MOTO_BRANDS :
+                                                        formData.collateralType === 'truck' ? TRUCK_BRANDS :
+                                                            formData.collateralType === 'agri' ? AGRI_BRANDS :
+                                                                CAR_BRANDS
+                                                }
+                                                value={formData.brand}
+                                                onValueChange={(val) => setFormData({ ...formData, brand: val, model: '' })}
+                                                placeholder="เลือกยี่ห้อ..."
+                                                searchPlaceholder="ค้นหายี่ห้อ..."
+                                                emptyText="ไม่พบยี่ห้อที่ค้นหา"
+                                            />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-gray-500">รุ่น</Label>
-                                            <Combobox options={CAR_MODELS} value={formData.model} onValueChange={(val) => setFormData({ ...formData, model: val })} placeholder="เลือกรุ่น..." searchPlaceholder="ค้นหารุ่น..." emptyText="ไม่พบรุ่นที่ค้นหา" />
+                                            <Combobox
+                                                options={MODELS_BY_BRAND[formData.brand] || []}
+                                                value={formData.model}
+                                                onValueChange={(val) => setFormData({ ...formData, model: val })}
+                                                placeholder="เลือกรุ่น..."
+                                                searchPlaceholder="ค้นหารุ่น..."
+                                                emptyText="ไม่พบรุ่นที่ค้นหา"
+                                                className={!formData.brand ? "opacity-50 pointer-events-none" : ""}
+                                            />
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-gray-500">ปี</Label>
                                             <Combobox options={YEARS} value={formData.year} onValueChange={(val) => setFormData({ ...formData, year: val })} placeholder="เลือกปี..." searchPlaceholder="ค้นหาปี..." emptyText="ไม่พบปีที่ค้นหา" />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">สี</Label>
-                                            <Input value={formData.color || ''} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="bg-white h-12" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">เลขเครื่องยนต์</Label>
-                                            <Input value={formData.engineNumber || ''} onChange={(e) => setFormData({ ...formData, engineNumber: e.target.value })} className="bg-white h-12 font-mono" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">เลขตัวถัง</Label>
-                                            <Input value={formData.chassisNumber || ''} onChange={(e) => setFormData({ ...formData, chassisNumber: e.target.value })} className="bg-white h-12 font-mono" />
-                                        </div>
-                                        <div className="col-span-1 md:col-span-2 space-y-2">
-                                            <Label className="text-gray-500">สถานะทางกฎหมาย</Label>
-                                            <Select value={formData.legalStatus || 'clear'} onValueChange={(val) => setFormData({ ...formData, legalStatus: val })}>
-                                                <SelectTrigger className="h-12 bg-white w-full"><SelectValue placeholder="เลือกสถานะ" /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="clear">ปลอดภาระ</SelectItem>
-                                                    <SelectItem value="pledge">จำนำ</SelectItem>
-                                                    <SelectItem value="hire_purchase">เช่าซื้อ</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                )}
 
-                                {formData.collateralType === 'agri' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">ยี่ห้อ</Label>
-                                            <Input value={formData.brand || ''} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} className="bg-white h-12" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">รุ่น</Label>
-                                            <Input value={formData.model || ''} onChange={(e) => setFormData({ ...formData, model: e.target.value })} className="bg-white h-12" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">ปี</Label>
-                                            <Input value={formData.year || ''} onChange={(e) => setFormData({ ...formData, year: e.target.value })} className="bg-white h-12" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-500">หมายเลขเครื่อง/Serial Number</Label>
-                                            <Input value={formData.serialNumber || ''} onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })} className="bg-white h-12 font-mono" />
-                                        </div>
+                                        {formData.collateralType === 'agri' && (
+                                            <div className="space-y-2">
+                                                <Label className="text-gray-500">หมายเลขเครื่อง/Serial Number</Label>
+                                                <Input
+                                                    value={formData.serialNumber || ''}
+                                                    onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
+                                                    className="bg-white h-12"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {formData.collateralType !== 'agri' && (
+                                            <div className="space-y-2">
+                                                <Label className="text-gray-500">สี</Label>
+                                                <Input value={formData.color || ''} onChange={(e) => setFormData({ ...formData, color: e.target.value })} className="bg-white h-12" />
+                                            </div>
+                                        )}
+
+                                        {formData.collateralType !== 'agri' && (
+                                            <>
+                                                <div className="space-y-2">
+                                                    <Label className="text-gray-500">เลขเครื่องยนต์</Label>
+                                                    <Input value={formData.engineNumber || ''} onChange={(e) => setFormData({ ...formData, engineNumber: e.target.value })} className="bg-white h-12 font-mono" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-gray-500">เลขตัวถัง</Label>
+                                                    <Input value={formData.chassisNumber || ''} onChange={(e) => setFormData({ ...formData, chassisNumber: e.target.value })} className="bg-white h-12 font-mono" />
+                                                </div>
+                                            </>
+                                        )}
+
                                         <div className="col-span-1 md:col-span-2 space-y-2">
                                             <Label className="text-gray-500">สถานะทางกฎหมาย</Label>
                                             <Select value={formData.legalStatus || 'clear'} onValueChange={(val) => setFormData({ ...formData, legalStatus: val })}>
@@ -637,6 +862,50 @@ export default function CalculatorPage() {
                                     </div>
                                 )}
 
+                                {/* Collateral Questions Section */}
+                                <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+                                    <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-4">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <Check className="w-4 h-4 text-chaiyo-blue" />
+                                        </div>
+                                        <h3 className="font-bold text-gray-800">แบบประเมินสภาพหลักประกัน (Collateral Checklist)</h3>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {(COLLATERAL_QUESTIONS[formData.collateralType] || COLLATERAL_QUESTIONS['car']).map((q) => (
+                                            <div key={q.id} className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                                                <span className="text-sm font-medium text-gray-700">{q.text}</span>
+                                                <div className="flex gap-2 shrink-0">
+                                                    <Button
+                                                        variant={formData.collateralQuestions?.[q.id] === 'yes' ? 'default' : 'outline'}
+                                                        className={cn(
+                                                            "w-20 h-9 rounded-lg transition-all",
+                                                            formData.collateralQuestions?.[q.id] === 'yes'
+                                                                ? "bg-chaiyo-blue text-white shadow-md shadow-blue-200 border-chaiyo-blue"
+                                                                : "text-gray-500 bg-white border-gray-200 hover:bg-gray-100"
+                                                        )}
+                                                        onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' } })}
+                                                    >
+                                                        ใช่
+                                                    </Button>
+                                                    <Button
+                                                        variant={formData.collateralQuestions?.[q.id] === 'no' ? 'default' : 'outline'}
+                                                        className={cn(
+                                                            "w-20 h-9 rounded-lg transition-all",
+                                                            formData.collateralQuestions?.[q.id] === 'no'
+                                                                ? "bg-chaiyo-blue text-white shadow-md shadow-blue-200 border-chaiyo-blue"
+                                                                : "text-gray-500 bg-white border-gray-200 hover:bg-gray-100"
+                                                        )}
+                                                        onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' } })}
+                                                    >
+                                                        ไม่ใช่
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 {/* Loan Summary Limit Card */}
                                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-6">
                                     <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-4">
@@ -660,8 +929,10 @@ export default function CalculatorPage() {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex justify-end pt-4 gap-4">
-
+                                <div className="flex justify-between pt-4 gap-4">
+                                    <Button variant="ghost" onClick={prevStep} className="text-gray-500 h-12">
+                                        <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
+                                    </Button>
                                     <Button onClick={nextStep} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white min-w-[150px] h-12 shadow-lg shadow-chaiyo-blue/20">
                                         ถัดไป <ChevronLeft className="w-5 h-5 rotate-180 ml-2" />
                                     </Button>
@@ -673,144 +944,12 @@ export default function CalculatorPage() {
                 )
             }
 
-            {/* STEP 4: Customer Info (Occupation & Income) */}
-            {currentStep === 4 && (
-                <div className="max-w-4xl mx-auto print:hidden space-y-8 animate-in slide-in-from-right-8 duration-300">
-                    {/* Header */}
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <User className="w-6 h-6 text-chaiyo-blue" />
-                            <h2 className="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h2>
-                        </div>
-                        <p className="text-gray-500 pl-8">กรุณากรอกข้อมูลอาชีพและรายได้ของลูกค้า</p>
-                    </div>
+            {/* REMOVED Step 4: Customer Info */}
 
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 space-y-6">
-                        {/* Occupation */}
-                        <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Briefcase className="w-4 h-4 text-chaiyo-blue" />
-                                อาชีพ
-                            </Label>
-                            <Select
-                                value={formData.occupation || ''}
-                                onValueChange={(val) => setFormData((prev: any) => ({ ...prev, occupation: val }))}
-                            >
-                                <SelectTrigger className="h-12 bg-white border-gray-200">
-                                    <SelectValue placeholder="เลือกอาชีพ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="employee">พนักงานบริษัท</SelectItem>
-                                    <SelectItem value="government">ข้าราชการ / พนักงานรัฐวิสาหกิจ</SelectItem>
-                                    <SelectItem value="business">ธุรกิจส่วนตัว / เจ้าของกิจการ</SelectItem>
-                                    <SelectItem value="freelance">รับจ้างอิสระ / ฟรีแลนซ์</SelectItem>
-                                    <SelectItem value="farmer">เกษตรกร</SelectItem>
-                                    <SelectItem value="retired">เกษียณ</SelectItem>
-                                    <SelectItem value="other">อื่นๆ</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+            {/* REMOVED Step 4: Customer Info */}
 
-                        {/* Occupation Detail (conditional) */}
-                        {formData.occupation === 'other' && (
-                            <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-gray-700">ระบุอาชีพ</Label>
-                                <Input
-                                    placeholder="กรุณาระบุอาชีพ"
-                                    value={formData.occupationDetail || ''}
-                                    onChange={(e) => setFormData((prev: any) => ({ ...prev, occupationDetail: e.target.value }))}
-                                    className="h-12 bg-white border-gray-200"
-                                />
-                            </div>
-                        )}
-
-                        {/* Workplace */}
-                        <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-gray-700">สถานที่ทำงาน / ชื่อกิจการ</Label>
-                            <Input
-                                placeholder="เช่น บริษัท ABC จำกัด"
-                                value={formData.workplace || ''}
-                                onChange={(e) => setFormData((prev: any) => ({ ...prev, workplace: e.target.value }))}
-                                className="h-12 bg-white border-gray-200"
-                            />
-                        </div>
-
-                        {/* Divider */}
-                        {/* Income & Expense Section Hidden for Sales Talk Flow
-                        <div className="border-t border-gray-100 pt-4">
-                            <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-4">
-                                <Banknote className="w-4 h-4 text-emerald-600" />
-                                ข้อมูลรายได้
-                            </Label>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-600">รายได้ต่อเดือน (บาท)</Label>
-                                    <Input
-                                        type="text"
-                                        placeholder="0"
-                                        value={formData.monthlyIncome ? Number(formData.monthlyIncome).toLocaleString() : ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/,/g, '');
-                                            if (!isNaN(Number(value))) {
-                                                setFormData((prev: any) => ({ ...prev, monthlyIncome: Number(value) }));
-                                            }
-                                        }}
-                                        className="h-12 bg-white border-gray-200 text-right text-lg font-semibold"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-sm text-gray-600">รายได้อื่นๆ ต่อเดือน (บาท)</Label>
-                                    <Input
-                                        type="text"
-                                        placeholder="0"
-                                        value={formData.otherIncome ? Number(formData.otherIncome).toLocaleString() : ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/,/g, '');
-                                            if (!isNaN(Number(value))) {
-                                                setFormData((prev: any) => ({ ...prev, otherIncome: Number(value) }));
-                                            }
-                                        }}
-                                        className="h-12 bg-white border-gray-200 text-right text-lg font-semibold"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label className="text-sm text-gray-600">ภาระหนี้สินต่อเดือน (บาท)</Label>
-                            <Input
-                                type="text"
-                                placeholder="0"
-                                value={formData.monthlyExpense ? Number(formData.monthlyExpense).toLocaleString() : ''}
-                                onChange={(e) => {
-                                    const value = e.target.value.replace(/,/g, '');
-                                    if (!isNaN(Number(value))) {
-                                        setFormData((prev: any) => ({ ...prev, monthlyExpense: Number(value) }));
-                                    }
-                                }}
-                                className="h-12 bg-white border-gray-200 text-right text-lg font-semibold"
-                            />
-                            <p className="text-xs text-gray-400">รวมค่างวดรถ, บ้าน, บัตรเครดิต, สินเชื่อส่วนบุคคล ฯลฯ</p>
-                        </div>
-                        */}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-4">
-                        <Button variant="ghost" onClick={prevStep} className="text-gray-500 h-12">
-                            <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
-                        </Button>
-                        <Button onClick={nextStep} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white min-w-[150px] h-12 shadow-lg shadow-chaiyo-blue/20">
-                            ถัดไป <ChevronLeft className="w-5 h-5 rotate-180 ml-2" />
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            {/* STEP 5: Product Suggestion */}
-            {currentStep === 5 && (() => {
+            {/* STEP 4: Product Suggestion (Was Step 5) */}
+            {currentStep === 4 && (() => {
                 const ltvRate = formData.collateralType === 'land' ? 0.7 : 0.9;
                 const maxLoan = Math.max(0, Math.floor((formData.appraisalPrice || 0) * ltvRate) - (Number(formData.existingDebt) || 0));
                 const selectedProduct = PRODUCTS.find(p => p.id === formData.collateralType);
@@ -986,9 +1125,9 @@ export default function CalculatorPage() {
                                 </TabsTrigger>
                             </TabsList>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                            <div className="grid grid-cols-1 max-w-lg mx-auto gap-6 items-start">
                                 {/* Column 1: Product Card */}
-                                <div>
+                                <div className="w-full">
                                     <TabsContent value="monthly" className="mt-0 animate-in fade-in zoom-in-95 duration-300">
                                         {/* Option 1: Monthly Installment */}
                                         <div className="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-lg shadow-blue-100 relative group w-full">
@@ -1005,28 +1144,18 @@ export default function CalculatorPage() {
                                                         </div>
                                                         <h3 className="text-2xl font-bold">ผ่อนชำระรายเดือน</h3>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-white/80 text-xs">วงเงินสูงสุด</p>
-                                                        <div className="flex items-baseline gap-1 justify-end">
-                                                            <span className="text-3xl font-bold">{maxLoan.toLocaleString()}</span>
-                                                            <span className="text-sm">บาท</span>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
 
                                                 {/* Key Stats Bar */}
-                                                <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-white/10">
+                                                <div className="grid grid-cols-2 gap-2 mt-6 pt-4 border-t border-white/10">
+                                                    <div>
+                                                        <p className="text-white/70 text-xs">วงเงินสูงสุด</p>
+                                                        <p className="font-bold">{maxLoan.toLocaleString()} <span className="text-[10px] font-normal opacity-75">บาท</span></p>
+                                                    </div>
                                                     <div>
                                                         <p className="text-white/70 text-xs">ดอกเบี้ย</p>
                                                         <p className="font-bold">23.99% <span className="text-[10px] font-normal opacity-75">ต่อปี</span></p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white/70 text-xs">ราคาประเมิน</p>
-                                                        <p className="font-bold">{Number(formData.appraisalPrice || 0).toLocaleString()}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white/70 text-xs">LTV</p>
-                                                        <p className="font-bold">{formData.collateralType === 'land' ? '70%' : '90%'}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1081,6 +1210,30 @@ export default function CalculatorPage() {
                                                     </div>
                                                 </div>
 
+                                                {/* Bundle Deal: Free Insurance */}
+                                                <div className="mt-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 relative overflow-hidden">
+                                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+
+                                                    <div className="flex items-start gap-4 relative z-10">
+                                                        <div className="shrink-0">
+                                                            <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                                                                <ShieldCheck className="w-7 h-7 text-blue-600" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h5 className="font-bold text-gray-800 text-sm">ฟรี! ประกันวงเงินสินเชื่อ</h5>
+                                                                <span className="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                                                    <Gift className="w-2.5 h-2.5" /> Special
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-gray-600 leading-relaxed">
+                                                                รับความคุ้มครองทันที คุ้มครองวงเงินสินเชื่อ อุ่นใจตลอดสัญญา ไม่มีค่าใช้จ่ายเพิ่มเติม
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                                 {/* Action Buttons for Monthly Plan */}
                                                 <div className="mt-6 grid grid-cols-2 gap-3">
                                                     <Button
@@ -1096,6 +1249,10 @@ export default function CalculatorPage() {
                                                     >
                                                         <Printer className="w-4 h-4" /> พิมพ์ Salesheets
                                                     </Button>
+                                                </div>
+                                                <div className="mt-4 text-xs text-gray-400 space-y-1 text-center">
+                                                    <p>1) กู้เท่าที่จำเป็นและชำระคืนไหว</p>
+                                                    <p>2) หากเลือกระยะเวลาในการผ่อนนาน จะทำให้เสียดอกเบี้ยรวมทั้งสัญญาเพิ่มขึ้น</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -1117,28 +1274,20 @@ export default function CalculatorPage() {
                                                         </div>
                                                         <h3 className="text-2xl font-bold">โปะงวดท้าย (One-Time)</h3>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-white/80 text-xs">วงเงินสูงสุด</p>
-                                                        <div className="flex items-baseline gap-1 justify-end">
-                                                            <span className="text-3xl font-bold">{maxLoan.toLocaleString()}</span>
-                                                            <span className="text-sm">บาท</span>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
 
                                                 {/* Key Stats Bar */}
-                                                <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-white/10">
+                                                <div className="grid grid-cols-2 gap-2 mt-6 pt-4 border-t border-white/10">
+
+
+                                                    <div>
+                                                        <p className="text-white/70 text-xs">วงเงินสูงสุด</p>
+                                                        <p className="font-bold">{maxLoan.toLocaleString()} <span className="text-[10px] font-normal opacity-75">บาท</span></p>
+                                                    </div>
                                                     <div>
                                                         <p className="text-white/70 text-xs">ดอกเบี้ย</p>
                                                         <p className="font-bold">23.99% <span className="text-[10px] font-normal opacity-75">ต่อปี</span></p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white/70 text-xs">ราคาประเมิน</p>
-                                                        <p className="font-bold">{Number(formData.appraisalPrice || 0).toLocaleString()}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white/70 text-xs">LTV</p>
-                                                        <p className="font-bold">{formData.collateralType === 'land' ? '70%' : '90%'}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1182,13 +1331,19 @@ export default function CalculatorPage() {
                                                         <Printer className="w-4 h-4" /> พิมพ์ Salesheets
                                                     </Button>
                                                 </div>
+                                                <div className="mt-4 text-xs text-gray-400 space-y-1 text-center">
+                                                    <p>1) กู้เท่าที่จำเป็นและชำระคืนไหว</p>
+                                                    <p>2) หากเลือกระยะเวลาในการผ่อนนาน จะทำให้เสียดอกเบี้ยรวมทั้งสัญญาเพิ่มขึ้น</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </TabsContent>
                                 </div>
 
-                                {/* Column 2: Document Checklist */}
-                                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-sm animate-in fade-in duration-500 h-full">
+
+                                {/* Column 2: Document Checklist (Hidden for now) */}
+                                {/* <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-sm animate-in fade-in duration-500 h-full"> */}
+                                {/* <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 shadow-sm animate-in fade-in duration-500 h-full">
                                     <div className="flex items-center gap-2 pb-3 border-b border-gray-100">
                                         <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
                                             <FileText className="w-5 h-5 text-emerald-600" />
@@ -1233,7 +1388,7 @@ export default function CalculatorPage() {
                                             เอกสารที่แนะนำนี้สร้างขึ้นจากข้อมูลที่ได้รับโดยอัตโนมัติ สามารถปรับเปลี่ยนได้ตามเงื่อนไขของสาขา
                                         </p>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </Tabs>
 

@@ -9,7 +9,16 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
+import {
+    CAR_BRANDS,
+    MOTO_BRANDS,
+    TRUCK_BRANDS,
+    AGRI_BRANDS,
+    MODELS_BY_BRAND,
+    YEARS
+} from "@/data/vehicle-data";
 
 interface CollateralStepProps {
     formData: any;
@@ -460,26 +469,40 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             </div>
                             <div className="space-y-2">
                                 <Label>ยี่ห้อ</Label>
-                                <Input
-                                    value={formData.brand || ''}
-                                    onChange={(e) => handleChange('brand', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={
+                                        selectedType === 'moto' ? MOTO_BRANDS :
+                                            selectedType === 'truck' ? TRUCK_BRANDS :
+                                                CAR_BRANDS
+                                    }
+                                    value={formData.brand}
+                                    onValueChange={(val) => handleChange('brand', val)}
+                                    placeholder="เลือกยี่ห้อ..."
+                                    searchPlaceholder="ค้นหายี่ห้อ..."
+                                    emptyText="ไม่พบยี่ห้อที่ค้นหา"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>รุ่น</Label>
-                                <Input
-                                    value={formData.model || ''}
-                                    onChange={(e) => handleChange('model', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={MODELS_BY_BRAND[formData.brand] || []}
+                                    value={formData.model}
+                                    onValueChange={(val) => handleChange('model', val)}
+                                    placeholder="เลือกรุ่น..."
+                                    searchPlaceholder="ค้นหารุ่น..."
+                                    emptyText="ไม่พบรุ่นที่ค้นหา"
+                                    className={!formData.brand ? "opacity-50 pointer-events-none" : ""}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>ปี</Label>
-                                <Input
-                                    value={formData.year || ''}
-                                    onChange={(e) => handleChange('year', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={YEARS}
+                                    value={formData.year}
+                                    onValueChange={(val) => handleChange('year', val)}
+                                    placeholder="เลือกปี..."
+                                    searchPlaceholder="ค้นหาปี..."
+                                    emptyText="ไม่พบปีที่ค้นหา"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -530,26 +553,36 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>ยี่ห้อ</Label>
-                                <Input
-                                    value={formData.brand || ''}
-                                    onChange={(e) => handleChange('brand', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={AGRI_BRANDS}
+                                    value={formData.brand}
+                                    onValueChange={(val) => handleChange('brand', val)}
+                                    placeholder="เลือกยี่ห้อ..."
+                                    searchPlaceholder="ค้นหายี่ห้อ..."
+                                    emptyText="ไม่พบยี่ห้อที่ค้นหา"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>รุ่น</Label>
-                                <Input
-                                    value={formData.model || ''}
-                                    onChange={(e) => handleChange('model', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={MODELS_BY_BRAND[formData.brand] || []}
+                                    value={formData.model}
+                                    onValueChange={(val) => handleChange('model', val)}
+                                    placeholder="เลือกรุ่น..."
+                                    searchPlaceholder="ค้นหารุ่น..."
+                                    emptyText="ไม่พบรุ่นที่ค้นหา"
+                                    className={!formData.brand ? "opacity-50 pointer-events-none" : ""}
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>ปี</Label>
-                                <Input
-                                    value={formData.year || ''}
-                                    onChange={(e) => handleChange('year', e.target.value)}
-                                    className="h-11"
+                                <Combobox
+                                    options={YEARS}
+                                    value={formData.year}
+                                    onValueChange={(val) => handleChange('year', val)}
+                                    placeholder="เลือกปี..."
+                                    searchPlaceholder="ค้นหาปี..."
+                                    emptyText="ไม่พบปีที่ค้นหา"
                                 />
                             </div>
                             <div className="space-y-2">
