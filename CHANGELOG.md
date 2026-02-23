@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2026-02-23
+
+### Added
+- **Application Submission Workflow**:
+    - Added "Submit Application" (ส่งใบคำขอ) button to the application header.
+    - Implemented a submission dialog with a comment field for staff notes.
+    - Added automatic activity logging for the submission step, visible in the Application Detail page.
+- **Leave Confirmation System**:
+    - Implemented a global `AlertDialog` safety net to prevent data loss when leaving an active application or screening session via breadcrumbs.
+- **Sonner Notifications**:
+    - Integrated `sonner` library for premium, non-modal toast notifications.
+    - Customized with white background and IBM Plex Sans Thai font for brand alignment.
+
+### Changed
+- **Application ID Standardization**:
+    - Standardized mock ID format to `app-yyyyXXXXX` (e.g., `app-256700001`) across Application List, Detail, and Creation flows.
+- **Navigation Flow**:
+    - "รายการคำขอ" (All Applications) breadcrumb now requires confirmation before navigating away from active sessions.
+    - Streamlined screening header by removing redundant "Back to Product Suggestion" buttons.
+    - Optimized "Edit Application" (แก้ไขคำขอ) logic to bridge directly into the correct form state with full context preservation.
+- **UI Refinements**:
+    - Updated application list headers for better clarity (e.g., "ผู้กู้" instead of "ผู้ยื่นคำขอ").
+    - Replaced traditional alert modals with smooth toast notifications for routine "Save Draft" actions.
+
 ## [Unreleased] - 2026-02-18
 
 ### Added
