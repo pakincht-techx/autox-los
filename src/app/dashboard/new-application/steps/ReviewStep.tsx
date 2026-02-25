@@ -245,8 +245,16 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="font-medium text-right">{formData.prefix} {formData.firstName} {formData.lastName}</span>
                                 </div>
                                 <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">เพศ</span>
+                                    <span className="font-medium text-right">{formData.gender || "-"}</span>
+                                </div>
+                                <div className="flex justify-between items-start">
                                     <span className="text-muted shrink-0">เลขบัตรประชาชน</span>
                                     <span className="font-medium text-right">{formData.idNumber}</span>
+                                </div>
+                                <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">เลขหลังบัตร (Laser ID)</span>
+                                    <span className="font-medium text-right font-mono">{formData.laserId || "-"}</span>
                                 </div>
                                 <div className="flex justify-between items-start">
                                     <span className="text-muted shrink-0">วันเกิด</span>
@@ -257,10 +265,42 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                         })() : "-"}
                                     </span>
                                 </div>
+                                <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">วันที่ออกบัตร</span>
+                                    <span className="font-medium text-right">
+                                        {formData.issueDate ? (() => {
+                                            const [y, m, d] = formData.issueDate.split('-');
+                                            return y && m && d ? `${d}/${m}/${parseInt(y) + 543}` : formData.issueDate;
+                                        })() : "-"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">วันที่บัตรหมดอายุ</span>
+                                    <span className="font-medium text-right">
+                                        {formData.expiryDate ? (() => {
+                                            const [y, m, d] = formData.expiryDate.split('-');
+                                            return y && m && d ? `${d}/${m}/${parseInt(y) + 543}` : formData.expiryDate;
+                                        })() : "-"}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between gap-4">
                                     <span className="text-muted shrink-0">ที่อยู่</span>
                                     <span className="font-medium text-right">
-                                        {formData.addressLine1} {formData.subDistrict} {formData.district} {formData.province} {formData.zipCode}
+                                        {[
+                                            formData.houseNumber && `เลขที่ ${formData.houseNumber}`,
+                                            formData.floorNumber && `ชั้น ${formData.floorNumber}`,
+                                            formData.unitNumber && `ห้อง ${formData.unitNumber}`,
+                                            formData.village && `หมู่บ้าน/อาคาร ${formData.village}`,
+                                            formData.moo && `หมู่ที่ ${formData.moo}`,
+                                            formData.soi && `ซอย ${formData.soi}`,
+                                            formData.yaek && `แยก ${formData.yaek}`,
+                                            formData.trohk && `ตรอก ${formData.trohk}`,
+                                            formData.street && `ถนน ${formData.street}`,
+                                            formData.subDistrict && (formData.province === 'กรุงเทพมหานคร' ? `แขวง${formData.subDistrict}` : `ตำบล${formData.subDistrict}`),
+                                            formData.district && (formData.province === 'กรุงเทพมหานคร' ? `เขต${formData.district}` : `อำเภอ${formData.district}`),
+                                            formData.province,
+                                            formData.zipCode
+                                        ].filter(Boolean).join(' ') || formData.addressLine1 || "-"}
                                     </span>
                                 </div>
 

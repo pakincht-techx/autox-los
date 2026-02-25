@@ -218,55 +218,24 @@ export function Sidebar() {
             {/* Announcement & User Footer */}
             <div className={cn("p-4 border-t border-white/10 space-y-2", isCollapsed && "px-2")}>
 
-                {/* Announcements */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className={cn(
-                            "flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
-                            isCollapsed && "justify-center p-1 py-2"
-                        )}>
-                            <div className="relative shrink-0">
-                                <Megaphone className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
-                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-chaiyo-blue"></span>
-                            </div>
-                            {!isCollapsed && (
-                                <div className="flex-1 overflow-hidden text-left">
-                                    <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors truncate">ประกาศแจ้งเตือน</p>
-                                </div>
-                            )}
+                {/* Announcements - Direct trigger for Modal */}
+                <div
+                    className={cn(
+                        "flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
+                        isCollapsed && "justify-center p-1 py-2"
+                    )}
+                    onClick={() => setShowAnnouncement(true)}
+                >
+                    <div className="relative shrink-0">
+                        <Megaphone className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-chaiyo-blue"></span>
+                    </div>
+                    {!isCollapsed && (
+                        <div className="flex-1 overflow-hidden text-left">
+                            <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors truncate">ประกาศแจ้งเตือน</p>
                         </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align={isCollapsed ? "center" : "end"} side="right" className="w-80 ml-2 border-border-subtle shadow-lg bg-white/95 backdrop-blur-sm">
-                        <DropdownMenuLabel className="font-semibold text-foreground">ประกาศ</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-gray-100" />
-                        <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                            <DropdownMenuItem
-                                className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-gray-50"
-                                onClick={() => setShowAnnouncement(true)}
-                            >
-                                <span className="font-medium text-sm text-chaiyo-blue">ประกาศสำคัญจากสำนักงานใหญ่</span>
-                                <span className="text-xs text-muted line-clamp-2">
-                                    แจ้งเปลี่ยนแปลงนโยบายการอนุมัติสินเชื่อและปรับอัตราดอกเบี้ย มีผล 1 มี.ค. 67
-                                </span>
-                                <span className="text-[10px] text-gray-400 mt-1">วันนี้, 09:00</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-100" />
-                            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3 cursor-pointer focus:bg-gray-50 opacity-70">
-                                <span className="font-medium text-sm text-foreground">แจ้งปิดปรับปรุงระบบ</span>
-                                <span className="text-xs text-muted line-clamp-2">
-                                    ระบบจะปิดปรับปรุงชั่วคราวในวันที่ 20 ก.พ. เวลา 02:00 - 04:00 น.
-                                </span>
-                                <span className="text-[10px] text-gray-400 mt-1">เมื่อวาน</span>
-                            </DropdownMenuItem>
-                        </div>
-                        <DropdownMenuSeparator className="bg-gray-100" />
-                        <div className="p-2 text-center">
-                            <Button variant="link" className="text-xs text-muted h-auto p-0 hover:text-chaiyo-blue">
-                                ดูประกาศทั้งหมด
-                            </Button>
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    )}
+                </div>
 
                 {/* Account Details */}
                 <DropdownMenu>

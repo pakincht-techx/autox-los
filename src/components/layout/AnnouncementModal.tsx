@@ -30,15 +30,20 @@ export function AnnouncementModal({ open, onOpenChange }: AnnouncementModalProps
             <DialogContent className="sm:max-w-[800px] p-0 gap-0 border-none bg-transparent shadow-none [&>button]:bg-white [&>button]:text-black [&>button]:opacity-100 [&>button]:hover:bg-gray-100 [&>button]:rounded-full [&>button]:shadow-md [&>button]:w-8 [&>button]:h-8 [&>button]:top-4 [&>button]:right-4 [&>button]:z-50 [&>button]:flex [&>button]:items-center [&>button]:justify-center border-0 outline-none">
                 <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-xl">
                     {/* Main Image 16:9 */}
-                    <div className="relative w-full aspect-video bg-gray-100">
+                    <a
+                        href="https://google.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative w-full aspect-video bg-gray-100 block hover:opacity-95 transition-opacity"
+                    >
                         <Image
                             src="/images/autox-chaiyo-w.jpg"
                             alt="Announcement Banner"
                             fill
-                            className="object-cover"
+                            className="object-cover cursor-pointer"
                             priority
                         />
-                    </div>
+                    </a>
 
                     {/* Footer with Checkbox */}
                     <div className="p-4 flex items-center justify-start bg-white border-t border-border-subtle">

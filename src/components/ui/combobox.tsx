@@ -67,7 +67,7 @@ export function Combobox({
                     aria-expanded={open}
                     disabled={disabled}
                     className={cn(
-                        "w-full justify-between h-12 bg-white font-normal rounded-xl border-gray-200 px-3 hover:bg-gray-50 transition-all",
+                        "w-full justify-between h-12 bg-white font-normal rounded-xl border-gray-200 px-3 hover:bg-gray-50 disabled:bg-gray-100 disabled:opacity-100 disabled:text-gray-500 transition-all",
                         className
                     )}
                 >

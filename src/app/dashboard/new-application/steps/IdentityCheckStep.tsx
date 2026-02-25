@@ -160,7 +160,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     const handleBackToSelection = () => {
         setVerificationMethod(null);
         setStage('INIT');
-        setFormData({ ...formData, idNumber: "", firstName: "", lastName: "" }); // Reset basic info
+        setFormData({ ...formData, idNumber: "", firstName: "", middleName: "", lastName: "", houseNumber: "", floorNumber: "", unitNumber: "", village: "", moo: "", yaek: "", trohk: "", soi: "" }); // Reset basic info
     };
 
 
@@ -173,11 +173,14 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
         const mockData = {
             idNumber: "1234567890123", // Default ID
             firstName: "สมชาย",
+            middleName: "",
             lastName: "รักชาติ",
             prefix: "นาย",
+            gender: "ชาย",
             birthDate: "1990-01-01",
             addressLine1: "123 หมู่ 1",
-            street: "",
+            houseNumber: "123",
+            moo: "1",
             subDistrict: "ลาดพร้าว",
             district: "ลาดพร้าว",
             province: "กรุงเทพมหานคร",
@@ -185,7 +188,10 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             fullAddress: "123 หมู่ 1 ลาดพร้าว ลาดพร้าว กรุงเทพมหานคร 10230",
             occupation: "พนักงานบริษัท", // Default occupation
             phoneNumber: "0812345678",
-            email: ""
+            email: "",
+            issueDate: "2020-05-20",
+            expiryDate: "2029-05-19",
+            laserId: "ME1-2345678-90",
         };
 
         setFormData({ ...formData, ...mockData });
@@ -204,16 +210,22 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
         const mockData = {
             idNumber: "3334567890123",
             firstName: "สมหญิง",
+            middleName: "มณี",
             lastName: "ใจงาม",
             prefix: "นางสาว",
+            gender: "หญิง",
             birthDate: "1995-05-05",
             addressLine1: "456 หมู่ 2",
+            houseNumber: "456",
+            moo: "2",
             street: "เจริญกรุง",
             subDistrict: "บางรัก",
-            district: "บางรัก",
             province: "กรุงเทพมหานคร",
             zipCode: "10500",
             fullAddress: "456 หมู่ 2 บางรัก บางรัก กรุงเทพมหานคร 10500",
+            issueDate: "2022-10-10",
+            expiryDate: "2031-10-09",
+            laserId: "CH2-9876543-21",
         };
 
         setFormData({ ...formData, ...mockData });
@@ -299,7 +311,18 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     };
 
     const handleFormChange = (field: string, value: string) => {
-        setFormData({ ...formData, [field]: value });
+        let updatedData = { ...formData, [field]: value };
+
+        // Auto-fill gender based on prefix
+        if (field === 'prefix') {
+            if (value === 'นาย') {
+                updatedData.gender = 'ชาย';
+            } else if (value === 'นาง' || value === 'นางสาว') {
+                updatedData.gender = 'หญิง';
+            }
+        }
+
+        setFormData(updatedData);
     };
 
     // --- RENDER HELPERS ---
@@ -547,7 +570,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                             </div>
 
                                             {/* Citizen ID Display */}
-                                            <div className="grid grid-cols-1">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <Label>เลขบัตรประชาชน</Label>
                                                     <div className="relative">
@@ -558,10 +581,20 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         />
                                                     </div>
                                                 </div>
+                                                <div className="space-y-2">
+                                                    <Label>เลขหลังบัตรประชาชน (Laser ID)</Label>
+                                                    <Input
+                                                        value={formData.laserId || ""}
+                                                        onChange={(e) => handleFormChange('laserId', e.target.value)}
+                                                        disabled={verificationMethod === 'DIPCHIP'}
+                                                        className="disabled:bg-gray-100 disabled:opacity-80 font-mono"
+                                                        placeholder="JT0-0000000-00"
+                                                    />
+                                                </div>
                                             </div>
 
-                                            <div className="grid grid-cols-3 gap-4">
-                                                <div className="col-span-1 space-y-2">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
                                                     <Label>คำนำหน้า</Label>
                                                     <Select value={formData.prefix} onValueChange={(val) => handleFormChange('prefix', val)} disabled={verificationMethod === 'DIPCHIP'}>
                                                         <SelectTrigger className="disabled:bg-gray-100 disabled:opacity-80">
@@ -574,11 +607,15 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                                <div className="col-span-1 space-y-2">
+                                                <div className="space-y-2">
                                                     <Label>ชื่อ</Label>
                                                     <Input value={formData.firstName} onChange={(e) => handleFormChange('firstName', e.target.value)} disabled={verificationMethod === 'DIPCHIP'} className="disabled:bg-gray-100 disabled:opacity-80" />
                                                 </div>
-                                                <div className="col-span-1 space-y-2">
+                                                <div className="space-y-2">
+                                                    <Label>ชื่อกลาง (ถ้ามี)</Label>
+                                                    <Input value={formData.middleName || ""} onChange={(e) => handleFormChange('middleName', e.target.value)} disabled={verificationMethod === 'DIPCHIP'} className="disabled:bg-gray-100 disabled:opacity-80" />
+                                                </div>
+                                                <div className="space-y-2">
                                                     <Label>นามสกุล</Label>
                                                     <Input value={formData.lastName} onChange={(e) => handleFormChange('lastName', e.target.value)} disabled={verificationMethod === 'DIPCHIP'} className="disabled:bg-gray-100 disabled:opacity-80" />
                                                 </div>
@@ -613,20 +650,118 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         </label>
                                                     </div>
                                                 </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                                    <div className="space-y-2">
+                                                        <Label>วันที่ออกบัตร</Label>
+                                                        <Input
+                                                            type="date"
+                                                            value={formData.issueDate || ""}
+                                                            onChange={(e) => handleFormChange('issueDate', e.target.value)}
+                                                            disabled={verificationMethod === 'DIPCHIP'}
+                                                            className="disabled:bg-gray-100 disabled:opacity-80"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>วันที่บัตรหมดอายุ</Label>
+                                                        <Input
+                                                            type="date"
+                                                            value={formData.expiryDate || ""}
+                                                            onChange={(e) => handleFormChange('expiryDate', e.target.value)}
+                                                            disabled={verificationMethod === 'DIPCHIP'}
+                                                            className="disabled:bg-gray-100 disabled:opacity-80"
+                                                        />
+                                                    </div>
+                                                </div>
                                                 <div className="space-y-4 pt-2">
                                                     <div className="flex items-center gap-2 text-sm font-bold text-gray-700 pb-2 border-b border-gray-100">
                                                         ที่อยู่อาศัย
                                                     </div>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className="col-span-1 md:col-span-2 space-y-2">
-                                                            <Label className="text-xs text-muted-foreground">เลขที่บ้าน/หมู่/คอนโด/ซอย</Label>
-                                                            <Input
-                                                                className="bg-white"
-                                                                value={formData.addressLine1 || ""}
-                                                                onChange={(e) => handleFormChange('addressLine1', e.target.value)}
-                                                                disabled={verificationMethod === 'DIPCHIP'}
-                                                                placeholder="เช่น 123/45 หมู่ 1 ซอยสุขใจ 1"
-                                                            />
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-1 md:col-span-2">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">เลขที่บ้าน</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.houseNumber || ""}
+                                                                    onChange={(e) => handleFormChange('houseNumber', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="123/45"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">ชั้น</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.floorNumber || ""}
+                                                                    onChange={(e) => handleFormChange('floorNumber', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="เช่น 2"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">หน่วย/ห้อง</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.unitNumber || ""}
+                                                                    onChange={(e) => handleFormChange('unitNumber', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="เช่น 201"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.moo || ""}
+                                                                    onChange={(e) => handleFormChange('moo', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="เช่น 1"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">หมู่บ้าน/อาคาร</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.village || ""}
+                                                                    onChange={(e) => handleFormChange('village', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="ชื่อหมู่บ้านหรืออาคาร"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">ซอย</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.soi || ""}
+                                                                    onChange={(e) => handleFormChange('soi', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="ชื่อซอย"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 col-span-1 md:col-span-2">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">แยก</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.yaek || ""}
+                                                                    onChange={(e) => handleFormChange('yaek', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="ระบุแยก (ถ้ามี)"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-xs text-muted-foreground">ตรอก</Label>
+                                                                <Input
+                                                                    className="bg-white"
+                                                                    value={formData.trohk || ""}
+                                                                    onChange={(e) => handleFormChange('trohk', e.target.value)}
+                                                                    disabled={verificationMethod === 'DIPCHIP'}
+                                                                    placeholder="ระบุตรอก (ถ้ามี)"
+                                                                />
+                                                            </div>
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label className="text-xs text-muted-foreground">ถนน</Label>
@@ -737,14 +872,24 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
                                         {/* Data Fields */}
                                         <div className="space-y-4 pt-4 border-t border-gray-200">
-                                            <div className="space-y-1">
-                                                <Label className="text-xs text-muted">เลขบัตรประจำตัว</Label>
-                                                <Input value={formData.idNumber} readOnly className="font-mono bg-white text-lg font-bold text-chaiyo-blue" placeholder="-" />
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs text-muted">เลขบัตรประจำตัว</Label>
+                                                    <Input value={formData.idNumber} readOnly className="font-mono bg-white text-base font-bold text-chaiyo-blue" placeholder="-" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs text-muted">เลขหลังบัตร</Label>
+                                                    <Input value={formData.laserId} readOnly className="font-mono bg-white text-base font-bold" placeholder="-" />
+                                                </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-3 gap-2">
                                                 <div className="space-y-1">
                                                     <Label className="text-xs text-muted">ชื่อ</Label>
                                                     <Input value={formData.firstName} readOnly className="bg-gray-100 border-none shadow-none text-muted-foreground" placeholder="-" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-xs text-muted">ชื่อกลาง</Label>
+                                                    <Input value={formData.middleName} readOnly className="bg-gray-100 border-none shadow-none text-muted-foreground" placeholder="-" />
                                                 </div>
                                                 <div className="space-y-1">
                                                     <Label className="text-xs text-muted">นามสกุล</Label>

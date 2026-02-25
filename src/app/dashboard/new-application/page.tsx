@@ -47,8 +47,8 @@ import { Label } from "@/components/ui/Label";
 // Application Flow starts at Step 1 (Customer Info).
 const ALL_STEPS = [
     { id: 1, title: 'ข้อมูลผู้กู้', description: 'Customer Info', icon: User },
-    { id: 2, title: 'รายได้และหนี้สิน', description: 'Income & Debt', icon: DollarSign },
-    { id: 3, title: 'หลักประกัน', description: 'Collateral', icon: Car }, // Merged step
+    { id: 2, title: 'หลักประกัน', description: 'Collateral', icon: Car },
+    { id: 3, title: 'รายได้และหนี้สิน', description: 'Income & Debt', icon: DollarSign },
     { id: 4, title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
     { id: 5, title: 'เอกสาร', description: 'Documents', icon: FileText },
     { id: 6, title: 'ตรวจสอบ', description: 'Review', icon: Check },
@@ -141,15 +141,33 @@ function NewApplicationPageContent() {
         idNumber: "",
         prefix: "",
         firstName: "",
+        middleName: "",
         lastName: "",
+        gender: "",
+        issueDate: "",
+        expiryDate: "",
+        laserId: "",
         birthDate: "",
         phone: "",
         addressLine1: "",
+        houseNumber: "",
+        floorNumber: "",
+        unitNumber: "",
+        village: "",
+        moo: "",
+        yaek: "",
+        trohk: "",
+        soi: "",
         subDistrict: "",
         district: "",
         province: "",
         zipCode: "",
         fullAddress: "", // From Identity Check
+
+        // Pre-initialize other addresses to avoid undefined if needed
+        currentHouseNumber: "", currentFloorNumber: "", currentUnitNumber: "", currentVillage: "", currentMoo: "", currentYaek: "", currentTrohk: "", currentSoi: "",
+        shippingHouseNumber: "", shippingFloorNumber: "", shippingUnitNumber: "", shippingVillage: "", shippingMoo: "", shippingYaek: "", shippingTrohk: "", shippingSoi: "",
+        workHouseNumber: "", workFloorNumber: "", workUnitNumber: "", workVillage: "", workMoo: "", workYaek: "", workTrohk: "", workSoi: "",
 
         income: 0,
         requestedAmount: 0,
@@ -310,7 +328,8 @@ function NewApplicationPageContent() {
             setFormData((prev: any) => ({
                 ...prev,
                 firstName: profile.fullName.split(" ")[1] || "",
-                lastName: profile.fullName.split(" ")[2] || "",
+                middleName: profile.fullName.split(" ").length > 3 ? profile.fullName.split(" ")[2] : "",
+                lastName: profile.fullName.split(" ").slice(-1)[0] || "",
             }));
         } else {
             // "Create Profile" clicked -> Start Application
@@ -354,7 +373,7 @@ function NewApplicationPageContent() {
             }));
 
             setIsAnalyzing(false);
-            setCurrentStep(3); // Move to Collateral Info (Step 3 now)
+            setCurrentStep(2); // Move to Collateral Info (Step 2 now)
         }, 3000); // 3 seconds delay
     };
 
@@ -582,22 +601,22 @@ function NewApplicationPageContent() {
                                             />
                                         )}
 
-                                        {/* Step 2: Income and Debt */}
+                                        {/* Step 2: Collateral (Merged: Type Selection + Document Upload + Info) */}
                                         {currentStep === 2 && (
-                                            <IncomeAndDebtStep
-                                                formData={formData}
-                                                setFormData={setFormData}
-                                                isExistingCustomer={isExistingCustomer}
-                                            />
-                                        )}
-
-                                        {/* Step 3: Collateral (Merged: Type Selection + Document Upload + Info) */}
-                                        {currentStep === 3 && (
                                             <CollateralStep
                                                 formData={formData}
                                                 setFormData={setFormData}
                                                 isExistingCustomer={isExistingCustomer}
                                                 existingCollaterals={isExistingCustomer ? MOCK_EXISTING_COLLATERALS : []}
+                                            />
+                                        )}
+
+                                        {/* Step 3: Income and Debt */}
+                                        {currentStep === 3 && (
+                                            <IncomeAndDebtStep
+                                                formData={formData}
+                                                setFormData={setFormData}
+                                                isExistingCustomer={isExistingCustomer}
                                             />
                                         )}
 
@@ -715,25 +734,25 @@ function NewApplicationPageContent() {
                         ) : (
                             <div className="space-y-8">
                                 <DialogHeader className="flex flex-col items-center text-center space-y-4">
-                                    <div className="h-16 w-16 flex items-center justify-center rounded-full bg-red-50 shrink-0">
-                                        <AlertCircle className="h-10 w-10 text-red-600" />
+                                    <div className="h-16 w-16 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
+                                        <AlertCircle className="h-10 w-10 text-amber-600" />
                                     </div>
                                     <div className="space-y-2 flex flex-col items-center">
                                         <DialogTitle className="text-xl font-bold text-gray-900">
                                             พบข้อมูลต้องสงสัย ({statusCheckResult})
                                         </DialogTitle>
                                         <DialogDescription className="text-base text-gray-500 text-center">
-                                            ข้อมูลลูกค้าตรงกับฐานข้อมูลแจ้งเตือน กรุณาส่งเรื่องให้ทีมรับผิดชอบตรวจสอบเพิ่มเติม
+                                            ข้อมูลลูกค้าตรงกับฐานข้อมูลแจ้งเตือน กรุณาเตรียมข้อมูลหรือเอกสารสำหรับตรวจสอบเพิ่มเติม
                                         </DialogDescription>
                                     </div>
                                 </DialogHeader>
 
-                                <div className="bg-red-50 p-6 rounded-2xl text-red-800 border border-red-100">
+                                <div className="bg-amber-50 p-6 rounded-2xl text-amber-800 border border-amber-100">
                                     <p className="flex items-start gap-3">
                                         <Info className="w-5 h-5 shrink-0 mt-0.5" />
                                         <span>
-                                            <strong className="block mb-1">คำแนะนำ:</strong>
-                                            ห้ามดำเนินการต่อจนกว่าจะได้รับการยืนยันจากทีม Fraud/Legal/Compliance
+                                            <strong className="block mb-1">คำแนะนำในการดำเนินการ:</strong>
+                                            ระบบจะบันทึกสถานะนี้เพื่อประกอบการพิจารณา ท่านสามารถดำเนินการต่อได้ แต่ควรเตรียมเอกสารเพิ่มเติมที่เกี่ยวข้อง
                                         </span>
                                     </p>
                                 </div>
@@ -746,16 +765,18 @@ function NewApplicationPageContent() {
                                         className="flex-1 order-2 sm:order-1 font-bold"
                                     >
                                         <ChevronLeft className="w-4 h-4 mr-2" />
-                                        ย้อนกลับ
+                                        กลับไปตรวจสอบ
                                     </Button>
                                     <Button
-                                        variant="destructive"
                                         size="xl"
-                                        onClick={handleSubmitToTeam}
-                                        className="flex-[2] order-1 sm:order-2 font-bold shadow-lg shadow-red-200"
+                                        onClick={() => {
+                                            setIsStatusDialogOpen(false);
+                                            proceedToNextStep();
+                                        }}
+                                        className="flex-[2] order-1 sm:order-2 font-bold bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200 text-white"
                                     >
-                                        <Send className="w-4 h-4 mr-2" />
-                                        ส่งให้ทีมตรวจสอบ
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        รับทราบและดำเนินการต่อ
                                     </Button>
                                 </DialogFooter>
                             </div>

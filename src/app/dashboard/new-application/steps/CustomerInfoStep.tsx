@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, Briefcase, UserPlus, Users, X, Info, ShieldCheck, Trash2, Plus, Save, Phone, Loader2, CheckCircle, RefreshCcw, Calendar, AlertTriangle, Mail, Pencil, AlertCircle, Upload } from "lucide-react";
+import { User, MapPin, Briefcase, UserPlus, Users, X, Info, ShieldCheck, Trash2, Plus, Save, Phone, Loader2, CheckCircle, RefreshCcw, Calendar, AlertTriangle, Mail, Pencil, AlertCircle, Upload, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe } from "lucide-react";
 import { format } from "date-fns";
 import {
     Select,
@@ -56,13 +56,16 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
     // Aggregate address components into a single map query
     const getMapQuery = () => {
         const parts = [
-            formData[getField('addressLine1')],
-            formData[getField('street')],
+            formData[getField('houseNumber')],
+            formData[getField('village')],
+            formData[getField('moo')] ? `หมู่ ${formData[getField('moo')]}` : '',
+            formData[getField('soi')] ? `ซอย ${formData[getField('soi')]}` : '',
+            formData[getField('street')] ? `ถนน ${formData[getField('street')]}` : '',
             formData[getField('subDistrict')],
             formData[getField('district')],
             formData[getField('province')],
             formData[getField('zipCode')]
-        ].filter(Boolean); // Filter out empty, undefined, or null values
+        ].filter(Boolean);
 
         return parts.join(' ');
     };
@@ -87,7 +90,6 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                     size="sm"
                     onClick={handleOpenMap}
                     disabled={!hasAddressData}
-                    className="h-8 text-xs text-chaiyo-blue border-chaiyo-blue hover:bg-blue-50"
                 >
                     <MapPin className="w-3 h-3 mr-1" /> ดูแผนที่
                 </Button>
@@ -119,25 +121,101 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                             </div>
                         </div>
                     )}
-                    <div className="col-span-1 md:col-span-2 space-y-2">
-                        <Label className="text-xs text-muted-foreground">เลขที่บ้าน/หมู่/คอนโด/ซอย</Label>
-                        <Input
-                            className="bg-white"
-                            value={formData[getField('addressLine1')] || ""}
-                            onChange={(e) => onChange(getField('addressLine1'), e.target.value)}
-                            disabled={disabled}
-                            placeholder="เช่น 123/45 หมู่ 1 ซอยสุขใจ 1"
-                        />
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-1 md:col-span-2">
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">เลขที่บ้าน</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('houseNumber')] || ""}
+                                onChange={(e) => onChange(getField('houseNumber'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="123/45"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">ชั้น</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('floorNumber')] || ""}
+                                onChange={(e) => onChange(getField('floorNumber'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="เช่น 2"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">หน่วย/ห้อง</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('unitNumber')] || ""}
+                                onChange={(e) => onChange(getField('unitNumber'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="เช่น 201"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('moo')] || ""}
+                                onChange={(e) => onChange(getField('moo'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="เช่น 1"
+                            />
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">ถนน</Label>
-                        <Combobox
-                            options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
-                            value={formData[getField('street')] || ""}
-                            onValueChange={(val) => onChange(getField('street'), val)}
-                            disabled={disabled}
-                            placeholder="ระบุถนน"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">หมู่บ้าน/อาคาร</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('village')] || ""}
+                                onChange={(e) => onChange(getField('village'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="ชื่อหมู่บ้านหรืออาคาร"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">ซอย</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('soi')] || ""}
+                                onChange={(e) => onChange(getField('soi'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="ชื่อซอย"
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 col-span-1 md:col-span-2">
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">แยก</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('yaek')] || ""}
+                                onChange={(e) => onChange(getField('yaek'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="ระบุแยก (ถ้ามี)"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">ตรอก</Label>
+                            <Input
+                                className="bg-white"
+                                value={formData[getField('trohk')] || ""}
+                                onChange={(e) => onChange(getField('trohk'), e.target.value)}
+                                disabled={disabled}
+                                placeholder="ระบุตรอก (ถ้ามี)"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">ถนน</Label>
+                            <Combobox
+                                options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
+                                value={formData[getField('street')] || ""}
+                                onValueChange={(val) => onChange(getField('street'), val)}
+                                disabled={disabled}
+                                placeholder="ระบุถนน"
+                            />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
@@ -184,6 +262,28 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
             )}
         </div>
     );
+};
+
+const SOCIAL_PLATFORMS = [
+    { label: "Facebook", value: "facebook" },
+    { label: "Line", value: "line" },
+    { label: "TikTok", value: "tiktok" },
+    { label: "Instagram", value: "instagram" },
+    { label: "X (Twitter)", value: "x" },
+    { label: "Youtube", value: "youtube" },
+    { label: "Other", value: "other" }
+];
+
+const SocialIcon = ({ platform }: { platform: string }) => {
+    switch (platform) {
+        case 'facebook': return <Facebook className="w-4 h-4 text-blue-600" />;
+        case 'line': return <MessageCircle className="w-4 h-4 text-green-500" />;
+        case 'tiktok': return <MessageCircle className="w-4 h-4 text-black" />;
+        case 'instagram': return <Instagram className="w-4 h-4 text-pink-600" />;
+        case 'x': return <Twitter className="w-4 h-4 text-black" />;
+        case 'youtube': return <Youtube className="w-4 h-4 text-red-600" />;
+        default: return <Globe className="w-4 h-4 text-gray-500" />;
+    }
 };
 
 export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProps) {
@@ -379,13 +479,36 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     // --- Delete Confirmation State ---
     const [deleteConfirmation, setDeleteConfirmation] = useState<{
         isOpen: boolean;
-        type: 'co-borrower' | 'guarantor' | null;
+        type: 'co-borrower' | 'guarantor' | 'social-media' | null;
         index: number | null;
     }>({
         isOpen: false,
         type: null,
         index: null
     });
+
+    // --- Social Media Logic ---
+    const handleAddSocialMedia = () => {
+        const current = formData.socialMedias || [];
+        setFormData((prev: any) => ({
+            ...prev,
+            socialMedias: [...current, { platform: "facebook", accountName: "" }]
+        }));
+    };
+
+    const handleUpdateSocialMedia = (index: number, field: string, value: string) => {
+        const items = [...(formData.socialMedias || [])];
+        items[index] = { ...items[index], [field]: value };
+        setFormData((prev: any) => ({ ...prev, socialMedias: items }));
+    };
+
+    const handleRemoveSocialMedia = (index: number) => {
+        setDeleteConfirmation({
+            isOpen: true,
+            type: 'social-media',
+            index: index
+        });
+    };
 
     // --- Co-Borrower Date Logic ---
     const [coBorrowerUseYearOnly, setCoBorrowerUseYearOnly] = useState(false);
@@ -531,7 +654,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setIsAddingCoBorrower(true);
         setEditingCoBorrowerIndex(null);
         setCoBorrowerStage('KYC');
-        setNewCoBorrower({ relationship: "", idNumber: "", prefix: "", firstName: "", lastName: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "" });
+        setNewCoBorrower({
+            relationship: "", idNumber: "", prefix: "", firstName: "", middleName: "", lastName: "", gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "", issueDate: "", expiryDate: "", laserId: "",
+            houseNumber: "", floorNumber: "", unitNumber: "", village: "", moo: "", yaek: "", trohk: "", soi: "", street: "", subDistrict: "", district: "", province: "", zipCode: ""
+        });
     };
 
     const handleEditCoBorrower = (index: number) => {
@@ -579,10 +705,28 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             idNumber: data.idNumber,
             prefix: data.prefix,
             firstName: data.firstName,
+            middleName: data.middleName || "",
             lastName: data.lastName,
+            gender: data.gender,
             verificationStatus: data.verificationStatus,
             birthDate: formatDateToThai(data.birthDate),
+            issueDate: data.issueDate,
+            expiryDate: data.expiryDate,
+            laserId: data.laserId,
             fullAddress: data.fullAddress,
+            houseNumber: data.houseNumber,
+            floorNumber: data.floorNumber,
+            unitNumber: data.unitNumber,
+            village: data.village,
+            moo: data.moo,
+            yaek: data.yaek,
+            trohk: data.trohk,
+            soi: data.soi,
+            street: data.street,
+            subDistrict: data.subDistrict,
+            district: data.district,
+            province: data.province,
+            zipCode: data.zipCode,
             watchlistReasons: data.watchlistReasons || []
         });
         setCoBorrowerStage('FORM');
@@ -629,7 +773,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setIsAddingGuarantor(true);
         setEditingGuarantorIndex(null);
         setGuarantorStage('KYC');
-        setNewGuarantor({ relationship: "", idNumber: "", prefix: "", firstName: "", lastName: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "" });
+        setNewGuarantor({
+            relationship: "", idNumber: "", prefix: "", firstName: "", lastName: "", gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "",
+            houseNumber: "", floorNumber: "", unitNumber: "", village: "", moo: "", yaek: "", trohk: "", soi: "", street: "", subDistrict: "", district: "", province: "", zipCode: ""
+        });
     };
 
     const handleEditGuarantor = (index: number) => {
@@ -659,10 +806,28 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             idNumber: data.idNumber,
             prefix: data.prefix,
             firstName: data.firstName,
+            middleName: data.middleName || "",
             lastName: data.lastName,
+            gender: data.gender,
             verificationStatus: data.verificationStatus,
             birthDate: formatDateToThai(data.birthDate),
+            issueDate: data.issueDate,
+            expiryDate: data.expiryDate,
+            laserId: data.laserId,
             fullAddress: data.fullAddress,
+            houseNumber: data.houseNumber,
+            floorNumber: data.floorNumber,
+            unitNumber: data.unitNumber,
+            village: data.village,
+            moo: data.moo,
+            yaek: data.yaek,
+            trohk: data.trohk,
+            soi: data.soi,
+            street: data.street,
+            subDistrict: data.subDistrict,
+            district: data.district,
+            province: data.province,
+            zipCode: data.zipCode,
             watchlistReasons: data.watchlistReasons || []
         });
         setGuarantorStage('FORM');
@@ -706,6 +871,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 ...prev,
                 guarantors: (prev.guarantors || []).filter((_: any, i: number) => i !== deleteConfirmation.index)
             }));
+        } else if (deleteConfirmation.type === 'social-media' && deleteConfirmation.index !== null) {
+            setFormData((prev: any) => ({
+                ...prev,
+                socialMedias: (prev.socialMedias || []).filter((_: any, i: number) => i !== deleteConfirmation.index)
+            }));
         }
         setDeleteConfirmation({ isOpen: false, type: null, index: null });
     };
@@ -746,6 +916,14 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <Label>เลขบัตรประชาชน</Label>
                                 <Input
                                     value={formData.idNumber}
+                                    disabled
+                                    className="bg-gray-50 text-gray-600 font-mono h-11"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>เลขหลังบัตรประชาชน (Laser ID)</Label>
+                                <Input
+                                    value={formData.laserId}
                                     disabled
                                     className="bg-gray-50 text-gray-600 font-mono h-11"
                                 />
@@ -797,8 +975,29 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <Input value={formData.firstName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
                             </div>
                             <div className="space-y-2">
+                                <Label>ชื่อกลาง</Label>
+                                <Input value={formData.middleName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                            </div>
+                            <div className="space-y-2">
                                 <Label>นามสกุล</Label>
                                 <Input value={formData.lastName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>ชื่อเล่น</Label>
+                                <Input
+                                    value={formData.nickname || ""}
+                                    onChange={(e) => handleChange("nickname", e.target.value)}
+                                    placeholder="ระบุชื่อเล่น"
+                                    className="h-11 bg-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>วันที่ออกบัตร</Label>
+                                <Input value={formatDateToThai(formData.issueDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>วันที่บัตรหมดอายุ</Label>
+                                <Input value={formatDateToThai(formData.expiryDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
                             </div>
                         </div>
                     </div>
@@ -844,12 +1043,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         />
 
 
-                        <AddressForm
-                            title="ที่อยู่ที่ทำงาน"
-                            prefix="work"
-                            formData={formData}
-                            onChange={handleChange}
-                        />
 
 
                         <AddressForm
@@ -868,6 +1061,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     <Label htmlFor="sameAsCurrent" className="cursor-pointer font-bold">ที่อยู่จัดส่งเอกสารตรงกับที่อยู่ปัจจุบัน</Label>
                                 </div>
                             }
+                        />
+                        <AddressForm
+                            title="ที่อยู่ที่ทำงาน"
+                            prefix="work"
+                            formData={formData}
+                            onChange={handleChange}
                         />
                     </div>
                 </CardContent>
@@ -912,7 +1111,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             variant="outline"
                                             onClick={handleSendOtp}
                                             disabled={!formData.phone || formData.phone.length < 10 || showOtpInput}
-                                            className="shrink-0 h-11 text-chaiyo-blue border-chaiyo-blue hover:bg-blue-50"
+                                            className="shrink-0 h-11"
                                         >
                                             ยืนยันเบอร์
                                         </Button>
@@ -1040,7 +1239,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             variant="outline"
                                             onClick={handleSendEmailOtp}
                                             disabled={!formData.email || !formData.email.includes('@') || showEmailOtpInput}
-                                            className="shrink-0 h-11 text-chaiyo-blue border-chaiyo-blue hover:bg-blue-50"
+                                            className="shrink-0 h-11"
                                         >
                                             ยืนยันอีเมล
                                         </Button>
@@ -1089,6 +1288,107 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         </div>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Home Telephone Field */}
+                            <div className="space-y-2">
+                                <Label>เบอร์โทรศัพท์บ้าน (ถ้ามี)</Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        value={formData.homePhone || ""}
+                                        placeholder="02-xxx-xxxx"
+                                        className="pl-9 font-mono h-11"
+                                        onChange={(e) => handleChange("homePhone", e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* SOCIAL MEDIAS SECTION */}
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                                <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                    <Globe className="w-4 h-4 text-chaiyo-blue" /> เครือข่ายสังคมออนไลน์ (Social Media)
+                                </Label>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleAddSocialMedia}
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> เพิ่มบัญชีโซเชียลมีเดีย
+                                </Button>
+                            </div>
+
+                            <div className="border border-border-subtle rounded-xl overflow-hidden shadow-sm bg-white">
+                                <Table>
+                                    <TableHeader className="bg-gray-50/80">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="w-[80px] py-3 text-center text-xs font-bold uppercase tracking-wider">ลำดับ</TableHead>
+                                            <TableHead className="w-[30%] py-3 text-xs font-bold uppercase tracking-wider">แพลตฟอร์ม</TableHead>
+                                            <TableHead className="py-3 text-xs font-bold uppercase tracking-wider">ชื่อบัญชี / ID / Link</TableHead>
+                                            <TableHead className="w-[80px] py-3 text-center text-xs font-bold uppercase tracking-wider">จัดการ</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {(!formData.socialMedias || formData.socialMedias.length === 0) ? (
+                                            <TableRow className="hover:bg-transparent">
+                                                <TableCell colSpan={4} className="text-center text-muted-foreground py-10 bg-gray-50/30">
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <Globe className="w-8 h-8 text-gray-300" />
+                                                        <p>ยังไม่มีข้อมูลโซเชียลมีเดีย</p>
+                                                        <p className="text-xs text-gray-400">คลิก "เพิ่มบัญชีโซเชียลมีเดีย" เพื่อเริ่มรายการ</p>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            formData.socialMedias.map((item: any, idx: number) => (
+                                                <TableRow key={idx} className="hover:bg-blue-50/20 group">
+                                                    <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
+                                                    <TableCell className="py-3">
+                                                        <Select
+                                                            value={item.platform}
+                                                            onValueChange={(val) => handleUpdateSocialMedia(idx, "platform", val)}
+                                                        >
+                                                            <SelectTrigger className="h-10 bg-white border-gray-200">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {SOCIAL_PLATFORMS.map(p => (
+                                                                    <SelectItem key={p.value} value={p.value}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <SocialIcon platform={p.value} />
+                                                                            <span>{p.label}</span>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </TableCell>
+                                                    <TableCell className="py-3">
+                                                        <Input
+                                                            value={item.accountName}
+                                                            onChange={(e) => handleUpdateSocialMedia(idx, "accountName", e.target.value)}
+                                                            placeholder="ระบุชื่อบัญชีหรือ ID"
+                                                            className="h-10 bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue"
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="py-3 text-center">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-9 w-9 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                            onClick={() => handleRemoveSocialMedia(idx)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
                             </div>
                         </div>
                     </div>
@@ -1245,13 +1545,35 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <Label>คำนำหน้า</Label>
                                                     <Select
                                                         value={newCoBorrower.prefix}
-                                                        onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, prefix: val })}
+                                                        onValueChange={(val) => {
+                                                            let updatedCoBorrower = { ...newCoBorrower, prefix: val };
+                                                            if (val === 'นาย') {
+                                                                updatedCoBorrower.gender = 'ชาย';
+                                                            } else if (val === 'นาง' || val === 'นางสาว') {
+                                                                updatedCoBorrower.gender = 'หญิง';
+                                                            }
+                                                            setNewCoBorrower(updatedCoBorrower);
+                                                        }}
                                                     >
                                                         <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="นาย">นาย</SelectItem>
                                                             <SelectItem value="นาง">นาง</SelectItem>
                                                             <SelectItem value="นางสาว">นางสาว</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>เพศ</Label>
+                                                    <Select
+                                                        value={newCoBorrower.gender}
+                                                        onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, gender: val })}
+                                                    >
+                                                        <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="ชาย">ชาย</SelectItem>
+                                                            <SelectItem value="หญิง">หญิง</SelectItem>
+                                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
@@ -1309,12 +1631,138 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <Label>ที่อยู่ตามทะเบียนบ้าน</Label>
-                                                <Input
-                                                    value={newCoBorrower.fullAddress}
-                                                    onChange={(e) => setNewCoBorrower({ ...newCoBorrower, fullAddress: e.target.value })}
-                                                />
+                                            <div className="space-y-4 pt-2">
+                                                <div className="flex items-center gap-2 text-sm font-bold text-gray-700 pb-2 border-b border-gray-100">
+                                                    ที่อยู่ตามทะเบียนบ้าน
+                                                </div>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">เลขที่บ้าน</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.houseNumber || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, houseNumber: e.target.value })}
+                                                            placeholder="123/45"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ชั้น</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.floorNumber || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, floorNumber: e.target.value })}
+                                                            placeholder="เช่น 2"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หน่วย/ห้อง</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.unitNumber || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, unitNumber: e.target.value })}
+                                                            placeholder="เช่น 201"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.moo || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, moo: e.target.value })}
+                                                            placeholder="เช่น 1"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หมู่บ้าน/อาคาร</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.village || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, village: e.target.value })}
+                                                            placeholder="ชื่อหมู่บ้านหรืออาคาร"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ซอย</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.soi || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, soi: e.target.value })}
+                                                            placeholder="ชื่อซอย"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">แยก</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.yaek || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, yaek: e.target.value })}
+                                                            placeholder="ระบุแยก (ถ้ามี)"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ตรอก</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.trohk || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, trohk: e.target.value })}
+                                                            placeholder="ระบุตรอก (ถ้ามี)"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ถนน</Label>
+                                                        <Combobox
+                                                            options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
+                                                            value={newCoBorrower.street || ""}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, street: val })}
+                                                            placeholder="ระบุถนน"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
+                                                        <Combobox
+                                                            options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
+                                                            value={newCoBorrower.subDistrict || ""}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, subDistrict: val })}
+                                                            placeholder="ระบุแขวง/ตำบล"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">เขต/อำเภอ</Label>
+                                                        <Combobox
+                                                            options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
+                                                            value={newCoBorrower.district || ""}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, district: val })}
+                                                            placeholder="ระบุเขต/อำเภอ"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                                                        <Combobox
+                                                            options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
+                                                            value={newCoBorrower.province || ""}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, province: val })}
+                                                            placeholder="ระบุจังหวัด"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newCoBorrower.zipCode || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, zipCode: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                                                            maxLength={5}
+                                                            placeholder="12345"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Additional Info for Co-borrower */}
@@ -1512,13 +1960,35 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <Label>คำนำหน้า</Label>
                                                     <Select
                                                         value={newGuarantor.prefix}
-                                                        onValueChange={(val) => setNewGuarantor({ ...newGuarantor, prefix: val })}
+                                                        onValueChange={(val) => {
+                                                            let updatedGuarantor = { ...newGuarantor, prefix: val };
+                                                            if (val === 'นาย') {
+                                                                updatedGuarantor.gender = 'ชาย';
+                                                            } else if (val === 'นาง' || val === 'นางสาว') {
+                                                                updatedGuarantor.gender = 'หญิง';
+                                                            }
+                                                            setNewGuarantor(updatedGuarantor);
+                                                        }}
                                                     >
                                                         <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="นาย">นาย</SelectItem>
                                                             <SelectItem value="นาง">นาง</SelectItem>
                                                             <SelectItem value="นางสาว">นางสาว</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>เพศ</Label>
+                                                    <Select
+                                                        value={newGuarantor.gender}
+                                                        onValueChange={(val) => setNewGuarantor({ ...newGuarantor, gender: val })}
+                                                    >
+                                                        <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="ชาย">ชาย</SelectItem>
+                                                            <SelectItem value="หญิง">หญิง</SelectItem>
+                                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
@@ -1576,12 +2046,138 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <Label>ที่อยู่ตามทะเบียนบ้าน</Label>
-                                                <Input
-                                                    value={newGuarantor.fullAddress}
-                                                    onChange={(e) => setNewGuarantor({ ...newGuarantor, fullAddress: e.target.value })}
-                                                />
+                                            <div className="space-y-4 pt-2">
+                                                <div className="flex items-center gap-2 text-sm font-bold text-gray-700 pb-2 border-b border-gray-100">
+                                                    ที่อยู่ตามทะเบียนบ้าน
+                                                </div>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">เลขที่บ้าน</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.houseNumber || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, houseNumber: e.target.value })}
+                                                            placeholder="123/45"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ชั้น</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.floorNumber || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, floorNumber: e.target.value })}
+                                                            placeholder="เช่น 2"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หน่วย/ห้อง</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.unitNumber || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, unitNumber: e.target.value })}
+                                                            placeholder="เช่น 201"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.moo || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, moo: e.target.value })}
+                                                            placeholder="เช่น 1"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">หมู่บ้าน/อาคาร</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.village || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, village: e.target.value })}
+                                                            placeholder="ชื่อหมู่บ้านหรืออาคาร"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ซอย</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.soi || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, soi: e.target.value })}
+                                                            placeholder="ชื่อซอย"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">แยก</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.yaek || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, yaek: e.target.value })}
+                                                            placeholder="ระบุแยก (ถ้ามี)"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ตรอก</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.trohk || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, trohk: e.target.value })}
+                                                            placeholder="ระบุตรอก (ถ้ามี)"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">ถนน</Label>
+                                                        <Combobox
+                                                            options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
+                                                            value={newGuarantor.street || ""}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, street: val })}
+                                                            placeholder="ระบุถนน"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
+                                                        <Combobox
+                                                            options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
+                                                            value={newGuarantor.subDistrict || ""}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, subDistrict: val })}
+                                                            placeholder="ระบุแขวง/ตำบล"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">เขต/อำเภอ</Label>
+                                                        <Combobox
+                                                            options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
+                                                            value={newGuarantor.district || ""}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, district: val })}
+                                                            placeholder="ระบุเขต/อำเภอ"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                                                        <Combobox
+                                                            options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
+                                                            value={newGuarantor.province || ""}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, province: val })}
+                                                            placeholder="ระบุจังหวัด"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์</Label>
+                                                        <Input
+                                                            className="bg-white"
+                                                            value={newGuarantor.zipCode || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, zipCode: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+                                                            maxLength={5}
+                                                            placeholder="12345"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Additional Info for Guarantor */}
@@ -1638,7 +2234,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบข้อมูล</AlertDialogTitle>
                         <AlertDialogDescription>
-                            คุณแน่ใจหรือไม่ที่จะลบข้อมูล{deleteConfirmation.type === 'co-borrower' ? 'ผู้กู้ร่วม' : 'ผู้ค้ำประกัน'}นี้?
+                            คุณแน่ใจหรือไม่ที่จะลบข้อมูล{
+                                deleteConfirmation.type === 'co-borrower' ? 'ผู้กู้ร่วม' :
+                                    deleteConfirmation.type === 'guarantor' ? 'ผู้ค้ำประกัน' : 'บัญชีโซเชียลมีเดีย'
+                            }นี้?
                             การกระทำนี้ไม่สามารถย้อนกลับได้
                         </AlertDialogDescription>
                     </AlertDialogHeader>
