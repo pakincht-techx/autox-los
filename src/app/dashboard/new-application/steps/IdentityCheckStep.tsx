@@ -58,11 +58,17 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     const [idBackPhoto, setIdBackPhoto] = useState<string | null>(null);
     const [isProcessingFrontPhoto, setIsProcessingFrontPhoto] = useState(false);
 
-    const [alertDialog, setAlertDialog] = useState({
+    const [alertDialog, setAlertDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        description: string;
+        type: "error" | "warning";
+        action?: () => void;
+    }>({
         isOpen: false,
         title: "",
         description: "",
-        type: "error" as "error" | "warning"
+        type: "error"
     });
     const [mockLivePhoto, setMockLivePhoto] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -406,9 +412,12 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                 isOpen: true,
                 title: "ตรวจสอบไม่ผ่าน",
                 description: `ตรวจพบสถานะ: ผู้ถือบัตรประชาชนเสียชีวิต`,
-                type: "error"
+                type: "error",
+                action: () => {
+                    setStage('INIT');
+                    setVerificationMethod(null);
+                }
             });
-            setStage('CARD_SUCCESS');
             return;
         }
 
@@ -426,9 +435,12 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     isOpen: true,
                     title: "บัตรประจำตัวประชาชนหมดอายุ",
                     description: "บัตรประจำตัวประชาชนใบนี้หมดอายุแล้ว ไม่สามารถใช้ประกอบการสมัครได้",
-                    type: "error"
+                    type: "error",
+                    action: () => {
+                        setStage('INIT');
+                        setVerificationMethod(null);
+                    }
                 });
-                setStage('CARD_SUCCESS');
                 return;
             } else if (diffDays <= 30) {
                 // Near expiry warning
@@ -1072,12 +1084,17 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogAction
+                            onClick={() => {
+                                if (alertDialog.action) {
+                                    alertDialog.action();
+                                }
+                            }}
                             className={cn(
                                 "text-white",
                                 alertDialog.type === 'error' ? "bg-red-600 hover:bg-red-700" : "bg-chaiyo-blue hover:bg-chaiyo-blue/90"
                             )}
                         >
-                            {alertDialog.type === 'error' ? "รับทราบ" : "ตรวจสอบอีกครั้ง"}
+                            {alertDialog.type === 'error' ? "รับทราบ" : alertDialog.type === 'warning' ? "ดำเนินการต่อ" : "ตรวจสอบอีกครั้ง"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
