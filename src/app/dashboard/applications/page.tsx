@@ -181,7 +181,6 @@ export default function ApplicationsPage() {
 
                         <Link href="/dashboard/pre-question" className="w-full sm:w-auto">
                             <Button className="w-full sm:w-auto font-bold active:scale-95 transition-all">
-                                <Calculator className="w-4 h-4" />
                                 แนะนำผลิตภัณฑ์
                             </Button>
                         </Link>

@@ -67,7 +67,6 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard/pre-question">
                         <Button size="lg" className="font-bold active:scale-95 transition-all">
-                            <Calculator className="w-4 h-4" />
                             แนะนำผลิตภัณฑ์
                         </Button>
                     </Link>

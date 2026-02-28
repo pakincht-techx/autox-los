@@ -28,18 +28,18 @@ export function AnnouncementModal({ open, onOpenChange }: AnnouncementModalProps
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-            <DialogContent className="sm:max-w-[800px] p-0 gap-0 border-none bg-transparent shadow-none border-0 outline-none">
+            <DialogContent className="sm:max-w-[600px] p-0 gap-0 border-none bg-transparent shadow-none border-0 outline-none">
                 <DialogTitle className="sr-only">Announcement</DialogTitle>
                 <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-xl">
-                    {/* Main Image 16:9 */}
+                    {/* Main Image 1:1 */}
                     <a
                         href="https://google.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="relative w-full aspect-video bg-gray-100 block hover:opacity-95 transition-opacity"
+                        className="relative w-full aspect-square bg-gray-100 block hover:opacity-95 transition-opacity"
                     >
                         <Image
-                            src="/images/autox-chaiyo-w.jpg"
+                            src="/images/headquarters-announcement01.jpg"
                             alt="Announcement Banner"
                             fill
                             className="object-cover cursor-pointer"

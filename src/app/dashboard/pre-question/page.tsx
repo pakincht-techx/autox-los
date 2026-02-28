@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, EyeOff, X, ChevronRight, Plus, Minus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, EyeOff, X, ChevronRight, Plus, Minus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote, ShieldCheck, AlertTriangle, CheckCircle, ChevronDown } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { ActionMenu } from "@/components/ui/ActionMenu";
 import { Switch } from "@/components/ui/switch";
@@ -128,6 +128,7 @@ function PreQuestionPageContent() {
     const [aiDetectedFields, setAiDetectedFields] = useState<string[]>([]);
     const [isFetchingRedbook, setIsFetchingRedbook] = useState(false);
     const [isConditionDialogOpen, setIsConditionDialogOpen] = useState(false);
+    const [isQuestionsExpanded, setIsQuestionsExpanded] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -250,6 +251,23 @@ function PreQuestionPageContent() {
         };
     }, [formData]);
 
+    const finalSummaryLimit = useMemo(() => {
+        let limit = 0;
+        let appraisalPrice = Number(formData.appraisalPrice) || 0;
+
+        if (formData.collateralType === 'land' && calculatedLandResult) {
+            limit = calculatedLandResult.finalCalculatedLimit;
+        } else {
+            let baseLTV = 0.80;
+            if (formData.specialProject === 'b2b_payroll') baseLTV += 0.10;
+            if (formData.branchRegion === 'isan' && formData.occupationGroup === 'business_owner') baseLTV -= 0.05;
+            const maxLtvCap = 1.20;
+            const finalLTV = Math.min(baseLTV, maxLtvCap);
+            limit = Math.floor(appraisalPrice * finalLTV);
+        }
+        return limit;
+    }, [formData, calculatedLandResult]);
+
     // Load state from localStorage on mount
     useEffect(() => {
         const savedState = localStorage.getItem('preQuestionState');
@@ -355,22 +373,23 @@ function PreQuestionPageContent() {
     // Mock Questions for Collateral Assessment
     const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
         car: [
-            { id: 'q1', text: 'มีการดัดแปลงสภาพรถหรือไม่?' },
-            { id: 'q2', text: 'มีประวัติอุบัติเหตุหนักหรือไม่?' },
-            { id: 'q3', text: 'เล่มทะเบียนมีผู้ครอบครองมากกว่า 1 คนหรือไม่?' },
+            { id: 'car_q1', text: 'เป็นรถจากเต้นท์' },
+            { id: 'car_q2', text: 'เป็นรถดัดแปลงสภาพ, รถแข่ง, รถแต่งเกิน 50%, รถดัดแปลงเครื่องยนต์' },
+            { id: 'car_q3', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
+            { id: 'car_q4', text: 'เป็นหรือเคยเป็น รถแท็กซี่ รถสองแถว/รถกะป๊อ /รถจากอาสามูลนิธิ' },
+            { id: 'car_q5', text: 'เป็นรถสไลด์ที่ดัดแปลงจากรถกระบะ' },
+            { id: 'car_q6', text: 'เป็นรถล้อเกินซุ้มล้อ' },
+            { id: 'car_q7', text: 'เป็นรถที่ตัดแต่งคัสซี / ตัดเว้าคัสซี' },
         ],
         moto: [
-            { id: 'q1', text: 'มีการดัดแปลงสภาพรถหรือไม่?' },
-            { id: 'q2', text: 'รถใช้งานรับจ้างสาธารณะหรือไม่?' },
+            { id: 'moto_q1', text: 'เป็นรถจากเต้นท์' },
+            { id: 'moto_q2', text: 'เป็นรถดัดแปลงสภาพ, รถแข่ง, รถแต่งเกิน 50%, รถดัดแปลงเครื่องยนต์' },
+            { id: 'moto_q3', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
         ],
         truck: [
-            { id: 'q1', text: 'มีการดัดแปลงต่อเติมกระบะ/โครงเหล็กหรือไม่?' },
-            { id: 'q2', text: 'รถวิ่งงานข้ามจังหวัดเป็นหลักหรือไม่?' },
+            { id: 'truck_q1', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
         ],
-        agri: [
-            { id: 'q1', text: 'เครื่องจักรมีการใช้งานหนักต่อเนื่องหรือไม่?' },
-            { id: 'q2', text: 'มีอุปกรณ์ต่อพ่วงครบชุดหรือไม่?' },
-        ],
+        agri: [],
         land: [
             { id: 'land_q1', text: 'เป็นที่ดินตาบอด หรือ ที่ดินติดคลอง/ติดลำธารทีไม่ติดถนนสาธารณะ' },
             { id: 'land_q2', text: 'เป็นที่ดินติดโรงเรียน/วัด/ศาลเจ้า/สถานที่ศักดิ์อื่น ๆ /สุสาน/ป่าช้า/บ่อขยะ' },
@@ -405,7 +424,7 @@ function PreQuestionPageContent() {
 
     const isStep1Valid = () => {
         // Essential fields for all types
-        if (!formData.collateralType || !formData.occupationGroup || !formData.borrowerAge || !formData.nationality || !formData.applicationOwner) return false;
+        if (!formData.collateralType || !formData.occupationGroup || !formData.borrowerAge || !formData.nationality) return false;
 
         // Vehicle (Car, Moto, Truck, Agri)
         if (['car', 'moto', 'truck', 'agri'].includes(formData.collateralType)) {
@@ -447,6 +466,11 @@ function PreQuestionPageContent() {
             let questions = COLLATERAL_QUESTIONS[formData.collateralType] || [];
             if (formData.collateralType === 'land' && formData.landDeedType === 'orchor2') {
                 questions = [];
+            }
+
+            if (formData.collateralType === 'land' && formData.landDeedType === 'trajong_deed' && formData.landProvince === 'other') {
+                setIsConditionDialogOpen(true);
+                return;
             }
 
             const hasYesAnswer = questions.some(q => formData.collateralQuestions?.[q.id] === 'yes');
@@ -746,7 +770,7 @@ function PreQuestionPageContent() {
                                                         <Button
                                                             variant="outline"
                                                             onClick={handleAddPhoto}
-                                                            className="flex items-center gap-2 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                                            className="flex items-center gap-2"
                                                         >
                                                             <Upload className="w-4 h-4" />
                                                             อัพโหลดรูปภาพ
@@ -754,7 +778,7 @@ function PreQuestionPageContent() {
                                                         <Button
                                                             variant="outline"
                                                             onClick={handleAddPhoto}
-                                                            className="flex items-center gap-2 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                                            className="flex items-center gap-2"
                                                         >
                                                             <Camera className="w-4 h-4" />
                                                             เปิดกล้อง
@@ -847,45 +871,7 @@ function PreQuestionPageContent() {
                                                     </Button>
                                                 </div>
 
-                                                {/* AI Analysis Result Display (New) */}
-                                                {formData.aiDetectedData && (
-                                                    <div className="mt-8 pt-6 border-t border-blue-100 flex flex-col md:flex-row gap-8 animate-in fade-in slide-in-from-top-2 duration-500">
-                                                        <div className="flex-1 space-y-4">
-                                                            <div className="flex items-center gap-2">
 
-                                                                <h4 className="font-bold text-gray-900">ผลการวิเคราะห์โดย AI (AI Result)</h4>
-                                                            </div>
-
-                                                            <div className="grid grid-cols-2 gap-4 bg-white/60 p-5 rounded-2xl border border-blue-100/50">
-                                                                <div className="space-y-1">
-                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ยี่ห้อ (Brand)</p>
-                                                                    <p className="text-sm font-bold text-gray-800">{formData.aiDetectedData.brand || '-'}</p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">รุ่น (Model)</p>
-                                                                    <p className="text-sm font-bold text-gray-800">{formData.aiDetectedData.model || '-'}</p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ปี (Year)</p>
-                                                                    <p className="text-sm font-bold text-gray-800">{formData.aiDetectedData.year || '-'}</p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ราคาประเมิน AI</p>
-                                                                    <p className="text-sm font-bold text-emerald-600">฿{formData.aiDetectedData.appraisalPrice?.toLocaleString() || '-'}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="md:w-px md:bg-blue-100/50" />
-
-                                                        <div className="flex-1 flex flex-col justify-center bg-blue-50/50 p-5 rounded-2xl border border-dashed border-blue-200">
-                                                            <p className="text-xs text-blue-600 font-medium mb-1">คำแนะนำ</p>
-                                                            <p className="text-[13px] text-gray-600 leading-relaxed">
-                                                                ระบบ AI วิเคราะห์ข้อมูลเบื้องต้นจากรูปถ่ายเรียบร้อยแล้ว กรุณาตรวจสอบและ <span className="font-bold text-gray-900">เลือกข้อมูลที่ถูกต้องจากฐานข้อมูล Redbook</span> ในส่วนถัดไปเพื่อความแม่นยำทางบัญชี
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -1358,31 +1344,12 @@ function PreQuestionPageContent() {
                                             </div>
                                         )}
                                         {/* Pricing Summary Section */}
-                                        {(formData.aiPrice > 0 || formData.redbookPrice > 0 || formData.appraisalPrice > 0) && (
+                                        {formData.collateralType !== 'land' && (formData.aiPrice > 0 || formData.redbookPrice > 0 || formData.appraisalPrice > 0) && (
                                             <div className="p-6 bg-gradient-to-r from-gray-50 to-white">
                                                 <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                                                     สรุปราคาประเมินเบื้องต้น
                                                 </h4>
-                                                <div className={cn(
-                                                    "grid grid-cols-1 gap-4",
-                                                    formData.collateralType === 'car' ? "md:grid-cols-3" :
-                                                        formData.collateralType === 'land' ? "md:grid-cols-1" :
-                                                            "md:grid-cols-2"
-                                                )}>
-                                                    {formData.collateralType === 'car' && (
-                                                        <div className="p-4 rounded-xl bg-white border border-border-strong space-y-1">
-                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">AI Analysis Price</p>
-                                                            <p className="text-lg font-bold text-gray-900">฿{formData.aiPrice?.toLocaleString() || '0'}</p>
-                                                            <Badge className="bg-blue-50 text-blue-600 border-none text-[9px]">From Photos</Badge>
-                                                        </div>
-                                                    )}
-                                                    {(formData.collateralType === 'car' || formData.collateralType === 'moto' || formData.collateralType === 'truck' || formData.collateralType === 'agri') && (
-                                                        <div className="p-4 rounded-xl bg-white border border-border-strong space-y-1">
-                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Redbook Database</p>
-                                                            <p className="text-lg font-bold text-gray-900">฿{formData.redbookPrice?.toLocaleString() || '0'}</p>
-                                                            <Badge className="bg-purple-50 text-purple-600 border-none text-[9px]">Market Standard</Badge>
-                                                        </div>
-                                                    )}
+                                                <div className="grid grid-cols-1 gap-4">
                                                     <div className="p-4 rounded-xl bg-chaiyo-blue text-gray-900 border border-border-strong space-y-1">
                                                         <p className="text-[10px] font-bold text-blue-200 uppercase tracking-wider">Final Appraisal Price</p>
                                                         <p className="text-2xl font-bold text-white">
@@ -1403,7 +1370,7 @@ function PreQuestionPageContent() {
                                         {/* End of Form and Pricing Summary Card (Card 2) */}
                                     </div>
 
-                                    {/* Dynamic Collateral Questions Card (Card 3) */}
+                                    {/* Dynamic Collateral Questions Card (Card 3) - Wrapped in Accordion */}
                                     {(() => {
                                         let questions = COLLATERAL_QUESTIONS[formData.collateralType] || [];
 
@@ -1417,28 +1384,56 @@ function PreQuestionPageContent() {
                                         if (questions.length === 0) return null;
 
                                         return (
-                                            <div className="border border-border-strong rounded-xl bg-white overflow-hidden divide-y divide-gray-200">
-                                                {questions.map((q) => (
-                                                    <div key={q.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40">
+                                            <div className="border border-border-strong rounded-2xl bg-white overflow-hidden">
+                                                {/* Accordion Header */}
+                                                <button
+                                                    onClick={() => setIsQuestionsExpanded(!isQuestionsExpanded)}
+                                                    className={cn(
+                                                        "w-full p-6 flex items-center justify-between text-left transition-colors hover:bg-gray-50",
+                                                        isQuestionsExpanded ? "bg-gray-50/50" : "bg-white"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center gap-3">
+
                                                         <div>
-                                                            <Label className=" font-bold">{q.text}</Label>
-                                                        </div>
-                                                        <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
-                                                            <button
-                                                                onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' } })}
-                                                                className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'yes' ? "bg-gray-200 text-gray-700" : "text-gray-500 hover:bg-gray-100")}
-                                                            >
-                                                                ใช่
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' } })}
-                                                                className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'no' ? "bg-chaiyo-blue text-white" : "text-gray-500 hover:bg-gray-100")}
-                                                            >
-                                                                ไม่ใช่
-                                                            </button>
+                                                            <h4 className="text-lg font-bold text-gray-900">การประเมินสภาพทรัพย์สินเพิ่มเติม</h4>
                                                         </div>
                                                     </div>
-                                                ))}
+                                                    <div className={cn(
+                                                        "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center transition-transform duration-300",
+                                                        isQuestionsExpanded ? "rotate-180" : ""
+                                                    )}>
+                                                        <ChevronDown className="w-5 h-5 text-gray-500" />
+                                                    </div>
+                                                </button>
+
+                                                {/* Accordion Content */}
+                                                <div className={cn(
+                                                    "divide-y divide-gray-100 transition-all duration-300 ease-in-out",
+                                                    isQuestionsExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+                                                )}>
+                                                    {questions.map((q) => (
+                                                        <div key={q.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/40">
+                                                            <div>
+                                                                <Label className=" font-bold">{q.text}</Label>
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
+                                                                <button
+                                                                    onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' } })}
+                                                                    className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'yes' ? "bg-gray-200 text-gray-700" : "text-gray-500 hover:bg-gray-100")}
+                                                                >
+                                                                    ใช่
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' } })}
+                                                                    className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'no' ? "bg-chaiyo-blue text-white" : "text-gray-500 hover:bg-gray-100")}
+                                                                >
+                                                                    ไม่ใช่
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         );
                                     })()}
@@ -1449,7 +1444,7 @@ function PreQuestionPageContent() {
                         </div>
 
                         {/* Section 2: Borrower Info */}
-                        <div className="relative border-l-[2px] border-gray-200 ml-4 pl-8 pb-12">
+                        <div className="relative border-l-[2px] border-transparent ml-4 pl-8 pb-4">
                             <div className="absolute -left-[18px] top-0 w-8 h-8 bg-white rounded-full border-[2px] border-gray-200 flex items-center justify-center font-bold text-gray-500 text-sm">
                                 2
                             </div>
@@ -1620,40 +1615,6 @@ function PreQuestionPageContent() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        {/* Section 3: สำหรับพนักงาน */}
-                        <div className="relative border-l-[2px] border-transparent ml-4 pl-8 pb-4">
-                            <div className="absolute -left-[18px] top-0 w-8 h-8 bg-white rounded-full border-[2px] border-gray-200 flex items-center justify-center font-bold text-gray-500 text-sm">
-                                3
-                            </div>
-
-                            <div className="space-y-6 -mt-1">
-                                <h3 className="text-xl font-bold text-gray-900">สำหรับพนักงาน</h3>
-
-                                <div className="border border-border-strong rounded-xl bg-white overflow-hidden p-6 relative">
-                                    <div className="max-w-md space-y-3">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-bold text-gray-700">พนักงานผู้ดูแลคำขอ (Application Owner) <span className="text-red-500">*</span></Label>
-                                            <Combobox
-                                                options={STAFF_MEMBERS}
-                                                value={formData.applicationOwner}
-                                                onValueChange={(val) => {
-                                                    const staff = STAFF_MEMBERS.find(s => s.value === val || s.label === val);
-                                                    setFormData({
-                                                        ...formData,
-                                                        applicationOwner: staff?.value || val,
-                                                        branchRegion: staff?.region || 'other'
-                                                    });
-                                                }}
-                                                placeholder="เลือกพนักงาน..."
-                                                searchPlaceholder="ค้นหาชื่อพนักงาน..."
-                                            />
-                                            <p className="text-xs text-gray-500">พนักงานที่เป็นเจ้าของคำขอนี้จะสามารถติดตามสถานะและดำเนินการต่อได้ ({formData.branchRegion === 'isan' ? 'สาขาภาคอีสาน' : 'สาขาทั่วไป'})</p>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 {/* Summary / Submit */}
                                 <div className="pt-4 flex flex-col items-end space-y-4">
@@ -1686,7 +1647,7 @@ function PreQuestionPageContent() {
                         if (formData.collateralType === 'land' && calculatedLandResult) {
                             const { chosenLand, chosenBuilding, finalAppraisalPrice, basePriceTotal: bpt, ltvPenalty, capLtv, finalCalculatedLimit, isLandOnly } = calculatedLandResult;
 
-                            finalLimit = finalCalculatedLimit;
+                            finalLimit = finalSummaryLimit;
                             appraisalPrice = bpt; // Full appraisal price of the selected sources
                             basePriceTotal = bpt;
                             finalLTV = capLtv;
@@ -1726,7 +1687,7 @@ function PreQuestionPageContent() {
                             const maxLtvCap = 1.20;
                             finalLTV = Math.min(baseLTV, maxLtvCap);
 
-                            finalLimit = Math.floor(appraisalPrice * finalLTV);
+                            finalLimit = finalSummaryLimit;
                         }
 
                         return (
@@ -1938,8 +1899,8 @@ function PreQuestionPageContent() {
                 {/* STEP 3: Product Suggestion (Was Step 4) */}
                 {
                     currentStep === 3 && (() => {
-                        const ltvRate = formData.collateralType === 'land' ? 0.7 : 0.9;
-                        const maxLoan = Math.max(0, Math.floor((formData.appraisalPrice || 0) * ltvRate) - (Number(formData.existingDebt) || 0));
+                        const finalLimit = finalSummaryLimit;
+                        const maxLoan = finalLimit;
                         const selectedProduct = PRODUCTS.find(p => p.id === formData.collateralType);
                         const TypeIcon = selectedProduct?.icon || Car;
 

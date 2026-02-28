@@ -266,6 +266,26 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">อายุ</span>
+                                    <span className="font-medium text-right">
+                                        {formData.birthDate ? (() => {
+                                            const birth = new Date(formData.birthDate);
+                                            if (isNaN(birth.getTime())) return "-";
+                                            const today = new Date();
+                                            let age = today.getFullYear() - birth.getFullYear();
+                                            const m = today.getMonth() - birth.getMonth();
+                                            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                                                age--;
+                                            }
+                                            return `${age} ปี`;
+                                        })() : "-"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-start">
+                                    <span className="text-muted shrink-0">สัญชาติ</span>
+                                    <span className="font-medium text-right">{formData.nationality || "-"}</span>
+                                </div>
+                                <div className="flex justify-between items-start">
                                     <span className="text-muted shrink-0">วันที่ออกบัตร</span>
                                     <span className="font-medium text-right">
                                         {formData.issueDate ? (() => {

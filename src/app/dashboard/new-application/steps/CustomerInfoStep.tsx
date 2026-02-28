@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, Briefcase, UserPlus, Users, X, Info, ShieldCheck, Trash2, Plus, Save, Phone, Loader2, CheckCircle, RefreshCcw, Calendar, AlertTriangle, Mail, Pencil, AlertCircle, Upload, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe } from "lucide-react";
+import { User, MapPin, Briefcase, UserPlus, Users, X, Info, ShieldCheck, Trash2, Plus, Save, Phone, Loader2, CheckCircle, RefreshCcw, Calendar, AlertTriangle, Mail, Pencil, AlertCircle, Upload, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home } from "lucide-react";
 import { format } from "date-fns";
 import {
     Select,
@@ -25,6 +25,7 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Textarea } from "@/components/ui/Textarea";
 import { Combobox } from "@/components/ui/combobox";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { KYCProcess, KYCData } from "@/components/application/KYCProcess";
 import {
@@ -50,7 +51,7 @@ interface CustomerInfoStepProps {
     setFormData: (data: any) => void;
 }
 
-const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false, headerChildren, hideFields = false }: { title: string, prefix?: string, formData: any, onChange: (field: string, val: any) => void, disabled?: boolean, headerChildren?: React.ReactNode, hideFields?: boolean }) => {
+const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false, headerChildren, footerChildren, hideFields = false }: { title: string, prefix?: string, formData: any, onChange: (field: string, val: any) => void, disabled?: boolean, headerChildren?: React.ReactNode, footerChildren?: React.ReactNode, hideFields?: boolean }) => {
     const getField = (name: string) => prefix ? `${prefix}${name.charAt(0).toUpperCase() + name.slice(1)}` : name;
 
     // Aggregate address components into a single map query
@@ -123,7 +124,7 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                     )}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-1 md:col-span-2">
                         <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground">เลขที่บ้าน</Label>
+                            <Label className="text-xs text-muted-foreground">เลขที่บ้าน <span className="text-red-500">*</span></Label>
                             <Input
                                 className="bg-white"
                                 value={formData[getField('houseNumber')] || ""}
@@ -207,7 +208,7 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs text-muted-foreground">ถนน</Label>
+                            <Label className="text-xs text-muted-foreground">ถนน <span className="text-red-500">*</span></Label>
                             <Combobox
                                 options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
                                 value={formData[getField('street')] || ""}
@@ -218,27 +219,27 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
+                        <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
                         <Combobox
                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                             value={formData[getField('subDistrict')] || ""}
                             onValueChange={(val) => onChange(getField('subDistrict'), val)}
                             disabled={disabled}
-                            placeholder="ระบุแขวง/ตำบล"
+                            placeholder="ระบุตำบล/แขวง"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">เขต/อำเภอ</Label>
+                        <Label className="text-xs text-muted-foreground">อำเภอ/เขต <span className="text-red-500">*</span></Label>
                         <Combobox
                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                             value={formData[getField('district')] || ""}
                             onValueChange={(val) => onChange(getField('district'), val)}
                             disabled={disabled}
-                            placeholder="ระบุเขต/อำเภอ"
+                            placeholder="ระบุอำเภอ/เขต"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                        <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
                         <Combobox
                             options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
                             value={formData[getField('province')] || ""}
@@ -248,7 +249,7 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์</Label>
+                        <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์ <span className="text-red-500">*</span></Label>
                         <Input
                             className="bg-white"
                             value={formData[getField('zipCode')] || ""}
@@ -260,6 +261,7 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
                     </div>
                 </div>
             )}
+            {footerChildren}
         </div>
     );
 };
@@ -285,6 +287,31 @@ const SocialIcon = ({ platform }: { platform: string }) => {
         default: return <Globe className="w-4 h-4 text-gray-500" />;
     }
 };
+
+const COUNTRIES = [
+    { label: "ไทย (Thai)", value: "Thai" },
+    { label: "พม่า (Myanmar)", value: "Myanmar" },
+    { label: "ลาว (Laos)", value: "Laos" },
+    { label: "กัมพูชา (Cambodia)", value: "Cambodia" },
+    { label: "จีน (China)", value: "China" },
+    { label: "ญี่ปุ่น (Japan)", value: "Japan" },
+    { label: "อื่นๆ (Other)", value: "Other" },
+];
+
+const ID_TYPES = [
+    { label: "บัตรประชาชนไทย", value: "THAI_ID" },
+    { label: "พาสปอร์ต", value: "PASSPORT" },
+    { label: "บัตรต่างด้าว", value: "ALIEN_ID" },
+    { label: "อื่นๆ", value: "OTHER" },
+];
+
+const MARITAL_STATUSES = [
+    { label: "โสด", value: "single" },
+    { label: "สมรสจดทะเบียน", value: "married_registered" },
+    { label: "สมรสไม่จดทะเบียน", value: "married_unregistered" },
+    { label: "หย่าร้าง", value: "divorced" },
+    { label: "หม่าย", value: "widowed" },
+];
 
 export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProps) {
     // --- Date State & Logic ---
@@ -506,6 +533,30 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setDeleteConfirmation({
             isOpen: true,
             type: 'social-media',
+            index: index
+        });
+    };
+
+
+    // --- Children Logic ---
+    const handleAddChild = () => {
+        const current = formData.children || [];
+        setFormData((prev: any) => ({
+            ...prev,
+            children: [...current, { age: "", occupation: "student" }]
+        }));
+    };
+
+    const handleUpdateChild = (index: number, field: string, value: string) => {
+        const items = [...(formData.children || [])];
+        items[index] = { ...items[index], [field]: value };
+        setFormData((prev: any) => ({ ...prev, children: items }));
+    };
+
+    const handleRemoveChild = (index: number) => {
+        setDeleteConfirmation({
+            isOpen: true,
+            type: 'child' as any,
             index: index
         });
     };
@@ -876,6 +927,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 ...prev,
                 socialMedias: (prev.socialMedias || []).filter((_: any, i: number) => i !== deleteConfirmation.index)
             }));
+        } else if (deleteConfirmation.type === ('child' as any) && deleteConfirmation.index !== null) {
+            setFormData((prev: any) => ({
+                ...prev,
+                children: (prev.children || []).filter((_: any, i: number) => i !== deleteConfirmation.index)
+            }));
         }
         setDeleteConfirmation({ isOpen: false, type: null, index: null });
     };
@@ -884,8 +940,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
 
             {/* MAIN APPLICANT - SECTION 1: Personal Info */}
-            <Card className="border-border-subtle">
-                <CardHeader className="bg-blue-50/50 border-b border-border-subtle pb-4">
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <User className="w-5 h-5" />
                         ข้อมูลส่วนตัว (ผู้กู้หลัก)
@@ -910,95 +966,198 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             )}
                         </div>
                     )}
-                    <div className="space-y-4 pt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-                            <div className="space-y-2">
-                                <Label>เลขบัตรประชาชน</Label>
-                                <Input
-                                    value={formData.idNumber}
-                                    disabled
-                                    className="bg-gray-50 text-gray-600 font-mono h-11"
-                                />
+                    <div className="space-y-8">
+                        {/* Sub-section 1: General Info */}
+                        <div className="space-y-4">
+                            <div className="pb-2 border-b border-gray-100 mb-4">
+                                <h3 className="text-sm font-bold text-gray-700">ข้อมูลทั่วไป</h3>
                             </div>
-                            <div className="space-y-2">
-                                <Label>เลขหลังบัตรประชาชน (Laser ID)</Label>
-                                <Input
-                                    value={formData.laserId}
-                                    disabled
-                                    className="bg-gray-50 text-gray-600 font-mono h-11"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <Label>วันเกิด</Label>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox
-                                            id="yearOnly"
-                                            checked={useYearOnly}
-                                            onCheckedChange={(checked) => setUseYearOnly(checked as boolean)}
-                                            disabled
-                                        />
-                                        <Label htmlFor="yearOnly" className="text-xs text-muted-foreground font-normal cursor-pointer">
-                                            ทราบแค่ปีเกิด
-                                        </Label>
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <Label>คำนำหน้า <span className="text-red-500">*</span></Label>
+                                    <Input value={formData.prefix || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
                                 </div>
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <div className="space-y-2">
+                                    <Label>เพศ <span className="text-red-500">*</span></Label>
+                                    <Select value={formData.gender || ""} onValueChange={(val) => handleChange("gender", val)}>
+                                        <SelectTrigger className="h-11 bg-white">
+                                            <SelectValue placeholder="ระบุเพศ" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ชาย">ชาย</SelectItem>
+                                            <SelectItem value="หญิง">หญิง</SelectItem>
+                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อเล่น <span className="text-red-500">*</span></Label>
                                     <Input
-                                        value={dateDisplay}
-                                        disabled
-                                        className="pl-9 font-mono bg-gray-50 text-gray-600 h-11"
+                                        value={formData.nickname || ""}
+                                        onChange={(e) => handleChange("nickname", e.target.value)}
+                                        placeholder="ระบุชื่อเล่น"
+                                        className="h-11 bg-white"
                                     />
                                 </div>
-                            </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อจริง <span className="text-red-500">*</span></Label>
+                                    <Input value={formData.firstName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อกลาง</Label>
+                                    <Input value={formData.middleName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>นามสกุล <span className="text-red-500">*</span></Label>
+                                    <Input value={formData.lastName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label>เพศ</Label>
-                                <Select value={formData.gender || ""} onValueChange={(val) => handleChange("gender", val)}>
-                                    <SelectTrigger className="h-11 bg-white">
-                                        <SelectValue placeholder="ระบุเพศ" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ชาย">ชาย</SelectItem>
-                                        <SelectItem value="หญิง">หญิง</SelectItem>
-                                        <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>คำนำหน้า</Label>
-                                <Input value={formData.prefix || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>ชื่อเล่น</Label>
-                                <Input
-                                    value={formData.nickname || ""}
-                                    onChange={(e) => handleChange("nickname", e.target.value)}
-                                    placeholder="ระบุชื่อเล่น"
-                                    className="h-11 bg-white"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>ชื่อจริง</Label>
-                                <Input value={formData.firstName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>ชื่อกลาง</Label>
-                                <Input value={formData.middleName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>นามสกุล</Label>
-                                <Input value={formData.lastName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
-                            </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        value={formData.firstNameEn || ""}
+                                        onChange={(e) => handleChange("firstNameEn", e.target.value)}
+                                        placeholder="First Name"
+                                        className="h-11 bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                    <Input
+                                        value={formData.middleNameEn || ""}
+                                        onChange={(e) => handleChange("middleNameEn", e.target.value)}
+                                        placeholder="Middle Name"
+                                        className="h-11 bg-white"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        value={formData.lastNameEn || ""}
+                                        onChange={(e) => handleChange("lastNameEn", e.target.value)}
+                                        placeholder="Last Name"
+                                        className="h-11 bg-white"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label>วันที่ออกบัตร</Label>
-                                <Input value={formatDateToThai(formData.issueDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <Label>วันเดือนปีเกิด <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="yearOnly"
+                                                checked={useYearOnly}
+                                                onCheckedChange={(checked) => setUseYearOnly(checked as boolean)}
+                                                disabled
+                                            />
+                                            <Label htmlFor="yearOnly" className="text-xs text-muted-foreground font-normal cursor-pointer">
+                                                ทราบแค่ปีเกิด
+                                            </Label>
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            value={dateDisplay}
+                                            disabled
+                                            className="pl-9 font-mono bg-gray-50 text-gray-600 h-11"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>อายุ <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        value={(() => {
+                                            if (!formData.birthDate) return "";
+                                            const birth = new Date(formData.birthDate);
+                                            if (isNaN(birth.getTime())) return "";
+                                            const today = new Date();
+                                            let age = today.getFullYear() - birth.getFullYear();
+                                            const m = today.getMonth() - birth.getMonth();
+                                            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                                                age--;
+                                            }
+                                            return age > 0 ? age.toString() : "0";
+                                        })()}
+                                        disabled
+                                        className="bg-gray-50 text-gray-600 h-11"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>สัญชาติ <span className="text-red-500">*</span></Label>
+                                    {formData.verificationMethod === 'DIPCHIP' ? (
+                                        <Input
+                                            value={formData.nationality || "Thai"}
+                                            disabled
+                                            className="bg-gray-50 text-gray-600 h-11"
+                                        />
+                                    ) : (
+                                        <Select
+                                            value={formData.nationality || ""}
+                                            onValueChange={(val) => handleChange("nationality", val)}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <SelectValue placeholder="เลือกสัญชาติ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {COUNTRIES.map(c => (
+                                                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>วันที่บัตรหมดอายุ</Label>
-                                <Input value={formatDateToThai(formData.expiryDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                        </div>
+
+                        {/* Sub-section 2: ID Card Info */}
+                        <div className="space-y-4 pt-4">
+                            <div className="pb-2 border-b border-gray-100 mb-4">
+                                <h3 className="text-sm font-bold text-gray-700">ข้อมูลบัตรประจำตัว</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <Label>ประเภทบัตรประจำตัว <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={formData.idType || "thai_id"}
+                                        onValueChange={(val) => handleChange("idType", val)}
+                                        disabled={formData.verificationMethod === 'DIPCHIP'}
+                                    >
+                                        <SelectTrigger className={cn("h-11 bg-white", formData.verificationMethod === 'DIPCHIP' && "bg-gray-50 text-gray-600")}>
+                                            <SelectValue placeholder="เลือกประเภทบัตร" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {ID_TYPES.map(type => (
+                                                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>เลขที่บัตรประจำตัว <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        value={formData.idNumber}
+                                        disabled
+                                        className="bg-gray-50 text-gray-600 font-mono h-11"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>เลขหลังบัตรประชาชน (Laser ID) <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        value={formData.laserId}
+                                        disabled
+                                        className="bg-gray-50 text-gray-600 font-mono h-11"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>วันที่ออกบัตร <span className="text-red-500">*</span></Label>
+                                    <Input value={formatDateToThai(formData.issueDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>วันหมดอายุบัตร <span className="text-red-500">*</span></Label>
+                                    <Input value={formatDateToThai(formData.expiryDate) || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -1006,8 +1165,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             </Card>
 
             {/* MAIN APPLICANT - SECTION 2: Address Info */}
-            <Card className="border-border-subtle">
-                <CardHeader className="bg-blue-50/50 border-b border-border-subtle pb-4">
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <MapPin className="w-5 h-5" />
                         ที่อยู่ (ผู้กู้หลัก)
@@ -1030,15 +1189,154 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             prefix="current"
                             formData={formData}
                             onChange={handleChange}
-                            hideFields={formData.isCurrentSameAsId}
+                            hideFields={formData.currentAddressSource && formData.currentAddressSource !== 'new'}
                             headerChildren={
-                                <div className="flex items-center gap-2 mb-2 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2">
-                                    <Checkbox
-                                        id="sameAsId"
-                                        checked={formData.isCurrentSameAsId}
-                                        onCheckedChange={(val) => handleChange("isCurrentSameAsId", val)}
-                                    />
-                                    <Label htmlFor="sameAsId" className="cursor-pointer font-bold">ที่อยู่ปัจจุบันตรงกับที่อยู่ตามบัตรประชาชน</Label>
+                                <div className="space-y-4 mb-4 mt-2">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">เลือกที่อยู่ปัจจุบัน</Label>
+                                        <Select
+                                            value={formData.currentAddressSource || (formData.isCurrentSameAsId ? "id" : "new")}
+                                            onValueChange={(val) => {
+                                                handleChange("currentAddressSource", val);
+                                                handleChange("isCurrentSameAsId", val === 'id');
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {formData.currentAddressSource === 'id' && (
+                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                            <Info className="w-4 h-4" />
+                                            ใช้ข้อมูลที่อยู่เดียวกับที่อยู่ตามบัตรประชาชน
+                                        </div>
+                                    )}
+                                </div>
+                            }
+                            footerChildren={
+                                <div className="mt-6 space-y-6 pt-6 border-t border-gray-100">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                                        ลักษณะที่อยู่อาศัย
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                        <div className="space-y-2">
+                                            <Label>ลักษณะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.currentHousingType || ""}
+                                                onValueChange={(val) => handleChange("currentHousingType", val)}
+                                            >
+                                                <SelectTrigger className="h-11 bg-white">
+                                                    <SelectValue placeholder="ระบุลักษณะที่อยู่อาศัย" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
+                                                    <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
+                                                    <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
+                                                    <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
+                                                    <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
+                                                    <SelectItem value="เพิง">เพิง</SelectItem>
+                                                    <SelectItem value="อื่น ๆ">อื่น ๆ (โปรดระบุ)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {formData.currentHousingType === "อื่น ๆ" && (
+                                                <Input
+                                                    className="mt-2 h-11 bg-white"
+                                                    placeholder="โปรดระบุลักษณะที่อยู่อาศัย"
+                                                    value={formData.currentHousingTypeOther || ""}
+                                                    onChange={(e) => handleChange("currentHousingTypeOther", e.target.value)}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>สถานะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.currentHousingStatus || ""}
+                                                onValueChange={(val) => handleChange("currentHousingStatus", val)}
+                                            >
+                                                <SelectTrigger className="h-11 bg-white">
+                                                    <SelectValue placeholder="ระบุสถานะที่อยู่อาศัย" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="เป็นของตนเอง (เป็นเจ้าบ้าน)">เป็นของตนเอง (เป็นเจ้าบ้าน)</SelectItem>
+                                                    <SelectItem value="เป็นผู้อาศัย">เป็นผู้อาศัย</SelectItem>
+                                                    <SelectItem value="เช่า">เช่า</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+
+
+                                        <div className="space-y-2">
+                                            <Label>ระยะเวลาที่พักอาศัย <span className="text-red-500">*</span></Label>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <Input
+                                                        type="number"
+                                                        className="h-11 bg-white text-center"
+                                                        placeholder="0"
+                                                        value={formData.housingDurationYears || ""}
+                                                        onChange={(e) => handleChange("housingDurationYears", e.target.value)}
+                                                    />
+                                                    <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                </div>
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <Input
+                                                        type="number"
+                                                        className="h-11 bg-white text-center"
+                                                        placeholder="0"
+                                                        max={11}
+                                                        value={formData.housingDurationMonths || ""}
+                                                        onChange={(e) => handleChange("housingDurationMonths", e.target.value)}
+                                                    />
+                                                    <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>จำนวนผู้อยู่อาศัย</Label>
+                                            <Select
+                                                value={formData.currentResidentType || ""}
+                                                onValueChange={(val) => handleChange("currentResidentType", val)}
+                                            >
+                                                <SelectTrigger className="h-11 bg-white">
+                                                    <SelectValue placeholder="ระบุประเภทผู้อยู่อาศัย" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
+                                                    <SelectItem value="พ่อ/แม่/ลูก">พ่อ/แม่/ลูก</SelectItem>
+                                                    <SelectItem value="สามี/ภรรยา">สามี/ภรรยา</SelectItem>
+                                                    <SelectItem value="ญาติ">ญาติ</SelectItem>
+                                                    <SelectItem value="แฟน">แฟน</SelectItem>
+                                                    <SelectItem value="เพื่อน">เพื่อน</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex items-center gap-2 pt-3">
+                                                <Checkbox
+                                                    id="isDailyResidence"
+                                                    checked={formData.isDailyResidence || false}
+                                                    onCheckedChange={(val) => handleChange("isDailyResidence", val)}
+                                                />
+                                                <Label htmlFor="isDailyResidence" className="cursor-pointer">ที่พักอาศัยเป็นที่อยู่ของทุกๆ วันหรือไม่ <span className="text-red-500">*</span></Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Checkbox
+                                                    id="isOnCollateral"
+                                                    checked={formData.isOnCollateral || false}
+                                                    onCheckedChange={(val) => handleChange("isOnCollateral", val)}
+                                                />
+                                                <Label htmlFor="isOnCollateral" className="cursor-pointer">ที่อยู่อาศัยบนหลักประกันหรือไม่ <span className="text-red-500">*</span></Label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             }
                         />
@@ -1051,31 +1349,423 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             prefix="shipping"
                             formData={formData}
                             onChange={handleChange}
-                            hideFields={formData.isShippingSameAsCurrent}
+                            hideFields={formData.shippingAddressSource && formData.shippingAddressSource !== 'new'}
                             headerChildren={
-                                <div className="flex items-center gap-2 mb-2 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2">
-                                    <Checkbox
-                                        id="sameAsCurrent"
-                                        checked={formData.isShippingSameAsCurrent}
-                                        onCheckedChange={(val) => handleChange("isShippingSameAsCurrent", val)}
-                                    />
-                                    <Label htmlFor="sameAsCurrent" className="cursor-pointer font-bold">ที่อยู่จัดส่งเอกสารตรงกับที่อยู่ปัจจุบัน</Label>
+                                <div className="space-y-4 mb-4 mt-2">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">เลือกที่อยู่จัดส่งเอกสาร</Label>
+                                        <Select
+                                            value={formData.shippingAddressSource || (formData.isShippingSameAsCurrent ? "current" : "new")}
+                                            onValueChange={(val) => {
+                                                handleChange("shippingAddressSource", val);
+                                                // Maintain backward compatibility for now if needed, 
+                                                // but primarily use shippingAddressSource
+                                                handleChange("isShippingSameAsCurrent", val === 'current');
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
+                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {formData.shippingAddressSource && formData.shippingAddressSource !== 'new' && (
+                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                            <Info className="w-4 h-4" />
+                                            ใช้ข้อมูลที่อยู่เดียวกับ{
+                                                formData.shippingAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' : 'ที่อยู่ปัจจุบัน'
+                                            }
+                                        </div>
+                                    )}
                                 </div>
                             }
                         />
                         <AddressForm
-                            title="ที่อยู่ที่ทำงาน"
-                            prefix="work"
+                            title="ที่อยู่ที่สามารถติดต่อได้"
+                            prefix="contact"
                             formData={formData}
                             onChange={handleChange}
+                            hideFields={formData.contactAddressSource && formData.contactAddressSource !== 'new'}
+                            headerChildren={
+                                <div className="space-y-4 mb-4 mt-2">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">เลือกที่อยู่ที่สามารถติดต่อได้</Label>
+                                        <Select
+                                            value={formData.contactAddressSource || "new"}
+                                            onValueChange={(val) => {
+                                                handleChange("contactAddressSource", val);
+                                                if (val !== 'new') {
+                                                    // Copy logic if needed, or just let AddressForm handle display
+                                                    // For consistency with other forms, we might want to sync data
+                                                    // but the user just requested "can use", so selection is enough.
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-11 bg-white">
+                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
+                                                <SelectItem value="shipping">ที่อยู่จัดส่งเอกสาร</SelectItem>
+                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {formData.contactAddressSource && formData.contactAddressSource !== 'new' && (
+                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                            <Info className="w-4 h-4" />
+                                            ใช้ข้อมูลที่อยู่เดียวกับ{
+                                                formData.contactAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' :
+                                                    formData.contactAddressSource === 'current' ? 'ที่อยู่ปัจจุบัน' :
+                                                        'ที่อยู่จัดส่งเอกสาร'
+                                            }
+                                        </div>
+                                    )}
+                                </div>
+                            }
                         />
                     </div>
                 </CardContent>
             </Card>
 
-            {/* MAIN APPLICANT - SECTION 3: Contact Info */}
-            <Card className="border-border-subtle">
-                <CardHeader className="bg-blue-50/50 border-b border-border-subtle pb-4">
+
+            {/* MAIN APPLICANT - SECTION 3: Family Info */}
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                        <Home className="w-5 h-5" />
+                        ข้อมูลครอบครัว (ผู้กู้หลัก)
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                        <div className="space-y-2">
+                            <Label>สถานะการสมรส <span className="text-red-500">*</span></Label>
+                            <Select
+                                value={formData.maritalStatus || ""}
+                                onValueChange={(val) => handleChange("maritalStatus", val)}
+                            >
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกสถานะการสมรส" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {MARITAL_STATUSES.map((status) => (
+                                        <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
+                            <Select
+                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
+                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
+                            >
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="true">ใช่</SelectItem>
+                                    <SelectItem value="false">ไม่ใช่</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                            <Select
+                                value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
+                                onValueChange={(val) => handleChange("householdHeadGender", val)}
+                            >
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกเพศ" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="ชาย">ชาย</SelectItem>
+                                    <SelectItem value="หญิง">หญิง</SelectItem>
+                                    <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                            <Input
+                                type="number"
+                                className="h-11 bg-white"
+                                placeholder="ระบุอายุ"
+                                value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
+                                onChange={(e) => handleChange("householdHeadAge", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>รายได้ของผู้กู้ต่อเดือน (บาท) <span className="text-red-500">*</span></Label>
+                            <Input
+                                type="number"
+                                className="h-11 bg-white"
+                                placeholder="0.00"
+                                value={formData.borrowerMonthlyIncome || ""}
+                                onChange={(e) => handleChange("borrowerMonthlyIncome", e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>รายจ่ายของผู้กู้ต่อเดือน (บาท) <span className="text-red-500">*</span></Label>
+                            <Input
+                                type="number"
+                                className="h-11 bg-white"
+                                placeholder="0.00"
+                                value={formData.borrowerMonthlyExpenses || ""}
+                                onChange={(e) => handleChange("borrowerMonthlyExpenses", e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                            <Users className="w-4 h-4 text-chaiyo-blue" /> จำนวนสมาชิกในครอบครัว
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="space-y-2 group">
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ (คน)</Label>
+                                <Input
+                                    type="number"
+                                    className="h-11 bg-white focus-visible:ring-chaiyo-blue/20"
+                                    placeholder="0"
+                                    value={formData.employedFamilyCount || ""}
+                                    onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2 group">
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ (คน)</Label>
+                                <Input
+                                    type="number"
+                                    className="h-11 bg-white focus-visible:ring-chaiyo-blue/20"
+                                    placeholder="0"
+                                    value={formData.unemployedFamilyCount || ""}
+                                    onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
+                                <div className="h-11 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
+
+                                    <div className="flex items-baseline gap-1.5">
+                                        <span className="text-2xl font-black text-chaiyo-blue tabular-nums">
+                                            {(Number(formData.employedFamilyCount) || 0) + (Number(formData.unemployedFamilyCount) || 0)}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-wider">คน</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                            <Users className="w-4 h-4 text-chaiyo-blue" /> ความสัมพันธ์และภาระค่าใช้จ่าย
+                        </div>
+                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                            <Table>
+                                <TableHeader className="bg-gray-50/50">
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead className="w-[180px] font-bold text-gray-700">ความสัมพันธ์</TableHead>
+                                        <TableHead className="w-[200px] font-bold text-gray-700">สถานะ</TableHead>
+                                        <TableHead className="w-[140px] font-bold text-gray-700">อายุ</TableHead>
+                                        <TableHead className="text-center font-bold text-gray-700">มีค่าใช้จ่ายประกัน</TableHead>
+                                        <TableHead className="text-center font-bold text-gray-700">มีภาระใช้จ่ายสุขภาพ</TableHead>
+                                        <TableHead className="w-[120px] text-center font-bold text-gray-700">แสดง</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {[
+                                        { id: 'father', label: 'พ่อ' },
+                                        { id: 'mother', label: 'แม่' },
+                                        { id: 'spouse', label: 'คู่สมรส' }
+                                    ].map((rel) => {
+                                        const memberData = formData.familyMembers?.[rel.id] || { exists: false, status: 'alive' };
+                                        const isExists = memberData.exists;
+
+                                        const updateMember = (field: string, val: any) => {
+                                            const currentMembers = formData.familyMembers || {};
+                                            handleChange("familyMembers", {
+                                                ...currentMembers,
+                                                [rel.id]: {
+                                                    ...(currentMembers[rel.id] || { exists: false, status: 'alive' }),
+                                                    [field]: val
+                                                }
+                                            });
+                                        };
+
+                                        return (
+                                            <TableRow key={rel.id} className={cn(
+                                                "border-b border-border-subtle transition-colors hover:bg-gray-50/50",
+                                                !isExists && "bg-gray-50/30 grayscale-[50%]"
+                                            )}>
+                                                <TableCell className="font-bold text-gray-800">{rel.label}</TableCell>
+                                                <TableCell>
+                                                    <Select
+                                                        disabled={!isExists}
+                                                        value={memberData.status || "alive"}
+                                                        onValueChange={(val) => updateMember("status", val)}
+                                                    >
+                                                        <SelectTrigger className="h-11 bg-white">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="alive">ยังมีชีวิตอยู่</SelectItem>
+                                                            <SelectItem value="deceased">เสียชีวิตแล้ว</SelectItem>
+                                                            <SelectItem value="none">ไม่มีข้อมูล</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Input
+                                                        disabled={!isExists}
+                                                        type="number"
+                                                        placeholder="อายุ"
+                                                        className="h-11 bg-white"
+                                                        value={memberData.age || ""}
+                                                        onChange={(e) => updateMember("age", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <div className="flex justify-center">
+                                                        <Checkbox
+                                                            disabled={!isExists}
+                                                            checked={memberData.hasInsurance || false}
+                                                            onCheckedChange={(val) => updateMember("hasInsurance", val)}
+                                                            className="h-5 w-5"
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <div className="flex justify-center">
+                                                        <Checkbox
+                                                            disabled={!isExists}
+                                                            checked={memberData.hasHealthExp || false}
+                                                            onCheckedChange={(val) => updateMember("hasHealthExp", val)}
+                                                            className="h-5 w-5"
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex justify-center">
+                                                        <Switch
+                                                            checked={isExists}
+                                                            onCheckedChange={(val) => updateMember("exists", val)}
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                    {/* Children Table */}
+                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                                <Users className="w-4 h-4 text-chaiyo-blue" /> ข้อมูลบุตร
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleAddChild}
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> เพิ่มข้อมูลบุตร
+                            </Button>
+                        </div>
+                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                            <Table>
+                                <TableHeader className="bg-gray-50/50">
+                                    <TableRow className="hover:bg-transparent">
+                                        <TableHead className="w-[80px] py-3 text-center text-xs font-bold uppercase tracking-wider text-gray-700">ลำดับ</TableHead>
+                                        <TableHead className="w-[200px] py-3 text-xs font-bold uppercase tracking-wider text-gray-700">อายุ (ปี)</TableHead>
+                                        <TableHead className="py-3 text-xs font-bold uppercase tracking-wider text-gray-700">อาชีพ</TableHead>
+                                        <TableHead className="w-[100px] py-3 text-center text-xs font-bold uppercase tracking-wider text-gray-700">จัดการ</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {(!formData.children || formData.children.length === 0) ? (
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10 bg-gray-50/30">
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <Users className="w-8 h-8 text-gray-300" />
+                                                    <p>ยังไม่มีข้อมูลบุตร</p>
+                                                    <p className="text-xs text-gray-400">คลิก "เพิ่มข้อมูลบุตร" เพื่อเริ่มรายการ</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        formData.children.map((child: any, idx: number) => (
+                                            <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors group">
+                                                <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
+                                                <TableCell className="py-3">
+                                                    <Input
+                                                        type="number"
+                                                        value={child.age || ""}
+                                                        onChange={(e) => handleUpdateChild(idx, "age", e.target.value)}
+                                                        placeholder="ระบุอายุ"
+                                                        className="h-11 bg-white"
+                                                    />
+                                                </TableCell>
+                                                <TableCell className="py-3">
+                                                    <Select
+                                                        value={child.occupation || "student"}
+                                                        onValueChange={(val) => handleUpdateChild(idx, "occupation", val)}
+                                                    >
+                                                        <SelectTrigger className="h-11 bg-white">
+                                                            <SelectValue placeholder="เลือกอาชีพ" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="student">นักเรียน/นักศึกษา</SelectItem>
+                                                            <SelectItem value="employee">พนักงานบริษัท</SelectItem>
+                                                            <SelectItem value="government">ข้าราชการ</SelectItem>
+                                                            <SelectItem value="farmer">เกษตรกร</SelectItem>
+                                                            <SelectItem value="owner">เจ้าของกิจการ</SelectItem>
+                                                            <SelectItem value="freelance">รับจ้างทั่วไป</SelectItem>
+                                                            <SelectItem value="none">ยังไม่เข้าเรียน/ว่างงาน</SelectItem>
+                                                            <SelectItem value="other">อื่นๆ</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </TableCell>
+                                                <TableCell className="py-3 text-center">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-9 w-9 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                        onClick={() => handleRemoveChild(idx)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+
+                </CardContent>
+            </Card>
+
+
+            {/* MAIN APPLICANT - SECTION 4: Contact Info */}
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <Phone className="w-5 h-5" />
                         ข้อมูลการติดต่อ (ผู้กู้หลัก)
@@ -1308,7 +1998,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                         {/* SOCIAL MEDIAS SECTION */}
                         <div className="space-y-4 pt-4">
-                            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                            <div className="flex items-center justify-between">
                                 <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                                     <Globe className="w-4 h-4 text-chaiyo-blue" /> เครือข่ายสังคมออนไลน์ (Social Media)
                                 </Label>
@@ -1322,7 +2012,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 </Button>
                             </div>
 
-                            <div className="border border-border-subtle rounded-xl overflow-hidden bg-white">
+                            <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
                                 <Table>
                                     <TableHeader className="bg-gray-50/80">
                                         <TableRow className="hover:bg-transparent">
@@ -1345,7 +2035,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </TableRow>
                                         ) : (
                                             formData.socialMedias.map((item: any, idx: number) => (
-                                                <TableRow key={idx} className="hover:bg-blue-50/20 group">
+                                                <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors group">
                                                     <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
                                                     <TableCell className="py-3">
                                                         <Select
@@ -1393,8 +2083,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             </div>
                         </div>
                     </div>
-
-
                 </CardContent>
             </Card>
 
@@ -1419,7 +2107,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                         {/* List of Co-Borrowers */}
                         {formData.coBorrowers && formData.coBorrowers.length > 0 && (
-                            <Card className="overflow-hidden border-border-subtle">
+                            <Card className="overflow-hidden border-border-strong">
                                 <Table>
                                     <TableHeader className="bg-gray-50">
                                         <TableRow className="hover:bg-gray-50">
@@ -1725,27 +2413,27 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
+                                                        <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                                                             value={newCoBorrower.subDistrict || ""}
                                                             onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, subDistrict: val })}
-                                                            placeholder="ระบุแขวง/ตำบล"
+                                                            placeholder="ระบุตำบล/แขวง"
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">เขต/อำเภอ</Label>
+                                                        <Label className="text-xs text-muted-foreground">อำเภอ/เขต <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                                                             value={newCoBorrower.district || ""}
                                                             onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, district: val })}
-                                                            placeholder="ระบุเขต/อำเภอ"
+                                                            placeholder="ระบุอำเภอ/เขต"
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                                                        <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
                                                             value={newCoBorrower.province || ""}
@@ -1832,7 +2520,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                         {/* List of Guarantors */}
                         {formData.guarantors && formData.guarantors.length > 0 && (
-                            <Card className="overflow-hidden border-border-subtle">
+                            <Card className="overflow-hidden border-border-strong">
                                 <Table>
                                     <TableHeader className="bg-gray-50">
                                         <TableRow className="hover:bg-gray-50">
@@ -2140,27 +2828,27 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">แขวง/ตำบล</Label>
+                                                        <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                                                             value={newGuarantor.subDistrict || ""}
                                                             onValueChange={(val) => setNewGuarantor({ ...newGuarantor, subDistrict: val })}
-                                                            placeholder="ระบุแขวง/ตำบล"
+                                                            placeholder="ระบุตำบล/แขวง"
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">เขต/อำเภอ</Label>
+                                                        <Label className="text-xs text-muted-foreground">อำเภอ/เขต <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
                                                             value={newGuarantor.district || ""}
                                                             onValueChange={(val) => setNewGuarantor({ ...newGuarantor, district: val })}
-                                                            placeholder="ระบุเขต/อำเภอ"
+                                                            placeholder="ระบุอำเภอ/เขต"
                                                         />
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                                                        <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
                                                         <Combobox
                                                             options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
                                                             value={newGuarantor.province || ""}
@@ -2237,7 +2925,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         <AlertDialogDescription>
                             คุณแน่ใจหรือไม่ที่จะลบข้อมูล{
                                 deleteConfirmation.type === 'co-borrower' ? 'ผู้กู้ร่วม' :
-                                    deleteConfirmation.type === 'guarantor' ? 'ผู้ค้ำประกัน' : 'บัญชีโซเชียลมีเดีย'
+                                    deleteConfirmation.type === 'guarantor' ? 'ผู้ค้ำประกัน' :
+                                        deleteConfirmation.type === ('child' as any) ? 'บุตร' : 'บัญชีโซเชียลมีเดีย'
                             }นี้?
                             การกระทำนี้ไม่สามารถย้อนกลับได้
                         </AlertDialogDescription>
