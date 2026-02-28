@@ -448,7 +448,8 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     isOpen: true,
                     title: "บัตรประจำตัวประชาชนใกล้หมดอายุ",
                     description: `บัตรประจำตัวประชาชนจะหมดอายุในอีก ${diffDays} วัน`,
-                    type: "warning"
+                    type: "warning",
+                    action: () => setStage('FACE_VERIFY')
                 });
                 // For near expiry, we often proceed after warning
                 // If it's manual, stay on review; if it's dipchip, we might proceed or stay.
@@ -556,7 +557,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <FileText className="w-8 h-8 text-orange-600" />
                         </div>
-                        <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-orange-600">กรอกข้อมูล / ถ่ายรูปบัตร</h3>
+                        <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-orange-600">ถ่ายรูปบัตร</h3>
                         <p className="text-sm text-muted mb-4">สำหรับบัตรประชาชนที่ไม่สามารถอ่านชิปได้ หรือ บัตรต่างด้าว (บัตรชมพู/ขาว)</p>
                     </CardContent>
                 </Card>
@@ -746,13 +747,13 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         ) : (
                                                             <>
                                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                    <Button variant="outline" className="w-full h-28 border-dashed border-2 flex flex-col gap-2 items-center justify-center rounded-2xl hover:border-chaiyo-blue hover:bg-blue-50/30 transition-all" onClick={() => handleOCRUpload('THAI_ID')}>
-                                                                        <Camera className="w-8 h-8 text-chaiyo-blue" />
-                                                                        <span className="text-base font-bold">บัตรประชาชน</span>
+                                                                    <Button variant="outline" className="w-full h-32 border-dashed border-2 flex flex-col gap-3 items-center justify-center rounded-2xl hover:border-chaiyo-blue hover:bg-blue-50/30 transition-all" onClick={() => handleOCRUpload('THAI_ID')}>
+                                                                        <img src="/images/card_citizen.svg" alt="บัตรประชาชน" className="h-12 w-auto mb-1" />
+                                                                        <span className="text-base font-bold text-gray-700">บัตรประชาชน</span>
                                                                     </Button>
-                                                                    <Button variant="outline" className="w-full h-28 border-dashed border-2 flex flex-col gap-2 items-center justify-center rounded-2xl hover:border-pink-400 hover:bg-pink-50/30 transition-all" onClick={() => handleOCRUpload('PINK_CARD')}>
-                                                                        <Camera className="w-8 h-8 text-pink-500" />
-                                                                        <span className="text-base font-bold">บัตรต่างด้าวชมพู</span>
+                                                                    <Button variant="outline" className="w-full h-32 border-dashed border-2 flex flex-col gap-3 items-center justify-center rounded-2xl hover:border-pink-400 hover:bg-pink-50/30 transition-all" onClick={() => handleOCRUpload('PINK_CARD')}>
+                                                                        <img src="/images/card_alien.svg" alt="บัตรต่างด้าวชมพู" className="h-12 w-auto mb-1" />
+                                                                        <span className="text-base font-bold text-gray-700">บัตรต่างด้าวชมพู</span>
                                                                     </Button>
                                                                 </div>
                                                             </>
