@@ -81,7 +81,7 @@ const AddressForm = ({ title, prefix = "", formData, onChange, disabled = false,
     const hasAddressData = getMapQuery().length > 0;
 
     return (
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                     {title}
@@ -1173,262 +1173,269 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
-                    <div className="space-y-4 pt-2">
+                    <div className="space-y-6 pt-2">
 
-                        <AddressForm
-                            title="ที่อยู่ตามบัตรประชาชน"
-                            prefix=""
-                            formData={formData}
-                            onChange={handleChange}
-                            disabled={false}
-                        />
+                        {/* Address 1: ID Card Address */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
+                            <AddressForm
+                                title="ที่อยู่ตามบัตรประชาชน"
+                                prefix=""
+                                formData={formData}
+                                onChange={handleChange}
+                                disabled={false}
+                            />
+                        </div>
 
-
-                        <AddressForm
-                            title="ที่อยู่ปัจจุบัน"
-                            prefix="current"
-                            formData={formData}
-                            onChange={handleChange}
-                            hideFields={formData.currentAddressSource && formData.currentAddressSource !== 'new'}
-                            headerChildren={
-                                <div className="space-y-4 mb-4 mt-2">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm">เลือกที่อยู่ปัจจุบัน</Label>
-                                        <Select
-                                            value={formData.currentAddressSource || (formData.isCurrentSameAsId ? "id" : "new")}
-                                            onValueChange={(val) => {
-                                                handleChange("currentAddressSource", val);
-                                                handleChange("isCurrentSameAsId", val === 'id');
-                                            }}
-                                        >
-                                            <SelectTrigger className="h-11 bg-white">
-                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
-                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    {formData.currentAddressSource === 'id' && (
-                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
-                                            <Info className="w-4 h-4" />
-                                            ใช้ข้อมูลที่อยู่เดียวกับที่อยู่ตามบัตรประชาชน
-                                        </div>
-                                    )}
-                                </div>
-                            }
-                            footerChildren={
-                                <div className="mt-6 space-y-6 pt-6 border-t border-gray-100">
-                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                        ลักษณะที่อยู่อาศัย
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        {/* Address 2: Current Address */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
+                            <AddressForm
+                                title="ที่อยู่ปัจจุบัน"
+                                prefix="current"
+                                formData={formData}
+                                onChange={handleChange}
+                                hideFields={formData.currentAddressSource && formData.currentAddressSource !== 'new'}
+                                headerChildren={
+                                    <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label>ลักษณะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
+                                            <Label className="text-sm">เลือกที่อยู่ปัจจุบัน</Label>
                                             <Select
-                                                value={formData.currentHousingType || ""}
-                                                onValueChange={(val) => handleChange("currentHousingType", val)}
+                                                value={formData.currentAddressSource || (formData.isCurrentSameAsId ? "id" : "new")}
+                                                onValueChange={(val) => {
+                                                    handleChange("currentAddressSource", val);
+                                                    handleChange("isCurrentSameAsId", val === 'id');
+                                                }}
                                             >
                                                 <SelectTrigger className="h-11 bg-white">
-                                                    <SelectValue placeholder="ระบุลักษณะที่อยู่อาศัย" />
+                                                    <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
-                                                    <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
-                                                    <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
-                                                    <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
-                                                    <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
-                                                    <SelectItem value="เพิง">เพิง</SelectItem>
-                                                    <SelectItem value="อื่น ๆ">อื่น ๆ (โปรดระบุ)</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            {formData.currentHousingType === "อื่น ๆ" && (
-                                                <Input
-                                                    className="mt-2 h-11 bg-white"
-                                                    placeholder="โปรดระบุลักษณะที่อยู่อาศัย"
-                                                    value={formData.currentHousingTypeOther || ""}
-                                                    onChange={(e) => handleChange("currentHousingTypeOther", e.target.value)}
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>สถานะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
-                                            <Select
-                                                value={formData.currentHousingStatus || ""}
-                                                onValueChange={(val) => handleChange("currentHousingStatus", val)}
-                                            >
-                                                <SelectTrigger className="h-11 bg-white">
-                                                    <SelectValue placeholder="ระบุสถานะที่อยู่อาศัย" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="เป็นของตนเอง (เป็นเจ้าบ้าน)">เป็นของตนเอง (เป็นเจ้าบ้าน)</SelectItem>
-                                                    <SelectItem value="เป็นผู้อาศัย">เป็นผู้อาศัย</SelectItem>
-                                                    <SelectItem value="เช่า">เช่า</SelectItem>
+                                                    <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                    <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-
-
-
-                                        <div className="space-y-2">
-                                            <Label>ระยะเวลาที่พักอาศัย <span className="text-red-500">*</span></Label>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1 flex items-center gap-2">
+                                        {formData.currentAddressSource === 'id' && (
+                                            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                ใช้ข้อมูลที่อยู่เดียวกับที่อยู่ตามบัตรประชาชน
+                                            </div>
+                                        )}
+                                    </div>
+                                }
+                                footerChildren={
+                                    <div className="mt-6 space-y-6 pt-6 border-t border-gray-100">
+                                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                                            ลักษณะที่อยู่อาศัย
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                            <div className="space-y-2">
+                                                <Label>ลักษณะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
+                                                <Select
+                                                    value={formData.currentHousingType || ""}
+                                                    onValueChange={(val) => handleChange("currentHousingType", val)}
+                                                >
+                                                    <SelectTrigger className="h-11 bg-white">
+                                                        <SelectValue placeholder="ระบุลักษณะที่อยู่อาศัย" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
+                                                        <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
+                                                        <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
+                                                        <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
+                                                        <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
+                                                        <SelectItem value="เพิง">เพิง</SelectItem>
+                                                        <SelectItem value="อื่น ๆ">อื่น ๆ (โปรดระบุ)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                {formData.currentHousingType === "อื่น ๆ" && (
                                                     <Input
-                                                        type="number"
-                                                        className="h-11 bg-white text-center"
-                                                        placeholder="0"
-                                                        value={formData.housingDurationYears || ""}
-                                                        onChange={(e) => handleChange("housingDurationYears", e.target.value)}
+                                                        className="mt-2 h-11 bg-white"
+                                                        placeholder="โปรดระบุลักษณะที่อยู่อาศัย"
+                                                        value={formData.currentHousingTypeOther || ""}
+                                                        onChange={(e) => handleChange("currentHousingTypeOther", e.target.value)}
                                                     />
-                                                    <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                )}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>สถานะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
+                                                <Select
+                                                    value={formData.currentHousingStatus || ""}
+                                                    onValueChange={(val) => handleChange("currentHousingStatus", val)}
+                                                >
+                                                    <SelectTrigger className="h-11 bg-white">
+                                                        <SelectValue placeholder="ระบุสถานะที่อยู่อาศัย" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="เป็นของตนเอง (เป็นเจ้าบ้าน)">เป็นของตนเอง (เป็นเจ้าบ้าน)</SelectItem>
+                                                        <SelectItem value="เป็นผู้อาศัย">เป็นผู้อาศัย</SelectItem>
+                                                        <SelectItem value="เช่า">เช่า</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>ระยะเวลาที่พักอาศัย <span className="text-red-500">*</span></Label>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1 flex items-center gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            className="h-11 bg-white text-center"
+                                                            placeholder="0"
+                                                            value={formData.housingDurationYears || ""}
+                                                            onChange={(e) => handleChange("housingDurationYears", e.target.value)}
+                                                        />
+                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                    </div>
+                                                    <div className="flex-1 flex items-center gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            className="h-11 bg-white text-center"
+                                                            placeholder="0"
+                                                            max={11}
+                                                            value={formData.housingDurationMonths || ""}
+                                                            onChange={(e) => handleChange("housingDurationMonths", e.target.value)}
+                                                        />
+                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 flex items-center gap-2">
-                                                    <Input
-                                                        type="number"
-                                                        className="h-11 bg-white text-center"
-                                                        placeholder="0"
-                                                        max={11}
-                                                        value={formData.housingDurationMonths || ""}
-                                                        onChange={(e) => handleChange("housingDurationMonths", e.target.value)}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>จำนวนผู้อยู่อาศัย</Label>
+                                                <Select
+                                                    value={formData.currentResidentType || ""}
+                                                    onValueChange={(val) => handleChange("currentResidentType", val)}
+                                                >
+                                                    <SelectTrigger className="h-11 bg-white">
+                                                        <SelectValue placeholder="ระบุประเภทผู้อยู่อาศัย" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
+                                                        <SelectItem value="พ่อ/แม่/ลูก">พ่อ/แม่/ลูก</SelectItem>
+                                                        <SelectItem value="สามี/ภรรยา">สามี/ภรรยา</SelectItem>
+                                                        <SelectItem value="ญาติ">ญาติ</SelectItem>
+                                                        <SelectItem value="แฟน">แฟน</SelectItem>
+                                                        <SelectItem value="เพื่อน">เพื่อน</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex items-center gap-2 pt-3">
+                                                    <Checkbox
+                                                        id="isDailyResidence"
+                                                        checked={formData.isDailyResidence || false}
+                                                        onCheckedChange={(val) => handleChange("isDailyResidence", val)}
                                                     />
-                                                    <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                    <Label htmlFor="isDailyResidence" className="cursor-pointer">ที่พักอาศัยเป็นที่อยู่ของทุกๆ วันหรือไม่ <span className="text-red-500">*</span></Label>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        id="isOnCollateral"
+                                                        checked={formData.isOnCollateral || false}
+                                                        onCheckedChange={(val) => handleChange("isOnCollateral", val)}
+                                                    />
+                                                    <Label htmlFor="isOnCollateral" className="cursor-pointer">ที่อยู่อาศัยบนหลักประกันหรือไม่ <span className="text-red-500">*</span></Label>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                }
+                            />
+                        </div>
 
+                        {/* Address 3: Shipping Address */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
+                            <AddressForm
+                                title="ที่อยู่จัดส่งเอกสาร"
+                                prefix="shipping"
+                                formData={formData}
+                                onChange={handleChange}
+                                hideFields={formData.shippingAddressSource && formData.shippingAddressSource !== 'new'}
+                                headerChildren={
+                                    <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label>จำนวนผู้อยู่อาศัย</Label>
+                                            <Label className="text-sm">เลือกที่อยู่จัดส่งเอกสาร</Label>
                                             <Select
-                                                value={formData.currentResidentType || ""}
-                                                onValueChange={(val) => handleChange("currentResidentType", val)}
+                                                value={formData.shippingAddressSource || (formData.isShippingSameAsCurrent ? "current" : "new")}
+                                                onValueChange={(val) => {
+                                                    handleChange("shippingAddressSource", val);
+                                                    // Maintain backward compatibility for now if needed, 
+                                                    // but primarily use shippingAddressSource
+                                                    handleChange("isShippingSameAsCurrent", val === 'current');
+                                                }}
                                             >
                                                 <SelectTrigger className="h-11 bg-white">
-                                                    <SelectValue placeholder="ระบุประเภทผู้อยู่อาศัย" />
+                                                    <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
-                                                    <SelectItem value="พ่อ/แม่/ลูก">พ่อ/แม่/ลูก</SelectItem>
-                                                    <SelectItem value="สามี/ภรรยา">สามี/ภรรยา</SelectItem>
-                                                    <SelectItem value="ญาติ">ญาติ</SelectItem>
-                                                    <SelectItem value="แฟน">แฟน</SelectItem>
-                                                    <SelectItem value="เพื่อน">เพื่อน</SelectItem>
+                                                    <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                    <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
+                                                    <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex items-center gap-2 pt-3">
-                                                <Checkbox
-                                                    id="isDailyResidence"
-                                                    checked={formData.isDailyResidence || false}
-                                                    onCheckedChange={(val) => handleChange("isDailyResidence", val)}
-                                                />
-                                                <Label htmlFor="isDailyResidence" className="cursor-pointer">ที่พักอาศัยเป็นที่อยู่ของทุกๆ วันหรือไม่ <span className="text-red-500">*</span></Label>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Checkbox
-                                                    id="isOnCollateral"
-                                                    checked={formData.isOnCollateral || false}
-                                                    onCheckedChange={(val) => handleChange("isOnCollateral", val)}
-                                                />
-                                                <Label htmlFor="isOnCollateral" className="cursor-pointer">ที่อยู่อาศัยบนหลักประกันหรือไม่ <span className="text-red-500">*</span></Label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        />
-
-
-
-
-                        <AddressForm
-                            title="ที่อยู่จัดส่งเอกสาร"
-                            prefix="shipping"
-                            formData={formData}
-                            onChange={handleChange}
-                            hideFields={formData.shippingAddressSource && formData.shippingAddressSource !== 'new'}
-                            headerChildren={
-                                <div className="space-y-4 mb-4 mt-2">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm">เลือกที่อยู่จัดส่งเอกสาร</Label>
-                                        <Select
-                                            value={formData.shippingAddressSource || (formData.isShippingSameAsCurrent ? "current" : "new")}
-                                            onValueChange={(val) => {
-                                                handleChange("shippingAddressSource", val);
-                                                // Maintain backward compatibility for now if needed, 
-                                                // but primarily use shippingAddressSource
-                                                handleChange("isShippingSameAsCurrent", val === 'current');
-                                            }}
-                                        >
-                                            <SelectTrigger className="h-11 bg-white">
-                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
-                                                <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
-                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    {formData.shippingAddressSource && formData.shippingAddressSource !== 'new' && (
-                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
-                                            <Info className="w-4 h-4" />
-                                            ใช้ข้อมูลที่อยู่เดียวกับ{
-                                                formData.shippingAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' : 'ที่อยู่ปัจจุบัน'
-                                            }
-                                        </div>
-                                    )}
-                                </div>
-                            }
-                        />
-                        <AddressForm
-                            title="ที่อยู่ที่สามารถติดต่อได้"
-                            prefix="contact"
-                            formData={formData}
-                            onChange={handleChange}
-                            hideFields={formData.contactAddressSource && formData.contactAddressSource !== 'new'}
-                            headerChildren={
-                                <div className="space-y-4 mb-4 mt-2">
-                                    <div className="space-y-2">
-                                        <Label className="text-sm">เลือกที่อยู่ที่สามารถติดต่อได้</Label>
-                                        <Select
-                                            value={formData.contactAddressSource || "new"}
-                                            onValueChange={(val) => {
-                                                handleChange("contactAddressSource", val);
-                                                if (val !== 'new') {
-                                                    // Copy logic if needed, or just let AddressForm handle display
-                                                    // For consistency with other forms, we might want to sync data
-                                                    // but the user just requested "can use", so selection is enough.
+                                        {formData.shippingAddressSource && formData.shippingAddressSource !== 'new' && (
+                                            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                ใช้ข้อมูลที่อยู่เดียวกับ{
+                                                    formData.shippingAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' : 'ที่อยู่ปัจจุบัน'
                                                 }
-                                            }}
-                                        >
-                                            <SelectTrigger className="h-11 bg-white">
-                                                <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
-                                                <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
-                                                <SelectItem value="shipping">ที่อยู่จัดส่งเอกสาร</SelectItem>
-                                                <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                            </div>
+                                        )}
                                     </div>
-                                    {formData.contactAddressSource && formData.contactAddressSource !== 'new' && (
-                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
-                                            <Info className="w-4 h-4" />
-                                            ใช้ข้อมูลที่อยู่เดียวกับ{
-                                                formData.contactAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' :
-                                                    formData.contactAddressSource === 'current' ? 'ที่อยู่ปัจจุบัน' :
-                                                        'ที่อยู่จัดส่งเอกสาร'
-                                            }
+                                }
+                            />
+                        </div>
+
+                        {/* Address 4: Contact Address */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
+                            <AddressForm
+                                title="ที่อยู่ที่สามารถติดต่อได้"
+                                prefix="contact"
+                                formData={formData}
+                                onChange={handleChange}
+                                hideFields={formData.contactAddressSource && formData.contactAddressSource !== 'new'}
+                                headerChildren={
+                                    <div className="space-y-4 mb-4 mt-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm">เลือกที่อยู่ที่สามารถติดต่อได้</Label>
+                                            <Select
+                                                value={formData.contactAddressSource || "new"}
+                                                onValueChange={(val) => {
+                                                    handleChange("contactAddressSource", val);
+                                                    if (val !== 'new') {
+                                                        // Copy logic if needed, or just let AddressForm handle display
+                                                        // For consistency with other forms, we might want to sync data
+                                                        // but the user just requested "can use", so selection is enough.
+                                                    }
+                                                }}
+                                            >
+                                                <SelectTrigger className="h-11 bg-white">
+                                                    <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
+                                                    <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
+                                                    <SelectItem value="shipping">ที่อยู่จัดส่งเอกสาร</SelectItem>
+                                                    <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
-                                    )}
-                                </div>
-                            }
-                        />
+                                        {formData.contactAddressSource && formData.contactAddressSource !== 'new' && (
+                                            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                ใช้ข้อมูลที่อยู่เดียวกับ{
+                                                    formData.contactAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' :
+                                                        formData.contactAddressSource === 'current' ? 'ที่อยู่ปัจจุบัน' :
+                                                            'ที่อยู่จัดส่งเอกสาร'
+                                                }
+                                            </div>
+                                        )}
+                                    </div>
+                                }
+                            />
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -1998,7 +2005,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                         {/* SOCIAL MEDIAS SECTION */}
                         <div className="space-y-4 pt-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-2">
                                 <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                                     <Globe className="w-4 h-4 text-chaiyo-blue" /> เครือข่ายสังคมออนไลน์ (Social Media)
                                 </Label>
