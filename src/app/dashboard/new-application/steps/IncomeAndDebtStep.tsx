@@ -433,18 +433,18 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const SE_INCOME_FREQUENCIES = [
-        { label: "ยอดขายรายวัน", value: "daily" },
-        { label: "ยอดขายรายสัปดาห์", value: "weekly" },
-        { label: "ยอดขายรายเดือน", value: "monthly" },
-        { label: "ยอดขายรายไตรมาส", value: "quarterly" },
-        { label: "ยอดขายรายปี", value: "yearly" },
+        { label: "รายวัน", value: "daily" },
+        { label: "รายสัปดาห์", value: "weekly" },
+        { label: "รายเดือน", value: "monthly" },
+        { label: "รายไตรมาส", value: "quarterly" },
+        { label: "รายปี", value: "yearly" },
     ];
 
     const SE_OPERATING_HOURS = [
-        { label: "ช่วงเช้า", value: "morning" },
-        { label: "ช่วงกลางวัน", value: "afternoon" },
-        { label: "ช่วงเย็น", value: "evening" },
-        { label: "ช่วงกลางคืน", value: "night" },
+        { label: "เช้า", value: "morning" },
+        { label: "กลางวัน", value: "afternoon" },
+        { label: "เย็น", value: "evening" },
+        { label: "กลางคืน", value: "night" },
     ];
 
     // SE Cost Handlers
@@ -533,11 +533,11 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     ];
 
     const SE_COST_FREQUENCIES = [
-        { label: "ต้นทุนรายวัน", value: "daily" },
-        { label: "ต้นทุนรายสัปดาห์", value: "weekly" },
-        { label: "ต้นทุนรายเดือน", value: "monthly" },
-        { label: "ต้นทุนรายไตรมาส", value: "quarterly" },
-        { label: "ต้นทุนรายปี", value: "yearly" },
+        { label: "รายวัน", value: "daily" },
+        { label: "รายสัปดาห์", value: "weekly" },
+        { label: "รายเดือน", value: "monthly" },
+        { label: "รายไตรมาส", value: "quarterly" },
+        { label: "รายปี", value: "yearly" },
     ];
 
     const handleAddIncomeDocument = (occId: string, docType: string, label: string) => {
