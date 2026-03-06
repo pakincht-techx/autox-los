@@ -337,7 +337,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between">
-                                            <Label>ปีรถ</Label>
+                                            <Label>รุ่นรถ (ค.ศ.)</Label>
                                             {aiDetectedFields.includes('year') && (
                                                 <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-none text-[10px] font-bold">
                                                     AI EXTRACTED
