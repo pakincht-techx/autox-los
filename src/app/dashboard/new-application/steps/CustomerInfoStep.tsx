@@ -45,7 +45,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 
 interface SocialMedia {
@@ -135,14 +135,14 @@ interface CustomerFormData {
     housingDurationYears?: string;
     housingDurationMonths?: string;
     currentResidentType?: string;
-    isDailyResidence?: boolean | "";
-    isOnCollateral?: boolean | "";
+    isDailyResidence?: boolean;
+    isOnCollateral?: boolean;
     shippingAddressSource?: string;
     isShippingSameAsCurrent?: boolean;
     contactAddressSource?: string;
     educationLevel?: string;
     maritalStatus?: string;
-    isHouseholdHeadBorrower?: boolean | "";
+    isHouseholdHeadBorrower?: boolean;
     householdHeadGender?: string;
     householdHeadAge?: string;
     employedFamilyCount?: string;
@@ -920,14 +920,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                     <div className="space-y-2">
                                         <Label>วันเดือนปีเกิด <span className="text-red-500">*</span></Label>
-                                        <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                value={dateDisplay}
-                                                disabled
-                                                className="pl-9 font-mono bg-gray-50 text-gray-600 h-11"
-                                            />
-                                        </div>
+                                        <DatePickerBE
+                                            value={formData.birthDate || ""}
+                                            onChange={(val) => handleChange("birthDate", val)}
+                                            readOnly
+                                            inputClassName="h-11 bg-gray-50 text-gray-600"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>อายุ <span className="text-red-500">*</span></Label>
@@ -939,14 +937,30 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 const y = parseInt(parts[0]);
                                                 if (isNaN(y)) return "";
                                                 const today = new Date();
-                                                const age = today.getFullYear() - y;
+                                                let age = today.getFullYear() - y;
                                                 return age >= 0 ? age.toString() : "0";
                                             })()}
                                             disabled
                                             className="bg-gray-50 text-gray-600 h-11"
                                         />
                                     </div>
-
+                                    <div className="space-y-2">
+                                        <Label>สัญชาติ <span className="text-red-500">*</span></Label>
+                                        {formData.verificationMethod === 'DIPCHIP' ? (
+                                            <Input value={formData.nationality || "THAI"} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                        ) : (
+                                            <Select value={formData.nationality || "Thai"} onValueChange={(val) => handleChange("nationality", val)}>
+                                                <SelectTrigger className="h-11 bg-white">
+                                                    <SelectValue placeholder="เลือกสัญชาติ" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {COUNTRIES.map((c) => (
+                                                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1158,7 +1172,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 prefix="current"
                                 formData={formData}
                                 onChange={handleChange}
-                                hideFields={formData.currentAddressSource && formData.currentAddressSource !== 'new'}
+                                hideFields={!!(formData.currentAddressSource && formData.currentAddressSource !== 'new')}
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
@@ -1316,7 +1330,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 prefix="shipping"
                                 formData={formData}
                                 onChange={handleChange}
-                                hideFields={formData.shippingAddressSource && formData.shippingAddressSource !== 'new'}
+                                hideFields={!!(formData.shippingAddressSource && formData.shippingAddressSource !== 'new')}
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
@@ -1360,7 +1374,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 prefix="contact"
                                 formData={formData}
                                 onChange={handleChange}
-                                hideFields={formData.contactAddressSource && formData.contactAddressSource !== 'new'}
+                                hideFields={!!(formData.contactAddressSource && formData.contactAddressSource !== 'new')}
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
@@ -2186,7 +2200,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <AlertTriangle className="w-4 h-4" />
                                                         บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
                                                     </div>
-                                                    {newCoBorrower.watchlistReasons && newCoBorrower.watchlistReasons.length > 0 && (
+                                                     {(newCoBorrower.watchlistReasons || []).length > 0 && (
                                                         <div className="flex flex-wrap gap-2 ml-6">
                                                             {(newCoBorrower.watchlistReasons || []).map
                                                                 ((reason: string, idx: number) => (
@@ -2278,17 +2292,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                                 <div className="space-y-2">
                                                     <Label>วันเกิด</Label>
-                                                    <div className="relative">
-                                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input
-                                                            value={coBorrowerDateDisplay}
-                                                            onChange={handleCoBorrowerDateInputChange}
-                                                            onBlur={handleCoBorrowerDateBlur}
-                                                            placeholder="วัน/เดือน/ปี (พ.ศ.)"
-                                                            className="pl-9 font-mono"
-                                                            maxLength={10}
-                                                        />
-                                                    </div>
+                                                    <DatePickerBE
+                                                        value={newCoBorrower.birthDate}
+                                                        onChange={(val) => setNewCoBorrower({ ...newCoBorrower, birthDate: val })}
+                                                        inputClassName="h-11"
+                                                    />
                                                 </div>
 
                                                 <div className="space-y-2">
@@ -2463,7 +2471,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <AlertTriangle className="w-4 h-4" />
                                                         บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
                                                     </div>
-                                                    {newGuarantor.watchlistReasons && newGuarantor.watchlistReasons.length > 0 && (
+                                                     {(newGuarantor.watchlistReasons || []).length > 0 && (
                                                         <div className="flex flex-wrap gap-2 ml-6">
                                                             {(newGuarantor.watchlistReasons || []).map
                                                                 ((reason: string, idx: number) => (
@@ -2555,17 +2563,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                                 <div className="space-y-2">
                                                     <Label>วันเกิด</Label>
-                                                    <div className="relative">
-                                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input
-                                                            value={guarantorDateDisplay}
-                                                            onChange={handleGuarantorDateInputChange}
-                                                            onBlur={handleGuarantorDateBlur}
-                                                            placeholder="วัน/เดือน/ปี (พ.ศ.)"
-                                                            className="pl-9 font-mono"
-                                                            maxLength={10}
-                                                        />
-                                                    </div>
+                                                    <DatePickerBE
+                                                        value={newGuarantor.birthDate}
+                                                        onChange={(val) => setNewGuarantor({ ...newGuarantor, birthDate: val })}
+                                                        inputClassName="h-11"
+                                                    />
                                                 </div>
 
                                                 <div className="space-y-2">

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/Textarea";
@@ -90,106 +91,10 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
     // --- DATE LOGIC ---
     const [isLifetime, setIsLifetime] = useState(false);
-    const [dateDisplay, setDateDisplay] = useState("");
-    // --- DATE DISPLAY STATES ---
-    const [issueDateDisplay, setIssueDateDisplay] = useState("");
-    const [expiryDateDisplay, setExpiryDateDisplay] = useState("");
-
-    const formatToThaiBE = (dateString: string | undefined) => {
-        if (!dateString) return "";
-
-        // Support partial dates (YYYY-MM-DD where MM or DD can be 00)
-        const parts = dateString.split('-');
-        if (parts.length === 3) {
-            const y = parseInt(parts[0]);
-            const m = parts[1];
-            const d = parts[2];
-            if (!isNaN(y)) {
-                const thaiYear = y + 543;
-                const displayDay = d === '00' ? '--' : d;
-                const displayMonth = m === '00' ? '--' : m;
-                return `${displayDay}/${displayMonth}/${thaiYear}`;
-            }
-        }
-
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return "";
-            const thaiYear = date.getFullYear() + 543;
-            return `${format(date, "dd/MM")}/${thaiYear}`;
-        } catch {
-            return "";
-        }
-    };
-
-    useEffect(() => {
-        if (formData.birthDate) {
-            setDateDisplay(formatToThaiBE(formData.birthDate));
-        } else {
-            setDateDisplay("");
-        }
-    }, [formData.birthDate]);
-
-    useEffect(() => {
-        setIssueDateDisplay(formatToThaiBE(formData.issueDate));
-    }, [formData.issueDate]);
-
-    useEffect(() => {
-        setExpiryDateDisplay(formatToThaiBE(formData.expiryDate));
-    }, [formData.expiryDate]);
-
-    const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string, setDisplay: (val: string) => void) => {
-        let rawVal = e.target.value;
-        let val = rawVal.replace(/[^0-9-]/g, ''); // Keep numbers and -
-
-        if (val.length > 8) val = val.slice(0, 8);
-
-        let formattedVal = "";
-        if (val.length > 0) {
-            formattedVal = val.slice(0, 2);
-            if (val.length > 2) {
-                formattedVal += '/' + val.slice(2, 4);
-                if (val.length > 4) {
-                    formattedVal += '/' + val.slice(4, 8);
-                }
-            }
-        }
-
-        setDisplay(formattedVal);
-
-        if (val.length === 8) {
-            const dStr = val.slice(0, 2);
-            const mStr = val.slice(2, 4);
-            let yStr = val.slice(4, 8);
-
-            const d = dStr === '--' ? '00' : dStr;
-            const m = mStr === '--' ? '00' : mStr;
-            let y = parseInt(yStr, 10);
-
-            // Auto-convert A.D. to B.E. (if year < 2400, assume it's A.D. and add 543)
-            if (y < 2400) {
-                const convertedY = y + 543;
-                y = convertedY;
-                setDisplay(`${dStr}/${mStr}/${convertedY}`);
-            }
-
-            const realYearAD = y - 543;
-            handleFormChange(field, `${realYearAD}-${m}-${d}`);
-        }
-    };
-
-    const handleDateBlur = (field: string, setDisplay: (val: string) => void) => {
-        if (formData[field]) {
-            setDisplay(formatToThaiBE(formData[field]));
-        }
-    };
-
-
 
     const toggleLifetime = (checked: boolean) => {
         setIsLifetime(checked);
         if (checked) {
-            setExpiryDateDisplay("");
             handleFormChange('expiryDate', "");
         }
     };
@@ -1194,15 +1099,11 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         </PopoverContent>
                                                     </Popover>
                                                 </div>
-                                                <Input
-                                                    value={dateDisplay || ""}
-                                                    onChange={(e) => handleDateInputChange(e, 'birthDate', setDateDisplay)}
+                                                <DatePickerBE
+                                                    value={formData.birthDate}
+                                                    onChange={(val) => handleFormChange('birthDate', val)}
                                                     readOnly={verificationMethod === 'DIPCHIP'}
-                                                    className={cn(
-                                                        "rounded-xl",
-                                                        verificationMethod === 'DIPCHIP' ? "bg-gray-50 border-none px-4" : "bg-white border focus:border-chaiyo-blue"
-                                                    )}
-                                                    placeholder="DD/MM/YYYY"
+                                                    inputClassName="h-11"
                                                 />
                                             </div>
 
@@ -1222,15 +1123,20 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Input
-                                                    value={isLifetime ? "-" : (expiryDateDisplay || "")}
-                                                    onChange={(e) => handleDateInputChange(e, 'expiryDate', setExpiryDateDisplay)}
-                                                    className={cn("rounded-xl border", (verificationMethod === 'DIPCHIP' || isLifetime) ? "bg-gray-50 border-gray-200 shadow-none px-4" : "bg-white focus:border-chaiyo-blue")}
+                                                <DatePickerBE
+                                                    value={formData.expiryDate}
+                                                    onChange={(val) => handleFormChange('expiryDate', val)}
                                                     readOnly={verificationMethod === 'DIPCHIP' || isLifetime}
-                                                    placeholder={isLifetime ? "ตลอดชีพ" : "DD/MM/YYYY"}
+                                                    disabled={isLifetime}
+                                                    inputClassName="h-11 shadow-none"
+                                                    placeholder={isLifetime ? "ไม่มีวันหมดอายุ" : undefined}
                                                 />
                                             </div>
                                         </div>
+
+
+
+
 
                                         <div className="pt-6 border-t">
                                             <Button
