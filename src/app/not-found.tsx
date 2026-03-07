@@ -51,7 +51,7 @@ export default function NotFoundPage() {
                             size="xl"
                             className="w-full rounded-2xl"
                         >
-                            <Link href="/" className="flex items-center justify-center">
+                            <Link href="/dashboard/applications" className="flex items-center justify-center">
                                 <ChevronLeft className="w-5 h-5 mr-2" />
                                 กลับสู่หน้าหลัก
                             </Link>

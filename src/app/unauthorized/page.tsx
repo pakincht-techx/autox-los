@@ -17,17 +17,7 @@ export default function UnauthorizedPage() {
                     transition={{ duration: 0.6, ease: "easeOut" }}
                     className="relative w-full aspect-square md:h-[500px] flex items-center justify-center"
                 >
-                    <motion.div
-                        animate={{
-                            y: [0, -10, 0],
-                        }}
-                        transition={{
-                            duration: 4,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                        }}
-                        className="relative w-full h-full"
-                    >
+                    <div className="relative w-full h-full">
                         <Image
                             src="/character/horse-confusing.png"
                             alt="Access Denied"
@@ -35,7 +25,7 @@ export default function UnauthorizedPage() {
                             className="object-contain"
                             priority
                         />
-                    </motion.div>
+                    </div>
                 </motion.div>
 
                 {/* Right Column: Text & Actions */}
@@ -45,15 +35,11 @@ export default function UnauthorizedPage() {
                     transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
                     className="flex flex-col items-start text-left"
                 >
-                    <div className="inline-block px-3 py-1 bg-red-50 text-status-rejected text-xs font-bold rounded-full mb-6 uppercase tracking-wider">
-                        Error 403: Forbidden
-                    </div>
-
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 font-[family-name:var(--font-ibm-plex-sans-thai)] leading-tight">
-                        ขออภัย ท่านไม่มีสิทธิ์<br className="hidden md:block" />เข้าถึงหน้านี้
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 font-[family-name:var(--font-ibm-plex-thai)] leading-tight">
+                        ขออภัย ท่านไม่มีสิทธิ์เข้าถึงหน้านี้
                     </h1>
 
-                    <p className="text-xl text-gray-500 mb-10 font-[family-name:var(--font-ibm-plex-sans-thai)] leading-relaxed max-w-md">
+                    <p className="text-xl text-gray-500 mb-10 font-[family-name:var(--font-ibm-plex-thai)] leading-relaxed max-w-md">
                         ดูเหมือนว่าท่านจะไม่มีสิทธิ์เข้าใช้งานในส่วนนี้ กรุณาติดต่อผู้ดูแลระบบหากท่านเชื่อว่านี่คือข้อผิดพลาด
                     </p>
 
@@ -61,17 +47,13 @@ export default function UnauthorizedPage() {
                         <Button
                             asChild
                             size="xl"
-                            className="w-full rounded-2xl shadow-lg shadow-chaiyo-blue/20"
+                            className="w-full rounded-2xl"
                         >
-                            <Link href="/" className="flex items-center justify-center">
+                            <Link href="/dashboard/applications" className="flex items-center justify-center">
                                 <ChevronLeft className="w-5 h-5 mr-2" />
                                 กลับสู่หน้าหลัก
                             </Link>
                         </Button>
-
-                        <p className="text-sm text-gray-400 font-[family-name:var(--font-ibm-plex-sans-thai)] pl-2">
-                            © {new Date().getFullYear() + 543} AutoX Co., Ltd.
-                        </p>
                     </div>
                 </motion.div>
             </div>

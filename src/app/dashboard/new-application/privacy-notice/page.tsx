@@ -11,7 +11,7 @@ export default function PrivacyNoticePage() {
     return (
         <PrivacyConsentStep
             onAccept={() => router.push("/dashboard/new-application/sensitive-data")}
-            onBack={() => router.push("/dashboard/new-application/salesheet")}
+            onBack={() => router.push("/dashboard/pre-question")}
             collateralType={formData.collateralType}
         />
     );

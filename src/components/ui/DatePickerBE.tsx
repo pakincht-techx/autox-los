@@ -1,16 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { format, parse, isValid, getYear } from "date-fns";
-import { Calendar as CalendarIcon, X } from "lucide-react";
+import { format, isValid, getYear } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/Button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
+
 import { Input } from "@/components/ui/Input";
 
 interface DatePickerBEProps {
@@ -37,13 +30,27 @@ export function DatePickerBE({
     error,
 }: DatePickerBEProps) {
     const [displayValue, setDisplayValue] = React.useState("");
-    const [isOpen, setIsOpen] = React.useState(false);
 
     // Sync internal display value when external value (A.D. ISO string) changes
     React.useEffect(() => {
         if (!value) {
             setDisplayValue("");
             return;
+        }
+
+        // Custom validation for partial dates (e.g. 1995------ or 1995-01---)
+        const parts = value.split('-');
+        if (parts.length === 3) {
+            const y = parts[0];
+            const m = parts[1];
+            const d = parts[2];
+
+            const isPartialValid = y.length === 4 && (m === "--" || parseInt(m) > 0) && (d === "--" || parseInt(d) > 0);
+            if (isPartialValid && (m === "--" || d === "--")) {
+                const yBE = parseInt(y) + 543;
+                setDisplayValue(`${d}/${m}/${yBE}`);
+                return;
+            }
         }
 
         const date = new Date(value);
@@ -56,7 +63,7 @@ export function DatePickerBE({
     }, [value]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/[^0-9]/g, ""); // Keep numbers only
+        let val = e.target.value.replace(/[^0-9\-]/g, ""); // Keep numbers and dashes only
         if (val.length > 8) val = val.slice(0, 8);
 
         // Format: DD/MM/YYYY
@@ -76,21 +83,23 @@ export function DatePickerBE({
         if (val.length === 8) {
             const d = val.slice(0, 2);
             const m = val.slice(2, 4);
-            let yBE = parseInt(val.slice(4, 8));
+            const yBERaw = val.slice(4, 8);
+            let yBE = parseInt(yBERaw);
 
-            // Basic validation
-            const dInt = parseInt(d);
-            const mInt = parseInt(m);
-            if (dInt > 0 && dInt <= 31 && mInt > 0 && mInt <= 12) {
-                // If year is < 2400, assume it's A.D. and convert to B.E. for internal consistency?
+            if (!isNaN(yBE)) {
                 // Rule says "Never show A.D. in UI". If user types 2024, convert to 2567.
-                if (yBE < 2400) {
+                if (yBE > 0 && yBE < 2400) {
                     yBE += 543;
                     setDisplayValue(`${d}/${m}/${yBE}`);
                 }
                 const yAD = yBE - 543;
-                const isoString = `${yAD}-${m}-${d}`;
-                if (isValid(new Date(isoString))) {
+
+                // Allow partial dates with dashes
+                const dValid = d === "--" || (parseInt(d) > 0 && parseInt(d) <= 31);
+                const mValid = m === "--" || (parseInt(m) > 0 && parseInt(m) <= 12);
+
+                if (dValid && mValid && yAD > 1900 && yAD < 2200) {
+                    const isoString = `${yAD}-${m}-${d}`;
                     onChange(isoString);
                 }
             }
@@ -104,6 +113,19 @@ export function DatePickerBE({
         if (!value) {
             setDisplayValue("");
         } else {
+            const parts = value.split('-');
+            if (parts.length === 3) {
+                const y = parts[0];
+                const m = parts[1];
+                const d = parts[2];
+                const isPartialValid = y.length === 4 && (m === "--" || parseInt(m) > 0) && (d === "--" || parseInt(d) > 0);
+                if (isPartialValid && (m === "--" || d === "--")) {
+                    const yBE = parseInt(y) + 543;
+                    setDisplayValue(`${d}/${m}/${yBE}`);
+                    return;
+                }
+            }
+
             const date = new Date(value);
             if (isValid(date)) {
                 const d = format(date, "dd");
@@ -113,17 +135,6 @@ export function DatePickerBE({
             }
         }
     };
-
-    const handleCalendarSelect = (date: Date | undefined) => {
-        if (date) {
-            const isoString = format(date, "yyyy-MM-dd");
-            onChange(isoString);
-            setIsOpen(false);
-        }
-    };
-
-    // Current Date in A.D. for Calendar
-    const calendarDate = value && isValid(new Date(value)) ? new Date(value) : undefined;
 
     return (
         <div className={cn("relative w-full", className)}>
@@ -137,46 +148,13 @@ export function DatePickerBE({
                     disabled={disabled}
                     readOnly={readOnly}
                     className={cn(
-                        "pr-10 h-12 rounded-xl", // Match standard project height
+                        "h-12 rounded-xl border-gray-200", // Match standard project height and border
                         error && "border-red-500 ring-red-500/20",
                         displayValue && "font-medium",
-                        readOnly && "bg-gray-50 border-none shadow-none text-gray-700",
+                        (disabled || readOnly) && "bg-gray-200/50! border-gray-200! text-gray-500 cursor-not-allowed select-none pointer-events-none",
                         inputClassName
                     )}
                 />
-                
-                <Popover open={isOpen} onOpenChange={setIsOpen}>
-                    <PopoverTrigger asChild>
-                        <button
-                            type="button"
-                            disabled={disabled || readOnly}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-chaiyo-blue transition-colors outline-none focus:text-chaiyo-blue disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <CalendarIcon className="w-4 h-4" />
-                        </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="end">
-                        <Calendar
-                            mode="single"
-                            selected={calendarDate}
-                            onSelect={handleCalendarSelect}
-                            initialFocus
-                        />
-                    </PopoverContent>
-                </Popover>
-
-                {displayValue && !disabled && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setDisplayValue("");
-                            onChange("");
-                        }}
-                        className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 transition-colors p-1"
-                    >
-                        <X className="w-3.5 h-3.5" />
-                    </button>
-                )}
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { CheckCircle, Loader2, CreditCard, User, Camera, ArrowRight, UserCheck, UserPlus, FileText, MapPin, Briefcase, Calendar, ShieldAlert, AlertTriangle, XCircle, ArrowLeft, AlertCircle, Info, Save, Check, Printer } from "lucide-react";
+import { CheckCircle, Loader2, CreditCard, User, Camera, ArrowRight, UserCheck, UserPlus, FileText, MapPin, Briefcase, Calendar, ShieldAlert, AlertTriangle, XCircle, ArrowLeft, AlertCircle, Info, Save, Check, Printer, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -83,6 +83,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     });
     const [showNotContinueDialog, setShowNotContinueDialog] = useState(false);
     const [notContinuePhone, setNotContinuePhone] = useState("");
+    const [notContinueLineId, setNotContinueLineId] = useState("");
     const [mockLivePhoto, setMockLivePhoto] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
@@ -207,6 +208,9 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             firstName: "สมชาย",
             middleName: "",
             lastName: "รักชาติ",
+            firstNameEn: "SOMCHAI",
+            middleNameEn: "",
+            lastNameEn: "RAKCHAT",
             prefix: "นาย",
             gender: "ชาย",
             birthDate: "1990-01-01",
@@ -225,6 +229,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             expiryDate: "2029-05-19",
             laserId: "ME1-2345678-90",
             nationality: "Thai",
+            verificationMethod: 'DIPCHIP',
         };
 
         const updatedData = { ...formData, ...mockData };
@@ -280,6 +285,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                 expiryDate: "2031-10-09",
                 laserId: formData.cardType === 'PINK_CARD' ? "PNK-0000000-01" : "JT2-9876543-21",
                 nationality: formData.cardType === 'PINK_CARD' ? "Myanmar" : "Thai",
+                verificationMethod: 'MANUAL',
             };
 
             setFormData({ ...formData, ...mockData });
@@ -897,43 +903,70 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {/* STAGE: FACE FAILED (FINAL FAILURE) */}
                         {stage === 'FACE_FAILED' && (
                             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                                <Card className="border-2 border-red-200 bg-red-50/30 overflow-hidden rounded-3xl">
+                                <Card className="border-1 overflow-hidden rounded-3xl">
                                     <CardContent className="flex flex-col items-center py-12 px-8 text-center">
                                         <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
                                             <XCircle className="w-12 h-12 text-red-600" />
                                         </div>
-                                        <h3 className="text-2xl font-black text-red-900 mb-2">การยืนยันตัวตนไม่สำเร็จ</h3>
-                                        <p className="text-red-700 text-base max-w-sm mb-10">ตรวจสอบใบหน้าไม่ผ่านครบ 3 ครั้งตามที่กฎกำหนด <br /> ไม่สามารถดำเนินการในขั้นตอนนี้ได้ต่อ</p>
+                                        <h3 className="text-2xl font-black mb-2">การยืนยันตัวตนไม่สำเร็จ</h3>
+                                        <p className="text-base max-w-sm mb-10">ตรวจสอบใบหน้าไม่ผ่านครบ 3 ครั้งตามที่กฎกำหนด <br /> ไม่สามารถดำเนินการในขั้นตอนนี้ได้ต่อ</p>
 
-                                        <div className="w-full max-w-md bg-white border border-red-100 rounded-2xl p-6 text-left space-y-4 mb-10">
+                                        <div className="w-full max-w-md bg-white border rounded-2xl p-6 text-left space-y-4 mb-10">
                                             <div className="space-y-1">
                                                 <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">ชื่อ-นามสกุล ลูกค้า</Label>
                                                 <p className="text-lg font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
                                             </div>
 
-                                            <div className="space-y-2 pt-2 border-t border-gray-50">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                    เบอร์ติดต่อ
-                                                </Label>
-                                                <Input
-                                                    placeholder="0xx-xxx-xxxx"
-                                                    className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue"
-                                                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                                />
+                                            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-50">
+                                                <div className="space-y-2">
+                                                    <Label className="text-muted tracking-tight">เบอร์ติดต่อ</Label>
+                                                    <div className="relative">
+                                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input
+                                                            placeholder="0xx-xxx-xxxx"
+                                                            className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9"
+                                                            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                                            defaultValue={formData.phoneNumber}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label className="text-muted tracking-tight">LINE ID</Label>
+                                                    <div className="relative">
+                                                        <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input
+                                                            placeholder="@lineid"
+                                                            className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9"
+                                                            onChange={(e) => setFormData({ ...formData, lineId: e.target.value })}
+                                                            defaultValue={formData.lineId}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full h-12 rounded-xl border-chaiyo-blue text-chaiyo-blue font-bold flex items-center justify-center gap-2 hover:bg-blue-50"
+                                                onClick={() => {
+                                                    const pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
+                                                    window.open(pdfPath, '_blank');
+                                                }}
+                                            >
+                                                <Printer className="w-5 h-5" /> พิมพ์ Salesheet
+                                            </Button>
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
                                             <Button
-                                                variant="destructive"
+                                                variant="outline"
                                                 className="h-12 rounded-xl font-bold flex items-center justify-center gap-2 order-2 sm:order-1"
                                                 onClick={() => window.location.href = '/dashboard'}
                                             >
                                                 <XCircle className="w-4 h-4" /> ปิดการทำรายการ
                                             </Button>
                                             <Button
-                                                variant="outline"
-                                                className="h-12 rounded-xl font-bold border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50 flex items-center justify-center gap-2 order-1 sm:order-2"
+                                                variant="default"
+                                                className="h-12 rounded-xl font-bold text-white flex items-center justify-center gap-2 order-1 sm:order-2"
                                                 onClick={() => {
                                                     setAlertDialog({
                                                         isOpen: true,
@@ -1232,14 +1265,31 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             <p className="text-lg font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label className="text-sm font-bold text-gray-700">เบอร์ติดต่อ</Label>
-                            <Input
-                                placeholder="0xx-xxx-xxxx"
-                                value={notContinuePhone}
-                                onChange={(e) => setNotContinuePhone(e.target.value)}
-                                className="rounded-xl h-12 border-gray-200 focus:border-chaiyo-blue bg-white"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-muted tracking-tight">เบอร์ติดต่อ</Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="0xx-xxx-xxxx"
+                                        value={notContinuePhone}
+                                        onChange={(e) => setNotContinuePhone(e.target.value)}
+                                        className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9 bg-white"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-muted tracking-tight">LINE ID</Label>
+                                <div className="relative">
+                                    <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="@lineid"
+                                        value={notContinueLineId}
+                                        onChange={(e) => setNotContinueLineId(e.target.value)}
+                                        className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9 bg-white"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <Button

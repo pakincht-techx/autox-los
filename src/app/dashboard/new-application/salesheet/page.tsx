@@ -16,7 +16,7 @@ const PdfViewer = dynamic(
 
 export default function SalesheetPage() {
     const router = useRouter();
-    const { formData, setFormData } = useApplication();
+    const { formData, setFormData, appId } = useApplication();
     const [showStaffBanner, setShowStaffBanner] = useState(true);
 
     let pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
@@ -84,14 +84,14 @@ export default function SalesheetPage() {
                 <Button
                     variant="outline"
                     size="xl"
-                    onClick={() => router.push("/dashboard/pre-question")}
+                    onClick={() => router.push("/dashboard/new-application/identity-checker")}
                     className="px-6 font-bold"
                 >
                     <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
                 </Button>
                 <Button
                     size="xl"
-                    onClick={() => router.push("/dashboard/new-application/privacy-notice")}
+                    onClick={() => router.push(`/dashboard/new-application/${appId || "app-256700001"}/customer-info`)}
                     disabled={!formData.isSalesheetRead}
                     className="px-8 font-bold"
                 >

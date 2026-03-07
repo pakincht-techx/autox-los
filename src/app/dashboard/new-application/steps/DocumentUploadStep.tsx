@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, CheckCircle, Upload, AlertCircle } from "lucide-react";
+import { FileText, CheckCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { cn } from "@/lib/utils";
+import { CustomerFormData } from "@/types/application";
 
 interface DocumentUploadStepProps {
-    formData: any;
-    setFormData: (data: any) => void;
+    formData: CustomerFormData;
+    setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
 }
 
-const getRequiredDocs = (collateralType: string) => {
+const getRequiredDocs = () => {
     // Phase 2: Only strictly personal/KYC documents here. 
     // Collateral docs moved to CollateralPhotoStep.
     return [
@@ -30,7 +30,7 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
         setUploads(prev => ({ ...prev, [id]: true }));
     };
 
-    const requiredDocs = getRequiredDocs(formData.collateralType || 'car');
+    const requiredDocs = getRequiredDocs();
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
@@ -87,7 +87,7 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                 <Checkbox
                     id="requireNCB"
                     checked={formData.requireNCB || false}
-                    onCheckedChange={(checked) => setFormData((prev: any) => ({ ...prev, requireNCB: checked }))}
+                    onCheckedChange={(checked) => setFormData((prev: CustomerFormData) => ({ ...prev, requireNCB: !!checked }))}
                     className="border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
                 />
                 <div className="grid gap-1.5 leading-none">

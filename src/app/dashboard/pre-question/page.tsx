@@ -1039,7 +1039,7 @@ function PreQuestionPageContent() {
     const handleCreateApplication = () => {
         // Save current sales talk data to localStorage for prefilling the application form
         localStorage.setItem('salesTalkData', JSON.stringify(formData));
-        router.push("/dashboard/new-application/salesheet");
+        router.push("/dashboard/new-application/privacy-notice");
     };
 
     const isStep1Valid = () => {
@@ -2699,7 +2699,7 @@ function PreQuestionPageContent() {
                                                                         {/* Footer (Actions) */}
                                                                         <div className="mt-4 flex pt-4 border-t border-gray-100">
                                                                             <Button size="lg" onClick={() => {
-                                                                                router.push('/dashboard/new-application/salesheet');
+                                                                                router.push('/dashboard/new-application/privacy-notice');
                                                                             }} className="w-full font-bold bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
                                                                         </div>
                                                                     </div>

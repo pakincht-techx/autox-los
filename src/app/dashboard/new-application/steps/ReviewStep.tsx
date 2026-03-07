@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, ShieldCheck, User, Banknote, Car, FileText, X, Phone, Briefcase, MessageSquare, RefreshCcw, Loader2, MapPin, Calendar, Mail, FileCheck, DollarSign, CheckCircle2, XCircle, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/Input";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Check, ShieldCheck, User, Banknote, Car, FileText, X, MessageSquare, RefreshCcw, Loader2, FileCheck, CheckCircle2, XCircle, AlertCircle, ArrowRight } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
@@ -27,10 +25,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CustomerFormData, CoBorrower, Guarantor } from "@/types/application";
 
 interface ReviewStepProps {
-    formData: any;
-    setFormData: (data: any) => void;
+    formData: CustomerFormData;
+    setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
     onSubmit: () => void;
     onEdit: (step: number) => void;
 }
@@ -45,7 +44,13 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
     // Submission & Approval State
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'analyzing' | 'approved' | 'rejected' | 'manual_review'>('idle');
-    const [approvalResult, setApprovalResult] = useState<any>(null);
+    const [approvalResult, setApprovalResult] = useState<{
+        status: string;
+        approvedAmount: number;
+        interestRate: number;
+        monthlyPayment: number;
+        reason?: string;
+    } | null>(null);
 
 
     const [alertDialog, setAlertDialog] = useState({
@@ -55,8 +60,8 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
     });
 
     // Calculate DSR locally to ensure it matches the displayed data (Current Expenses / Current Income)
-    const displayIncome = Number(formData.baseSalary || formData.income || 0) + Number(formData.otherIncome || 0);
-    const displayExpenses = Number(formData.expenses || 0);
+    const displayIncome = Number(formData.baseSalary ?? formData.income ?? 0) + Number(formData.otherIncome ?? 0);
+    const displayExpenses = Number(formData.expenses ?? 0);
     const calculatedDSR = displayIncome > 0 ? (displayExpenses / displayIncome) * 100 : 0;
 
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
@@ -121,20 +126,28 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
 
     useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval>;
         if (showOTP && timer > 0) {
             interval = setInterval(() => {
                 setTimer((prev) => prev - 1);
             }, 1000);
-        } else if (timer === 0) {
-            setCanResend(true);
         }
         return () => clearInterval(interval);
     }, [showOTP, timer]);
 
+    useEffect(() => {
+        if (showOTP && timer === 0 && !canResend) {
+            // Using setTimeout to defer state update and avoid React lint warning
+            const timeout = setTimeout(() => {
+                setCanResend(true);
+            }, 0);
+            return () => clearTimeout(timeout);
+        }
+    }, [showOTP, timer, canResend]);
+
     const handleTermsChange = (checked: boolean) => {
         setAcceptedTerms(checked);
-        setFormData((prev: any) => ({ ...prev, consentTerms: checked }));
+        setFormData((prev: CustomerFormData) => ({ ...prev, consentTerms: checked }));
     };
 
     const handleConfirmSubmission = () => {
@@ -147,8 +160,8 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
         setSubmissionStatus('analyzing');
 
         // Calculate DSR
-        const totalExp = (formData.expenses || 0) + (formData.estimatedMonthlyPayment || 0);
-        const dsr = formData.income > 0 ? (totalExp / formData.income) * 100 : 0;
+        const totalExp = (formData.expenses ?? 0) + (formData.estimatedMonthlyPayment ?? 0);
+        const dsr = (formData.income ?? 0) > 0 ? (totalExp / (formData.income ?? 1)) * 100 : 0;
 
         let status: 'approved' | 'rejected' | 'manual_review' = 'manual_review';
         let message = "";
@@ -166,9 +179,9 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
         // Mock Result Data
         const result = {
             status,
-            approvedAmount: status === 'approved' ? formData.requestedAmount : 0,
-            interestRate: formData.interestRate,
-            monthlyPayment: formData.estimatedMonthlyPayment,
+            approvedAmount: status === 'approved' ? (formData.requestedAmount ?? 0) : 0,
+            interestRate: formData.interestRate ?? 0,
+            monthlyPayment: formData.estimatedMonthlyPayment ?? 0,
             reason: message
         };
 
@@ -246,7 +259,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 </div>
                                 <div className="flex justify-between items-start">
                                     <span className="text-muted shrink-0">เพศ</span>
-                                    <span className="font-medium text-right">{formData.gender || "-"}</span>
+                                    <span className="font-medium text-right">{String(formData.gender || "-")}</span>
                                 </div>
                                 <div className="flex justify-between items-start">
                                     <span className="text-muted shrink-0">เลขบัตรประชาชน</span>
@@ -260,7 +273,10 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted shrink-0">วันเกิด</span>
                                     <span className="font-medium text-right">
                                         {formData.birthDate ? (() => {
-                                            const [y, m, d] = formData.birthDate.split('-');
+                                            const parts = formData.birthDate.split('-');
+                                            const y = parts[0];
+                                            const m = parts[1];
+                                            const d = parts[2];
                                             return y && m && d ? `${d}/${m}/${parseInt(y) + 543}` : formData.birthDate;
                                         })() : "-"}
                                     </span>
@@ -269,12 +285,28 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted shrink-0">อายุ</span>
                                     <span className="font-medium text-right">
                                         {formData.birthDate ? (() => {
-                                            const birth = new Date(formData.birthDate);
-                                            if (isNaN(birth.getTime())) return "-";
+                                            let birthYear: number;
+                                            let birthMonth = 0;
+                                            let birthDateNum = 1;
+
+                                            const parts = formData.birthDate.split('-');
+                                            if (parts.length === 3) {
+                                                birthYear = parseInt(parts[0]);
+                                                birthMonth = parts[1] === '--' ? 0 : parseInt(parts[1]) - 1;
+                                                birthDateNum = parts[2] === '--' ? 1 : parseInt(parts[2]);
+                                            } else {
+                                                const birth = new Date(formData.birthDate);
+                                                if (isNaN(birth.getTime())) return "-";
+                                                birthYear = birth.getFullYear();
+                                                birthMonth = birth.getMonth();
+                                                birthDateNum = birth.getDate();
+                                            }
+
+                                            if (isNaN(birthYear)) return "-";
                                             const today = new Date();
-                                            let age = today.getFullYear() - birth.getFullYear();
-                                            const m = today.getMonth() - birth.getMonth();
-                                            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                                            let age = today.getFullYear() - birthYear;
+                                            const m = today.getMonth() - birthMonth;
+                                            if (m < 0 || (m === 0 && today.getDate() < birthDateNum)) {
                                                 age--;
                                             }
                                             return `${age} ปี`;
@@ -320,7 +352,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             formData.district && (formData.province === 'กรุงเทพมหานคร' ? `เขต${formData.district}` : `อำเภอ${formData.district}`),
                                             formData.province,
                                             formData.zipCode
-                                        ].filter(Boolean).join(' ') || formData.addressLine1 || "-"}
+                                        ].filter(Boolean).map(val => String(val)).join(' ') || String(formData.addressLine1 || "-")}
                                     </span>
                                 </div>
 
@@ -329,10 +361,14 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted">เบอร์โทรศัพท์</span>
                                     <span className="font-medium text-right">{formData.phone || formData.phoneNumber || "-"}</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted">LINE ID</span>
+                                    <span className="font-medium text-right">{formData.lineId || "-"}</span>
+                                </div>
                                 {formData.email && (
                                     <div className="flex justify-between">
                                         <span className="text-muted">อีเมล</span>
-                                        <span className="font-medium text-right break-all">{formData.email}</span>
+                                        <span className="font-medium text-right break-all">{String(formData.email || "-")}</span>
                                     </div>
                                 )}
 
@@ -346,19 +382,19 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="text-muted">รายได้หลัก</span>
                                     <span className="font-medium text-right">฿{Number(formData.baseSalary || formData.income || 0).toLocaleString()}</span>
                                 </div>
-                                {formData.otherIncome > 0 && (
+                                {Number(formData.otherIncome ?? 0) > 0 && (
                                     <div className="flex justify-between">
                                         <span className="text-muted">รายได้อื่นๆ</span>
-                                        <span className="font-medium text-right">฿{Number(formData.otherIncome || 0).toLocaleString()}</span>
+                                        <span className="font-medium text-right">฿{Number(formData.otherIncome ?? 0).toLocaleString()}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
                                     <span className="text-muted">ภาระหนี้สิน</span>
-                                    <span className="font-medium text-right text-red-500">- ฿{Number(formData.expenses || 0).toLocaleString()}</span>
+                                    <span className="font-medium text-right text-red-500">- ฿{Number(formData.expenses ?? 0).toLocaleString()}</span>
                                 </div>
                                 <div className="border-t border-dashed border-gray-200 my-2 pt-4 flex justify-between">
                                     <span className="text-muted font-bold">รายได้สุทธิ (Net Income)</span>
-                                    <span className="font-bold text-right text-emerald-600">฿{(Number(formData.income || 0) - Number(formData.expenses || 0)).toLocaleString()}</span>
+                                    <span className="font-bold text-right text-emerald-600">฿{(Number(formData.income ?? 0) - Number(formData.expenses ?? 0)).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl mt-2">
                                     <span className="text-muted text-xs">อัตราส่วนหนี้สิน (DSR)</span>
@@ -393,7 +429,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {(formData.coBorrowers || []).map((person: any, index: number) => (
+                                            {(formData.coBorrowers || []).map((person: CoBorrower, index: number) => (
                                                 <TableRow key={`co-${index}`} className="hover:bg-transparent border-gray-100">
                                                     <TableCell className="py-3 text-xs font-medium pl-6">
                                                         {person.firstName} {person.lastName}
@@ -404,11 +440,11 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="py-3 text-xs text-right text-muted-foreground pr-6">
-                                                        {translateRelationship(person.relationship)}
+                                                        {translateRelationship(person.relationship ?? "")}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
-                                            {(formData.guarantors || []).map((person: any, index: number) => (
+                                            {(formData.guarantors || []).map((person: Guarantor, index: number) => (
                                                 <TableRow key={`gu-${index}`} className="hover:bg-transparent border-gray-100">
                                                     <TableCell className="py-3 text-xs font-medium pl-6">
                                                         {person.firstName} {person.lastName}
@@ -419,7 +455,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                                         </span>
                                                     </TableCell>
                                                     <TableCell className="py-3 text-xs text-right text-muted-foreground pr-6">
-                                                        {translateRelationship(person.relationship)}
+                                                        {translateRelationship(person.relationship ?? "")}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -456,9 +492,9 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <div className="flex justify-between">
                                     <span className="text-muted">สถานะทางกฎหมาย</span>
                                     <span className="font-medium text-right">
-                                        {['pawned', 'pledge'].includes(formData.legalStatus) ? 'ติดจำนำ' :
-                                            ['lease', 'hire_purchase'].includes(formData.legalStatus) ? 'ติดเช่าซื้อ' :
-                                                ['mortgaged', 'mortgage_refinance'].includes(formData.legalStatus) ? 'ติดจำนอง' : 'ปลอดภาระ'}
+                                        {['pawned', 'pledge'].includes(formData.legalStatus ?? "") ? 'ติดจำนำ' :
+                                            ['lease', 'hire_purchase'].includes(formData.legalStatus ?? "") ? 'ติดเช่าซื้อ' :
+                                                ['mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? "") ? 'ติดจำนอง' : 'ปลอดภาระ'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -492,15 +528,15 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <div className="flex justify-between">
                                     <span className="text-muted">สถานะทางกฎหมาย</span>
                                     <span className="font-medium text-right">
-                                        {['pawned', 'pledge'].includes(formData.legalStatus) ? 'ติดจำนำ' :
-                                            ['lease', 'hire_purchase'].includes(formData.legalStatus) ? 'ติดเช่าซื้อ' :
-                                                ['mortgaged', 'mortgage_refinance'].includes(formData.legalStatus) ? 'ติดจำนอง' : 'ปลอดภาระ'}
+                                        {['pawned', 'pledge'].includes(formData.legalStatus ?? "") ? 'ติดจำนำ' :
+                                            ['lease', 'hire_purchase'].includes(formData.legalStatus ?? "") ? 'ติดเช่าซื้อ' :
+                                                ['mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? "") ? 'ติดจำนอง' : 'ปลอดภาระ'}
                                     </span>
                                 </div>
-                                {(['pawned', 'pledge', 'lease', 'hire_purchase', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus)) && (
+                                {(['pawned', 'pledge', 'lease', 'hire_purchase', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? '')) && (
                                     <div className="flex justify-between text-red-500">
                                         <span className="text-red-500">
-                                            {['pawned', 'pledge', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus) ? 'ยอดหนี้คงเหลือ' : 'ยอดปิดบัญชี (Payoff)'}
+                                            {['pawned', 'pledge', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? "") ? 'ยอดหนี้คงเหลือ' : 'ยอดปิดบัญชี (Payoff)'}
                                         </span>
                                         <span className="font-medium text-right">
                                             ฿{Number(
@@ -599,10 +635,10 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <span className="font-medium">+ {Math.floor((formData.appraisalPrice || formData.aiAppraisal || 0) * (formData.collateralType === 'land' ? 0.7 : 0.9)).toLocaleString()} บาท</span>
                                 </div>
 
-                                {['pawned', 'pledge', 'lease', 'hire_purchase', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus) && (
+                                {['pawned', 'pledge', 'lease', 'hire_purchase', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? '') && (
                                     <div className="flex justify-between items-center text-red-500">
                                         <span>
-                                            หัก{['pawned', 'pledge', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus) ? 'ภาระหนี้' : 'ปิดบัญชี'}
+                                            หัก{['pawned', 'pledge', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? "") ? 'ภาระหนี้' : 'ปิดบัญชี'}
                                         </span>
                                         <span className="font-medium">
                                             - {Number(
@@ -715,7 +751,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <span className="font-medium text-right">฿{formData.requestedAmount?.toLocaleString()}</span>
                         </div>
 
-                        {formData.includeInsuranceInLoan && formData.selectedInsurances?.length > 0 && (
+                        {(formData.includeInsuranceInLoan && (formData.selectedInsurances?.length ?? 0) > 0) && (
                             <div className="flex justify-between">
                                 <span className="text-muted">ค่าประกัน (รวมในยอดจัด)</span>
                                 <span className="font-medium text-right text-chaiyo-blue flex items-center justify-end gap-1">
@@ -727,7 +763,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             { id: 'car_tier3', label: 'ประกันรถยนต์ ชั้น 3+', price: 10000 },
                                             { id: 'pa_basic', label: 'ประกันอุบัติเหตุส่วนบุคคล (PA)', price: 2500 },
                                         ];
-                                        return formData.selectedInsurances.reduce((acc: number, id: string) => {
+                                        return (formData.selectedInsurances ?? []).reduce((acc: number, id: string) => {
                                             const opt = INSURANCE_OPTIONS.find(o => o.id === id);
                                             return acc + (opt ? opt.price : 0);
                                         }, 0);
@@ -746,12 +782,12 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                         { id: 'car_tier3', label: 'ประกันรถยนต์ ชั้น 3+', price: 10000 },
                                         { id: 'pa_basic', label: 'ประกันอุบัติเหตุส่วนบุคคล (PA)', price: 2500 },
                                     ];
-                                    const insuranceCost = formData.selectedInsurances?.reduce((acc: number, id: string) => {
+                                    const insuranceCost = (formData.selectedInsurances ?? []).reduce((acc: number, id: string) => {
                                         const opt = INSURANCE_OPTIONS.find(o => o.id === id);
                                         return acc + (opt ? opt.price : 0);
-                                    }, 0) || 0;
+                                    }, 0);
 
-                                    return ((formData.requestedAmount || 0) + (formData.includeInsuranceInLoan ? insuranceCost : 0)).toLocaleString();
+                                    return ((formData.requestedAmount ?? 0) + (formData.includeInsuranceInLoan ? insuranceCost : 0)).toLocaleString();
                                 })()}
                             </span>
                         </div>
@@ -776,12 +812,12 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                         { id: 'insurance_tier3_plus', label: 'ประกันรถยนต์ ชั้น 3+', price: 10000 },
                                         { id: 'insurance_pa', label: 'ประกันอุบัติเหตุ (PA)', price: 2500 },
                                     ];
-                                    const insuranceCost = formData.selectedInsurances?.reduce((acc: number, id: string) => {
+                                    const insuranceCost = (formData.selectedInsurances ?? []).reduce((acc: number, id: string) => {
                                         const opt = INSURANCE_OPTIONS.find(o => o.id === id);
                                         return acc + (opt ? opt.price : 0);
-                                    }, 0) || 0;
-                                    const principal = (formData.requestedAmount || 0) + (formData.includeInsuranceInLoan ? insuranceCost : 0);
-                                    return (principal + (formData.totalInterest || 0)).toLocaleString();
+                                    }, 0);
+                                    const principal = (formData.requestedAmount ?? 0) + (formData.includeInsuranceInLoan ? insuranceCost : 0);
+                                    return (principal + (formData.totalInterest ?? 0)).toLocaleString();
                                 })()}
                             </span>
                         </div>
@@ -810,7 +846,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                         // If 0, DSR won't increase much.
                                         // Let's assume this is correct for now or user will flag it.
 
-                                        const dsr = formData.income > 0 ? (totalExp / formData.income) * 100 : 0;
+                                        const dsr = (formData.income ?? 0) > 0 ? (totalExp / (formData.income ?? 1)) * 100 : 0;
                                         const isSafe = dsr <= 60;
                                         return (
                                             <div className={cn(
@@ -826,11 +862,11 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <div className="flex justify-between items-baseline">
                                     <span className="text-xs text-indigo-900/70">DSR หลังกู้ครั้งนี้ (เทียบรายได้):</span>
                                     <span className="text-xl font-black text-indigo-900">
-                                        {Math.round((((formData.expenses || 0) + (formData.estimatedMonthlyPayment || 0)) / (formData.income || 1)) * 100)}%
+                                        {Math.round((((formData.expenses ?? 0) + (formData.estimatedMonthlyPayment ?? 0)) / (formData.income ?? 1)) * 100)}%
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-indigo-900/40 mt-1 italic">
-                                    * รวมภาระหนี้เดิม ฿{(formData.expenses || 0).toLocaleString()} และงวดปัจจุบัน
+                                    * รวมภาระหนี้เดิม ฿{(formData.expenses ?? 0).toLocaleString()} และงวดปัจจุบัน
                                 </p>
                             </div>
                         </div>
@@ -877,7 +913,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                             <h5 className="font-bold text-sm mb-3 sticky top-0 bg-gray-50/95 py-2 -mt-2">ข้อตกลงและเงื่อนไข (Terms & Conditions)</h5>
 
                             <p className="mb-2 font-bold">1. การเปิดเผยข้อมูลส่วนบุคคล</p>
-                            <p className="mb-4">ข้าพเจ้าตกลงยินยอมให้บริษัท เงินไชโย จำกัด ("บริษัท") และพนักงานของบริษัท เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อประโยชน์ในการพิจารณาสินเชื่อ การติดต่อสื่อสาร การวิเคราะห์ข้อมูล และการนำเสนอผลิตภัณฑ์...</p>
+                            <p className="mb-4">ข้าพเจ้าตกลงยินยอมให้บริษัท เงินไชโย จำกัด (&quot;บริษัท&quot;) และพนักงานของบริษัท เก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของข้าพเจ้า เพื่อประโยชน์ในการพิจารณาสินเชื่อ การติดต่อสื่อสาร การวิเคราะห์ข้อมูล และการนำเสนอผลิตภัณฑ์...</p>
 
                             <p className="mb-2 font-bold">2. ความถูกต้องของข้อมูล</p>
                             <p className="mb-4">ข้าพเจ้ารับรองว่าข้อมูลและเอกสารทั้งหมดที่ได้ให้ไว้กับบริษัท ในการสมัครสินเชื่อนี้ เป็นความจริงทุกประการ หากปรากฏว่าข้อมูลใดเป็นเท็จ ข้าพเจ้ายินยอมให้บริษัทระงับการพิจารณาหรือยกเลิกวงเงินสินเชื่อได้ทันที...</p>
@@ -947,7 +983,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <div className="text-center space-y-2">
                                     <h3 className="text-2xl font-bold text-foreground">ยืนยันตัวตน</h3>
                                     <p className="text-sm text-muted">
-                                        ระบบได้ส่งรหัส OTP ไปยัง <span className="font-bold text-foreground">{formData.phoneNumber || formData.phone}</span>
+                                        ระบบได้ส่งรหัส OTP ไปยัง <span className="font-bold text-foreground">{String(formData.phoneNumber || formData.phone || "-")}</span>
                                     </p>
                                 </div>
 

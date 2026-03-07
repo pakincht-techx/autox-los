@@ -24,6 +24,9 @@ export type KYCData = {
     firstName: string;
     lastName: string;
     middleName?: string;
+    firstNameEn?: string;
+    lastNameEn?: string;
+    middleNameEn?: string;
     prefix: string;
     birthDate: string;
     addressLine1: string;
@@ -45,6 +48,7 @@ export type KYCData = {
     expiryDate?: string;
     laserId?: string;
     gender?: string;
+    verificationMethod?: 'DIPCHIP' | 'MANUAL';
     verificationStatus: 'NORMAL' | 'WATCHLIST' | 'BLACKLIST';
     watchlistReasons?: ('Fraud' | 'Compliance' | 'Legal')[];
 };
@@ -80,6 +84,9 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
             firstName: "สมชาย",
             middleName: "", // Mock empty middle name for male
             lastName: "รักชาติ",
+            firstNameEn: "SOMCHAI",
+            lastNameEn: "RAKCHAT",
+            middleNameEn: "",
             prefix: "นาย",
             gender: "ชาย",
             birthDate: "1990-01-01",
@@ -184,7 +191,7 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
 
     const handleContinueWatchlist = () => {
         // Proceed even if watchlist
-        onComplete({ ...tempData, verificationStatus: 'WATCHLIST', watchlistReasons } as KYCData);
+        onComplete({ ...tempData, verificationMethod, verificationStatus: 'WATCHLIST', watchlistReasons } as KYCData);
     };
 
     // --- Renders ---
@@ -343,7 +350,7 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
                     <div className="flex justify-center">
                         <Button
                             className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[150px]"
-                            onClick={() => onComplete({ ...tempData, verificationStatus: 'NORMAL' } as KYCData)}
+                            onClick={() => onComplete({ ...tempData, verificationMethod, verificationStatus: 'NORMAL' } as KYCData)}
                         >
                             ยืนยันข้อมูล
                         </Button>

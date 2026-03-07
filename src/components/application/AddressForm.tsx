@@ -170,7 +170,7 @@ export const AddressForm = ({
                                         value={formData[getField('trohk')] || ""}
                                         onChange={(e) => onChange(getField('trohk'), e.target.value)}
                                         disabled={disabled}
-                                        placeholder="ระบุตรอก (ถ้ามี)"
+                                        placeholder="ระบุตรอก"
                                     />
                                 </div>
                                 <div className="space-y-2">

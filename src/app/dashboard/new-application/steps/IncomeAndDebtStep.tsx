@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Select,
@@ -37,31 +37,34 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Info, HelpCircle, Link } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/Dialog";
 import { AddressForm } from "@/components/application/AddressForm";
+import { CustomerFormData, IncomeOccupation, SpecialIncome, IncomeItem, EnterpriseIncome, IncomeDocument, PersonalDebt, ChaiyoLoan, SAIncome, ReferencePerson, BankAccount } from "@/types/application";
 
 interface IncomeAndDebtStepProps {
-    formData: any;
-    setFormData: (data: any) => void;
+    formData: CustomerFormData;
+    setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
     isExistingCustomer?: boolean;
 }
 
 export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = false }: IncomeAndDebtStepProps) {
-    const handleChange = (field: string, value: any) => {
-        setFormData((prev: any) => ({ ...prev, [field]: value }));
+    const handleChange = <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     // Helper for specific occupation tab field change
-    const handleOccupationChange = (id: string, fieldOrUpdates: string | Record<string, any>, value?: any) => {
-        setFormData((prev: any) => {
-            const occs = prev.occupations || [{ id: 'main', isMain: true }];
+    const handleOccupationChange = (id: string, fieldOrUpdates: string | Partial<IncomeOccupation>, value?: unknown) => {
+        setFormData((prev) => {
+            const occs = prev.occupations || [{ id: 'main', isMain: true } as IncomeOccupation];
             const updates = typeof fieldOrUpdates === 'string' ? { [fieldOrUpdates]: value } : fieldOrUpdates;
-            const updated = occs.map((o: any) => o.id === id ? { ...o, ...updates } : o);
+            const updated = occs.map((o) => o.id === id ? { ...o, ...updates } : o);
             return { ...prev, occupations: updated };
         });
     };
 
     const [activeTab, setActiveTab] = useState("main");
+    const idCounterRef = useRef(0);
+    const generateId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
     const occupations = formData.occupations || [{ id: 'main', isMain: true }];
 
     const [isSpecialIncomeDialogOpen, setIsSpecialIncomeDialogOpen] = useState(false);
@@ -79,7 +82,14 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     // Debt Row Handlers
     const handleAddDebtRow = () => {
         const debts = formData.personalDebts || [];
-        handleChange("personalDebts", [...debts, { type: "", amount: "" }]);
+        const newDebt: PersonalDebt = {
+            id: generateId('debt'),
+            type: "",
+            description: "",
+            amount: 0,
+            installment: 0
+        };
+        handleChange("personalDebts", [...debts, newDebt]);
     };
 
     const handleUpdateDebtRow = (index: number, field: string, value: string) => {
@@ -107,19 +117,26 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         setItemToDelete(null);
     };
 
-    const handleSaveSpecialIncome = (source: SpecialIncomeSource) => {
+    const handleSaveSpecialIncome = (source: SpecialIncomeSource | SpecialIncome) => {
         const currentIncomes = formData.specialIncomes || [];
-        if (editingSpecialIncome) {
-            handleChange("specialIncomes", currentIncomes.map((item: any) => item.id === source.id ? source : item));
+        if ('amount' in source) {
+            handleChange("specialIncomes", currentIncomes.map((item) => (item.id === source.id ? source : item)));
         } else {
-            handleChange("specialIncomes", [...currentIncomes, source]);
+            const newIncome: SpecialIncome = {
+                ...source,
+                frequency: 'monthly',
+                amount: 0,
+                netIncome: 0,
+                id: generateId('special'),
+            };
+            handleChange("specialIncomes", [...currentIncomes, newIncome]);
         }
         setEditingSpecialIncome(null);
     };
 
     const handleRemoveSpecialIncome = (id: string) => {
         const currentIncomes = formData.specialIncomes || [];
-        handleChange("specialIncomes", currentIncomes.filter((item: any) => item.id !== id));
+        handleChange("specialIncomes", currentIncomes.filter((item: SpecialIncome) => item.id !== id));
         setItemToDelete(null);
     };
 
@@ -150,12 +167,13 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     const handleNumberChange = (field: string, value: string) => {
         const cleanValue = value.replace(/,/g, '');
         if (/^\d*\.?\d*$/.test(cleanValue)) {
-            handleChange(field, cleanValue);
+            const num = cleanValue === "" ? 0 : Number(cleanValue);
+            handleChange(field as keyof CustomerFormData, num);
         }
     };
 
     const formatNumberWithCommas = (val: string | number) => {
-        if (val === null || val === undefined || val === "") return "";
+        if (val === null || val === undefined || String(val) === "") return "";
         const parts = val.toString().split(".");
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         return parts.join(".");
@@ -170,34 +188,34 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     useEffect(() => {
         // Special Income Calc
         const specialIncomesList = formData.specialIncomes || [];
-        const specialIncomeSum = specialIncomesList.reduce((sum: number, item: any) => sum + (item.netIncome || 0), 0);
+        const specialIncomeSum = specialIncomesList.reduce((sum: number, item: SpecialIncome) => sum + (item.netIncome || 0), 0);
 
-        if (formData.specialIncome !== specialIncomeSum.toString()) {
-            handleChange("specialIncome", specialIncomeSum.toString());
+        if (formData.specialIncome !== specialIncomeSum) {
+            handleChange("specialIncome", specialIncomeSum);
         }
 
         // Get Occupation Sums
-        const mainOccSum = occupations.filter((o: any) => o.isMain).reduce((acc: number, o: any) => {
+        const mainOccSum = occupations.filter((o: IncomeOccupation) => o.isMain).reduce((acc: number, o: IncomeOccupation) => {
             if (o.employmentType === 'SA') {
-                const saSum = (o.saIncomes || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.amount) || 0), 0);
+                const saSum = (o.saIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.amount) || 0), 0);
                 return acc + roundDown2(saSum);
             }
             if (o.employmentType === 'SE') {
-                const sales = (o.seIncomes || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
-                const costs = (o.seCosts || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
+                const sales = (o.seIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
+                const costs = (o.seCosts || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 return acc + roundDown2(sales - costs);
             }
             return acc;
         }, 0);
 
-        const secondaryOccSum = occupations.filter((o: any) => !o.isMain).reduce((acc: number, o: any) => {
+        const secondaryOccSum = occupations.filter((o: IncomeOccupation) => !o.isMain).reduce((acc: number, o: IncomeOccupation) => {
             if (o.employmentType === 'SA') {
-                const saSum = (o.saIncomes || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.amount) || 0), 0);
+                const saSum = (o.saIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.amount) || 0), 0);
                 return acc + roundDown2(saSum);
             }
             if (o.employmentType === 'SE') {
-                const sales = (o.seIncomes || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
-                const costs = (o.seCosts || []).reduce((sumAcc: number, item: any) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
+                const sales = (o.seIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
+                const costs = (o.seCosts || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 return acc + roundDown2(sales - costs);
             }
             return acc;
@@ -209,42 +227,42 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         const totalIncome = mainOccSum + secondaryOccSum + special + other;
 
         // Keep mainIncome and secondaryIncome properties in sync for data model consistency
-        if (formData.mainOccupationIncome !== mainOccSum.toString()) {
-            handleChange("mainOccupationIncome", mainOccSum.toString());
+        if (formData.mainOccupationIncome !== mainOccSum) {
+            handleChange("mainOccupationIncome", mainOccSum);
         }
-        if (formData.secondaryOccupationIncome !== secondaryOccSum.toString()) {
-            handleChange("secondaryOccupationIncome", secondaryOccSum.toString());
+        if (formData.secondaryOccupationIncome !== secondaryOccSum) {
+            handleChange("secondaryOccupationIncome", secondaryOccSum);
         }
 
-        if (formData.totalIncome !== totalIncome.toString()) {
-            handleChange("totalIncome", totalIncome.toString());
+        if (formData.totalIncome !== totalIncome) {
+            handleChange("totalIncome", totalIncome);
         }
 
         // Debt - Personal
         const debtsList = formData.personalDebts || [];
-        const personalDebtSum = debtsList.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
+        const personalDebtSum = debtsList.reduce((sum: number, item: SAIncome) => sum + (Number(item.amount) || 0), 0);
         const totalPersonalDebt = roundDown2(personalDebtSum);
 
-        if (formData.totalPersonalDebt !== totalPersonalDebt.toString()) {
-            handleChange("totalPersonalDebt", totalPersonalDebt.toString());
+        if (formData.totalPersonalDebt !== totalPersonalDebt) {
+            handleChange("totalPersonalDebt", totalPersonalDebt);
         }
 
         // Debt - Chaiyo
         const chaiyoList = formData.chaiyoLoans || [];
-        const chaiyoLoansSum = chaiyoList.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
+        const chaiyoLoansSum = chaiyoList.reduce((sum: number, item: SAIncome) => sum + (Number(item.amount) || 0), 0);
         // Add legacy field if exists for fallback
         const legacyChaiyo = Number(formData.chaiyoLoanInstallment) || 0;
         const chaiyoIns = Number(formData.chaiyoInsuranceInstallment) || 0;
         const totalChaiyoDebt = chaiyoLoansSum + legacyChaiyo + chaiyoIns;
 
-        if (formData.totalChaiyoDebt !== totalChaiyoDebt.toString()) {
-            handleChange("totalChaiyoDebt", totalChaiyoDebt.toString());
+        if (formData.totalChaiyoDebt !== totalChaiyoDebt) {
+            handleChange("totalChaiyoDebt", totalChaiyoDebt);
         }
 
         // Total Debt
         const totalDebt = totalPersonalDebt + totalChaiyoDebt;
-        if (formData.totalDebt !== totalDebt.toString()) {
-            handleChange("totalDebt", totalDebt.toString());
+        if (formData.totalDebt !== totalDebt) {
+            handleChange("totalDebt", totalDebt);
         }
     }, [
         occupations, formData.specialIncome, formData.otherIncome,
@@ -255,7 +273,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     // Reference Persons
     const handleAddReference = () => {
         const refs = formData.referencePersons || [];
-        setFormData((prev: any) => ({
+        setFormData((prev: CustomerFormData) => ({
             ...prev,
             referencePersons: [...refs, { name: "", phone: "", relationship: "", customRelationship: "" }]
         }));
@@ -277,10 +295,10 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     // Occupations Management
 
     const handleAddSecondaryOccupation = () => {
-        const secondaryCount = occupations.filter((o: any) => !o.isMain).length;
+        const secondaryCount = occupations.filter((o: IncomeOccupation) => !o.isMain).length;
         if (secondaryCount >= 10) return;
 
-        const newId = `sec-${Date.now()}`;
+        const newId = generateId('sec');
         handleChange("occupations", [
             ...occupations,
             { id: newId, isMain: false }
@@ -289,7 +307,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleRemoveOccupation = (id: string) => {
-        const newOccupations = occupations.filter((o: any) => o.id !== id);
+        const newOccupations = occupations.filter((o: IncomeOccupation) => o.id !== id);
         handleChange("occupations", newOccupations);
         if (activeTab === id) {
             setActiveTab("main");
@@ -312,7 +330,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
     // Income Channels Handlers
     const toggleIncomeChannel = (occId: string, channel: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const current = occ.incomeChannels || [];
         const updated = current.includes(channel)
@@ -322,14 +340,14 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleAddBankAccount = (occId: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentAccounts = occ.bankAccounts || [];
         handleOccupationChange(occId, 'bankAccounts', [...currentAccounts, { bankName: '', accountNo: '' }]);
     };
 
     const handleUpdateBankAccount = (occId: string, index: number, field: string, value: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentAccounts = [...(occ.bankAccounts || [])];
 
@@ -356,7 +374,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleRemoveBankAccount = (occId: string, index: number) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentAccounts = [...(occ.bankAccounts || [])];
         currentAccounts.splice(index, 1);
@@ -366,14 +384,14 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
     // SA Income Handlers
     const handleAddSAIncomeRow = (occId: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = occ.saIncomes || [];
         handleOccupationChange(occId, 'saIncomes', [...currentIncomes, { type: '', detail: '', amount: '' }]);
     };
 
     const handleUpdateSAIncomeRow = (occId: string, index: number, field: string, value: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = [...(occ.saIncomes || [])];
 
@@ -394,26 +412,26 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         currentIncomes[index] = { ...currentIncomes[index], [field]: finalValue };
 
         // Calculate total income for this occupation
-        const total = currentIncomes.reduce((acc: number, curr: any) => acc + (Number(curr.amount) || 0), 0);
+        const total = currentIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
 
         handleOccupationChange(occId, {
             saIncomes: currentIncomes,
-            totalIncome: total.toString()
+            totalIncome: total
         });
     };
 
     const handleRemoveSAIncomeRow = (occId: string, index: number) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = [...(occ.saIncomes || [])];
         currentIncomes.splice(index, 1);
 
         // Calculate total
-        const total = currentIncomes.reduce((acc: number, curr: any) => acc + (Number(curr.amount) || 0), 0);
+        const total = currentIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
 
         handleOccupationChange(occId, {
             saIncomes: currentIncomes,
-            totalIncome: total.toString()
+            totalIncome: total
         });
         setItemToDelete(null);
     };
@@ -502,7 +520,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     ];
 
     // SE Income Handlers
-    const calculateSEMonthlyIncome = (item: any) => {
+    const calculateSEMonthlyIncome = (item: EnterpriseIncome) => {
         const amount = Number(item.salesAmount) || 0;
         if (!item.frequency) return 0;
         let result = 0;
@@ -523,7 +541,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleAddSEIncomeRow = (occId: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = occ.seIncomes || [];
         handleOccupationChange(occId, 'seIncomes', [...currentIncomes, {
@@ -536,12 +554,12 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         }]);
     };
 
-    const handleUpdateSEIncomeRow = (occId: string, index: number, updates: Record<string, any>) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+    const handleUpdateSEIncomeRow = (occId: string, index: number, updates: Record<string, unknown>) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = [...(occ.seIncomes || [])];
 
-        let currentRow = { ...currentIncomes[index] };
+        const currentRow: EnterpriseIncome = { ...currentIncomes[index] };
 
         for (const [field, value] of Object.entries(updates)) {
             let finalValue = value;
@@ -564,30 +582,30 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         }
 
         // Update calculated monthly for this row specifically
-        currentRow.calculatedMonthly = calculateSEMonthlyIncome(currentRow).toString();
+        currentRow.calculatedMonthly = calculateSEMonthlyIncome(currentRow);
         currentIncomes[index] = currentRow;
 
         // Calculate total income for this occupation
-        const total = currentIncomes.reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0);
+        const total = currentIncomes.reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
 
         handleOccupationChange(occId, {
             seIncomes: currentIncomes,
-            totalIncome: total.toString()
+            totalIncome: total
         });
     };
 
     const handleRemoveSEIncomeRow = (occId: string, index: number) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = [...(occ.seIncomes || [])];
         currentIncomes.splice(index, 1);
 
         // Calculate total
-        const total = currentIncomes.reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0);
+        const total = currentIncomes.reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
 
         handleOccupationChange(occId, {
             seIncomes: currentIncomes,
-            totalIncome: total.toString()
+            totalIncome: total
         });
         setItemToDelete(null);
     };
@@ -608,7 +626,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     ];
 
     // SE Cost Handlers
-    const calculateSEMonthlyCost = (item: any) => {
+    const calculateSEMonthlyCost = (item: EnterpriseIncome) => {
         const amount = Number(item.costAmount) || 0;
         if (!item.frequency) return 0;
         let result = 0;
@@ -629,7 +647,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleAddSECostRow = (occId: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentCosts = occ.seCosts || [];
         handleOccupationChange(occId, 'seCosts', [...currentCosts, {
@@ -643,12 +661,12 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         }]);
     };
 
-    const handleUpdateSECostRow = (occId: string, index: number, updates: Record<string, any>) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+    const handleUpdateSECostRow = (occId: string, index: number, updates: Record<string, unknown>) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentCosts = [...(occ.seCosts || [])];
 
-        let currentRow = { ...currentCosts[index] };
+        const currentRow: EnterpriseIncome = { ...currentCosts[index] };
 
         for (const [field, value] of Object.entries(updates)) {
             let finalValue = value;
@@ -671,14 +689,14 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         }
 
         // Update calculated monthly for this row specifically
-        currentRow.calculatedMonthly = calculateSEMonthlyCost(currentRow).toString();
+        currentRow.calculatedMonthly = calculateSEMonthlyCost(currentRow);
         currentCosts[index] = currentRow;
 
         handleOccupationChange(occId, 'seCosts', currentCosts);
     };
 
     const handleRemoveSECostRow = (occId: string, index: number) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentCosts = [...(occ.seCosts || [])];
         currentCosts.splice(index, 1);
@@ -704,11 +722,11 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     ];
 
     const handleAddIncomeDocument = (occId: string, docType: string, label: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentDocs = occ.incomeDocuments || [];
         const newDoc = {
-            id: `doc-${Date.now()}`,
+            id: generateId('doc'),
             type: docType,
             name: `${label}_${new Date().toLocaleDateString('th-TH')}.pdf`,
             status: 'success',
@@ -718,9 +736,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleRemoveIncomeDocument = (occId: string, docId: string) => {
-        const occ = occupations.find((o: any) => o.id === occId);
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
-        const currentDocs = (occ.incomeDocuments || []).filter((d: any) => d.id !== docId);
+        const currentDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.id !== docId);
         handleOccupationChange(occId, 'incomeDocuments', currentDocs);
         setItemToDelete(null);
     };
@@ -761,7 +779,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                 {/* Scrollable Tab List */}
                                 <div className="flex-1 overflow-x-auto no-scrollbar pr-4 min-w-0">
                                     <TabsList className="bg-transparent h-auto p-0 flex space-x-2 w-max pb-3">
-                                        {occupations.map((occ: any, index: number) => (
+                                        {occupations.map((occ: IncomeOccupation, index: number) => (
                                             <TabsTrigger
                                                 key={occ.id}
                                                 value={occ.id}
@@ -797,7 +815,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                         variant="outline"
                                         size="sm"
                                         onClick={handleAddSecondaryOccupation}
-                                        disabled={occupations.filter((o: any) => !o.isMain).length >= 10}
+                                        disabled={occupations.filter((o: IncomeOccupation) => !o.isMain).length >= 10}
                                         className="h-10 border-dashed gap-2 whitespace-nowrap text-gray-600 hover:text-chaiyo-blue transition-colors"
                                     >
                                         <Plus className="w-4 h-4" />
@@ -806,7 +824,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                 </div>
                             </div>
 
-                            {occupations.map((occ: any) => (
+                            {occupations.map((occ: IncomeOccupation) => (
                                 <TabsContent key={occ.id} value={occ.id} className="space-y-8 animate-in fade-in duration-300">
                                     {/* 1. ข้อมูลอาชีพ */}
                                     <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
@@ -1054,7 +1072,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ) : (
-                                                                occ.saIncomes.map((item: any, idx: number) => (
+                                                                occ.saIncomes.map((item: SAIncome, idx: number) => (
                                                                     <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
                                                                         <TableCell className="py-3">
                                                                             <Select
@@ -1082,7 +1100,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                         <TableCell className="py-3">
                                                                             <Input
                                                                                 type="text"
-                                                                                value={formatNumberWithCommas(item.amount) || ""}
+                                                                                value={formatNumberWithCommas(item.amount ?? 0) || ""}
                                                                                 onChange={(e) => handleUpdateSAIncomeRow(occ.id, idx, 'amount', e.target.value)}
                                                                                 placeholder="0.00"
                                                                                 className="h-9 text-sm bg-gray-50/30 text-right font-mono"
@@ -1239,7 +1257,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         </TableHeader>
                                                         <TableBody>
                                                             {(() => {
-                                                                const item = occ.seIncomes?.[0] || {};
+                                                                const item = (occ.seIncomes?.[0] || {}) as EnterpriseIncome;
                                                                 const idx = 0;
                                                                 return (
                                                                     <TableRow className="group transition-colors hover:bg-gray-50/50">
@@ -1247,7 +1265,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                             <Select
                                                                                 value={item.frequency || ""}
                                                                                 onValueChange={(val) => {
-                                                                                    const rowUpdates: any = { frequency: val };
+                                                                                    const rowUpdates: Record<string, unknown> = { frequency: val };
                                                                                     // Clear dependent fields if switching
                                                                                     if (val !== 'daily') rowUpdates.daysPerMonth = '';
                                                                                     if (val !== 'weekly') rowUpdates.weeksPerMonth = '';
@@ -1313,7 +1331,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                         <TableCell className="py-3 pr-6">
                                                                             <Input
                                                                                 type="text"
-                                                                                value={formatNumberWithCommas(item.salesAmount) || ""}
+                                                                                value={formatNumberWithCommas(item.salesAmount ?? "")}
                                                                                 onChange={(e) => handleUpdateSEIncomeRow(occ.id, idx, { salesAmount: e.target.value })}
                                                                                 placeholder="0.00"
                                                                                 className="h-9 text-xs bg-gray-50/30 text-right font-mono"
@@ -1331,7 +1349,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                 <TableCell className="text-right pr-6 py-4">
                                                                     <div className="text-lg font-bold font-mono">
                                                                         ฿{formatNumberWithCommas(
-                                                                            (occ.seIncomes || []).reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0)
+                                                                            (occ.seIncomes || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0)
                                                                         )}
                                                                     </div>
                                                                 </TableCell>
@@ -1378,14 +1396,14 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ) : (
-                                                                occ.seCosts.map((item: any, idx: number) => (
+                                                                occ.seCosts.map((item: EnterpriseIncome, idx: number) => (
                                                                     <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
                                                                         <TableCell className="py-3">
                                                                             <div className="space-y-2">
                                                                                 <Select
                                                                                     value={item.type || ""}
                                                                                     onValueChange={(val) => {
-                                                                                        const rowUpdates: any = { type: val };
+                                                                                        const rowUpdates: Record<string, unknown> = { type: val };
                                                                                         if (val !== 'custom') {
                                                                                             rowUpdates.customType = '';
                                                                                         }
@@ -1416,7 +1434,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                             <Select
                                                                                 value={item.frequency || ""}
                                                                                 onValueChange={(val) => {
-                                                                                    const rowUpdates: any = { frequency: val };
+                                                                                    const rowUpdates: Record<string, unknown> = { frequency: val };
                                                                                     // Clear dependent fields if switching
                                                                                     if (val !== 'daily') rowUpdates.daysPerMonth = '';
                                                                                     if (val !== 'weekly') rowUpdates.weeksPerMonth = '';
@@ -1456,7 +1474,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                         <TableCell className="py-3 align-top">
                                                                             <Input
                                                                                 type="text"
-                                                                                value={formatNumberWithCommas(item.costAmount) || ""}
+                                                                                value={formatNumberWithCommas(item.costAmount ?? 0) || ""}
                                                                                 onChange={(e) => handleUpdateSECostRow(occ.id, idx, { costAmount: e.target.value })}
                                                                                 placeholder="0.00"
                                                                                 className="h-9 text-xs bg-gray-50/30 text-right font-mono"
@@ -1494,7 +1512,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                 <TableCell className="text-right pr-4 py-4">
                                                                     <div className="text-lg font-bold font-mono text-gray-900">
                                                                         ฿{formatNumberWithCommas(
-                                                                            (occ.seCosts || []).reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0)
+                                                                            (occ.seCosts || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0)
                                                                         )}
                                                                     </div>
                                                                 </TableCell>
@@ -1519,8 +1537,8 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                     </div>
                                                     <div className="text-right">
                                                         {(() => {
-                                                            const totalIncome = (occ.seIncomes || []).reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0);
-                                                            const totalCost = (occ.seCosts || []).reduce((acc: number, curr: any) => acc + (Number(curr.calculatedMonthly) || 0), 0);
+                                                            const totalIncome = (occ.seIncomes || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
+                                                            const totalCost = (occ.seCosts || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
                                                             const netIncome = totalIncome - totalCost;
                                                             return (
                                                                 <div className={cn(
@@ -1541,7 +1559,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                     <AddressForm
                                         title="ที่อยู่ที่ทำงาน / กิจการ"
                                         prefix="work"
-                                        formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}) : occ}
+                                        formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {}) : occ}
                                         onChange={(field, val) => handleOccupationChange(occ.id, field, val)}
                                         disabled={!!occ.isSameAsMainAddress}
                                         headerChildren={
@@ -1582,7 +1600,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                     <div className="space-y-2">
                                                         <Label>บริเวณใกล้เคียง/จุดสังเกต</Label>
                                                         <Input
-                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}).workLandmark : occ.workLandmark) || ""}
+                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLandmark : occ.workLandmark) || ""}
                                                             onChange={(e) => handleOccupationChange(occ.id, "workLandmark", e.target.value)}
                                                             placeholder="เช่น ใกล้เซเว่น, ตรงข้ามธนาคาร"
                                                             className="h-11 bg-white"
@@ -1593,7 +1611,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <Label>ลักษณะที่ตั้งของกิจการ <span className="text-red-500">*</span></Label>
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                             <Select
-                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}).workLocationType : occ.workLocationType) || ""}
+                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) || ""}
                                                                 onValueChange={(val) => handleOccupationChange(occ.id, "workLocationType", val)}
                                                                 disabled={!!occ.isSameAsMainAddress}
                                                             >
@@ -1610,9 +1628,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                     <SelectItem value="other">อื่นๆ รายละเอียดอื่นๆ</SelectItem>
                                                                 </SelectContent>
                                                             </Select>
-                                                            {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}).workLocationType : occ.workLocationType) === 'other') && (
+                                                            {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) === 'other') && (
                                                                 <Input
-                                                                    value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}).workLocationTypeOther : occ.workLocationTypeOther) || ""}
+                                                                    value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationTypeOther : occ.workLocationTypeOther) || ""}
                                                                     onChange={(e) => handleOccupationChange(occ.id, "workLocationTypeOther", e.target.value)}
                                                                     placeholder="โปรดระบุรายละเอียด"
                                                                     className="h-11 bg-white"
@@ -1628,7 +1646,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <div className="space-y-3">
                                                             <Label>สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA' || occ.employmentType === 'SE') && <span className="text-red-500">*</span>}</Label>
                                                             <RadioGroup
-                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: any) => o.id === 'main') || {}).businessStatus : occ.businessStatus) || ""}
+                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
                                                                 onValueChange={(val) => handleOccupationChange(occ.id, "businessStatus", val)}
                                                                 className="flex gap-6 pt-1"
                                                                 disabled={!!occ.isSameAsMainAddress}
@@ -1711,7 +1729,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                         </TableCell>
                                                                     </TableRow>
                                                                 ) : (
-                                                                    occ.bankAccounts.map((account: any, idx: number) => (
+                                                                    occ.bankAccounts.map((account: BankAccount, idx: number) => (
                                                                         <TableRow key={idx}>
                                                                             <TableCell>
                                                                                 <Select
@@ -1792,7 +1810,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         </TableHeader>
                                                         <TableBody>
                                                             {INCOME_DOC_TYPES.map((docType) => {
-                                                                const uploadedDocs = (occ.incomeDocuments || []).filter((d: any) => d.type === docType.id);
+                                                                const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
 
                                                                 return (
                                                                     <TableRow key={docType.id} className="hover:bg-transparent">
@@ -1810,7 +1828,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                         <TableCell>
                                                                             {uploadedDocs.length > 0 ? (
                                                                                 <div className="space-y-1">
-                                                                                    {uploadedDocs.map((doc: any) => (
+                                                                                    {uploadedDocs.map((doc: IncomeDocument) => (
                                                                                         <div key={doc.id} className="flex items-center gap-2 text-xs text-chaiyo-blue bg-blue-50/50 px-2 py-1 rounded-md border border-blue-100 w-fit max-w-[200px]">
                                                                                             <span className="truncate">{doc.name}</span>
                                                                                             <button
@@ -1906,7 +1924,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                     </TableCell>
                                                 </TableRow>
                                             ) : (
-                                                formData.personalDebts.map((item: any, idx: number) => (
+                                                formData.personalDebts.map((item: PersonalDebt, idx: number) => (
                                                     <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
                                                         <TableCell className="py-3 text-center text-xs font-medium text-gray-500">
                                                             {idx + 1}
@@ -2015,12 +2033,12 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                             ) : (
                                                 <>
                                                     {/* Specific Chaiyo Products */}
-                                                    {(formData.chaiyoLoans || []).map((loan: any, lIdx: number) => (
+                                                    {(formData.chaiyoLoans || []).map((loan: ChaiyoLoan, lIdx: number) => (
                                                         <TableRow key={`chaiyo-${lIdx}`} className="hover:bg-gray-50/50 transition-colors border-border-subtle">
                                                             <TableCell className="text-center text-xs text-gray-400">{lIdx + 1}</TableCell>
                                                             <TableCell className="text-sm text-gray-700">{loan.type}</TableCell>
                                                             <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                                {formatNumberWithCommas(loan.amount) || "0.00"}
+                                                                {formatNumberWithCommas(loan.amount ?? 0) || "0.00"}
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
@@ -2033,7 +2051,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                             </TableCell>
                                                             <TableCell className="text-sm text-gray-700">สินเชื่อกับเงินไชโยอื่นๆ</TableCell>
                                                             <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                                {formatNumberWithCommas(formData.chaiyoLoanInstallment) || "0.00"}
+                                                                {formatNumberWithCommas(formData.chaiyoLoanInstallment ?? 0) || "0.00"}
                                                             </TableCell>
                                                         </TableRow>
                                                     )}
@@ -2046,7 +2064,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                             </TableCell>
                                                             <TableCell className="text-sm text-sm text-gray-700">สินเชื่อประกันผ่อนกับเงินไชโย</TableCell>
                                                             <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                                {formatNumberWithCommas(formData.chaiyoInsuranceInstallment) || "0.00"}
+                                                                {formatNumberWithCommas(formData.chaiyoInsuranceInstallment ?? 0) || "0.00"}
                                                             </TableCell>
                                                         </TableRow>
                                                     )}
@@ -2094,7 +2112,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                 <Users className="w-5 h-5 text-chaiyo-blue" />
                                 <CardTitle className="text-lg text-chaiyo-blue">
                                     บุคคลอ้างอิง
-                                    {!occupations.some((occ: any) => (occ.incomeDocuments || []).length > 0) ? (
+                                    {!occupations.some((occ: IncomeOccupation) => (occ.incomeDocuments || []).length > 0) ? (
                                         <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น กรณีไม่มีเอกสารแสดงรายได้) *</span>
                                     ) : (
                                         <span className="text-muted-foreground ml-1.5 text-xs font-normal">(ถ้ามี)</span>
@@ -2130,7 +2148,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        formData.referencePersons.map((ref: any, index: number) => (
+                                        formData.referencePersons.map((ref: ReferencePerson, index: number) => (
                                             <TableRow key={index} className="group transition-colors hover:bg-gray-50/50">
                                                 <TableCell className="py-3 text-center text-xs font-medium text-gray-500">
                                                     {index + 1}
@@ -2463,12 +2481,12 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                         </button>
 
                         {/* Navigation */}
-                        {formData.incomePhotos.length > 1 && (
+                        {formData.incomePhotos?.length > 1 && (
                             <>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        setLightboxIndex(prev => prev !== null ? (prev - 1 + formData.incomePhotos.length) % formData.incomePhotos.length : 0);
+                                        setLightboxIndex(prev => prev !== null && formData.incomePhotos ? (prev - 1 + formData.incomePhotos.length) % formData.incomePhotos.length : 0);
                                     }}
                                     className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
                                 >
@@ -2477,7 +2495,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        setLightboxIndex(prev => prev !== null ? (prev + 1) % formData.incomePhotos.length : 0);
+                                        setLightboxIndex(prev => prev !== null && formData.incomePhotos ? (prev + 1) % formData.incomePhotos.length : 0);
                                     }}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
                                 >
@@ -2488,7 +2506,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
                         {/* Main Image */}
                         <img
-                            src={formData.incomePhotos[lightboxIndex]}
+                            src={formData.incomePhotos?.[lightboxIndex]}
                             alt={`Business Photo ${lightboxIndex + 1}`}
                             className="max-h-[80vh] max-w-full object-contain rounded-lg"
                             onClick={(e) => e.stopPropagation()}
@@ -2496,7 +2514,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
                         {/* Thumbnail Strip */}
                         <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto pb-2" onClick={(e) => e.stopPropagation()}>
-                            {formData.incomePhotos.map((doc: string, idx: number) => (
+                            {formData.incomePhotos?.map((doc: string, idx: number) => (
                                 <button
                                     key={idx}
                                     onClick={() => setLightboxIndex(idx)}
@@ -2505,13 +2523,13 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                         idx === lightboxIndex ? "border-white scale-110 ring-2 ring-white/20" : "border-transparent opacity-50 hover:opacity-100"
                                     )}
                                 >
-                                    <img src={doc} className="w-full h-full object-cover" />
+                                    <img src={doc} alt={`Business Photo Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
 
                         <div className="absolute top-4 left-4 text-white/80 font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                            {lightboxIndex + 1} / {formData.incomePhotos.length}
+                            {lightboxIndex + 1} / {formData.incomePhotos?.length}
                         </div>
                     </div>
                 )

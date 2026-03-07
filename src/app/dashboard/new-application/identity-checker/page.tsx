@@ -36,7 +36,7 @@ export default function IdentityCheckerPage() {
             // New customer → Start application flow
             setIsApplicationStarted(true);
             setAppId("app-256700002");
-            router.push("/dashboard/new-application/app-256700002/customer-info");
+            router.push("/dashboard/new-application/salesheet");
         }
         setIsIdentityVerified(true);
     };
@@ -45,7 +45,7 @@ export default function IdentityCheckerPage() {
         setIsApplicationStarted(true);
         setAppId("app-256700001");
         setIsSkipped(false);
-        router.push("/dashboard/new-application/app-256700001/customer-info");
+        router.push("/dashboard/new-application/salesheet");
     };
 
     const handleSkipToCalculator = () => {

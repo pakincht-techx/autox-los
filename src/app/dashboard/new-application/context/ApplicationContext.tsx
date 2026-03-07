@@ -8,10 +8,10 @@ import { User, Car, DollarSign, Calculator, FileText, Check } from "lucide-react
 
 /** All steps in the full flow, in order */
 export const ALL_FLOW_STEPS = [
-    { slug: 'salesheet', getPath: () => '/dashboard/new-application/salesheet', phase: 'screening' as const },
     { slug: 'privacy-notice', getPath: () => '/dashboard/new-application/privacy-notice', phase: 'screening' as const },
     { slug: 'sensitive-data', getPath: () => '/dashboard/new-application/sensitive-data', phase: 'screening' as const },
     { slug: 'identity-checker', getPath: () => '/dashboard/new-application/identity-checker', phase: 'screening' as const },
+    { slug: 'salesheet', getPath: () => '/dashboard/new-application/salesheet', phase: 'screening' as const },
     { slug: 'customer-info', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/customer-info`, phase: 'application' as const },
     { slug: 'collateral-info', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/collateral-info`, phase: 'application' as const },
     { slug: 'income-and-debt', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/income-and-debt`, phase: 'application' as const },

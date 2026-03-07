@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, UserPlus, Users, Info, ShieldCheck, Trash2, Plus, Save, Phone, Loader2, CheckCircle, Calendar, AlertTriangle, Mail, Pencil, AlertCircle, Upload, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, FileText } from "lucide-react";
+import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, FileText, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { format } from "date-fns";
 import {
     Select,
     SelectContent,
@@ -45,119 +44,10 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog";import { DatePickerBE } from "@/components/ui/DatePickerBE";
+} from "@/components/ui/alert-dialog"; import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 
-interface SocialMedia {
-    platform: string;
-    accountName: string;
-}
-
-interface Child {
-    age: string;
-    occupation: string;
-}
-
-interface FamilyMember {
-    status: string;
-    age?: string;
-    hasInsurance?: string;
-    hasHealthExp?: string;
-}
-
-interface CoBorrower {
-    relationship: string;
-    idNumber: string;
-    prefix?: string;
-    firstName?: string;
-    middleName?: string;
-    lastName?: string;
-    gender?: string;
-    occupation?: string;
-    income?: string;
-    birthDate: string;
-    fullAddress?: string;
-    watchlistReasons?: string[];
-    phone?: string;
-    issueDate?: string;
-    expiryDate?: string;
-    laserId?: string;
-    houseNumber?: string;
-    floorNumber?: string;
-    unitNumber?: string;
-    village?: string;
-    moo?: string;
-    yaek?: string;
-    trohk?: string;
-    soi?: string;
-    street?: string;
-    subDistrict?: string;
-    district?: string;
-    province?: string;
-    zipCode?: string;
-    verificationStatus?: string;
-    latitude?: string;
-    longitude?: string;
-}
-
-type Guarantor = CoBorrower;
-
-interface CustomerFormData {
-    verificationStatus: string;
-    cardType?: string;
-    verificationMethod?: string;
-    watchlistReasons?: string[];
-    prefix?: string;
-    gender?: string;
-    nickname?: string;
-    firstName?: string;
-    middleName?: string;
-    lastName?: string;
-    firstNameEn?: string;
-    middleNameEn?: string;
-    lastNameEn?: string;
-    birthDate: string;
-    age?: string;
-    idType: string;
-    idNumber: string;
-    issueCountry?: string;
-    nationality?: string;
-    issueDate?: string;
-    issueDateDisplay?: string;
-    isLifetime?: boolean;
-    expiryDate?: string;
-    expiryDateDisplay?: string;
-    currentAddressSource?: string;
-    isCurrentSameAsId?: boolean;
-    currentHousingType?: string;
-    currentHousingTypeOther?: string;
-    currentHousingStatus?: string;
-    housingDurationYears?: string;
-    housingDurationMonths?: string;
-    currentResidentType?: string;
-    isDailyResidence?: boolean;
-    isOnCollateral?: boolean;
-    shippingAddressSource?: string;
-    isShippingSameAsCurrent?: boolean;
-    contactAddressSource?: string;
-    educationLevel?: string;
-    maritalStatus?: string;
-    isHouseholdHeadBorrower?: boolean;
-    householdHeadGender?: string;
-    householdHeadAge?: string;
-    employedFamilyCount?: string;
-    unemployedFamilyCount?: string;
-    familyMembers?: Record<string, FamilyMember>;
-    socialMedias: SocialMedia[];
-    children: Child[];
-    phone?: string;
-    email?: string;
-    homePhone?: string;
-    coBorrowers: CoBorrower[];
-    guarantors: Guarantor[];
-    phoneOwnershipProof?: File | null;
-    [key: string]: unknown;
-}
+import { SocialMedia, Child, FamilyMember, CoBorrower, Guarantor, CustomerFormData } from "@/types/application";
 
 interface CustomerInfoStepProps {
     formData: CustomerFormData;
@@ -224,33 +114,6 @@ const EDUCATION_LEVELS = [
 ];
 
 export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProps) {
-    // --- Date State & Logic ---
-    const [dateDisplay, setDateDisplay] = useState("");
-
-    useEffect(() => {
-        const updateDisplay = () => {
-            if (formData.birthDate) {
-                const dateStr = formData.birthDate;
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    const y = parseInt(parts[0]);
-                    const m = parts[1];
-                    const d = parts[2];
-                    if (!isNaN(y)) {
-                        const thaiYear = y + 543;
-                        const displayDay = d === '00' ? '--' : d;
-                        const displayMonth = m === '00' ? '--' : m;
-                        setDateDisplay(`${displayDay}/${displayMonth}/${thaiYear}`);
-                    }
-                }
-            } else {
-                setDateDisplay("");
-            }
-        };
-        // Use setTimeout to avoid synchronous state update in effect warning
-        const timer = setTimeout(updateDisplay, 0);
-        return () => clearTimeout(timer);
-    }, [formData.birthDate]);
 
 
 
@@ -324,18 +187,14 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     };
 
     useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (otpTimer > 0) {
-            interval = setInterval(() => setOtpTimer((prev) => prev - 1), 1000);
-        }
+        if (otpTimer <= 0) return;
+        const interval = setInterval(() => setOtpTimer((prev: number) => prev - 1), 1000);
         return () => clearInterval(interval);
     }, [otpTimer]);
 
     useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (emailOtpTimer > 0) {
-            interval = setInterval(() => setEmailOtpTimer((prev) => prev - 1), 1000);
-        }
+        if (emailOtpTimer <= 0) return;
+        const interval = setInterval(() => setEmailOtpTimer((prev: number) => prev - 1), 1000);
         return () => clearInterval(interval);
     }, [emailOtpTimer]);
 
@@ -349,6 +208,9 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         firstName: "",
         middleName: "",
         lastName: "",
+        firstNameEn: "",
+        middleNameEn: "",
+        lastNameEn: "",
         gender: "",
         occupation: "",
         income: "",
@@ -371,6 +233,9 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         firstName: "",
         middleName: "",
         lastName: "",
+        firstNameEn: "",
+        middleNameEn: "",
+        lastNameEn: "",
         gender: "",
         verificationStatus: "",
         occupation: "",
@@ -408,7 +273,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     const handleUpdateSocialMedia = (index: number, field: string, value: string) => {
         const items = [...(formData.socialMedias || [])];
         items[index] = { ...items[index], [field]: value };
-        setFormData((prev) => ({ ...prev, socialMedias: items }));
+        setFormData((prev: CustomerFormData) => ({ ...prev, socialMedias: items }));
     };
 
     const handleRemoveSocialMedia = (index: number) => {
@@ -432,7 +297,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     const handleUpdateChild = (index: number, field: string, value: unknown) => {
         const items = [...(formData.children || [])];
         items[index] = { ...items[index], [field]: value };
-        setFormData((prev) => ({ ...prev, children: items }));
+        setFormData((prev: CustomerFormData) => ({ ...prev, children: items }));
     };
 
     const handleRemoveChild = (index: number) => {
@@ -443,135 +308,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         });
     };
 
-    // --- Co-Borrower Date Logic ---
-
-    const [coBorrowerDateDisplay, setCoBorrowerDateDisplay] = useState("");
-
-    useEffect(() => {
-        const updateDisplay = () => {
-            if (newCoBorrower.birthDate) {
-                const dateStr = newCoBorrower.birthDate;
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    const y = parseInt(parts[0]);
-                    const m = parts[1];
-                    const d = parts[2];
-                    if (!isNaN(y)) {
-                        const thaiYear = y + 543;
-                        const displayDay = d === '00' ? '--' : d;
-                        const displayMonth = m === '00' ? '--' : m;
-                        setCoBorrowerDateDisplay(`${displayDay}/${displayMonth}/${thaiYear}`);
-                    }
-                }
-            } else {
-                setCoBorrowerDateDisplay("");
-            }
-        };
-        const timer = setTimeout(updateDisplay, 0);
-        return () => clearTimeout(timer);
-    }, [newCoBorrower.birthDate]);
-
-    const handleCoBorrowerDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/[^0-9-]/g, '');
-        if (val.length > 8) val = val.slice(0, 8);
-
-        let formattedVal = "";
-        if (val.length > 0) {
-            formattedVal = val.slice(0, 2);
-            if (val.length > 2) {
-                formattedVal += '/' + val.slice(2, 4);
-                if (val.length > 4) {
-                    formattedVal += '/' + val.slice(4, 8);
-                }
-            }
-        }
-        setCoBorrowerDateDisplay(formattedVal);
-
-        if (val.length === 8) {
-            const dStr = val.slice(0, 2);
-            const mStr = val.slice(2, 4);
-            const yStr = val.slice(4, 8);
-
-            const d = dStr === '--' ? '00' : dStr;
-            const m = mStr === '--' ? '00' : mStr;
-            const y = parseInt(yStr);
-            let realYearAD = y;
-            if (y > 2400) realYearAD = y - 543;
-
-            setNewCoBorrower((prev) => ({ ...prev, birthDate: `${realYearAD}-${m}-${d}` }));
-        }
-    };
-
-    const handleCoBorrowerDateBlur = () => {
-        // Handled by input change and useEffect for display
-    };
-
-    // --- Guarantor Date Logic ---
-
-    const [guarantorDateDisplay, setGuarantorDateDisplay] = useState("");
-
-    useEffect(() => {
-        const updateDisplay = () => {
-            if (newGuarantor.birthDate) {
-                const dateStr = newGuarantor.birthDate;
-                const parts = dateStr.split('-');
-                if (parts.length === 3) {
-                    const y = parseInt(parts[0]);
-                    const m = parts[1];
-                    const d = parts[2];
-                    if (!isNaN(y)) {
-                        const thaiYear = y + 543;
-                        const displayDay = d === '00' ? '--' : d;
-                        const displayMonth = m === '00' ? '--' : m;
-                        setGuarantorDateDisplay(`${displayDay}/${displayMonth}/${thaiYear}`);
-                    }
-                }
-            } else {
-                setGuarantorDateDisplay("");
-            }
-        };
-        const timer = setTimeout(updateDisplay, 0);
-        return () => clearTimeout(timer);
-    }, [newGuarantor.birthDate]);
-
-    const handleGuarantorDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/[^0-9-]/g, '');
-        if (val.length > 8) val = val.slice(0, 8);
-
-        let formattedVal = "";
-        if (val.length > 0) {
-            formattedVal = val.slice(0, 2);
-            if (val.length > 2) {
-                formattedVal += '/' + val.slice(2, 4);
-                if (val.length > 4) {
-                    formattedVal += '/' + val.slice(4, 8);
-                }
-            }
-        }
-        setGuarantorDateDisplay(formattedVal);
-
-        if (val.length === 8) {
-            const dStr = val.slice(0, 2);
-            const mStr = val.slice(2, 4);
-            const yStr = val.slice(4, 8);
-
-            const d = dStr === '--' ? '00' : dStr;
-            const m = mStr === '--' ? '00' : mStr;
-            const y = parseInt(yStr);
-            let realYearAD = y;
-            if (y > 2400) realYearAD = y - 543;
-
-            setNewGuarantor((prev) => ({ ...prev, birthDate: `${realYearAD}-${m}-${d}` }));
-        }
-    };
-
-    const handleGuarantorDateBlur = () => {
-        // Handled by input change and useEffect for display
-    };
 
     // Helper: Update main form data
     const handleChange = (field: string, value: unknown) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev: CustomerFormData) => ({ ...prev, [field]: value }));
     };
 
     // --- Co-Borrower Handlers ---
@@ -580,7 +320,9 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setEditingCoBorrowerIndex(null);
         setCoBorrowerStage('KYC');
         setNewCoBorrower({
-            relationship: "", idNumber: "", prefix: "", firstName: "", middleName: "", lastName: "", gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "", issueDate: "", expiryDate: "", laserId: "",
+            relationship: "", idNumber: "", prefix: "", firstName: "", middleName: "", lastName: "",
+            firstNameEn: "", middleNameEn: "", lastNameEn: "",
+            gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "", issueDate: "", expiryDate: "", laserId: "",
             houseNumber: "", floorNumber: "", unitNumber: "", village: "", moo: "", yaek: "", trohk: "", soi: "", street: "", subDistrict: "", district: "", province: "", zipCode: ""
         });
     };
@@ -592,28 +334,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setCoBorrowerStage('FORM'); // Skip KYC for edit
         setIsAddingCoBorrower(true);
 
-        // Populate date display logic
-        if (coBorrowerToEdit.birthDate) {
-            // Check if it's a year-only date (YYYY-01-01) - simple heuristic or check logic
-            // For now, we will follow the standard logic:
-            const date = new Date(coBorrowerToEdit.birthDate);
-            if (!isNaN(date.getTime())) {
-                const year = date.getFullYear();
-                const thaiYear = year + 543;
-                // If the date is Jan 1st and user intended year only, we might need a flag or inference.
-                // For simplicity, let's default to full date unless it looks exactly like Jan 1
-                // const isJan1 = date.getMonth() === 0 && date.getDate() === 1;
-
-                // Ideally, we should store `isYearOnly` in the data as well.
-                // For now, let's just display as full date and let user change if needed, 
-                // or infer if it was originally year only if we had that flag.
-                // Let's assume full date for editing for now to be safe.
-
-                const day = format(date, "dd");
-                const month = format(date, "MM");
-                setCoBorrowerDateDisplay(`${day}/${month}/${thaiYear}`);
-            }
-        }
     };
 
     // Helper: Format Date to Thai
@@ -632,7 +352,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             firstName: data.firstName,
             middleName: data.middleName || "",
             lastName: data.lastName,
+            firstNameEn: data.firstNameEn || "",
+            middleNameEn: data.middleNameEn || "",
+            lastNameEn: data.lastNameEn || "",
             gender: data.gender,
+            verificationMethod: data.verificationMethod,
             verificationStatus: data.verificationStatus,
             birthDate: formatDateToThai(data.birthDate),
             issueDate: data.issueDate,
@@ -664,10 +388,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             // Update existing
             const updatedCoBorrowers = [...(formData.coBorrowers || [])];
             updatedCoBorrowers[editingCoBorrowerIndex] = newCoBorrower;
-            setFormData((prev) => ({ ...prev, coBorrowers: updatedCoBorrowers }));
+            setFormData((prev: CustomerFormData) => ({ ...prev, coBorrowers: updatedCoBorrowers }));
         } else {
             // Add new
-            setFormData((prev) => ({
+            setFormData((prev: CustomerFormData) => ({
                 ...prev,
                 coBorrowers: [...(prev.coBorrowers || []), newCoBorrower]
             }));
@@ -699,7 +423,9 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setEditingGuarantorIndex(null);
         setGuarantorStage('KYC');
         setNewGuarantor({
-            relationship: "", idNumber: "", prefix: "", firstName: "", lastName: "", gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "",
+            relationship: "", idNumber: "", prefix: "", firstName: "", middleName: "", lastName: "",
+            firstNameEn: "", middleNameEn: "", lastNameEn: "",
+            gender: "", occupation: "", income: "", birthDate: "", fullAddress: "", watchlistReasons: [], phone: "",
             houseNumber: "", floorNumber: "", unitNumber: "", village: "", moo: "", yaek: "", trohk: "", soi: "", street: "", subDistrict: "", district: "", province: "", zipCode: ""
         });
     };
@@ -711,18 +437,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         setGuarantorStage('FORM'); // Skip KYC for edit
         setIsAddingGuarantor(true);
 
-        // Populate date display logic
-        if (guarantorToEdit.birthDate) {
-            const date = new Date(guarantorToEdit.birthDate);
-            if (!isNaN(date.getTime())) {
-                const year = date.getFullYear();
-                const thaiYear = year + 543;
-
-                const day = format(date, "dd");
-                const month = format(date, "MM");
-                setGuarantorDateDisplay(`${day}/${month}/${thaiYear}`);
-            }
-        }
     };
 
     const handleGuarantorKYCComplete = (data: KYCData) => {
@@ -733,7 +447,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             firstName: data.firstName,
             middleName: data.middleName || "",
             lastName: data.lastName,
+            firstNameEn: data.firstNameEn || "",
+            middleNameEn: data.middleNameEn || "",
+            lastNameEn: data.lastNameEn || "",
             gender: data.gender,
+            verificationMethod: data.verificationMethod,
             verificationStatus: data.verificationStatus,
             birthDate: formatDateToThai(data.birthDate),
             issueDate: data.issueDate,
@@ -765,10 +483,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             // Update existing
             const updatedGuarantors = [...(formData.guarantors || [])];
             updatedGuarantors[editingGuarantorIndex] = newGuarantor;
-            setFormData((prev) => ({ ...prev, guarantors: updatedGuarantors }));
+            setFormData((prev: CustomerFormData) => ({ ...prev, guarantors: updatedGuarantors }));
         } else {
             // Add new
-            setFormData((prev) => ({
+            setFormData((prev: CustomerFormData) => ({
                 ...prev,
                 guarantors: [...(prev.guarantors || []), newGuarantor]
             }));
@@ -802,7 +520,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 socialMedias: (prev.socialMedias || []).filter((_, i) => i !== deleteConfirmation.index)
             }));
         } else if (deleteConfirmation.type === 'child' && deleteConfirmation.index !== null) {
-            setFormData((prev) => ({
+            setFormData((prev: CustomerFormData) => ({
                 ...prev,
                 children: (prev.children || []).filter((_, i) => i !== deleteConfirmation.index)
             }));
@@ -923,8 +641,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         <DatePickerBE
                                             value={formData.birthDate || ""}
                                             onChange={(val) => handleChange("birthDate", val)}
-                                            readOnly
-                                            inputClassName="h-11 bg-gray-50 text-gray-600"
+                                            disabled
+                                            inputClassName="h-11"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -937,30 +655,14 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 const y = parseInt(parts[0]);
                                                 if (isNaN(y)) return "";
                                                 const today = new Date();
-                                                let age = today.getFullYear() - y;
+                                                const age = today.getFullYear() - y;
                                                 return age >= 0 ? age.toString() : "0";
                                             })()}
                                             disabled
                                             className="bg-gray-50 text-gray-600 h-11"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label>สัญชาติ <span className="text-red-500">*</span></Label>
-                                        {formData.verificationMethod === 'DIPCHIP' ? (
-                                            <Input value={formData.nationality || "THAI"} disabled className="bg-gray-50 text-gray-600 h-11" />
-                                        ) : (
-                                            <Select value={formData.nationality || "Thai"} onValueChange={(val) => handleChange("nationality", val)}>
-                                                <SelectTrigger className="h-11 bg-white">
-                                                    <SelectValue placeholder="เลือกสัญชาติ" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {COUNTRIES.map((c) => (
-                                                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -1988,17 +1690,32 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 )}
                             </div>
 
-                            {/* Home Telephone Field */}
-                            <div className="space-y-2">
-                                <Label>เบอร์โทรศัพท์บ้าน (ถ้ามี)</Label>
-                                <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        value={formData.homePhone || ""}
-                                        placeholder="02-xxx-xxxx"
-                                        className="pl-9 font-mono h-11"
-                                        onChange={(e) => handleChange("homePhone", e.target.value)}
-                                    />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                                {/* Home Telephone Field */}
+                                <div className="space-y-2">
+                                    <Label>เบอร์โทรศัพท์บ้าน (ถ้ามี)</Label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            value={formData.homePhone || ""}
+                                            placeholder="02-xxx-xxxx"
+                                            className="pl-9 font-mono h-11"
+                                            onChange={(e) => handleChange("homePhone", e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                {/* LINE ID Field */}
+                                <div className="space-y-2">
+                                    <Label>LINE ID</Label>
+                                    <div className="relative">
+                                        <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            value={formData.lineId || ""}
+                                            placeholder="@lineid"
+                                            className="pl-9 h-11"
+                                            onChange={(e) => handleChange("lineId", e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2200,7 +1917,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <AlertTriangle className="w-4 h-4" />
                                                         บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
                                                     </div>
-                                                     {(newCoBorrower.watchlistReasons || []).length > 0 && (
+                                                    {(newCoBorrower.watchlistReasons || []).length > 0 && (
                                                         <div className="flex flex-wrap gap-2 ml-6">
                                                             {(newCoBorrower.watchlistReasons || []).map
                                                                 ((reason: string, idx: number) => (
@@ -2287,6 +2004,34 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <Input
                                                         value={newCoBorrower.lastName}
                                                         onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastName: e.target.value })}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Input
+                                                        value={newCoBorrower.firstNameEn || ""}
+                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstNameEn: e.target.value })}
+                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                                    <Input
+                                                        value={newCoBorrower.middleNameEn || ""}
+                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, middleNameEn: e.target.value })}
+                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Input
+                                                        value={newCoBorrower.lastNameEn || ""}
+                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastNameEn: e.target.value })}
+                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
                                                     />
                                                 </div>
 
@@ -2471,7 +2216,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <AlertTriangle className="w-4 h-4" />
                                                         บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
                                                     </div>
-                                                     {(newGuarantor.watchlistReasons || []).length > 0 && (
+                                                    {(newGuarantor.watchlistReasons || []).length > 0 && (
                                                         <div className="flex flex-wrap gap-2 ml-6">
                                                             {(newGuarantor.watchlistReasons || []).map
                                                                 ((reason: string, idx: number) => (
@@ -2562,6 +2307,34 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
 
                                                 <div className="space-y-2">
+                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Input
+                                                        value={newGuarantor.firstNameEn || ""}
+                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, firstNameEn: e.target.value })}
+                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                                    <Input
+                                                        value={newGuarantor.middleNameEn || ""}
+                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, middleNameEn: e.target.value })}
+                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Input
+                                                        value={newGuarantor.lastNameEn || ""}
+                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, lastNameEn: e.target.value })}
+                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
                                                     <Label>วันเกิด</Label>
                                                     <DatePickerBE
                                                         value={newGuarantor.birthDate}
@@ -2638,7 +2411,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 </>
             )}
             {/* Delete Confirmation Alert Dialog */}
-            <AlertDialog open={deleteConfirmation.isOpen} onOpenChange={(open) => !open && setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}>
+            <AlertDialog open={deleteConfirmation.isOpen} onOpenChange={(open) => !open && setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบข้อมูล</AlertDialogTitle>

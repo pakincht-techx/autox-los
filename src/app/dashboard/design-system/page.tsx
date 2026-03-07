@@ -18,13 +18,10 @@ import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
 import {
     Calendar as CalendarIcon,
-    Check,
-    ChevronRight,
     Loader2,
     Mail,
     Search,
     AlertCircle,
-    AlertTriangle,
     Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -185,7 +182,7 @@ export default function DesignSystemPage() {
                         <div className="space-y-2">
                             <Label htmlFor="with-icon">Input with Description</Label>
                             <Input id="with-icon" placeholder="Enter value" />
-                            <p className="text-xs text-gray-500">We'll never share your data.</p>
+                            <p className="text-xs text-gray-500">We&apos;ll never share your data.</p>
                         </div>
                         <div className="space-y-2">
                             <Label>Slider</Label>
@@ -387,7 +384,7 @@ export default function DesignSystemPage() {
                                 <CardHeader>
                                     <CardTitle>Account</CardTitle>
                                     <CardDescription>
-                                        Make changes to your account here. Click save when you're done.
+                                        Make changes to your account here. Click save when you&apos;re done.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
@@ -410,7 +407,7 @@ export default function DesignSystemPage() {
                                 <CardHeader>
                                     <CardTitle>Password</CardTitle>
                                     <CardDescription>
-                                        Change your password here. After saving, you'll be logged out.
+                                        Change your password here. After saving, you&apos;ll be logged out.
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
