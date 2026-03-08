@@ -76,7 +76,7 @@ export const AddressForm = ({
                                     <div className="space-y-2">
                                         <Label className="text-xs text-muted-foreground">ชื่อสถานที่ทำงาน / ชื่อกิจการ</Label>
                                         <Input
-                                            className="bg-white h-11"
+                                            className="bg-white h-12"
                                             value={formData[getField('workplaceName')] || ""}
                                             onChange={(e) => onChange(getField('workplaceName'), e.target.value)}
                                             disabled={disabled}
@@ -86,7 +86,7 @@ export const AddressForm = ({
                                     <div className="space-y-2">
                                         <Label className="text-xs text-muted-foreground">เบอร์ติดต่อที่ทำงาน</Label>
                                         <Input
-                                            className="bg-white font-mono h-11"
+                                            className="bg-white font-mono h-12"
                                             value={formData[getField('workPhone')] || ""}
                                             onChange={(e) => onChange(getField('workPhone'), e.target.value)}
                                             disabled={disabled}
@@ -100,7 +100,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">เลขที่บ้าน <span className="text-red-500">*</span></Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('houseNumber')] || ""}
                                         onChange={(e) => onChange(getField('houseNumber'), e.target.value)}
                                         disabled={disabled}
@@ -110,7 +110,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">ชั้น</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('floorNumber')] || ""}
                                         onChange={(e) => onChange(getField('floorNumber'), e.target.value)}
                                         disabled={disabled}
@@ -120,7 +120,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">หน่วย/ห้อง</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('unitNumber')] || ""}
                                         onChange={(e) => onChange(getField('unitNumber'), e.target.value)}
                                         disabled={disabled}
@@ -130,7 +130,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('moo')] || ""}
                                         onChange={(e) => onChange(getField('moo'), e.target.value)}
                                         disabled={disabled}
@@ -143,7 +143,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">หมู่บ้าน/อาคาร</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('village')] || ""}
                                         onChange={(e) => onChange(getField('village'), e.target.value)}
                                         disabled={disabled}
@@ -153,7 +153,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">ซอย</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('soi')] || ""}
                                         onChange={(e) => onChange(getField('soi'), e.target.value)}
                                         disabled={disabled}
@@ -166,7 +166,7 @@ export const AddressForm = ({
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">ตรอก</Label>
                                     <Input
-                                        className="bg-white h-11"
+                                        className="bg-white h-12"
                                         value={formData[getField('trohk')] || ""}
                                         onChange={(e) => onChange(getField('trohk'), e.target.value)}
                                         disabled={disabled}
@@ -218,7 +218,7 @@ export const AddressForm = ({
                             <div className="space-y-2">
                                 <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์ <span className="text-red-500">*</span></Label>
                                 <Input
-                                    className="bg-white h-11"
+                                    className="bg-white h-12"
                                     value={formData[getField('zipCode')] || ""}
                                     onChange={(e) => onChange(getField('zipCode'), e.target.value.replace(/\D/g, '').slice(0, 5))}
                                     disabled={disabled}

@@ -34,7 +34,7 @@ interface MapPickerDialogProps {
     title?: string
 }
 
-const DEFAULT_CENTER: [number, number] = [13.7563, 100.5018] // Bangkok
+const DEFAULT_CENTER: [number, number] = [13.827461555753386, 100.56348533094047]
 
 export function MapPickerDialog({
     open,
@@ -45,21 +45,21 @@ export function MapPickerDialog({
     title = "ระบุตำแหน่งในแผนที่"
 }: MapPickerDialogProps) {
     const [position, setPosition] = React.useState<[number, number] | null>(
-        initialLat && initialLng ? [initialLat, initialLng] : null
+        initialLat && initialLng ? [initialLat, initialLng] : DEFAULT_CENTER
     )
     const [center, setCenter] = React.useState<[number, number]>(
         initialLat && initialLng ? [initialLat, initialLng] : DEFAULT_CENTER
     )
-    const [zoom, setZoom] = React.useState(initialLat && initialLng ? 15 : 6)
+    const [zoom, setZoom] = React.useState(17)
     const [searchQuery, setSearchQuery] = React.useState("")
     const [isSearching, setIsSearching] = React.useState(false)
 
     React.useEffect(() => {
         if (open) {
-            const initialPos: [number, number] | null = initialLat && initialLng ? [initialLat, initialLng] : null
+            const initialPos: [number, number] | null = initialLat && initialLng ? [initialLat, initialLng] : DEFAULT_CENTER
             setPosition(initialPos)
             setCenter(initialPos || DEFAULT_CENTER)
-            setZoom(initialPos ? 15 : 6)
+            setZoom(17)
             setSearchQuery("")
         }
     }, [open, initialLat, initialLng])

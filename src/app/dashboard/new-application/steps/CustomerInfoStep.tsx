@@ -568,12 +568,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <div className="space-y-2">
                                         <Label>คำนำหน้า <span className="text-red-500">*</span></Label>
-                                        <Input value={formData.prefix || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                        <Input value={formData.prefix || ""} disabled className="bg-gray-50 text-gray-600 h-12" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>เพศ <span className="text-red-500">*</span></Label>
                                         <Select value={formData.gender || ""} onValueChange={(val) => handleChange("gender", val)}>
-                                            <SelectTrigger className="h-11 bg-white">
+                                            <SelectTrigger className="h-12 bg-white">
                                                 <SelectValue placeholder="ระบุเพศ" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -589,50 +589,50 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             value={formData.nickname || ""}
                                             onChange={(e) => handleChange("nickname", e.target.value)}
                                             placeholder="ระบุชื่อเล่น"
-                                            className="h-11 bg-white"
+                                            className="h-12 bg-white"
                                         />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>ชื่อจริง <span className="text-red-500">*</span></Label>
-                                        <Input value={formData.firstName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                        <Input value={formData.firstName || ""} disabled className="bg-gray-50 text-gray-600 h-12" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>ชื่อกลาง</Label>
-                                        <Input value={formData.middleName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                        <Input value={formData.middleName || ""} disabled className="bg-gray-50 text-gray-600 h-12" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>นามสกุล <span className="text-red-500">*</span></Label>
-                                        <Input value={formData.lastName || ""} disabled className="bg-gray-50 text-gray-600 h-11" />
+                                        <Input value={formData.lastName || ""} disabled className="bg-gray-50 text-gray-600 h-12" />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>ชื่อภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                        <Label>ชื่อภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
                                         <Input
                                             value={formData.firstNameEn || ""}
                                             onChange={(e) => handleChange("firstNameEn", e.target.value)}
                                             placeholder="First Name"
                                             disabled={formData.verificationMethod === 'DIPCHIP'}
-                                            className={cn("h-11", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                            className={cn("h-12", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                        <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
                                         <Input
                                             value={formData.middleNameEn || ""}
                                             onChange={(e) => handleChange("middleNameEn", e.target.value)}
                                             placeholder="Middle Name"
                                             disabled={formData.verificationMethod === 'DIPCHIP'}
-                                            className={cn("h-11", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                            className={cn("h-12", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                        <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
                                         <Input
                                             value={formData.lastNameEn || ""}
                                             onChange={(e) => handleChange("lastNameEn", e.target.value)}
                                             placeholder="Last Name"
                                             disabled={formData.verificationMethod === 'DIPCHIP'}
-                                            className={cn("h-11", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                            className={cn("h-12", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
                                         />
                                     </div>
 
@@ -642,7 +642,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             value={formData.birthDate || ""}
                                             onChange={(val) => handleChange("birthDate", val)}
                                             disabled
-                                            inputClassName="h-11"
+                                            inputClassName="h-12"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -659,7 +659,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 return age >= 0 ? age.toString() : "0";
                                             })()}
                                             disabled
-                                            className="bg-gray-50 text-gray-600 h-11"
+                                            className="bg-gray-50 text-gray-600 h-12"
                                         />
                                     </div>
 
@@ -676,36 +676,42 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                                     <div className="space-y-2">
-                                        <Label>ประเภทบัตรประจำตัว <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-end justify-between min-h-[20px]">
+                                            <Label>ประเภทบัตรประจำตัว <span className="text-red-500">*</span></Label>
+                                        </div>
                                         <Input
                                             value={ID_TYPES.find(t => t.value.toLowerCase() === (formData.idType || "thai_id").toLowerCase())?.label || "บัตรประชาชนไทย"}
                                             disabled
-                                            className="bg-gray-50 text-gray-600 h-11"
+                                            className="bg-gray-50 text-gray-600 h-12"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>{formData.cardType === 'PINK_CARD' ? "เลขประจำตัว" : "เลขที่บัตรประจำตัว"} <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-end justify-between min-h-[20px]">
+                                            <Label>{formData.cardType === 'PINK_CARD' ? "เลขประจำตัว" : "เลขที่บัตรประจำตัว"} <span className="text-red-500">*</span></Label>
+                                        </div>
                                         <Input
                                             value={formData.idNumber}
                                             disabled
-                                            className="bg-gray-50 text-gray-600 font-mono h-11"
+                                            className="bg-gray-50 text-gray-600 font-mono h-12"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>ประเทศที่ออกบัตร <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-end justify-between min-h-[20px]">
+                                            <Label>ประเทศที่ออกบัตร <span className="text-red-500">*</span></Label>
+                                        </div>
                                         {formData.verificationMethod === 'DIPCHIP' ? (
                                             <Input
                                                 value={formData.issueCountry || "Thailand"}
                                                 disabled
-                                                className="bg-gray-50 text-gray-600 h-11"
+                                                className="bg-gray-50 text-gray-600 h-12"
                                             />
                                         ) : (
                                             <Select
                                                 value={formData.issueCountry || "Thailand"}
                                                 onValueChange={(val) => handleChange("issueCountry", val)}
                                             >
-                                                <SelectTrigger className="h-11 bg-white">
+                                                <SelectTrigger className="h-12 bg-white">
                                                     <SelectValue placeholder="เลือกประเทศที่ออกบัตร" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -718,19 +724,21 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>สัญชาติ <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-end justify-between min-h-[20px]">
+                                            <Label>สัญชาติ <span className="text-red-500">*</span></Label>
+                                        </div>
                                         {formData.verificationMethod === 'DIPCHIP' ? (
                                             <Input
                                                 value={formData.nationality || "Thai"}
                                                 disabled
-                                                className="bg-gray-50 text-gray-600 h-11"
+                                                className="bg-gray-50 text-gray-600 h-12"
                                             />
                                         ) : (
                                             <Select
                                                 value={formData.nationality || ""}
                                                 onValueChange={(val) => handleChange("nationality", val)}
                                             >
-                                                <SelectTrigger className="h-11 bg-white">
+                                                <SelectTrigger className="h-12 bg-white">
                                                     <SelectValue placeholder="เลือกสัญชาติ" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -743,7 +751,9 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>วันที่ออกบัตร <span className="text-red-500">*</span></Label>
+                                        <div className="flex items-end justify-between min-h-[20px]">
+                                            <Label>วันที่ออกบัตร <span className="text-red-500">*</span></Label>
+                                        </div>
                                         <Input
                                             value={
                                                 formData.verificationMethod === 'DIPCHIP' ?
@@ -779,7 +789,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 }
                                             }}
                                             disabled={formData.verificationMethod === 'DIPCHIP'}
-                                            className={cn("h-11", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white focus:border-chaiyo-blue")}
+                                            className={cn("h-12", formData.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white focus:border-chaiyo-blue")}
                                             placeholder="DD/MM/YYYY"
                                         />
                                     </div>
@@ -833,7 +843,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 }
                                             }}
                                             disabled={formData.verificationMethod === 'DIPCHIP' || formData.isLifetime}
-                                            className={cn("h-11", (formData.verificationMethod === 'DIPCHIP' || formData.isLifetime) ? "bg-gray-50 text-gray-600" : "bg-white focus:border-chaiyo-blue")}
+                                            className={cn("h-12", (formData.verificationMethod === 'DIPCHIP' || formData.isLifetime) ? "bg-gray-50 text-gray-600" : "bg-white focus:border-chaiyo-blue")}
                                             placeholder={formData.isLifetime ? "ตลอดชีพ" : "DD/MM/YYYY"}
                                         />
                                     </div>
@@ -886,7 +896,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     handleChange("isCurrentSameAsId", val === 'id');
                                                 }}
                                             >
-                                                <SelectTrigger className="h-11 bg-white">
+                                                <SelectTrigger className="h-12 bg-white">
                                                     <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -915,7 +925,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     value={formData.currentHousingType || ""}
                                                     onValueChange={(val) => handleChange("currentHousingType", val)}
                                                 >
-                                                    <SelectTrigger className="h-11 bg-white">
+                                                    <SelectTrigger className="h-12 bg-white">
                                                         <SelectValue placeholder="ระบุลักษณะที่อยู่อาศัย" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -930,7 +940,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </Select>
                                                 {formData.currentHousingType === "อื่น ๆ" && (
                                                     <Input
-                                                        className="mt-2 h-11 bg-white"
+                                                        className="mt-2 h-12 bg-white"
                                                         placeholder="โปรดระบุลักษณะที่อยู่อาศัย"
                                                         value={formData.currentHousingTypeOther || ""}
                                                         onChange={(e) => handleChange("currentHousingTypeOther", e.target.value)}
@@ -944,7 +954,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     value={formData.currentHousingStatus || ""}
                                                     onValueChange={(val) => handleChange("currentHousingStatus", val)}
                                                 >
-                                                    <SelectTrigger className="h-11 bg-white">
+                                                    <SelectTrigger className="h-12 bg-white">
                                                         <SelectValue placeholder="ระบุสถานะที่อยู่อาศัย" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -961,7 +971,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <div className="flex-1 flex items-center gap-2">
                                                         <Input
                                                             type="number"
-                                                            className="h-11 bg-white text-center"
+                                                            className="h-12 bg-white text-center"
                                                             placeholder="0"
                                                             value={formData.housingDurationYears || ""}
                                                             onChange={(e) => handleChange("housingDurationYears", e.target.value)}
@@ -971,7 +981,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <div className="flex-1 flex items-center gap-2">
                                                         <Input
                                                             type="number"
-                                                            className="h-11 bg-white text-center"
+                                                            className="h-12 bg-white text-center"
                                                             placeholder="0"
                                                             max={11}
                                                             value={formData.housingDurationMonths || ""}
@@ -988,7 +998,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     value={formData.currentResidentType || ""}
                                                     onValueChange={(val) => handleChange("currentResidentType", val)}
                                                 >
-                                                    <SelectTrigger className="h-11 bg-white">
+                                                    <SelectTrigger className="h-12 bg-white">
                                                         <SelectValue placeholder="ระบุประเภทผู้อยู่อาศัย" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -1046,7 +1056,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     handleChange("isShippingSameAsCurrent", val === 'current');
                                                 }}
                                             >
-                                                <SelectTrigger className="h-11 bg-white">
+                                                <SelectTrigger className="h-12 bg-white">
                                                     <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -1092,7 +1102,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     }
                                                 }}
                                             >
-                                                <SelectTrigger className="h-11 bg-white">
+                                                <SelectTrigger className="h-12 bg-white">
                                                     <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -1137,7 +1147,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 value={formData.educationLevel || ""}
                                 onValueChange={(val) => handleChange("educationLevel", val)}
                             >
-                                <SelectTrigger className="h-11 bg-white">
+                                <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกระดับการศึกษา" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1167,7 +1177,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 value={formData.maritalStatus || ""}
                                 onValueChange={(val) => handleChange("maritalStatus", val)}
                             >
-                                <SelectTrigger className="h-11 bg-white">
+                                <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกสถานะการสมรส" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1184,7 +1194,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
                                 onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
                             >
-                                <SelectTrigger className="h-11 bg-white">
+                                <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1200,7 +1210,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
                                 onValueChange={(val) => handleChange("householdHeadGender", val)}
                             >
-                                <SelectTrigger className="h-11 bg-white">
+                                <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกเพศ" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1215,7 +1225,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
                             <Input
                                 type="number"
-                                className="h-11 bg-white"
+                                className="h-12 bg-white"
                                 placeholder="ระบุอายุ"
                                 value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
                                 onChange={(e) => handleChange("householdHeadAge", e.target.value)}
@@ -1234,7 +1244,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ (คน)</Label>
                                 <Input
                                     type="number"
-                                    className="h-11 bg-white focus-visible:ring-chaiyo-blue/20"
+                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"
                                     placeholder="0"
                                     value={formData.employedFamilyCount || ""}
                                     onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
@@ -1244,7 +1254,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ (คน)</Label>
                                 <Input
                                     type="number"
-                                    className="h-11 bg-white focus-visible:ring-chaiyo-blue/20"
+                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"
                                     placeholder="0"
                                     value={formData.unemployedFamilyCount || ""}
                                     onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
@@ -1252,7 +1262,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
-                                <div className="h-11 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
+                                <div className="h-12 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
 
                                     <div className="flex items-baseline gap-1.5">
                                         <span className="text-2xl font-black text-chaiyo-blue tabular-nums">
@@ -1308,7 +1318,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         value={memberData.status || "living_together"}
                                                         onValueChange={(val) => updateMember("status", val)}
                                                     >
-                                                        <SelectTrigger className="h-11 bg-white">
+                                                        <SelectTrigger className="h-12 bg-white">
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -1323,7 +1333,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <Input
                                                             type="number"
                                                             placeholder="อายุ"
-                                                            className="h-11 bg-white"
+                                                            className="h-12 bg-white"
                                                             value={memberData.age || ""}
                                                             onChange={(e) => updateMember("age", e.target.value)}
                                                         />
@@ -1338,7 +1348,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                                 value={memberData.hasInsurance || "no"}
                                                                 onValueChange={(val) => updateMember("hasInsurance", val)}
                                                             >
-                                                                <SelectTrigger className="h-11 bg-white">
+                                                                <SelectTrigger className="h-12 bg-white">
                                                                     <SelectValue placeholder="เลือก" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
@@ -1358,7 +1368,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                                 value={memberData.hasHealthExp || "no"}
                                                                 onValueChange={(val) => updateMember("hasHealthExp", val)}
                                                             >
-                                                                <SelectTrigger className="h-11 bg-white">
+                                                                <SelectTrigger className="h-12 bg-white">
                                                                     <SelectValue placeholder="เลือก" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
@@ -1427,7 +1437,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         value={child.age || ""}
                                                         onChange={(e) => handleUpdateChild(idx, "age", e.target.value)}
                                                         placeholder="ระบุอายุ"
-                                                        className="h-11 bg-white"
+                                                        className="h-12 bg-white"
                                                     />
                                                 </TableCell>
                                                 <TableCell className="py-3">
@@ -1435,7 +1445,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         value={child.occupation || "student"}
                                                         onValueChange={(val) => handleUpdateChild(idx, "occupation", val)}
                                                     >
-                                                        <SelectTrigger className="h-11 bg-white">
+                                                        <SelectTrigger className="h-12 bg-white">
                                                             <SelectValue placeholder="เลือกอาชีพ" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -1493,7 +1503,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             value={formData.phone || ""}
                                             placeholder="08x-xxx-xxxx"
                                             className={cn(
-                                                "pl-9 font-mono h-11",
+                                                "pl-9 font-mono h-12",
                                                 isOtpVerified && "border-green-500 bg-green-50 text-green-700"
                                             )}
                                             onChange={(e) => {
@@ -1511,7 +1521,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             variant="outline"
                                             onClick={handleSendOtp}
                                             disabled={!formData.phone || formData.phone.length < 10 || showOtpInput}
-                                            className="shrink-0 h-11"
+                                            className="shrink-0 h-12"
                                         >
                                             ยืนยันเบอร์
                                         </Button>
@@ -1621,7 +1631,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             value={formData.email || ""}
                                             placeholder="example@email.com"
                                             className={cn(
-                                                "pl-9 h-11",
+                                                "pl-9 h-12",
                                                 isEmailOtpVerified && "border-green-500 bg-green-50 text-green-700"
                                             )}
                                             onChange={(e) => {
@@ -1639,7 +1649,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             variant="outline"
                                             onClick={handleSendEmailOtp}
                                             disabled={!formData.email || !formData.email.includes('@') || showEmailOtpInput}
-                                            className="shrink-0 h-11"
+                                            className="shrink-0 h-12"
                                         >
                                             ยืนยันอีเมล
                                         </Button>
@@ -1699,7 +1709,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         <Input
                                             value={formData.homePhone || ""}
                                             placeholder="02-xxx-xxxx"
-                                            className="pl-9 font-mono h-11"
+                                            className="pl-9 font-mono h-12"
                                             onChange={(e) => handleChange("homePhone", e.target.value)}
                                         />
                                     </div>
@@ -1712,7 +1722,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         <Input
                                             value={formData.lineId || ""}
                                             placeholder="@lineid"
-                                            className="pl-9 h-11"
+                                            className="pl-9 h-12"
                                             onChange={(e) => handleChange("lineId", e.target.value)}
                                         />
                                     </div>
@@ -2008,7 +2018,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
                                                     <Input
                                                         value={newCoBorrower.firstNameEn || ""}
                                                         onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstNameEn: e.target.value })}
@@ -2017,7 +2027,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
                                                     <Input
                                                         value={newCoBorrower.middleNameEn || ""}
                                                         onChange={(e) => setNewCoBorrower({ ...newCoBorrower, middleNameEn: e.target.value })}
@@ -2026,7 +2036,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
                                                     <Input
                                                         value={newCoBorrower.lastNameEn || ""}
                                                         onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastNameEn: e.target.value })}
@@ -2040,7 +2050,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <DatePickerBE
                                                         value={newCoBorrower.birthDate}
                                                         onChange={(val) => setNewCoBorrower({ ...newCoBorrower, birthDate: val })}
-                                                        inputClassName="h-11"
+                                                        inputClassName="h-12"
                                                     />
                                                 </div>
 
@@ -2307,7 +2317,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
                                                     <Input
                                                         value={newGuarantor.firstNameEn || ""}
                                                         onChange={(e) => setNewGuarantor({ ...newGuarantor, firstNameEn: e.target.value })}
@@ -2316,7 +2326,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name EN)</Label>
+                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
                                                     <Input
                                                         value={newGuarantor.middleNameEn || ""}
                                                         onChange={(e) => setNewGuarantor({ ...newGuarantor, middleNameEn: e.target.value })}
@@ -2325,7 +2335,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name EN) <span className="text-red-500">*</span></Label>
+                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
                                                     <Input
                                                         value={newGuarantor.lastNameEn || ""}
                                                         onChange={(e) => setNewGuarantor({ ...newGuarantor, lastNameEn: e.target.value })}
@@ -2339,7 +2349,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <DatePickerBE
                                                         value={newGuarantor.birthDate}
                                                         onChange={(val) => setNewGuarantor({ ...newGuarantor, birthDate: val })}
-                                                        inputClassName="h-11"
+                                                        inputClassName="h-12"
                                                     />
                                                 </div>
 
