@@ -37,7 +37,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+<<<<<<< Updated upstream
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/Dialog";
+=======
+import { Info, HelpCircle } from "lucide-react";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+>>>>>>> Stashed changes
 import { AddressForm } from "@/components/application/AddressForm";
 import { CustomerFormData, IncomeOccupation, SpecialIncome, IncomeItem, EnterpriseIncome, IncomeDocument, PersonalDebt, ChaiyoLoan, SAIncome, ReferencePerson, BankAccount } from "@/types/application";
 

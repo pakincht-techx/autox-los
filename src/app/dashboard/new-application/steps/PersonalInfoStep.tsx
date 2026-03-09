@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import { Combobox } from "@/components/ui/combobox";
+import { THAI_ADDRESS_DATA } from "@/data/thai-address-data";
 
 interface PersonalInfoStepProps {
     formData: any;
@@ -150,15 +152,66 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
                         </div>
                         <div className="space-y-2">
                             <Label>จังหวัด</Label>
-                            <Input value={formData.province} placeholder="กรุงเทพมหานคร" className="h-14 rounded-xl" onChange={(e) => handleChange("province", e.target.value)} />
+                            <Combobox
+                                options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
+                                value={formData.province}
+                                onValueChange={(val) => {
+                                    setFormData({
+                                        ...formData,
+                                        province: val,
+                                        district: "",
+                                        subDistrict: "",
+                                        zipCode: ""
+                                    });
+                                }}
+                                className="h-14 rounded-xl"
+                                placeholder="เลือกจังหวัด"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>เขต / อำเภอ</Label>
-                            <Input value={formData.district} placeholder="จตุจักร" className="h-14 rounded-xl" onChange={(e) => handleChange("district", e.target.value)} />
+                            <Combobox
+                                options={
+                                    THAI_ADDRESS_DATA.find(p => p.name === formData.province)
+                                        ?.districts.map(d => ({ label: d.name, value: d.name })) || []
+                                }
+                                value={formData.district}
+                                onValueChange={(val) => {
+                                    setFormData({
+                                        ...formData,
+                                        district: val,
+                                        subDistrict: "",
+                                        zipCode: ""
+                                    });
+                                }}
+                                disabled={!formData.province}
+                                className="h-14 rounded-xl"
+                                placeholder="เลือกเขต / อำเภอ"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>แขวง / ตำบล</Label>
-                            <Input value={formData.subDistrict} placeholder="จอมพล" className="h-14 rounded-xl" onChange={(e) => handleChange("subDistrict", e.target.value)} />
+                            <Combobox
+                                options={
+                                    THAI_ADDRESS_DATA.find(p => p.name === formData.province)
+                                        ?.districts.find(d => d.name === formData.district)
+                                        ?.subdistricts.map(s => ({ label: s.name, value: s.name })) || []
+                                }
+                                value={formData.subDistrict}
+                                onValueChange={(val) => {
+                                    const sub = THAI_ADDRESS_DATA.find(p => p.name === formData.province)
+                                        ?.districts.find(d => d.name === formData.district)
+                                        ?.subdistricts.find(s => s.name === val);
+                                    setFormData({
+                                        ...formData,
+                                        subDistrict: val,
+                                        zipCode: sub?.zipCode || ""
+                                    });
+                                }}
+                                disabled={!formData.district}
+                                className="h-14 rounded-xl"
+                                placeholder="เลือกแขวง / ตำบล"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>รหัสไปรษณีย์</Label>

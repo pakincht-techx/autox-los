@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Combobox } from "@/components/ui/combobox";
 import { MapPickerDialog } from "@/components/application/MapPickerDialog";
 import { cn } from "@/lib/utils";
+import { THAI_ADDRESS_DATA } from "@/data/thai-address-data";
 
 const MapContents = dynamic(() => import('./MapContents').then(mod => mod.MapContents || mod.default), {
     ssr: false,
@@ -186,33 +187,57 @@ export const AddressForm = ({
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
                                 <Combobox
-                                    options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
-                                    value={formData[getField('subDistrict')] || ""}
-                                    onValueChange={(val) => onChange(getField('subDistrict'), val)}
+                                    options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
+                                    value={formData[getField('province')] || ""}
+                                    onValueChange={(val) => {
+                                        onChange(getField('province'), val);
+                                        onChange(getField('district'), "");
+                                        onChange(getField('subDistrict'), "");
+                                        onChange(getField('zipCode'), "");
+                                    }}
                                     disabled={disabled}
-                                    placeholder="ระบุตำบล/แขวง"
+                                    placeholder="ระบุจังหวัด"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-xs text-muted-foreground">อำเภอ/เขต <span className="text-red-500">*</span></Label>
                                 <Combobox
-                                    options={[{ label: "ลาดพร้าว", value: "ลาดพร้าว" }, { label: "บางรัก", value: "บางรัก" }]}
+                                    options={
+                                        THAI_ADDRESS_DATA.find(p => p.name === formData[getField('province')])
+                                            ?.districts.map(d => ({ label: d.name, value: d.name })) || []
+                                    }
                                     value={formData[getField('district')] || ""}
-                                    onValueChange={(val) => onChange(getField('district'), val)}
-                                    disabled={disabled}
+                                    onValueChange={(val) => {
+                                        onChange(getField('district'), val);
+                                        onChange(getField('subDistrict'), "");
+                                        onChange(getField('zipCode'), "");
+                                    }}
+                                    disabled={disabled || !formData[getField('province')]}
                                     placeholder="ระบุอำเภอ/เขต"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
                                 <Combobox
-                                    options={[{ label: "กรุงเทพมหานคร", value: "กรุงเทพมหานคร" }, { label: "นนทบุรี", value: "นนทบุรี" }, { label: "ปทุมธานี", value: "ปทุมธานี" }]}
-                                    value={formData[getField('province')] || ""}
-                                    onValueChange={(val) => onChange(getField('province'), val)}
-                                    disabled={disabled}
-                                    placeholder="ระบุจังหวัด"
+                                    options={
+                                        THAI_ADDRESS_DATA.find(p => p.name === formData[getField('province')])
+                                            ?.districts.find(d => d.name === formData[getField('district')])
+                                            ?.subdistricts.map(s => ({ label: s.name, value: s.name })) || []
+                                    }
+                                    value={formData[getField('subDistrict')] || ""}
+                                    onValueChange={(val) => {
+                                        onChange(getField('subDistrict'), val);
+                                        const sub = THAI_ADDRESS_DATA.find(p => p.name === formData[getField('province')])
+                                            ?.districts.find(d => d.name === formData[getField('district')])
+                                            ?.subdistricts.find(s => s.name === val);
+                                        if (sub) {
+                                            onChange(getField('zipCode'), sub.zipCode);
+                                        }
+                                    }}
+                                    disabled={disabled || !formData[getField('district')]}
+                                    placeholder="ระบุตำบล/แขวง"
                                 />
                             </div>
                             <div className="space-y-2">

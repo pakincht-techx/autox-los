@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>AutoX LOS - หลักประกัน</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+tailwindcss.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Noto Sans Thai', 'sans-serif'] },
+      colors: {
+        'chaiyo-blue': '#10069F',
+        'chaiyo-gold': '#FFD100',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans Thai', sans-serif; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="w-[268px] bg-chaiyo-blue flex flex-col shrink-0 h-full text-white">
+    <!-- Logo -->
+    <div class="px-6 py-5 flex items-center gap-3">
+      <div class="w-8 h-8 bg-chaiyo-gold rounded-lg flex items-center justify-center">
+        <svg class="w-5 h-5 text-chaiyo-blue" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-3.2-2H7c-1.3 0-2.5.6-3.3 1.6L2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+      </div>
+      <span class="text-xl font-bold tracking-tight">auto<span class="text-chaiyo-gold">x</span></span>
+    </div>
+
+    <!-- Search -->
+    <div class="px-4 mb-4">
+      <div class="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 text-sm text-white/60">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>ค้นหา...</span>
+      </div>
+    </div>
+
+    <!-- Nav Group: จัดการ -->
+    <div class="px-4 mb-2">
+      <p class="text-[10px] font-bold text-white/40 uppercase tracking-wider px-3 mb-2">จัดการ</p>
+      <nav class="space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          รายการคำขอ
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          ลูกค้า
+        </a>
+      </nav>
+    </div>
+
+    <!-- Nav Group: ตั้งค่า -->
+    <div class="px-4 mb-2">
+      <p class="text-[10px] font-bold text-white/40 uppercase tracking-wider px-3 mb-2 mt-4">ตั้งค่า</p>
+      <nav class="space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          บัญชี
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          การตั้งค่า
+        </a>
+      </nav>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <!-- User Profile at bottom -->
+    <div class="px-4 py-4 border-t border-white/10">
+      <div class="flex items-center gap-3 px-3 py-2">
+        <div class="w-9 h-9 bg-chaiyo-gold/20 border border-chaiyo-gold/30 rounded-full flex items-center justify-center text-sm font-bold text-chaiyo-gold">สจ</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-white truncate">สมหญิง จริงใจ</p>
+          <p class="text-[11px] text-white/50">Maker · สาขาลาดพร้าว</p>
+        </div>
+        <svg class="w-4 h-4 text-white/30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN AREA ═══ -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-chaiyo-blue">
+    <div class="flex-1 relative p-2 overflow-hidden">
+      <div class="bg-white rounded-md h-full shadow-sm flex flex-col overflow-hidden border border-white/5 relative">
+
+        <!-- Page Header / Breadcrumb -->
+        <div class="flex items-center justify-between px-6 py-3 border-b border-gray-100 bg-white shrink-0">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-gray-500 hover:text-gray-700 cursor-pointer">รายการคำขอ</span>
+            <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+            <span class="font-semibold text-gray-900">APP-256700001</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              บันทึกแบบร่าง
+            </button>
+            <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-chaiyo-blue text-white rounded-lg hover:bg-chaiyo-blue/90">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+              ส่งใบคำขอ
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+          <div class="h-full bg-gray-50/50">
+            <div class="max-w-7xl mx-auto space-y-6 p-6 lg:px-8 lg:py-6 pb-32">
+
+              <!-- Title -->
+              <div class="px-2">
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-chaiyo-blue to-blue-800">ใบคำขอเลขที่ APP-256700001</h1>
+                <p class="text-gray-500 mt-1">กรอกข้อมูลผู้สมัครและยื่นเอกสารเพื่อพิจารณาสินเชื่อ</p>
+              </div>
+
+              <!-- Card with Stepper -->
+              <div class="border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] bg-white min-h-[600px]">
+
+                <!-- HORIZONTAL STEPPER -->
+                <div class="pt-10 pb-12 border-b border-gray-100 rounded-t-[2rem]">
+                  <div class="relative flex items-center justify-between w-full px-24">
+                    <!-- Progress line -->
+                    <div class="absolute left-24 right-24 top-1/2 -translate-y-1/2 h-[2px] bg-gray-300 z-0">
+                      <div class="h-full bg-chaiyo-gold transition-all duration-500" style="width: 20%"></div>
+                    </div>
+
+                    <!-- Step 1: ข้อมูลผู้กู้ (completed) -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center z-10 bg-chaiyo-gold border-chaiyo-gold text-blue-900 shadow-sm shadow-chaiyo-gold/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-gray-900">ข้อมูลผู้กู้</p></div>
+                    </div>
+
+                    <!-- Step 2: หลักประกัน (active) -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center bg-white z-10 border-chaiyo-gold text-chaiyo-blue" style="animation: pulse 2s infinite">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-3.2-2H7c-1.3 0-2.5.6-3.3 1.6L2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-chaiyo-blue">หลักประกัน</p></div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center bg-white z-10 border-gray-200 text-gray-300">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-gray-400">รายได้และหนี้สิน</p></div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center bg-white z-10 border-gray-200 text-gray-300">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-gray-400">คำนวณวงเงิน</p></div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center bg-white z-10 border-gray-200 text-gray-300">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-gray-400">เอกสาร</p></div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="flex flex-col items-center gap-2 relative">
+                      <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center bg-white z-10 border-gray-200 text-gray-300">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div class="absolute top-9 w-32 text-center"><p class="text-xs font-bold text-gray-400">ตรวจสอบ</p></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step Header -->
+                <div class="border-b border-gray-100 px-10 py-6 bg-gray-50/30">
+                  <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-chaiyo-gold/10 text-chaiyo-gold flex items-center justify-center text-sm font-bold">2</span>
+                    <h2 class="text-lg font-semibold text-gray-900">หลักประกัน</h2>
+                  </div>
+                </div>
+
+                <!-- Step Content -->
+                <div class="px-8 py-8 w-full">
+                  <div class="max-w-4xl mx-auto pb-20 pt-4">
+                    <div class="space-y-6">
+
+                      <!-- ═══ SECTION 1: ข้อมูลหลักประกัน ═══ -->
+                      <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-blue-50/50 border-b border-gray-200 px-6 py-4">
+                          <h3 class="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                            ข้อมูลหลักประกัน
+                          </h3>
+                        </div>
+                        <div class="p-6">
+                          <p class="text-xs text-gray-500 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100 italic">
+                            * ข้อมูลเบื้องต้นดึงมาจากแบบสอบถามคัดกรอง (Pre-screening)
+                          </p>
+
+                          <div class="grid grid-cols-2 gap-6 pb-6 border-b border-gray-100">
+                            <div class="space-y-1">
+                              <label class="text-sm font-bold text-gray-700">ชื่อหลักประกัน</label>
+                              <div class="h-12 flex items-center">
+                                <h3 class="text-2xl font-bold text-chaiyo-blue tracking-tight">2334582260</h3>
+                              </div>
+                            </div>
+                            <div class="space-y-2">
+                              <label class="text-sm font-bold text-gray-700">ประเภทหลักประกัน <span class="text-red-500">*</span></label>
+                              <div class="h-12 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium flex items-center px-4">
+                                <div class="flex items-center gap-2">
+                                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-3.2-2H7c-1.3 0-2.5.6-3.3 1.6L2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                                  รถเก๋ง / รถกระบะ / รถตู้
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Vehicle Details -->
+                          <div class="mt-8 space-y-6">
+                            <h3 class="text-lg font-bold text-gray-900">รายละเอียดหลักประกัน</h3>
+
+                            <div class="grid grid-cols-3 gap-x-6 gap-y-4">
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ลักษณสภาพรถ</label>
+                                <input disabled value="ใช้แล้ว" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เลขทะเบียน</label>
+                                <input disabled value="7กล 474" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">จังหวัด</label>
+                                <input disabled value="กรุงเทพมหานคร" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">วันที่ครบกำหนดเสียภาษี</label>
+                                <input disabled value="15/06/2568" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ยี่ห้อรถ</label>
+                                <input disabled value="HONDA" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">รุ่นรถ</label>
+                                <input disabled value="CIVIC" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">รุ่นปี ค.ศ.</label>
+                                <input disabled value="2018" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">หมายเลขรุ่นย่อย</label>
+                                <input disabled value="1.8 i-VTEC EL" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ซีซี (CC)</label>
+                                <input disabled value="1,799" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm text-right">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">แรงม้า</label>
+                                <input disabled value="141" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm text-right">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">สี</label>
+                                <input disabled value="ขาว (Platinum White Pearl)" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เลข รย.</label>
+                                <input disabled value="รย.1" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ลักษณะ</label>
+                                <input disabled value="เก๋งสองตอน" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ประเภทการใช้งาน</label>
+                                <input disabled value="ส่วนบุคคล" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เชื้อเพลิง</label>
+                                <input disabled value="เบนซิน" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เลขเครื่องยนต์</label>
+                                <input disabled value="R18Z1-7842516" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm font-mono text-[12px]">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เลขตัวถัง</label>
+                                <input disabled value="MRHFC1650JPXXXXXX" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm font-mono text-[12px]">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">บริเวณสถานที่ตั้งรถ</label>
+                                <input disabled value="กรุงเทพมหานคร" class="w-full h-10 rounded-xl bg-gray-50/50 border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Pre-screening Questions -->
+                          <div class="pt-8 border-t border-gray-100 mt-8">
+                            <h4 class="text-sm font-bold text-gray-900 mb-6 flex items-center gap-2">
+                              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                              เงื่อนไขการประเมินสภาพรถ
+                            </h4>
+                            <div class="space-y-2">
+
+                              <!-- Q1 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถจากเต้นท์</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q2 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถดัดแปลงสภาพ, รถแข่ง, รถแต่งเกิน 50%, รถดัดแปลงเครื่องยนต์</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q3 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถตัดต่อ, เคยชนหนัก</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q4 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นหรือเคยเป็น รถแท็กซี่ รถสองแถว/รถกะป๊อ /รถจากอาสามูลนิธิ</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q5 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถสไลด์ที่ดัดแปลงจากรถกระบะ</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q6 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถล้อเกินซุ้มล้อ</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+
+                              <!-- Q7 -->
+                              <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นรถที่ตัดแต่งคัสซี / ตัดเว้าคัสซี</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ไม่ใช่</button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Additional: livelihood -->
+                            <div class="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                              <div class="flex items-center justify-between p-4 bg-blue-50/30 border border-blue-100/50 rounded-xl">
+                                <span class="text-sm text-gray-700 font-bold">เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่</span>
+                                <div class="flex items-center gap-1.5 bg-white border border-gray-200 p-1 rounded-lg shrink-0">
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold bg-chaiyo-blue text-white shadow-sm">ใช่</button>
+                                  <button class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-400">ไม่ใช่</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- ═══ SECTION 2: ข้อมูลผู้ถือกรรมสิทธิ์ ═══ -->
+                      <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-blue-50/50 border-b border-gray-200 px-6 py-4">
+                          <h3 class="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                            ข้อมูลผู้ถือกรรมสิทธิ์
+                          </h3>
+                        </div>
+                        <div class="p-6 space-y-6">
+                          <h3 class="text-lg font-bold text-gray-900">ผู้ถือครองกรรมสิทธิ์</h3>
+
+                          <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-2 space-y-1">
+                              <label class="text-[13px] text-gray-500 ml-1">คำนำหน้า</label>
+                              <div class="h-12 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium flex items-center px-3 text-sm">นาย</div>
+                            </div>
+                            <div class="col-span-10">
+                              <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                  <label class="text-[13px] text-gray-500 ml-1">ชื่อ <span class="text-red-500">*</span></label>
+                                  <input value="กฤตพาส" class="w-full h-12 rounded-xl bg-white border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                                </div>
+                                <div class="space-y-1">
+                                  <label class="text-[13px] text-gray-500 ml-1">นามสกุล <span class="text-red-500">*</span></label>
+                                  <input value="อัครเดชธนาธรพงศ์" class="w-full h-12 rounded-xl bg-white border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- ระยะเวลาการถือกรรมสิทธิ์ -->
+                          <div class="pt-4 border-t border-gray-100">
+                            <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                              <svg class="w-4 h-4 text-chaiyo-gold" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                              ระยะเวลาการถือกรรมสิทธิ์
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4">
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">วันที่ถือกรรมสิทธิ์(จำนำ/จำนอง)/ครอบครอง(รีไฟแนนซ์)</label>
+                                <input value="20/01/2560" class="w-full h-12 rounded-xl bg-white border border-gray-200 px-3 text-gray-900 font-medium text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">ระยะเวลาถือกรรมสิทธิ์/ครอบครอง</label>
+                                <div class="h-12 flex items-center px-4 bg-blue-50/30 border border-blue-100/50 rounded-xl text-chaiyo-blue font-medium text-sm">
+                                  3 ปี 2 เดือน 15 วัน
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- ข้อมูลเจ้าของเดิม -->
+                          <div class="pt-4 border-t border-gray-100">
+                            <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                              <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                              ข้อมูลเจ้าของเดิม
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4">
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">เจ้าของกรรมสิทธิ์เดิม</label>
+                                <input placeholder="ชื่อ-นามสกุล เจ้าของเดิม" class="w-full h-12 rounded-xl bg-white border border-gray-200 px-3 text-gray-400 text-sm">
+                              </div>
+                              <div class="space-y-1">
+                                <label class="text-[13px] text-gray-500 ml-1">วันที่ถือกรรมสิทธิ์ของเจ้าของเดิม</label>
+                                <input placeholder="เลือกวันที่" class="w-full h-12 rounded-xl bg-white border border-gray-200 px-3 text-gray-400 text-sm">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- ═══ SECTION 3: ราคาประเมินสินทรัพย์ ═══ -->
+                      <div class="border border-gray-200 rounded-xl overflow-hidden">
+                        <div class="bg-blue-50/50 border-b border-gray-200 px-6 py-4">
+                          <h3 class="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+                            ราคาประเมินสินทรัพย์
+                          </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                          <div class="flex items-center justify-between p-4 bg-blue-50/30 border border-blue-100/50 rounded-xl">
+                            <label class="text-base font-bold text-gray-700">ราคาประเมิน/เรทบุ๊ค</label>
+                            <div class="text-2xl font-bold text-chaiyo-blue">
+                              550,000 <span class="text-sm text-gray-500 ml-1">บาท</span>
+                            </div>
+                          </div>
+
+                          <div class="flex items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl">
+                            <span class="text-sm text-gray-700 font-bold">
+                              ถ้ามีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร
+                            </span>
+                            <div class="relative w-64">
+                              <input value="650,000" class="w-full h-12 pr-12 text-right font-bold text-chaiyo-blue border border-chaiyo-blue/20 bg-white rounded-xl px-3 text-sm">
+                              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">บาท</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Footer Navigation -->
+              <div class="flex justify-between items-center py-6 mt-2">
+                <button class="w-32 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-lg">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                  ย้อนกลับ
+                </button>
+                <button class="w-32 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-chaiyo-blue text-white rounded-lg shadow-lg shadow-blue-500/20">
+                  ถัดไป
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style>
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 0, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 209, 0, 0); }
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "h2d-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://h2d-mcp.divriots.com/578aec44-0174-4aea-8d93-e1a24c053be4/mcp"
+      ],
+      "env": {}
+    }
+  }
+}
