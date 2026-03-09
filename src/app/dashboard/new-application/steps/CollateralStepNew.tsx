@@ -315,7 +315,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 usageType: formData.usageType || "ส่วนบุคคล",
                 fuelType: formData.fuelType || "เบนซิน",
                 engineNumber: formData.engineNumber || "R18Z1-7842516",
-                chassisNumber: formData.chassisNumber || "MRHFC1650JPXXXXXX",
+                chassisNumber: formData.chassisNumber || "MRHFC1650JP742518",
                 location: formData.location || "กรุงเทพมหานคร",
                 appraisalMethod: formData.appraisalMethod || "กรมที่ดิน",
                 appraisalDate: formData.appraisalDate || "",
@@ -440,14 +440,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {getPhotoDocs(formData.collateralType).map((doc, idx) => (
-                                        <div key={idx} className="aspect-[3/4] border-2 border-dashed border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 bg-gray-50/50 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all group cursor-pointer relative">
+                                        <label key={idx} className="aspect-[3/4] border-2 border-dashed border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 bg-gray-50/50 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all group cursor-pointer relative">
+                                            <input type="file" accept="image/*" capture="environment" className="hidden" />
                                             <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform">
                                                 <Plus className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
                                             </div>
                                             <span className="text-[10px] sm:text-xs font-medium leading-tight px-1 py-0.5 rounded bg-white/80">
                                                 {doc.label} {doc.required && <span className="text-red-500">*</span>}
                                             </span>
-                                        </div>
+                                        </label>
                                     ))}
                                 </div>
                             </div>
@@ -459,14 +460,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </h4>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {getPaperDocs(formData.collateralType, formData).map((doc, idx) => (
-                                        <div key={idx} className="aspect-video border-2 border-dashed border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 bg-gray-50/50 hover:bg-white hover:border-emerald-400 hover:text-emerald-600 transition-all group cursor-pointer">
+                                        <label key={idx} className="aspect-video border-2 border-dashed border-gray-200 rounded-xl p-3 flex flex-col items-center justify-center text-center gap-2 bg-gray-50/50 hover:bg-white hover:border-emerald-400 hover:text-emerald-600 transition-all group cursor-pointer">
+                                            <input type="file" accept="image/*,application/pdf" className="hidden" />
                                             <div className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform">
                                                 <Upload className="w-4 h-4 text-gray-400 group-hover:text-emerald-500" />
                                             </div>
                                             <span className="text-[10px] sm:text-xs font-medium leading-tight">
                                                 {doc.label} {doc.required && <span className="text-red-500">*</span>}
                                             </span>
-                                        </div>
+                                        </label>
                                     ))}
                                 </div>
                             </div>
@@ -486,9 +488,11 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         </p>
 
                         <div className="mt-8 space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">
-                                {formData.collateralType === 'land' ? 'รายละเอียดโฉนดที่ดิน' : 'รายละเอียดหลักประกัน'}
-                            </h3>
+                            <div className="pb-2 border-b border-gray-100 mb-4">
+                                <h3 className="text-sm font-bold text-gray-700">
+                                    {formData.collateralType === 'land' ? 'รายละเอียดโฉนดที่ดิน' : 'รายละเอียดหลักประกัน'}
+                                </h3>
+                            </div>
 
                             {formData.collateralType === 'land' ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
@@ -825,10 +829,12 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                             {COLLATERAL_QUESTIONS[formData.collateralType]?.length > 0 && !(formData.collateralType === 'land' && formData.landDeedType === 'อ.ช. 2') && (
                                 <div className="pt-8 border-t border-border-subtle mt-8">
-                                    <h4 className="text-sm font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                        เงื่อนไขการประเมินสภาพ{formData.collateralType === 'land' ? 'ทรัพย์สิน' : 'รถ'}
-                                    </h4>
+                                    <div className="pb-2 border-b border-gray-100 mb-6">
+                                        <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                            เงื่อนไขการประเมินสภาพ{formData.collateralType === 'land' ? 'ทรัพย์สิน' : 'รถ'}
+                                        </h4>
+                                    </div>
                                     <div className="space-y-2">
                                         {COLLATERAL_QUESTIONS[formData.collateralType]?.map((q) => (
                                             <div key={q.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
@@ -884,7 +890,9 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครองกรรมสิทธิ์</h3>
+                            <div className="pb-2 border-b border-gray-100 mb-2">
+                                <h3 className="text-sm font-bold text-gray-700">ผู้ถือครองกรรมสิทธิ์</h3>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <Label className="text-[13px] text-muted-foreground ml-1">คำนำหน้า</Label>
@@ -919,11 +927,13 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             </div>
 
                             {/* Group: ระยะเวลาการถือกรรมสิทธิ์ */}
-                            <div className="pt-4 border-t border-gray-100">
-                                <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-chaiyo-gold" />
-                                    {formData.collateralType === 'land' ? 'ข้อมูลการโอนกรรมสิทธิ์' : 'ระยะเวลาการถือกรรมสิทธิ์'}
-                                </h4>
+                            <div className="pt-4 border-t border-gray-100 mt-4">
+                                <div className="pb-2 border-b border-gray-100 mb-4">
+                                    <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-chaiyo-gold" />
+                                        {formData.collateralType === 'land' ? 'ข้อมูลการโอนกรรมสิทธิ์' : 'ระยะเวลาการถือกรรมสิทธิ์'}
+                                    </h4>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">
@@ -947,11 +957,13 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             </div>
 
                             {/* Group: ข้อมูลเจ้าของเดิม */}
-                            <div className="pt-4 border-t border-gray-100">
-                                <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Book className="w-4 h-4 text-blue-500" />
-                                    ข้อมูลเจ้าของเดิม
-                                </h4>
+                            <div className="pt-4 border-t border-gray-100 mt-4">
+                                <div className="pb-2 border-b border-gray-100 mb-4">
+                                    <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                        <Book className="w-4 h-4 text-blue-500" />
+                                        ข้อมูลเจ้าของเดิม
+                                    </h4>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เจ้าของกรรมสิทธิ์เดิม</Label>
@@ -1645,39 +1657,92 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 )}
 
                 {/* SECTION 3: ราคาประเมินสินทรัพย์ */}
-                {(formData.collateralType === 'car' || formData.collateralType === 'land') && (
-                    <Card className="border-border-strong overflow-hidden">
-                        <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                            <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                                <Calculator className="w-5 h-5" />
-                                ราคาประเมินสินทรัพย์
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="space-y-4">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
-                                    <span className="text-sm text-gray-700 font-bold">
-                                        {formData.collateralType === 'land' ? 'หากมีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร' : 'ถ้ามีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร'}
-                                    </span>
-                                    <div className="relative w-full md:w-64">
-                                        <Input
-                                            type="text"
-                                            placeholder="0"
-                                            value={formData.estimatedSalePrice ? Number(formData.estimatedSalePrice).toLocaleString() : ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value.replace(/,/g, '');
-                                                if (/^\d*$/.test(val) || val === '') {
-                                                    setFormData({ ...formData, estimatedSalePrice: val });
-                                                }
-                                            }}
-                                            className="h-12 pr-12 text-right font-bold text-chaiyo-blue border-chaiyo-blue/20 bg-white focus:border-chaiyo-blue focus:ring-chaiyo-blue/10 rounded-xl"
-                                        />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">บาท</span>
+                <Card className="border-border-strong overflow-hidden">
+                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
+                            <Calculator className="w-5 h-5" />
+                            วิธีการประเมินและราคาประเมิน
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-6">
+                            {/* Sub-section: Behavioral Appraisal Question */}
+                            <div className="pb-2 border-b border-gray-100 mb-4">
+                                <h3 className="text-sm font-bold text-gray-700">ข้อมูลการคาดการณ์ราคา</h3>
+                            </div>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
+                                <span className="text-sm text-gray-700 font-bold">
+                                    {formData.collateralType === 'land' ? 'หากมีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร' : 'ถ้ามีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร'}
+                                </span>
+                                <div className="relative w-full md:w-64">
+                                    <Input
+                                        type="text"
+                                        placeholder="0"
+                                        value={formData.estimatedSalePrice ? Number(formData.estimatedSalePrice).toLocaleString() : ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/,/g, '');
+                                            if (/^\d*$/.test(val) || val === '') {
+                                                setFormData({ ...formData, estimatedSalePrice: val });
+                                            }
+                                        }}
+                                        className="h-12 pr-12 text-right font-bold text-chaiyo-blue border-chaiyo-blue/20 bg-white focus:border-chaiyo-blue focus:ring-chaiyo-blue/10 rounded-xl"
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">บาท</span>
+                                </div>
+                            </div>
+
+                            {/* Sub-section: Method and Valuation */}
+                            <div className="pt-4 border-t border-gray-100">
+                                <div className="pb-2 border-b border-gray-100 mb-4">
+                                    <h3 className="text-sm font-bold text-gray-700">รายละเอียดราคาประเมิน</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">วิธีประเมิน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.appraisalMethod || "เรทบุ๊ค (Redbook)"}
+                                            onValueChange={(val) => setFormData({ ...formData, appraisalMethod: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 focus:ring-chaiyo-blue/20">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {formData.collateralType === 'land' ? (
+                                                    APPRAISAL_METHODS.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)
+                                                ) : (
+                                                    ["เรทบุ๊ค (Redbook)", "ประเมินโดยเจ้าหน้าที่", "ราคาประเมินกลาง"].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)
+                                                )}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">วันที่ประเมิน <span className="text-red-500">*</span></Label>
+                                        <DatePickerBE
+                                            value={formData.appraisalDate}
+                                            onChange={(val) => setFormData({ ...formData, appraisalDate: val })}
+                                            inputClassName="h-10 border-gray-200"
+                                        />
+                                    </div>
+                                    {formData.collateralType === 'land' && (
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ชื่อบริษัทประเมิน <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.appraisalCompany || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, appraisalCompany: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue placeholder="เลือกบริษัทประเมิน" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {APPRAISAL_COMPANIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {formData.collateralType === 'land' ? (
-                                    <>
+                                <div className="mt-6">
+                                    {formData.collateralType === 'land' ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="flex items-center justify-between p-4 bg-blue-50/30 border border-blue-100/50 rounded-xl">
                                                 <Label className="text-sm font-bold text-gray-700">ราคาประเมินที่ดิน</Label>
@@ -1698,19 +1763,39 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 </div>
                                             </div>
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="flex items-center justify-between p-4 bg-blue-50/30 border border-blue-100/50 rounded-xl">
-                                        <Label className="text-base font-bold text-gray-700">ราคาประเมิน/เรทบุ๊ค</Label>
-                                        <div className="text-2xl font-bold text-chaiyo-blue">
-                                            550,000 <span className="text-sm text-muted-foreground ml-1">บาท</span>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-blue-50/30 border border-blue-100/50 rounded-xl gap-4">
+                                                <Label className="text-base font-bold text-gray-700">ราคาประเมิน/เรทบุ๊ค</Label>
+                                                <div className="relative w-full md:w-64">
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="0"
+                                                        value={formData.appraisalPrice ? Number(formData.appraisalPrice).toLocaleString() : '0'}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(/,/g, '');
+                                                            if (/^\d*$/.test(val) || val === '') {
+                                                                setFormData({ ...formData, appraisalPrice: val });
+                                                            }
+                                                        }}
+                                                        className="h-12 pr-12 text-right font-bold text-chaiyo-blue border-chaiyo-blue/20 bg-white focus:border-chaiyo-blue focus:ring-chaiyo-blue/10 rounded-xl"
+                                                    />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">บาท</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between p-6 bg-emerald-50/30 border border-emerald-100/50 rounded-xl">
+                                                <Label className="text-lg font-bold text-emerald-800">ยอดจัดที่แนะนำ</Label>
+                                                <div className="text-3xl font-bold text-emerald-600">
+                                                    {(Number(formData.appraisalPrice || 0) * 0.9).toLocaleString()} <span className="text-sm text-emerald-800/60 ml-1">บาท</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                )}
+                        </div>
+                    </CardContent>
+                </Card>
 
             </div>
 

@@ -8,6 +8,16 @@
         "https://h2d-mcp.divriots.com/578aec44-0174-4aea-8d93-e1a24c053be4/mcp"
       ],
       "env": {}
+    },
+    "figma-remote-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.figma.com/mcp"
+      ],
+      "env": {}
     }
   }
 }
