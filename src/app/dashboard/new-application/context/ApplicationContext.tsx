@@ -98,6 +98,10 @@ const DEFAULT_FORM_DATA = {
     // Co-borrower & Guarantor
     coBorrowers: [],
     guarantors: [],
+    // Context mapping
+    customerGroup: "thai",
+    nationality: "thai",
+    specialProject: "none",
 };
 
 // ─── Context Type ────────────────────────────────────────────────────────────
@@ -236,6 +240,9 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
                     requestedDuration: salesTalkData.duration || salesTalkData.requestedDuration || prev.requestedDuration,
                     monthlyDebt: salesTalkData.monthlyDebt || prev.monthlyDebt,
                     occupation: salesTalkData.occupation || prev.occupation,
+                    customerGroup: salesTalkData.customerGroup || prev.customerGroup || "thai",
+                    nationality: salesTalkData.nationality || prev.nationality || "thai",
+                    specialProject: salesTalkData.specialProject || prev.specialProject || "none",
                 }));
                 localStorage.removeItem('salesTalkData');
 

@@ -2556,12 +2556,6 @@ function PreQuestionPageContent() {
                                                                                     <div className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-bold backdrop-blur-sm tracking-widest uppercase">
                                                                                         {product.code}
                                                                                     </div>
-                                                                                    <div className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-bold backdrop-blur-sm">
-                                                                                        {formData.requestedDuration} งวด
-                                                                                    </div>
-                                                                                    <div className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-bold backdrop-blur-sm ">
-                                                                                        {product.interestRate}
-                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                             <Button
@@ -2577,63 +2571,85 @@ function PreQuestionPageContent() {
 
 
                                                                         {/* Requested Amount Block */}
-                                                                        <div className="mt-5 backdrop-blur-md rounded-xl p-4 border bg-white/15 border-white/20">
+                                                                        <div className="mt-5 backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-white/20 to-white/5 border-white/20 shadow-inner group/amount transition-all duration-300">
                                                                             <div className="flex items-center justify-between mb-2">
-                                                                                <p className="text-xs font-bold uppercase tracking-wider text-blue-200">
+                                                                                <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-200/90">
                                                                                     {actualReqAmount > maxAmount ? "วงเงินสูงสุดที่แนะนำ" : "วงเงินที่ต้องการ"}
                                                                                 </p>
                                                                                 <div className="flex items-baseline gap-1.5">
-                                                                                    <span className="text-3xl font-black leading-none tracking-tight text-white">
+                                                                                    <span className="text-3xl font-black leading-none tracking-tighter text-white drop-shadow-sm">
                                                                                         {requestedAmount.toLocaleString()}
                                                                                     </span>
-                                                                                    <span className="text-sm font-bold text-white/70">บาท</span>
+                                                                                    <span className="text-xs font-bold text-white/60">บาท</span>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-1">
-                                                                                <p className="text-white/70 text-[10px] uppercase tracking-wider">ค่างวดประมาณ</p>
-                                                                                <p className="font-bold text-md leading-tight text-white">
-                                                                                    {(() => {
-                                                                                        const duration = Number(formData.requestedDuration) || 12;
-                                                                                        if (selectedPlan === 'balloon') {
-                                                                                            return calcBalloonMonthly(requestedAmount).toLocaleString();
-                                                                                        }
-                                                                                        return calcMonthly(requestedAmount, duration).toLocaleString();
-                                                                                    })()}
-                                                                                    <span className="text-[10px] font-normal opacity-80 ml-1">บาท/งวด</span>
-                                                                                </p>
+                                                                            <div className="flex items-center justify-between border-t border-white/10 pt-2.5 mt-1.5">
+                                                                                <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
+                                                                                <div className="flex items-baseline gap-1">
+                                                                                    <p className="font-black text-lg leading-tight text-white">
+                                                                                        {(() => {
+                                                                                            const duration = Number(formData.requestedDuration) || 12;
+                                                                                            if (selectedPlan === 'balloon') {
+                                                                                                return calcBalloonMonthly(requestedAmount).toLocaleString();
+                                                                                            }
+                                                                                            return calcMonthly(requestedAmount, duration).toLocaleString();
+                                                                                        })()}
+                                                                                    </p>
+                                                                                    <span className="text-[10px] font-bold text-white/50">บาท/งวด</span>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
 
                                                                         {/* Max Amount Block (Only if different) */}
                                                                         {hasDifferentMax && (
-                                                                            <div className="mt-2 backdrop-blur-md rounded-xl p-4 border bg-chaiyo-gold/15 border-chaiyo-gold/30">
+                                                                            <div className="mt-2.5 backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-chaiyo-gold/25 to-chaiyo-gold/10 border-chaiyo-gold/30 shadow-lg shadow-black/5 group/max transition-all duration-300">
                                                                                 <div className="flex items-center justify-between mb-2">
-                                                                                    <div className="flex items-center gap-1.5">
-                                                                                        <Star className="w-3.5 h-3.5 text-chaiyo-gold fill-chaiyo-gold" />
-                                                                                        <p className="text-xs font-bold uppercase tracking-wider text-chaiyo-gold">วงเงินสูงสุดที่แนะนำ</p>
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        <div className="bg-chaiyo-gold rounded-full p-1 animate-pulse">
+                                                                                            <Star className="w-2.5 h-2.5 text-chaiyo-blue fill-chaiyo-blue" />
+                                                                                        </div>
+                                                                                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-chaiyo-gold">วงเงินสูงสุดที่แนะนำ</p>
                                                                                     </div>
                                                                                     <div className="flex items-baseline gap-1.5">
-                                                                                        <span className="text-2xl font-black leading-none tracking-tight text-chaiyo-gold">
+                                                                                        <span className="text-2xl font-black leading-none tracking-tighter text-chaiyo-gold drop-shadow-sm group-hover/max:scale-105 transition-transform">
                                                                                             {maxAmount.toLocaleString()}
                                                                                         </span>
-                                                                                        <span className="text-sm font-bold text-chaiyo-gold/70">บาท</span>
+                                                                                        <span className="text-xs font-bold text-chaiyo-gold/60">บาท</span>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-1">
-                                                                                    <p className="text-chaiyo-gold/70 text-[10px] uppercase tracking-wider">ค่างวดประมาณ</p>
-                                                                                    <p className="font-bold text-md leading-tight text-chaiyo-gold">
-                                                                                        {(() => {
-                                                                                            const duration = Number(formData.requestedDuration) || 12;
-                                                                                            if (selectedPlan === 'balloon') {
-                                                                                                return calcBalloonMonthly(maxAmount).toLocaleString();
-                                                                                            }
-                                                                                            return calcMonthly(maxAmount, duration).toLocaleString();
-                                                                                        })()}
-                                                                                        <span className="text-[10px] font-normal opacity-80 ml-1">บาท/งวด</span>
-                                                                                    </p>
+                                                                                <div className="flex items-center justify-between border-t border-chaiyo-gold/10 pt-2.5 mt-1.5">
+                                                                                    <p className="text-chaiyo-gold/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
+                                                                                    <div className="flex items-baseline gap-1">
+                                                                                        <p className="font-black text-lg leading-tight text-chaiyo-gold">
+                                                                                            {(() => {
+                                                                                                const duration = Number(formData.requestedDuration) || 12;
+                                                                                                if (selectedPlan === 'balloon') {
+                                                                                                    return calcBalloonMonthly(maxAmount).toLocaleString();
+                                                                                                }
+                                                                                                return calcMonthly(maxAmount, duration).toLocaleString();
+                                                                                            })()}
+                                                                                        </p>
+                                                                                        <span className="text-[10px] font-bold text-chaiyo-gold/50">บาท/งวด</span>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         )}
+                                                                        {/* Duration & Interest Row */}
+                                                                        <div className="mt-4 grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
+                                                                            <div className="flex flex-col gap-0.5">
+                                                                                <p className="text-[10px] font-bold uppercase tracking-wider text-blue-200">ระยะเวลาผ่อน</p>
+                                                                                <div className="flex items-baseline gap-1">
+                                                                                    <span className="text-xl font-black text-white">{formData.requestedDuration}</span>
+                                                                                    <span className="text-[10px] font-bold text-white/70">งวด</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-4">
+                                                                                <p className="text-[10px] font-bold uppercase tracking-wider text-blue-200">อัตราดอกเบี้ย</p>
+                                                                                <div className="flex items-baseline gap-1">
+                                                                                    <span className="text-xl font-black text-white">{product.interestRate}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
 
                                                                     </div>
 
@@ -2698,9 +2714,7 @@ function PreQuestionPageContent() {
 
                                                                         {/* Footer (Actions) */}
                                                                         <div className="mt-4 flex pt-4 border-t border-gray-100">
-                                                                            <Button size="lg" onClick={() => {
-                                                                                router.push('/dashboard/new-application/privacy-notice');
-                                                                            }} className="w-full font-bold bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
+                                                                            <Button size="lg" onClick={handleCreateApplication} className="w-full font-bold bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
                                                                         </div>
                                                                     </div>
                                                                 </div>

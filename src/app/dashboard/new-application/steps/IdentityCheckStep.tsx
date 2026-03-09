@@ -606,89 +606,111 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 )}
 
                                 {/* Primary Option: Dipchip */}
-                                <Card className={cn(
-                                    "border-2 transition-all duration-300 shadow-none overflow-hidden",
-                                    dipchipError
-                                        ? "border-red-200 bg-red-50"
-                                        : "border-chaiyo-blue/10 bg-blue-50/20 hover:bg-blue-50/40 cursor-pointer"
-                                )} onClick={!dipchipError ? handleReadCard : undefined}>
-                                    <CardContent className="flex flex-col items-center justify-center py-10 text-center relative px-8">
-                                        {stage === 'READING_CARD' ? (
-                                            <>
-                                                <Loader2 className="w-16 h-16 text-chaiyo-blue animate-spin mb-4" />
-                                                <h3 className="text-xl font-bold text-chaiyo-blue">กำลังอ่านข้อมูลจากบัตร...</h3>
-                                            </>
-                                        ) : dipchipError ? (
-                                            <div className="animate-in fade-in zoom-in-95 duration-500 w-full flex flex-col items-center">
-                                                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-                                                    <XCircle className="w-10 h-10 text-red-600" />
+                                {formData.customerGroup !== 'ethnic' && (
+                                    <Card className={cn(
+                                        "border-2 transition-all duration-300 shadow-none overflow-hidden",
+                                        dipchipError
+                                            ? ""
+                                            : "border-chaiyo-blue/10 bg-blue-50/20 hover:bg-blue-50/40 cursor-pointer"
+                                    )} onClick={!dipchipError ? handleReadCard : undefined}>
+                                        <CardContent className="flex flex-col items-center justify-center py-10 text-center relative px-8">
+                                            {stage === 'READING_CARD' ? (
+                                                <>
+                                                    <Loader2 className="w-16 h-16 text-chaiyo-blue animate-spin mb-4" />
+                                                    <h3 className="text-xl font-bold text-chaiyo-blue">กำลังอ่านข้อมูลจากบัตร...</h3>
+                                                </>
+                                            ) : dipchipError ? (
+                                                <div className="animate-in fade-in zoom-in-95 duration-500 w-full flex flex-col items-center">
+                                                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                                                        <XCircle className="w-10 h-10 text-red-600" />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold">ไม่สามารถอ่านข้อมูลจากชิปได้</h3>
+                                                    <p className="text-sm mt-2 mb-8 max-w-sm leading-relaxed">
+                                                        พบข้อผิดพลาดขณะอ่านข้อมูลจากบัตรประชาชน <br />
+                                                        กรุณาตรวจสอบการเสียบบัตรและลองอีกครั้ง หรือใช้วิธีถ่ายรูปแทน
+                                                    </p>
+                                                    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            onClick={() => {
+                                                                setVerificationMethod('MANUAL');
+                                                                handleOCRUpload('THAI_ID');
+                                                            }}
+                                                            className="font-bold h-12 px-8 rounded-xl"
+                                                        >
+                                                            ถ่ายรูปบัตรแทน
+                                                        </Button>
+                                                        <Button
+                                                            onClick={handleReadCard}
+                                                            className="text-white font-bold h-12 px-8 rounded-xl "
+                                                        >
+                                                            ลองอีกครั้ง
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <h3 className="text-xl font-bold text-red-800">ไม่สามารถอ่านข้อมูลจากชิปได้</h3>
-                                                <p className="text-red-700/70 text-sm mt-2 mb-8 max-w-sm leading-relaxed">
-                                                    พบข้อผิดพลาดขณะอ่านข้อมูลจากบัตรประชาชน <br />
-                                                    กรุณาตรวจสอบการเสียบบัตรและลองอีกครั้ง หรือใช้วิธีถ่ายรูปแทน
-                                                </p>
-                                                <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center">
-                                                    <Button
-                                                        onClick={handleReadCard}
-                                                        className="bg-red-600 hover:bg-red-700 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-red-200"
-                                                    >
-                                                        ลองอีกครั้ง
-                                                    </Button>
-
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <div className="w-32 h-24 shadow-lg border border-gray-100 rounded-xl flex items-center justify-center mb-6 p-4 bg-white">
-                                                    <img src="/images/card_citizen.svg" alt="Dipchip" className="w-full h-full object-contain" />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-foreground">เสียบบัตรประชาชน (Dipchip)</h3>
-                                                <p className="text-muted text-sm mt-2 mb-6 max-w-sm">ดึงข้อมูลจากชิปการ์ดเพื่อความรวดเร็วและแม่นยำสูงสุด</p>
-                                                <Button className="pointer-events-none bg-chaiyo-blue px-10 h-10 rounded-xl">อ่านข้อมูลบัตร</Button>
-                                            </>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                            ) : (
+                                                <>
+                                                    <div className="w-32 h-24 shadow-lg border border-gray-100 rounded-xl flex items-center justify-center mb-6 p-4 bg-white">
+                                                        <img src="/images/card_citizen.svg" alt="Dipchip" className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-foreground">เสียบบัตรประชาชน (Dipchip)</h3>
+                                                    <p className="text-muted text-sm mt-2 mb-6 max-w-sm">ดึงข้อมูลจากชิปการ์ดเพื่อความรวดเร็วและแม่นยำสูงสุด</p>
+                                                    <Button className="pointer-events-none bg-chaiyo-blue px-10 h-10 rounded-xl">อ่านข้อมูลบัตร</Button>
+                                                </>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                )}
 
                                 {/* Secondary Options: OCR/Manual */}
                                 {stage === 'INIT' && (
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-[1px] flex-1 bg-gray-200"></div>
-                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2">หรือใช้วิธีอื่น</span>
-                                            <div className="h-[1px] flex-1 bg-gray-200"></div>
-                                        </div>
+                                        {(formData.customerGroup === 'thai' || formData.customerGroup === 'b2b_payroll') ? null : (
+                                            <>
+                                                {formData.customerGroup !== 'ethnic' && (
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2">หรือใช้วิธีอื่น</span>
+                                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                                    </div>
+                                                )}
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <Button
-                                                variant="outline"
-                                                className="h-28 border-border-subtle hover:border-chaiyo-blue hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group"
-                                                onClick={() => {
-                                                    setVerificationMethod('MANUAL');
-                                                    handleOCRUpload('THAI_ID');
-                                                }}
-                                            >
-                                                <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <img src="/images/card_citizen.svg" alt="บัตรประชาชน" className="w-full h-full object-contain" />
-                                                </div>
-                                                <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรประชาชน</span>
-                                            </Button>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {formData.customerGroup !== 'ethnic' && (
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-28 border-border-subtle hover:border-chaiyo-blue hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group"
+                                                            onClick={() => {
+                                                                setVerificationMethod('MANUAL');
+                                                                handleOCRUpload('THAI_ID');
+                                                            }}
+                                                        >
+                                                            <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                                <img src="/images/card_citizen.svg" alt="บัตรประชาชน" className="w-full h-full object-contain" />
+                                                            </div>
+                                                            <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรประชาชน</span>
+                                                        </Button>
+                                                    )}
 
-                                            <Button
-                                                variant="outline"
-                                                className="h-28 border-border-subtle hover:border-pink-400 hover:bg-pink-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group"
-                                                onClick={() => {
-                                                    setVerificationMethod('MANUAL');
-                                                    handleOCRUpload('PINK_CARD');
-                                                }}
-                                            >
-                                                <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                    <img src="/images/card_alien.svg" alt="บัตรต่างด้าวชมพู" className="w-full h-full object-contain" />
+                                                    <Button
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "h-28 border-border-subtle hover:border-pink-400 hover:bg-pink-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group",
+                                                            formData.customerGroup === 'ethnic' ? "md:col-span-2 py-8 h-40" : ""
+                                                        )}
+                                                        onClick={() => {
+                                                            setVerificationMethod('MANUAL');
+                                                            handleOCRUpload('PINK_CARD');
+                                                        }}
+                                                    >
+                                                        <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                            <img src="/images/card_alien.svg" alt="บัตรต่างด้าวชมพู" className="w-full h-full object-contain" />
+                                                        </div>
+                                                        <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรชมพู / อื่นๆ</span>
+                                                    </Button>
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรชมพู / อื่นๆ</span>
-                                            </Button>
-                                        </div>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </div>
