@@ -136,13 +136,21 @@ export default function ApplicationsPage() {
         <div className="flex flex-col h-full">
             <div className="flex-1 space-y-6 p-6 lg:p-8">
                 {/* Page Title Header */}
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการคำขอ</h1>
-                    <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการคำขอสินเชื่อทั้งหมดของคุณ</p>
+                <div className="flex flex-row items-start justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการคำขอ</h1>
+                        <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการคำขอสินเชื่อทั้งหมดของคุณ</p>
+                    </div>
+
+                    <Link href="/dashboard/pre-question">
+                        <Button className="font-bold active:scale-95 transition-all shadow-sm">
+                            แนะนำผลิตภัณฑ์
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Filters & Search */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                     <Tabs
                         value={currentTab}
                         onValueChange={(value) => { setCurrentTab(value); setCurrentPage(1); }}
@@ -168,7 +176,7 @@ export default function ApplicationsPage() {
                     </Tabs>
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="relative w-full sm:w-80">
+                        <div className="relative w-full sm:w-72">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted hover:text-chaiyo-blue transition-colors z-10" />
                             <Input
                                 type="text"
@@ -178,12 +186,6 @@ export default function ApplicationsPage() {
                                 className="pl-9 pr-4 h-9 shadow-none border-gray-200"
                             />
                         </div>
-
-                        <Link href="/dashboard/pre-question" className="w-full sm:w-auto">
-                            <Button className="w-full sm:w-auto font-bold active:scale-95 transition-all">
-                                แนะนำผลิตภัณฑ์
-                            </Button>
-                        </Link>
                     </div>
                 </div>
 

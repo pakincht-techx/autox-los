@@ -253,6 +253,7 @@ export const AddressForm = ({
                             </div>
                         </div>
                     )}
+                    {footerChildren}
                 </div>
 
                 {!hideFields && (
@@ -354,7 +355,6 @@ export const AddressForm = ({
                 }}
                 title={`ค้นหาตำแหน่ง: ${title}`}
             />
-            {footerChildren}
         </div>
     );
 };

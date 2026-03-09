@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, FileText, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck } from "lucide-react";
+import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, FileText, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
@@ -34,6 +34,8 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
+    DialogFooter,
 } from "@/components/ui/Dialog";
 import {
     AlertDialog,
@@ -58,7 +60,6 @@ interface CustomerInfoStepProps {
 
 const SOCIAL_PLATFORMS = [
     { label: "Facebook", value: "facebook" },
-    { label: "Line", value: "line" },
     { label: "TikTok", value: "tiktok" },
     { label: "Instagram", value: "instagram" },
     { label: "X (Twitter)", value: "x" },
@@ -113,6 +114,77 @@ const EDUCATION_LEVELS = [
     { label: "สูงกว่าปริญญาตรี", value: "post_graduate" }
 ];
 
+const RatingGroup = ({ label, value, onChange }: { label: string, value?: number, onChange: (v: number) => void }) => {
+    return (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 py-4 border-b border-border-subtle/50 last:border-0">
+            <span className="text-sm font-bold text-gray-700">{label}</span>
+            <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
+                {[1, 2, 3, 4, 5].map((num) => (
+                    <button
+                        key={num}
+                        type="button"
+                        onClick={() => onChange(num)}
+                        className={cn(
+                            "w-10 h-10 rounded-lg text-sm font-bold transition-all flex items-center justify-center",
+                            value === num
+                                ? "bg-chaiyo-blue text-white shadow-sm"
+                                : "bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                        )}
+                    >
+                        {num}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const YesNoGroup = ({ label, value, onChange }: { label: React.ReactNode, value?: boolean, onChange: (v: boolean) => void }) => {
+    return (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 py-4 border-b border-border-subtle/50 last:border-0">
+            <span className="text-sm font-bold text-gray-700 leading-relaxed max-w-[70%]">{label}</span>
+            <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
+                {[
+                    { label: "ใช่", value: true },
+                    { label: "ไม่ใช่", value: false }
+                ].map((item) => (
+                    <button
+                        key={String(item.value)}
+                        type="button"
+                        onClick={() => onChange(item.value)}
+                        className={cn(
+                            "px-6 py-2 rounded-lg text-sm font-bold transition-all min-w-[80px]",
+                            value === item.value
+                                ? "bg-chaiyo-blue text-white shadow-sm"
+                                : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                        )}
+                    >
+                        {item.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export const formatPhoneNumber = (value: string) => {
+    if (!value) return "";
+    const digits = value.replace(/\D/g, "");
+    if (digits.length === 0) return "";
+
+    if (digits.startsWith("02")) {
+        const truncated = digits.slice(0, 9);
+        if (truncated.length <= 2) return truncated;
+        if (truncated.length <= 5) return `${truncated.slice(0, 2)}-${truncated.slice(2)}`;
+        return `${truncated.slice(0, 2)}-${truncated.slice(2, 5)}-${truncated.slice(5)}`;
+    }
+
+    const truncated = digits.slice(0, 10);
+    if (truncated.length <= 3) return truncated;
+    if (truncated.length <= 6) return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+    return `${truncated.slice(0, 3)}-${truncated.slice(3, 6)}-${truncated.slice(6)}`;
+};
+
 export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProps) {
 
 
@@ -130,6 +202,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     const [isEmailOtpVerified, setIsEmailOtpVerified] = useState(false);
     const [isVerifyingEmailOtp, setIsVerifyingEmailOtp] = useState(false);
     const [emailOtpTimer, setEmailOtpTimer] = useState(0);
+    const [otpError, setOtpError] = useState("");
+    const [emailOtpError, setEmailOtpError] = useState("");
+    const [otpRef, setOtpRef] = useState("");
+    const [emailOtpRef, setEmailOtpRef] = useState("");
 
     const [alertDialog, setAlertDialog] = useState({
         isOpen: false,
@@ -138,25 +214,52 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
         variant: "error" as "error" | "info"
     });
 
+    // --- Phone Ownership Verification State ---
+    const [showPhoneVerifyDialog, setShowPhoneVerifyDialog] = useState(false);
+    const [isPhoneOwnershipVerifying, setIsPhoneOwnershipVerifying] = useState(false);
+    const [phoneOwnershipStatus, setPhoneOwnershipStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+    const handleVerifyPhoneOwnership = () => {
+        setShowPhoneVerifyDialog(true);
+        setIsPhoneOwnershipVerifying(true);
+        setPhoneOwnershipStatus('idle');
+
+        // Simulate network delay for verification
+        setTimeout(() => {
+            setIsPhoneOwnershipVerifying(false);
+            // Simulate error if phone ends in 9 for demo purposes
+            if (formData.phone?.endsWith('9')) {
+                setPhoneOwnershipStatus('error');
+            } else {
+                setPhoneOwnershipStatus('success');
+            }
+        }, 2000);
+    };
+
     const handleSendOtp = () => {
         setShowOtpInput(true);
         setOtpTimer(60);
+        setOtpError("");
+        setOtp("");
+        // Generate random 4-char ref code
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let ref = "";
+        for (let i = 0; i < 4; i++) {
+            ref += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setOtpRef(ref);
         // Simulate sending OTP
     };
 
     const handleVerifyOtp = () => {
         setIsVerifyingOtp(true);
+        setOtpError("");
         setTimeout(() => {
             if (otp === "123456") {
                 setIsOtpVerified(true);
                 setShowOtpInput(false);
             } else {
-                setAlertDialog({
-                    isOpen: true,
-                    title: "รหัส OTP ไม่ถูกต้อง",
-                    description: "กรุณากรอกรหัส OTP ให้ถูกต้อง (ใช้ 123456 สำหรับ Demo)",
-                    variant: "error"
-                });
+                setOtpError("รหัส OTP ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง (ใช้ 123456)");
             }
             setIsVerifyingOtp(false);
         }, 1000);
@@ -165,22 +268,27 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
     const handleSendEmailOtp = () => {
         setShowEmailOtpInput(true);
         setEmailOtpTimer(60);
+        setEmailOtpError("");
+        setEmailOtp("");
+        // Generate random 4-char ref code
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let ref = "";
+        for (let i = 0; i < 4; i++) {
+            ref += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setEmailOtpRef(ref);
         // Simulate sending Email OTP
     };
 
     const handleVerifyEmailOtp = () => {
         setIsVerifyingEmailOtp(true);
+        setEmailOtpError("");
         setTimeout(() => {
             if (emailOtp === "123456") {
                 setIsEmailOtpVerified(true);
                 setShowEmailOtpInput(false);
             } else {
-                setAlertDialog({
-                    isOpen: true,
-                    title: "รหัส OTP ไม่ถูกต้อง",
-                    description: "กรุณากรอกรหัส OTP ให้ถูกต้อง (ใช้ 123456 สำหรับ Demo)",
-                    variant: "error"
-                });
+                setEmailOtpError("รหัส OTP ไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง (ใช้ 123456)");
             }
             setIsVerifyingEmailOtp(false);
         }, 1000);
@@ -606,7 +714,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label>ชื่อภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
+                                        <Label>ชื่อจริง (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
                                         <Input
                                             value={formData.firstNameEn || ""}
                                             onChange={(e) => handleChange("firstNameEn", e.target.value)}
@@ -616,7 +724,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
+                                        <Label>ชื่อกลาง (ภาษาอังกฤษ)</Label>
                                         <Input
                                             value={formData.middleNameEn || ""}
                                             onChange={(e) => handleChange("middleNameEn", e.target.value)}
@@ -626,7 +734,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
+                                        <Label>นามสกุล (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
                                         <Input
                                             value={formData.lastNameEn || ""}
                                             onChange={(e) => handleChange("lastNameEn", e.target.value)}
@@ -992,42 +1100,70 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <Label>จำนวนผู้อยู่อาศัย</Label>
-                                                <Select
-                                                    value={formData.currentResidentType || ""}
-                                                    onValueChange={(val) => handleChange("currentResidentType", val)}
-                                                >
-                                                    <SelectTrigger className="h-12 bg-white">
-                                                        <SelectValue placeholder="ระบุประเภทผู้อยู่อาศัย" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
-                                                        <SelectItem value="พ่อ/แม่/ลูก">พ่อ/แม่/ลูก</SelectItem>
-                                                        <SelectItem value="สามี/ภรรยา">สามี/ภรรยา</SelectItem>
-                                                        <SelectItem value="ญาติ">ญาติ</SelectItem>
-                                                        <SelectItem value="แฟน">แฟน</SelectItem>
-                                                        <SelectItem value="เพื่อน">เพื่อน</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label>อาศัยอยู่กับใคร <span className="text-red-500">*</span></Label>
+                                                    <Select
+                                                        value={formData.currentResidentType || ""}
+                                                        onValueChange={(val) => {
+                                                            handleChange("currentResidentType", val);
+                                                            if (val === "อยู่คนเดียว") {
+                                                                handleChange("currentResidentRelationships", []);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="h-12 bg-white">
+                                                            <SelectValue placeholder="ระบุผู้ที่พักอาศัยอยู่ด้วยกัน" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
+                                                            <SelectItem value="อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์">อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+
+                                                {formData.currentResidentType === "อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์" && (
+                                                    <div className="space-y-3 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                                                        <Label className="text-xs text-muted-foreground">โปรดระบุความสัมพันธ์ (เลือกได้มากกว่า 1)</Label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {["พ่อ", "แม่", "ลูก", "สามี/ภรรยา/แฟน", "ญาติ", "เพื่อน"].map((relation) => {
+                                                                const isSelected = formData.currentResidentRelationships?.includes(relation);
+                                                                return (
+                                                                    <Button
+                                                                        key={relation}
+                                                                        type="button"
+                                                                        variant={isSelected ? "default" : "outline"}
+                                                                        className={cn(
+                                                                            "h-9 px-3 rounded-full text-xs font-medium transition-all",
+                                                                            isSelected ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90" : "bg-white hover:bg-gray-100 border-border-strong text-gray-700"
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            const current = formData.currentResidentRelationships || [];
+                                                                            const next = isSelected
+                                                                                ? current.filter(r => r !== relation)
+                                                                                : [...current, relation];
+                                                                            handleChange("currentResidentRelationships", next);
+                                                                        }}
+                                                                    >
+                                                                        {relation}
+                                                                    </Button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex flex-col gap-4">
-                                                <div className="flex items-center gap-2 pt-3">
-                                                    <Checkbox
-                                                        id="isDailyResidence"
-                                                        checked={!!formData.isDailyResidence}
-                                                        onCheckedChange={(val) => handleChange("isDailyResidence", val)}
-                                                    />
-                                                    <Label htmlFor="isDailyResidence" className="cursor-pointer">อาศัยอยู่ที่นี้ทุกวันหรือไม่ <span className="text-red-500">*</span></Label>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Checkbox
-                                                        id="isOnCollateral"
-                                                        checked={!!formData.isOnCollateral}
-                                                        onCheckedChange={(val) => handleChange("isOnCollateral", val)}
-                                                    />
-                                                    <Label htmlFor="isOnCollateral" className="cursor-pointer">ที่อยู่อาศัยปัจจุบัน อยู่บนที่ดินที่เป็นหลักประกันหรือไม่ <span className="text-red-500">*</span></Label>
-                                                </div>
+                                            <div className="col-span-1 md:col-span-2 mt-2 rounded-xl border border-border-subtle overflow-hidden bg-white">
+                                                <YesNoGroup
+                                                    label="ท่านพักอาศัยอยู่ที่เดิมเป็นประจำทุกวัน"
+                                                    value={formData.isLivingHereEveryday}
+                                                    onChange={(val) => handleChange("isLivingHereEveryday", val)}
+                                                />
+                                                <YesNoGroup
+                                                    label="สถานที่พักปัจจุบันตั้งอยู่บนที่ดินที่ติดการจำนอง"
+                                                    value={formData.isResidingOnMortgagedLand}
+                                                    onChange={(val) => handleChange("isResidingOnMortgagedLand", val)}
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -1495,7 +1631,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                             {/* Phone Verification Field */}
                             <div className="space-y-2">
-                                <Label>เบอร์โทรศัพท์มือถือ</Label>
+                                <Label>เบอร์โทรศัพท์มือถือ <span className="text-red-500">*</span></Label>
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
                                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1508,7 +1644,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             )}
                                             onChange={(e) => {
                                                 if (isOtpVerified) setIsOtpVerified(false); // Reset if changed
-                                                handleChange("phone", e.target.value);
+                                                handleChange("phone", formatPhoneNumber(e.target.value));
                                             }}
                                             disabled={isOtpVerified}
                                         />
@@ -1520,203 +1656,299 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         <Button
                                             variant="outline"
                                             onClick={handleSendOtp}
-                                            disabled={!formData.phone || formData.phone.length < 10 || showOtpInput}
-                                            className="shrink-0 h-12"
+                                            disabled={!formData.phone || formData.phone.replace(/\D/g, '').length < 10}
+                                            className="shrink-0 h-12 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
                                         >
-                                            ยืนยันเบอร์
+                                            ยืนยันเบอร์มือถือ
                                         </Button>
                                     )}
                                 </div>
-                                <div className="mt-2 bg-slate-50 border border-slate-200 text-slate-700 p-3 rounded-xl text-xs leading-relaxed animate-in fade-in slide-in-from-top-1">
-                                    <div className="font-bold flex items-center gap-1 mb-1 text-slate-800">
-                                        <Info className="w-3.5 h-3.5" />
-                                        คำแนะนำสำหรับพนักงาน
-                                    </div>
-                                    <p className="mb-2">
-                                        ให้ลูกค้ากด <span className="font-mono bg-blue-100/50 text-blue-800 px-1 rounded mx-1">*179*เลขบัตรประชาชน 13 หลัก#</span> โทรออก จากนั้นแคปหน้าจอผลลัพธ์เพื่อใช้ยืนยันความเป็นเจ้าของเบอร์
-                                    </p>
-                                    {formData.phoneOwnershipProof ? (
-                                        <div className="flex items-center justify-between bg-white border border-slate-200 p-2 rounded-lg">
-                                            <span className="truncate max-w-[200px] font-medium flex items-center gap-2">
-                                                <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                                                {formData.phoneOwnershipProof.name}
-                                            </span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => handleChange("phoneOwnershipProof", null)}
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </Button>
+                                {isOtpVerified && formData.idType === 'THAI_ID' && (
+                                    <div className="mt-2 bg-slate-50 border border-slate-200 text-slate-700 p-3 rounded-xl text-xs leading-relaxed animate-in fade-in slide-in-from-top-1">
+                                        <div className="font-bold flex items-center gap-1 mb-1 text-slate-800">
+                                            <Info className="w-3.5 h-3.5" />
+                                            ตรวจสอบเบอร์มือถือ
                                         </div>
-                                    ) : (
-                                        <div>
-                                            <Input
-                                                type="file"
-                                                id="phoneOwnershipProof"
-                                                className="hidden"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) {
-                                                        handleChange("phoneOwnershipProof", file);
-                                                        // Reset the value so the same file could be selected again if removed
-                                                        e.target.value = '';
-                                                    }
-                                                }}
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 text-slate-600 border-slate-300 hover:bg-slate-100 hover:text-slate-800 w-full rounded-lg bg-white"
-                                                onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
-                                            >
-                                                <Upload className="w-3.5 h-3.5 mr-1" />
-                                                อัพโหลดรูปถ่ายหน้าจอ
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* OTP Input UI */}
-                                {showOtpInput && !isOtpVerified && (
-                                    <div className="mt-3 bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-in slide-in-from-top-2">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="text-center">
-                                                <p className="text-sm font-bold text-chaiyo-blue">กรอกรหัส OTP</p>
-                                                <p className="text-xs text-muted-foreground">รหัสถูกส่งไปยัง {formData.phone}</p>
-                                            </div>
-
-                                            <InputOTP maxLength={6} value={otp} onChange={(val) => setOtp(val)}>
-                                                <InputOTPGroup className="bg-white">
-                                                    <InputOTPSlot index={0} />
-                                                    <InputOTPSlot index={1} />
-                                                    <InputOTPSlot index={2} />
-                                                    <InputOTPSlot index={3} />
-                                                    <InputOTPSlot index={4} />
-                                                    <InputOTPSlot index={5} />
-                                                </InputOTPGroup>
-                                            </InputOTP>
-
-                                            <div className="flex items-center gap-2 w-full">
+                                        <p className="mb-2">
+                                            ให้ลูกค้ากด <span className="font-mono bg-blue-100/50 text-blue-800 px-1 rounded mx-1">*179*เลขบัตรประชาชน 13 หลัก#</span> โทรออก จากนั้นแคปหน้าจอผลลัพธ์เพื่อใช้ยืนยันความเป็นเจ้าของเบอร์
+                                        </p>
+                                        {formData.phoneOwnershipProof ? (
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between bg-white border border-slate-200 p-2 rounded-lg">
+                                                    <span className="truncate max-w-[200px] font-medium flex items-center gap-2 text-xs">
+                                                        <CheckCircle className={cn(
+                                                            "w-3.5 h-3.5",
+                                                            phoneOwnershipStatus === 'success' ? "text-green-500" :
+                                                                phoneOwnershipStatus === 'error' ? "text-red-500" : "text-gray-400"
+                                                        )} />
+                                                        {formData.phoneOwnershipProof.name}
+                                                    </span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                        onClick={() => {
+                                                            handleChange("phoneOwnershipProof", null);
+                                                            setPhoneOwnershipStatus('idle');
+                                                        }}
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </Button>
+                                                </div>
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="sm"
-                                                    className="flex-1 text-xs text-muted-foreground"
-                                                    disabled={otpTimer > 0}
-                                                    onClick={handleSendOtp}
+                                                    onClick={handleVerifyPhoneOwnership}
+                                                    disabled={!formData.phone || !formData.idNumber}
+                                                    className={cn(
+                                                        "w-full h-10 rounded-xl transition-all duration-300",
+                                                        phoneOwnershipStatus === 'success' ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800" :
+                                                            phoneOwnershipStatus === 'error' ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800" :
+                                                                "bg-white border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                                    )}
                                                 >
-                                                    {otpTimer > 0 ? `ขอรหัสใหม่ใน ${otpTimer}s` : "ขอรหัสใหม่"}
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="flex-1 bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
-                                                    onClick={handleVerifyOtp}
-                                                    disabled={otp.length !== 6 || isVerifyingOtp}
-                                                >
-                                                    {isVerifyingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : "ยืนยัน"}
+                                                    {phoneOwnershipStatus === 'success' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <ShieldCheck className="w-4 h-4" />
+                                                            ยืนยันความเป็นเจ้าของเรียบร้อย
+                                                        </div>
+                                                    ) : phoneOwnershipStatus === 'error' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <AlertCircle className="w-4 h-4 text-red-500" />
+                                                            ข้อมูลไม่ตรงกัน - ตรวจสอบอีกครั้ง
+                                                        </div>
+                                                    ) : (
+                                                        "ตรวจสอบเบอร์มือถือ"
+                                                    )}
                                                 </Button>
                                             </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <Label>อีเมล (ถ้ามี)</Label>
-                                <div className="flex gap-2">
-                                    <div className="relative flex-1">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            value={formData.email || ""}
-                                            placeholder="example@email.com"
-                                            className={cn(
-                                                "pl-9 h-12",
-                                                isEmailOtpVerified && "border-green-500 bg-green-50 text-green-700"
-                                            )}
-                                            onChange={(e) => {
-                                                if (isEmailOtpVerified) setIsEmailOtpVerified(false);
-                                                handleChange("email", e.target.value);
-                                            }}
-                                            disabled={isEmailOtpVerified}
-                                        />
-                                        {isEmailOtpVerified && (
-                                            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                                        ) : (
+                                            <div>
+                                                <Input
+                                                    type="file"
+                                                    id="phoneOwnershipProof"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) {
+                                                            handleChange("phoneOwnershipProof", file);
+                                                            // Reset the value so the same file could be selected again if removed
+                                                            e.target.value = '';
+                                                        }
+                                                    }}
+                                                />
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 text-slate-600 border-slate-300 hover:bg-slate-100 hover:text-slate-800 w-full rounded-lg bg-white"
+                                                    onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
+                                                >
+                                                    <Upload className="w-3.5 h-3.5 mr-1" />
+                                                    อัพโหลดรูปถ่ายหน้าจอ
+                                                </Button>
+                                            </div>
                                         )}
                                     </div>
-                                    {!isEmailOtpVerified && (
-                                        <Button
-                                            variant="outline"
-                                            onClick={handleSendEmailOtp}
-                                            disabled={!formData.email || !formData.email.includes('@') || showEmailOtpInput}
-                                            className="shrink-0 h-12"
-                                        >
-                                            ยืนยันอีเมล
-                                        </Button>
-                                    )}
-                                </div>
+                                )}
 
-                                {/* Email OTP Input UI */}
-                                {showEmailOtpInput && !isEmailOtpVerified && (
-                                    <div className="mt-3 bg-blue-50/50 border border-blue-100 p-4 rounded-xl animate-in slide-in-from-top-2">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="text-center">
-                                                <p className="text-sm font-bold text-chaiyo-blue">กรอกรหัส OTP (Email)</p>
-                                                <p className="text-xs text-muted-foreground">รหัสถูกส่งไปยัง {formData.email}</p>
+                                {/* Phone OTP Dialog */}
+                                <Dialog open={showOtpInput} onOpenChange={setShowOtpInput}>
+                                    <DialogContent className="max-w-[400px] p-6">
+                                        <DialogHeader className="items-center text-center">
+                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
+                                                <Smartphone className="w-6 h-6 text-chaiyo-blue" />
                                             </div>
+                                            <DialogTitle className="text-xl font-bold text-gray-900">ยืนยันเบอร์โทรศัพท์</DialogTitle>
+                                            <DialogDescription className="text-sm text-gray-500">
+                                                กรุณากรอกรหัส OTP ที่ส่งไปยังเบอร์ {formData.phone}
+                                                {otpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {otpRef})</span>}
+                                            </DialogDescription>
+                                        </DialogHeader>
 
-                                            <InputOTP maxLength={6} value={emailOtp} onChange={(val) => setEmailOtp(val)}>
-                                                <InputOTPGroup className="bg-white">
-                                                    <InputOTPSlot index={0} />
-                                                    <InputOTPSlot index={1} />
-                                                    <InputOTPSlot index={2} />
-                                                    <InputOTPSlot index={3} />
-                                                    <InputOTPSlot index={4} />
-                                                    <InputOTPSlot index={5} />
+                                        <div className="flex flex-col items-center py-6">
+                                            <InputOTP
+                                                maxLength={6}
+                                                value={otp}
+                                                onChange={(val) => {
+                                                    setOtp(val);
+                                                    if (otpError) setOtpError("");
+                                                }}
+                                            >
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot index={0} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
+                                                    <InputOTPSlot index={1} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
+                                                    <InputOTPSlot index={2} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
+                                                    <InputOTPSlot index={3} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
+                                                    <InputOTPSlot index={4} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
+                                                    <InputOTPSlot index={5} className={cn("h-12 w-10 sm:w-12 text-lg", otpError && "border-red-500")} />
                                                 </InputOTPGroup>
                                             </InputOTP>
 
-                                            <div className="flex items-center gap-2 w-full">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="flex-1 text-xs text-muted-foreground"
+                                            {otpError && (
+                                                <p className="mt-4 text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                                                    {otpError}
+                                                </p>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                className="mt-6 text-sm font-medium text-chaiyo-blue hover:underline disabled:text-gray-400"
+                                                disabled={otpTimer > 0}
+                                                onClick={handleSendOtp}
+                                            >
+                                                {otpTimer > 0 ? `ขอรหัสใหม่ใน ${otpTimer} วินาที` : "ส่งรหัสอีกครั้ง"}
+                                            </button>
+                                        </div>
+
+                                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                                            <Button
+                                                variant="outline"
+                                                className="flex-1 h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                onClick={() => setShowOtpInput(false)}
+                                            >
+                                                ยกเลิก
+                                            </Button>
+                                            <Button
+                                                className="flex-1 h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                onClick={handleVerifyOtp}
+                                                disabled={otp.length !== 6 || isVerifyingOtp}
+                                            >
+                                                {isVerifyingOtp ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        กำลังตรวจสอบ...
+                                                    </div>
+                                                ) : "ยืนยันรหัส OTP"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2">
+                                    <Label>อีเมล</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                value={formData.email || ""}
+                                                placeholder="example@email.com"
+                                                className={cn(
+                                                    "pl-9 h-12",
+                                                    isEmailOtpVerified && "border-green-500 bg-green-50 text-green-700"
+                                                )}
+                                                onChange={(e) => {
+                                                    if (isEmailOtpVerified) setIsEmailOtpVerified(false);
+                                                    handleChange("email", e.target.value);
+                                                }}
+                                                disabled={isEmailOtpVerified}
+                                            />
+                                            {isEmailOtpVerified && (
+                                                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                                            )}
+                                        </div>
+                                        {!isEmailOtpVerified && (
+                                            <Button
+                                                variant="outline"
+                                                onClick={handleSendEmailOtp}
+                                                disabled={!formData.email || !formData.email.includes('@')}
+                                                className="shrink-0 h-12 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                            >
+                                                ยืนยันอีเมล
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {/* Email OTP Dialog */}
+                                    <Dialog open={showEmailOtpInput} onOpenChange={setShowEmailOtpInput}>
+                                        <DialogContent className="max-w-[400px] p-6">
+                                            <DialogHeader className="items-center text-center">
+                                                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
+                                                    <Mail className="w-6 h-6 text-chaiyo-blue" />
+                                                </div>
+                                                <DialogTitle className="text-xl font-bold text-gray-900">ยืนยันอีเมล</DialogTitle>
+                                                <DialogDescription className="text-sm text-gray-500">
+                                                    กรุณากรอกรหัส OTP ที่ส่งไปยังอีเมล {formData.email}
+                                                    {emailOtpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {emailOtpRef})</span>}
+                                                </DialogDescription>
+                                            </DialogHeader>
+
+                                            <div className="flex flex-col items-center py-6">
+                                                <InputOTP
+                                                    maxLength={6}
+                                                    value={emailOtp}
+                                                    onChange={(val) => {
+                                                        setEmailOtp(val);
+                                                        if (emailOtpError) setEmailOtpError("");
+                                                    }}
+                                                >
+                                                    <InputOTPGroup>
+                                                        <InputOTPSlot index={0} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                        <InputOTPSlot index={1} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                        <InputOTPSlot index={2} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                        <InputOTPSlot index={3} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                        <InputOTPSlot index={4} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                        <InputOTPSlot index={5} className={cn("h-12 w-10 sm:w-12 text-lg", emailOtpError && "border-red-500")} />
+                                                    </InputOTPGroup>
+                                                </InputOTP>
+
+                                                {emailOtpError && (
+                                                    <p className="mt-4 text-xs font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+                                                        {emailOtpError}
+                                                    </p>
+                                                )}
+
+                                                <button
+                                                    type="button"
+                                                    className="mt-6 text-sm font-medium text-chaiyo-blue hover:underline disabled:text-gray-400"
                                                     disabled={emailOtpTimer > 0}
                                                     onClick={handleSendEmailOtp}
                                                 >
-                                                    {emailOtpTimer > 0 ? `ขอรหัสใหม่ใน ${emailOtpTimer}s` : "ขอรหัสใหม่"}
+                                                    {emailOtpTimer > 0 ? `ขอรหัสใหม่ใน ${emailOtpTimer} วินาที` : "ส่งรหัสอีกครั้ง"}
+                                                </button>
+                                            </div>
+
+                                            <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                                                <Button
+                                                    variant="outline"
+                                                    className="flex-1 h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                    onClick={() => setShowEmailOtpInput(false)}
+                                                >
+                                                    ยกเลิก
                                                 </Button>
                                                 <Button
-                                                    size="sm"
-                                                    className="flex-1 bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                                                    className="flex-1 h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
                                                     onClick={handleVerifyEmailOtp}
                                                     disabled={emailOtp.length !== 6 || isVerifyingEmailOtp}
                                                 >
-                                                    {isVerifyingEmailOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : "ยืนยัน"}
+                                                    {isVerifyingEmailOtp ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                            กำลังตรวจสอบ...
+                                                        </div>
+                                                    ) : "ยืนยันรหัส OTP"}
                                                 </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
                                 {/* Home Telephone Field */}
                                 <div className="space-y-2">
-                                    <Label>เบอร์โทรศัพท์บ้าน (ถ้ามี)</Label>
+                                    <Label>เบอร์โทรศัพท์บ้าน</Label>
                                     <div className="relative">
                                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             value={formData.homePhone || ""}
                                             placeholder="02-xxx-xxxx"
                                             className="pl-9 font-mono h-12"
-                                            onChange={(e) => handleChange("homePhone", e.target.value)}
+                                            onChange={(e) => handleChange("homePhone", formatPhoneNumber(e.target.value))}
                                         />
                                     </div>
                                 </div>
                                 {/* LINE ID Field */}
                                 <div className="space-y-2">
-                                    <Label>LINE ID</Label>
+                                    <Label>LINE ID <span className="text-red-500">*</span></Label>
                                     <div className="relative">
                                         <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -1727,7 +1959,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         />
                                     </div>
                                 </div>
+
                             </div>
+
+
                         </div>
 
                         {/* SOCIAL MEDIAS SECTION */}
@@ -1820,606 +2055,953 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 </CardContent>
             </Card>
 
-            {false && (
-                <>
-                    {/* CO-BORROWERS SECTION */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                <Users className="w-5 h-5 text-gray-800" />
-                                ผู้กู้ร่วม
-                                <span className="text-sm font-normal text-muted-foreground ml-2">(สามารถเพิ่มได้หลายคน)</span>
-                            </h3>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={startAddCoBorrower}
-                            >
-                                <Plus className="w-4 h-4 mr-2" /> เพิ่มผู้กู้ร่วม
-                            </Button>
-                        </div>
+            {/* QUESTIONNAIRE SECTION */}
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                        <ClipboardList className="w-5 h-5" />
+                        แบบสอบถาม
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="flex flex-col gap-4">
+                        {/* Sub-section 1: Extra Income */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <Wallet className="w-4 h-4 text-chaiyo-blue" />
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-700">การหารายได้เสริม</h3>
+                            </div>
 
-                        {/* List of Co-Borrowers */}
-                        {formData.coBorrowers && formData.coBorrowers.length > 0 && (
-                            <Card className="overflow-hidden border-border-strong">
-                                <Table>
-                                    <TableHeader className="bg-gray-50">
-                                        <TableRow className="hover:bg-gray-50">
-                                            <TableHead className="w-[35%] text-gray-700">ชื่อ-นามสกุล</TableHead>
-                                            <TableHead className="w-[30%] text-gray-700">{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</TableHead>
-                                            <TableHead className="w-[25%] text-gray-700">ความสัมพันธ์</TableHead>
-                                            <TableHead className="w-[10%] text-gray-700"></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {formData.coBorrowers.map((person, index) => (
-                                            <TableRow key={index} className="table-row-hover group">
-                                                <TableCell className="font-medium py-3">
-                                                    {person.prefix} {person.firstName} {person.lastName}
-                                                    {person.verificationStatus === 'WATCHLIST' && person.watchlistReasons && person.watchlistReasons.length > 0 && (
-                                                        <div className="ml-2 inline-flex gap-1 align-top flex-wrap">
-                                                            {person.watchlistReasons.map((r: string, i: number) => (
-                                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                                                    {r}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs py-3">{person.idNumber}</TableCell>
-                                                <TableCell className="py-3">
-                                                    {{
-                                                        spouse: "คู่สมรส",
-                                                        parent: "บิดา/มารดา",
-                                                        sibling: "พี่น้อง",
-                                                        child: "บุตร/ธิดา",
-                                                        friend: "เพื่อน/คนรู้จัก",
-                                                        other: "อื่นๆ"
-                                                    }[person.relationship as string] || person.relationship}
-                                                </TableCell>
-                                                <TableCell className="py-3 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-muted-foreground hover:text-chaiyo-blue hover:bg-blue-50 h-8 w-8 p-0 rounded-full"
-                                                            onClick={() => handleEditCoBorrower(index)}
-                                                        >
-                                                            <Pencil className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                            onClick={() => handleRemoveCoBorrower(index)}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
+                            <div className="space-y-4 pt-2">
+                                {/* Skill Select */}
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium text-gray-700">ความสามารถพิเศษอื่นๆ ที่จะสร้างรายได้เพิ่ม</Label>
+                                    <Select
+                                        value={formData.qExtraSkill}
+                                        onValueChange={(val) => handleChange("qExtraSkill", val)}
+                                    >
+                                        <SelectTrigger className="h-12 bg-white rounded-xl border-gray-200">
+                                            <SelectValue placeholder="เลือกความสามารถพิเศษ" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="online_sales">ขายของออนไลน์</SelectItem>
+                                            <SelectItem value="delivery">ขับรถส่งอาหาร/เดลิเวอรี่</SelectItem>
+                                            <SelectItem value="handmade">รับจ้างผลิตสินค้า (Handmade)</SelectItem>
+                                            <SelectItem value="technician">บริการช่างซ่อมต่างๆ</SelectItem>
+                                            <SelectItem value="tutor">ติวเตอร์/สอนพิเศษ</SelectItem>
+                                            <SelectItem value="other">อื่นๆ โปรดระบุ</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {formData.qExtraSkill === "other" && (
+                                        <div className="pt-1">
+                                            <Input
+                                                placeholder="โปรดระบุความสามารถพิเศษ"
+                                                value={formData.qExtraSkillOther || ""}
+                                                onChange={(e) => handleChange("qExtraSkillOther", e.target.value)}
+                                                className="h-12 bg-white rounded-xl border-gray-200"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Known Apps Multi-select */}
+                                <div className="space-y-3 pt-2">
+                                    <Label className="text-sm font-bold text-gray-700">แอปที่รู้จัก และใช้เป็น</Label>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        {[
+                                            { id: "Tiktok", label: "Tiktok", logo: "/application/tiktok.png" },
+                                            { id: "Shoppee", label: "Shoppee", logo: "/application/shoppee.png" },
+                                            { id: "Lazada", label: "Lazada", logo: "/application/lazada.png" },
+                                            { id: "Grab", label: "Grab", logo: "/application/grab.png" },
+                                            { id: "Lineman", label: "Lineman", logo: "/application/lineman.png" },
+                                        ].map((app) => {
+                                            const isSelected = (formData.qAppsKnown || []).includes(app.id);
+                                            return (
+                                                <div key={app.id} className={cn(
+                                                    "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer group",
+                                                    isSelected
+                                                        ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
+                                                        : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
+                                                )}
+                                                    onClick={() => {
+                                                        const currentApps = formData.qAppsKnown || [];
+                                                        const newApps = currentApps.includes(app.id)
+                                                            ? currentApps.filter(a => a !== app.id)
+                                                            : [...currentApps, app.id];
+                                                        handleChange("qAppsKnown", newApps);
+                                                    }}>
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-100">
+                                                        <img src={app.logo} alt={app.label} className="w-full h-full object-contain" />
                                                     </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Card>
-                        )}
-
-                        {/* Add Co-Borrower Dialog */}
-                        <Dialog open={isAddingCoBorrower} onOpenChange={setIsAddingCoBorrower}>
-                            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                                {coBorrowerStage === 'KYC' ? (
-                                    <KYCProcess
-                                        title="ยืนยันตัวตนผู้กู้ร่วม (eKYC)"
-                                        onComplete={handleCoBorrowerKYCComplete}
-                                        onCancel={() => setIsAddingCoBorrower(false)}
-                                    />
-                                ) : (
-                                    <>
-                                        <DialogHeader>
-                                            <DialogTitle className="text-chaiyo-blue flex items-center gap-2">
-                                                <UserPlus className="w-5 h-5" /> {editingCoBorrowerIndex !== null ? "แก้ไขข้อมูลผู้กู้ร่วม" : "เพิ่มข้อมูลผู้กู้ร่วม"}
-                                            </DialogTitle>
-                                        </DialogHeader>
-                                        <div className="space-y-4 py-4">
-                                            {newCoBorrower.verificationStatus === 'WATCHLIST' && (
-                                                <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-md mb-4">
-                                                    <div className="flex items-center gap-2 text-sm font-bold mb-2">
-                                                        <AlertTriangle className="w-4 h-4" />
-                                                        บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
+                                                    <div className="flex-1 min-w-0">
+                                                        <Label className="text-sm font-bold cursor-pointer block truncate">{app.label}</Label>
                                                     </div>
-                                                    {(newCoBorrower.watchlistReasons || []).length > 0 && (
-                                                        <div className="flex flex-wrap gap-2 ml-6">
-                                                            {(newCoBorrower.watchlistReasons || []).map
-                                                                ((reason: string, idx: number) => (
-                                                                    <Badge key={idx} variant="outline" className="border-orange-200 bg-white text-orange-700">
-                                                                        {reason}
-                                                                    </Badge>
-                                                                ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
-                                                    <Select
-                                                        value={newCoBorrower.relationship}
-                                                        onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, relationship: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="spouse">คู่สมรส</SelectItem>
-                                                            <SelectItem value="parent">บิดา/มารดา</SelectItem>
-                                                            <SelectItem value="sibling">พี่น้อง</SelectItem>
-                                                            <SelectItem value="child">บุตร/ธิดา</SelectItem>
-                                                            <SelectItem value="other">อื่นๆ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</Label>
-                                                    <Input
-                                                        className="font-mono"
-                                                        value={newCoBorrower.idNumber}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, idNumber: e.target.value })}
+                                                    <Checkbox
+                                                        id={`app-${app.id}`}
+                                                        checked={isSelected}
+                                                        onCheckedChange={() => { }}
+                                                        className="rounded-md"
                                                     />
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label>คำนำหน้า</Label>
-                                                    <Select
-                                                        value={newCoBorrower.prefix}
-                                                        onValueChange={(val) => {
-                                                            const updatedCoBorrower = { ...newCoBorrower, prefix: val };
-                                                            if (val === 'นาย') {
-                                                                updatedCoBorrower.gender = 'ชาย';
-                                                            } else if (val === 'นาง' || val === 'นางสาว') {
-                                                                updatedCoBorrower.gender = 'หญิง';
-                                                            }
-                                                            setNewCoBorrower(updatedCoBorrower);
-                                                        }}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="นาย">นาย</SelectItem>
-                                                            <SelectItem value="นาง">นาง</SelectItem>
-                                                            <SelectItem value="นางสาว">นางสาว</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>เพศ</Label>
-                                                    <Select
-                                                        value={newCoBorrower.gender}
-                                                        onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, gender: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="ชาย">ชาย</SelectItem>
-                                                            <SelectItem value="หญิง">หญิง</SelectItem>
-                                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อจริง</Label>
-                                                    <Input
-                                                        value={newCoBorrower.firstName}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstName: e.target.value })}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>นามสกุล</Label>
-                                                    <Input
-                                                        value={newCoBorrower.lastName}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastName: e.target.value })}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={newCoBorrower.firstNameEn || ""}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstNameEn: e.target.value })}
-                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
-                                                    <Input
-                                                        value={newCoBorrower.middleNameEn || ""}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, middleNameEn: e.target.value })}
-                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={newCoBorrower.lastNameEn || ""}
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastNameEn: e.target.value })}
-                                                        disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>วันเกิด</Label>
-                                                    <DatePickerBE
-                                                        value={newCoBorrower.birthDate}
-                                                        onChange={(val) => setNewCoBorrower({ ...newCoBorrower, birthDate: val })}
-                                                        inputClassName="h-12"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>เบอร์โทรศัพท์มือถือ</Label>
-                                                    <Input
-                                                        value={newCoBorrower.phone}
-                                                        placeholder="08x-xxx-xxxx"
-                                                        className="font-mono"
-                                                        onChange={(e) => setNewCoBorrower({ ...newCoBorrower, phone: e.target.value })}
-                                                    />
-                                                </div>
+                                            );
+                                        })}
+                                        <div className={cn(
+                                            "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer",
+                                            (formData.qAppsKnown || []).includes("อื่นๆ")
+                                                ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
+                                                : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
+                                        )}
+                                            onClick={() => {
+                                                const app = "อื่นๆ";
+                                                const currentApps = formData.qAppsKnown || [];
+                                                const newApps = currentApps.includes(app)
+                                                    ? currentApps.filter(a => a !== app)
+                                                    : [...currentApps, app];
+                                                handleChange("qAppsKnown", newApps);
+                                            }}>
+                                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                                <MoreHorizontal className="w-4 h-4 text-gray-400" />
                                             </div>
-
-                                            <div className="pt-2">
-                                                <AddressForm
-                                                    title="ที่อยู่ตามทะเบียนบ้าน"
-                                                    formData={newCoBorrower}
-                                                    onChange={(field, val) => setNewCoBorrower({ ...newCoBorrower, [field]: val })}
-                                                />
+                                            <div className="flex-1 min-w-0">
+                                                <Label className="text-sm font-bold cursor-pointer block truncate">อื่นๆ โปรดระบุ</Label>
                                             </div>
+                                            <Checkbox
+                                                id="app-other"
+                                                checked={(formData.qAppsKnown || []).includes("อื่นๆ")}
+                                                onCheckedChange={() => { }}
+                                                className="rounded-md"
+                                            />
+                                        </div>
+                                    </div>
+                                    {(formData.qAppsKnown || []).includes("อื่นๆ") && (
+                                        <div className="pt-1">
+                                            <Input
+                                                placeholder="โปรดระบุแอปอื่นๆ"
+                                                value={formData.qAppsKnownOther || ""}
+                                                onChange={(e) => handleChange("qAppsKnownOther", e.target.value)}
+                                                className="h-12 bg-white rounded-xl border-gray-200"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
 
-                                            {/* Additional Info for Co-borrower */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>อาชีพ</Label>
-                                                    <Select
-                                                        value={newCoBorrower.occupation}
-                                                        onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, occupation: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือกอาชีพ" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="พนักงานบริษัท">พนักงานบริษัท</SelectItem>
-                                                            <SelectItem value="ข้าราชการ">ข้าราชการ</SelectItem>
-                                                            <SelectItem value="เกษตรกร">เกษตรกร</SelectItem>
-                                                            <SelectItem value="เจ้าของกิจการ">เจ้าของกิจการ</SelectItem>
-                                                            <SelectItem value="รับจ้างทั่วไป">รับจ้างทั่วไป</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>รายได้สุทธิต่อเดือน (บาท)</Label>
-                                                    <Input
-                                                        value={newCoBorrower.income}
-                                                        placeholder="0.00"
-                                                        className="text-right"
-                                                        onChange={(e) => {
-                                                            const rawValue = e.target.value.replace(/,/g, '');
-                                                            if (!isNaN(Number(rawValue))) {
-                                                                const parts = rawValue.split('.');
-                                                                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                                                setNewCoBorrower({ ...newCoBorrower, income: parts.join('.') });
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end pt-4">
-                                                <Button onClick={handleAddCoBorrower} className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90">
-                                                    <Save className="w-4 h-4 mr-2" /> บันทึกข้อมูล
-                                                </Button>
+                                {/* Intention Rating */}
+                                <div className="pt-2 border-t border-gray-100">
+                                    <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
+                                        <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
+                                            <div>
+                                                <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
                                             </div>
                                         </div>
-                                    </>
-                                )}
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-
-                    {/* GUARANTORS SECTION */}
-                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                <ShieldCheck className="w-5 h-5 text-gray-800" />
-                                ผู้ค้ำประกัน
-                                <span className="text-sm font-normal text-muted-foreground ml-2">(สามารถเพิ่มได้หลายคน)</span>
-                            </h3>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={startAddGuarantor}
-                            >
-                                <Plus className="w-4 h-4 mr-2" /> เพิ่มผู้ค้ำประกัน
-                            </Button>
+                                    </div>
+                                    <RatingGroup
+                                        label="ความตั้งใจ ในการสร้างรายได้ เพื่อชำระหนี้"
+                                        value={formData.qDebtRepaymentIntention}
+                                        onChange={(v) => handleChange("qDebtRepaymentIntention", v)}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* List of Guarantors */}
-                        {formData.guarantors && formData.guarantors.length > 0 && (
-                            <Card className="overflow-hidden border-border-strong">
-                                <Table>
-                                    <TableHeader className="bg-gray-50">
-                                        <TableRow className="hover:bg-gray-50">
-                                            <TableHead className="w-[35%] text-gray-700">ชื่อ-นามสกุล</TableHead>
-                                            <TableHead className="w-[30%] text-gray-700">{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</TableHead>
-                                            <TableHead className="w-[25%] text-gray-700">ความสัมพันธ์</TableHead>
-                                            <TableHead className="w-[10%] text-gray-700"></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {formData.guarantors.map((person, index) => (
-                                            <TableRow key={index} className="table-row-hover group">
-                                                <TableCell className="font-medium py-3">
-                                                    {person.prefix} {person.firstName} {person.lastName}
-                                                    {person.verificationStatus === 'WATCHLIST' && person.watchlistReasons && person.watchlistReasons.length > 0 && (
-                                                        <div className="ml-2 inline-flex gap-1 align-top flex-wrap">
-                                                            {person.watchlistReasons.map((r: string, i: number) => (
-                                                                <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                                                    {r}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="font-mono text-xs py-3">{person.idNumber}</TableCell>
-                                                <TableCell className="py-3">
-                                                    {{
-                                                        spouse: "คู่สมรส",
-                                                        parent: "บิดา/มารดา",
-                                                        sibling: "พี่น้อง",
-                                                        friend: "เพื่อน/คนรู้จัก",
-                                                        other: "อื่นๆ"
-                                                    }[person.relationship as string] || person.relationship}
-                                                </TableCell>
-                                                <TableCell className="py-3 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-muted-foreground hover:text-chaiyo-blue hover:bg-blue-50 h-8 w-8 p-0 rounded-full"
-                                                            onClick={() => handleEditGuarantor(index)}
-                                                        >
-                                                            <Pencil className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                            onClick={() => handleRemoveGuarantor(index)}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Card>
-                        )}
+                        {/* Sub-section 2: Financial Behavior */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                <div className="w-8 h-8 rounded-lg bg-gold-100 flex items-center justify-center" style={{ backgroundColor: 'rgba(255, 209, 0, 0.1)' }}>
+                                    <TrendingUp className="w-4 h-4 text-[#FFD100]" />
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-700">พฤติกรรมทางการเงิน</h3>
+                            </div>
+                            <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
+                                <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
+                                    <div>
+                                        <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <div className="flex flex-col gap-0 text-gray-800">
+                                <RatingGroup
+                                    label="ก่อนที่ท่านจะซื้อสินค้า ท่านได้ไตร่ตรองอย่างถี่ถ้วน ว่ามีเงินพอจ่ายได้"
+                                    value={formData.qFinancialPonder}
+                                    onChange={(v) => handleChange("qFinancialPonder", v)}
+                                />
+                                <RatingGroup
+                                    label="ท่านชำระเงินค่าใช้จ่ายต่างๆ ตรงเวลา"
+                                    value={formData.qFinancialOnTime}
+                                    onChange={(v) => handleChange("qFinancialOnTime", v)}
+                                />
+                                <RatingGroup
+                                    label="ท่านดูแลเรื่องเงินของตัวเองอย่างใกล้ชิด เช่นรู้ว่ามีรายได้ และรายจ่ายเท่าไหร่"
+                                    value={formData.qFinancialCloseMonitor}
+                                    onChange={(v) => handleChange("qFinancialCloseMonitor", v)}
+                                />
+                                <RatingGroup
+                                    label="ท่านมีวางแผนตั้งเป้าหมายทางการเงินระยะยาว อย่างน้อย 1-3 ปี"
+                                    value={formData.qFinancialLongTermGoal}
+                                    onChange={(v) => handleChange("qFinancialLongTermGoal", v)}
+                                />
+                                <RatingGroup
+                                    label="ในการซื้อสินค้าหรือบริการท่านเปรียบเทียบข้อมูลก่อนการซื้อ และศึกษาข้อมูลจากแหล่งที่เหมาะสมก่อนตัดสินใจซื้อ"
+                                    value={formData.qFinancialCompareInfo}
+                                    onChange={(v) => handleChange("qFinancialCompareInfo", v)}
+                                />
+                            </div>
+                        </div>
 
+                        {/* Sub-section 3: Debt Repayment */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                    <CreditCard className="w-4 h-4 text-emerald-600" />
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-700">การชำระหนี้</h3>
+                            </div>
+                            <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
+                                <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
+                                    <div>
+                                        <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-0 text-gray-800">
+                                <RatingGroup
+                                    label="ท่านมีความกังวลข้อมูลเครดิต"
+                                    value={formData.qCreditConcern}
+                                    onChange={(v) => handleChange("qCreditConcern", v)}
+                                />
+                                <RatingGroup
+                                    label="ท่านมีความกังวลในการชำระหนี้ที่มีการค้างชำระอยู่"
+                                    value={formData.qDebtConcern}
+                                    onChange={(v) => handleChange("qDebtConcern", v)}
+                                />
+                                <RatingGroup
+                                    label="ท่านมีความกังวลหลักประกันที่จะถูกยึด"
+                                    value={formData.qCollateralConcern}
+                                    onChange={(v) => handleChange("qCollateralConcern", v)}
+                                />
+                            </div>
+                        </div>
 
-                        {/* Add Guarantor Dialog */}
-                        <Dialog open={isAddingGuarantor} onOpenChange={setIsAddingGuarantor}>
-                            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                                {guarantorStage === 'KYC' ? (
-                                    <KYCProcess
-                                        title="ยืนยันตัวตนผู้ค้ำประกัน (eKYC)"
-                                        onComplete={handleGuarantorKYCComplete}
-                                        onCancel={() => setIsAddingGuarantor(false)}
-                                    />
-                                ) : (
-                                    <>
-                                        <DialogHeader>
-                                            <DialogTitle className="text-chaiyo-orange flex items-center gap-2">
-                                                <ShieldCheck className="w-5 h-5" /> {editingGuarantorIndex !== null ? "แก้ไขข้อมูลผู้ค้ำประกัน" : "เพิ่มข้อมูลผู้ค้ำประกัน"}
-                                            </DialogTitle>
-                                        </DialogHeader>
-                                        <div className="space-y-4 py-4">
-                                            {newGuarantor.verificationStatus === 'WATCHLIST' && (
-                                                <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-md mb-4">
-                                                    <div className="flex items-center gap-2 text-sm font-bold mb-2">
-                                                        <AlertTriangle className="w-4 h-4" />
-                                                        บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
-                                                    </div>
-                                                    {(newGuarantor.watchlistReasons || []).length > 0 && (
-                                                        <div className="flex flex-wrap gap-2 ml-6">
-                                                            {(newGuarantor.watchlistReasons || []).map
-                                                                ((reason: string, idx: number) => (
-                                                                    <Badge key={idx} variant="outline" className="border-orange-200 bg-white text-orange-700">
-                                                                        {reason}
-                                                                    </Badge>
-                                                                ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
-                                                    <Select
-                                                        value={newGuarantor.relationship}
-                                                        onValueChange={(val) => setNewGuarantor({ ...newGuarantor, relationship: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="spouse">คู่สมรส</SelectItem>
-                                                            <SelectItem value="parent">บิดา/มารดา</SelectItem>
-                                                            <SelectItem value="sibling">พี่น้อง</SelectItem>
-                                                            <SelectItem value="friend">เพื่อน/คนรู้จัก</SelectItem>
-                                                            <SelectItem value="other">อื่นๆ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</Label>
-                                                    <Input
-                                                        className="font-mono"
-                                                        value={newGuarantor.idNumber}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, idNumber: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>คำนำหน้า</Label>
-                                                    <Select
-                                                        value={newGuarantor.prefix}
-                                                        onValueChange={(val) => {
-                                                            const updatedGuarantor = { ...newGuarantor, prefix: val };
-                                                            if (val === 'นาย') {
-                                                                updatedGuarantor.gender = 'ชาย';
-                                                            } else if (val === 'นาง' || val === 'นางสาว') {
-                                                                updatedGuarantor.gender = 'หญิง';
-                                                            }
-                                                            setNewGuarantor(updatedGuarantor);
-                                                        }}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="นาย">นาย</SelectItem>
-                                                            <SelectItem value="นาง">นาง</SelectItem>
-                                                            <SelectItem value="นางสาว">นางสาว</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>เพศ</Label>
-                                                    <Select
-                                                        value={newGuarantor.gender}
-                                                        onValueChange={(val) => setNewGuarantor({ ...newGuarantor, gender: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="ชาย">ชาย</SelectItem>
-                                                            <SelectItem value="หญิง">หญิง</SelectItem>
-                                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อจริง</Label>
-                                                    <Input
-                                                        value={newGuarantor.firstName}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, firstName: e.target.value })}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>นามสกุล</Label>
-                                                    <Input
-                                                        value={newGuarantor.lastName}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, lastName: e.target.value })}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อจริงภาษาอังกฤษ (First Name) <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={newGuarantor.firstNameEn || ""}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, firstNameEn: e.target.value })}
-                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>ชื่อกลางภาษาอังกฤษ (Middle Name)</Label>
-                                                    <Input
-                                                        value={newGuarantor.middleNameEn || ""}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, middleNameEn: e.target.value })}
-                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>นามสกุลภาษาอังกฤษ (Last Name) <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={newGuarantor.lastNameEn || ""}
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, lastNameEn: e.target.value })}
-                                                        disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
-                                                        className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>วันเกิด</Label>
-                                                    <DatePickerBE
-                                                        value={newGuarantor.birthDate}
-                                                        onChange={(val) => setNewGuarantor({ ...newGuarantor, birthDate: val })}
-                                                        inputClassName="h-12"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                    <Label>เบอร์โทรศัพท์มือถือ</Label>
-                                                    <Input
-                                                        value={newGuarantor.phone}
-                                                        placeholder="08x-xxx-xxxx"
-                                                        className="font-mono"
-                                                        onChange={(e) => setNewGuarantor({ ...newGuarantor, phone: e.target.value })}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="pt-2">
-                                                <AddressForm
-                                                    title="ที่อยู่ตามทะเบียนบ้าน"
-                                                    formData={newGuarantor}
-                                                    onChange={(field, val) => setNewGuarantor({ ...newGuarantor, [field]: val })}
-                                                />
-                                            </div>
-
-                                            {/* Additional Info for Guarantor */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label>อาชีพ</Label>
-                                                    <Select
-                                                        value={newGuarantor.occupation}
-                                                        onValueChange={(val) => setNewGuarantor({ ...newGuarantor, occupation: val })}
-                                                    >
-                                                        <SelectTrigger><SelectValue placeholder="เลือกอาชีพ" /></SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="พนักงานบริษัท">พนักงานบริษัท</SelectItem>
-                                                            <SelectItem value="ข้าราชการ">ข้าราชการ</SelectItem>
-                                                            <SelectItem value="เกษตรกร">เกษตรกร</SelectItem>
-                                                            <SelectItem value="เจ้าของกิจการ">เจ้าของกิจการ</SelectItem>
-                                                            <SelectItem value="รับจ้างทั่วไป">รับจ้างทั่วไป</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label>รายได้สุทธิต่อเดือน (บาท)</Label>
-                                                    <Input
-                                                        value={newGuarantor.income}
-                                                        placeholder="0.00"
-                                                        className="text-right"
-                                                        onChange={(e) => {
-                                                            const rawValue = e.target.value.replace(/,/g, '');
-                                                            if (!isNaN(Number(rawValue))) {
-                                                                const parts = rawValue.split('.');
-                                                                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                                                                setNewGuarantor({ ...newGuarantor, income: parts.join('.') });
-                                                            }
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-end pt-4">
-                                                <Button onClick={handleAddGuarantor} className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90">
-                                                    <Save className="w-4 h-4 mr-2" /> บันทึกข้อมูล
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </DialogContent>
-                        </Dialog>
+                        {/* Sub-section 4: Delinquency */}
+                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-700">การค้างชำระ</h3>
+                            </div>
+                            <div className="flex flex-col gap-4">
+                                <div className="rounded-xl border border-gray-100 bg-white/40 overflow-hidden">
+                                    <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
+                                        <div className="w-1 h-4 bg-chaiyo-blue rounded-full" />
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">หากจำเป็นต้องค้างชำระเงินกู้อาจเกิดจากปัญหาด้านใด</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <YesNoGroup
+                                            label="ต้นทุนสูงขึ้น (ค่าใช้จ่ายของการผลิตสูงขึ้น)"
+                                            value={formData.qDelinquencyHigherCost}
+                                            onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ขายสินค้าไม่ออก เช่นผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
+                                            value={formData.qDelinquencyUnsold}
+                                            onChange={(v) => handleChange("qDelinquencyUnsold", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีรายจ่ายหนี้สินอื่นๆ"
+                                            value={formData.qDelinquencyOtherDebt}
+                                            onChange={(v) => handleChange("qDelinquencyOtherDebt", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายภายในครอบครัว"
+                                            value={formData.qDelinquencyFamilyExpense}
+                                            onChange={(v) => handleChange("qDelinquencyFamilyExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายในการศึกษาบุตรเพิ่มขึ้น"
+                                            value={formData.qDelinquencyEducationExpense}
+                                            onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="อุบัติเหตุ/ความเจ็บป่วยหรือถึงแก่กรรม"
+                                            value={formData.qDelinquencyAccident}
+                                            onChange={(v) => handleChange("qDelinquencyAccident", v)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="rounded-xl border border-gray-100 bg-white/40 overflow-hidden">
+                                    <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
+                                        <div className="w-1 h-4 bg-chaiyo-blue rounded-full" />
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">หากจำเป็นต้องมีการค้างชำระเงินกู้อาจเกิดจากสาเหตุใด</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <YesNoGroup
+                                            label="เกิดปัญหาในครอบครัวเช่นหย่าร้าง หรือคู่สมรสเสียชีวิต"
+                                            value={formData.qDelinquencyFamilyDispute}
+                                            onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="กิจการที่ทำอยู่ประสบปัญหา"
+                                            value={formData.qDelinquencyBusinessProblem}
+                                            onChange={(v) => handleChange("qDelinquencyBusinessProblem", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ประสบปัญหาด้านสุขภาพ"
+                                            value={formData.qDelinquencyHealthProblem}
+                                            onChange={(v) => handleChange("qDelinquencyHealthProblem", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายหลายทาง/ภาระค่าใช้จ่ายสูง"
+                                            value={formData.qDelinquencyHighExpense}
+                                            onChange={(v) => handleChange("qDelinquencyHighExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="การย้ายถิ่นที่อยู่อาศัย"
+                                            value={formData.qDelinquencyRelocation}
+                                            onChange={(v) => handleChange("qDelinquencyRelocation", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ขาดความเข้าใจในกระบวนการ/ขั้นตอนการจัดการหนี้"
+                                            value={formData.qDelinquencyDebtProcessIgnorance}
+                                            onChange={(v) => handleChange("qDelinquencyDebtProcessIgnorance", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ถูกฟ้องให้ชำระหนี้สิน"
+                                            value={formData.qDelinquencyLawsuit}
+                                            onChange={(v) => handleChange("qDelinquencyLawsuit", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ย้ายไปประกอบธุรกิจที่จังหวัดอื่น"
+                                            value={formData.qDelinquencyMoveBusiness}
+                                            onChange={(v) => handleChange("qDelinquencyMoveBusiness", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ภาวะทางเศรษฐกิจ"
+                                            value={formData.qDelinquencyEconomy}
+                                            onChange={(v) => handleChange("qDelinquencyEconomy", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="เกิดภัยธรรมชาติ"
+                                            value={formData.qDelinquencyNaturalDisaster}
+                                            onChange={(v) => handleChange("qDelinquencyNaturalDisaster", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="รัฐบาลเปลี่ยนแปลงนโยบายบ่อย"
+                                            value={formData.qDelinquencyGovernmentPolicy}
+                                            onChange={(v) => handleChange("qDelinquencyGovernmentPolicy", v)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </>
-            )}
+                </CardContent>
+            </Card>
+
+            {
+                false && (
+                    <>
+                        {/* CO-BORROWERS SECTION */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    <Users className="w-5 h-5 text-gray-800" />
+                                    ผู้กู้ร่วม
+                                    <span className="text-sm font-normal text-muted-foreground ml-2">(สามารถเพิ่มได้หลายคน)</span>
+                                </h3>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={startAddCoBorrower}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" /> เพิ่มผู้กู้ร่วม
+                                </Button>
+                            </div>
+
+                            {/* List of Co-Borrowers */}
+                            {formData.coBorrowers && formData.coBorrowers.length > 0 && (
+                                <Card className="overflow-hidden border-border-strong">
+                                    <Table>
+                                        <TableHeader className="bg-gray-50">
+                                            <TableRow className="hover:bg-gray-50">
+                                                <TableHead className="w-[35%] text-gray-700">ชื่อ-นามสกุล</TableHead>
+                                                <TableHead className="w-[30%] text-gray-700">{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</TableHead>
+                                                <TableHead className="w-[25%] text-gray-700">ความสัมพันธ์</TableHead>
+                                                <TableHead className="w-[10%] text-gray-700"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {formData.coBorrowers.map((person, index) => (
+                                                <TableRow key={index} className="table-row-hover group">
+                                                    <TableCell className="font-medium py-3">
+                                                        {person.prefix} {person.firstName} {person.lastName}
+                                                        {person.verificationStatus === 'WATCHLIST' && person.watchlistReasons && person.watchlistReasons.length > 0 && (
+                                                            <div className="ml-2 inline-flex gap-1 align-top flex-wrap">
+                                                                {person.watchlistReasons.map((r: string, i: number) => (
+                                                                    <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                                                        {r}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="font-mono text-xs py-3">{person.idNumber}</TableCell>
+                                                    <TableCell className="py-3">
+                                                        {{
+                                                            spouse: "คู่สมรส",
+                                                            parent: "บิดา/มารดา",
+                                                            sibling: "พี่น้อง",
+                                                            child: "บุตร/ธิดา",
+                                                            friend: "เพื่อน/คนรู้จัก",
+                                                            other: "อื่นๆ"
+                                                        }[person.relationship as string] || person.relationship}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-muted-foreground hover:text-chaiyo-blue hover:bg-blue-50 h-8 w-8 p-0 rounded-full"
+                                                                onClick={() => handleEditCoBorrower(index)}
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                onClick={() => handleRemoveCoBorrower(index)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Card>
+                            )}
+
+                            {/* Add Co-Borrower Dialog */}
+                            <Dialog open={isAddingCoBorrower} onOpenChange={setIsAddingCoBorrower}>
+                                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                                    {coBorrowerStage === 'KYC' ? (
+                                        <KYCProcess
+                                            title="ยืนยันตัวตนผู้กู้ร่วม (eKYC)"
+                                            onComplete={handleCoBorrowerKYCComplete}
+                                            onCancel={() => setIsAddingCoBorrower(false)}
+                                        />
+                                    ) : (
+                                        <>
+                                            <DialogHeader>
+                                                <DialogTitle className="text-chaiyo-blue flex items-center gap-2">
+                                                    <UserPlus className="w-5 h-5" /> {editingCoBorrowerIndex !== null ? "แก้ไขข้อมูลผู้กู้ร่วม" : "เพิ่มข้อมูลผู้กู้ร่วม"}
+                                                </DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-4 py-4">
+                                                {newCoBorrower.verificationStatus === 'WATCHLIST' && (
+                                                    <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-md mb-4">
+                                                        <div className="flex items-center gap-2 text-sm font-bold mb-2">
+                                                            <AlertTriangle className="w-4 h-4" />
+                                                            บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
+                                                        </div>
+                                                        {(newCoBorrower.watchlistReasons || []).length > 0 && (
+                                                            <div className="flex flex-wrap gap-2 ml-6">
+                                                                {(newCoBorrower.watchlistReasons || []).map
+                                                                    ((reason: string, idx: number) => (
+                                                                        <Badge key={idx} variant="outline" className="border-orange-200 bg-white text-orange-700">
+                                                                            {reason}
+                                                                        </Badge>
+                                                                    ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label>ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
+                                                        <Select
+                                                            value={newCoBorrower.relationship}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, relationship: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="spouse">คู่สมรส</SelectItem>
+                                                                <SelectItem value="parent">บิดา/มารดา</SelectItem>
+                                                                <SelectItem value="sibling">พี่น้อง</SelectItem>
+                                                                <SelectItem value="child">บุตร/ธิดา</SelectItem>
+                                                                <SelectItem value="other">อื่นๆ</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</Label>
+                                                        <Input
+                                                            className="font-mono"
+                                                            value={newCoBorrower.idNumber}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, idNumber: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>คำนำหน้า</Label>
+                                                        <Select
+                                                            value={newCoBorrower.prefix}
+                                                            onValueChange={(val) => {
+                                                                const updatedCoBorrower = { ...newCoBorrower, prefix: val };
+                                                                if (val === 'นาย') {
+                                                                    updatedCoBorrower.gender = 'ชาย';
+                                                                } else if (val === 'นาง' || val === 'นางสาว') {
+                                                                    updatedCoBorrower.gender = 'หญิง';
+                                                                }
+                                                                setNewCoBorrower(updatedCoBorrower);
+                                                            }}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="นาย">นาย</SelectItem>
+                                                                <SelectItem value="นาง">นาง</SelectItem>
+                                                                <SelectItem value="นางสาว">นางสาว</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>เพศ</Label>
+                                                        <Select
+                                                            value={newCoBorrower.gender}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, gender: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="ชาย">ชาย</SelectItem>
+                                                                <SelectItem value="หญิง">หญิง</SelectItem>
+                                                                <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อจริง</Label>
+                                                        <Input
+                                                            value={newCoBorrower.firstName}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstName: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>นามสกุล</Label>
+                                                        <Input
+                                                            value={newCoBorrower.lastName}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastName: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อจริง (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newCoBorrower.firstNameEn || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, firstNameEn: e.target.value })}
+                                                            disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อกลาง (ภาษาอังกฤษ)</Label>
+                                                        <Input
+                                                            value={newCoBorrower.middleNameEn || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, middleNameEn: e.target.value })}
+                                                            disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>นามสกุล (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newCoBorrower.lastNameEn || ""}
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, lastNameEn: e.target.value })}
+                                                            disabled={newCoBorrower.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newCoBorrower.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>วันเกิด</Label>
+                                                        <DatePickerBE
+                                                            value={newCoBorrower.birthDate}
+                                                            onChange={(val) => setNewCoBorrower({ ...newCoBorrower, birthDate: val })}
+                                                            inputClassName="h-12"
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>เบอร์โทรศัพท์มือถือ <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newCoBorrower.phone}
+                                                            placeholder="08x-xxx-xxxx"
+                                                            className="font-mono"
+                                                            onChange={(e) => setNewCoBorrower({ ...newCoBorrower, phone: formatPhoneNumber(e.target.value) })}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="pt-2">
+                                                    <AddressForm
+                                                        title="ที่อยู่ตามทะเบียนบ้าน"
+                                                        formData={newCoBorrower}
+                                                        onChange={(field, val) => setNewCoBorrower({ ...newCoBorrower, [field]: val })}
+                                                    />
+                                                </div>
+
+                                                {/* Additional Info for Co-borrower */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label>อาชีพ</Label>
+                                                        <Select
+                                                            value={newCoBorrower.occupation}
+                                                            onValueChange={(val) => setNewCoBorrower({ ...newCoBorrower, occupation: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือกอาชีพ" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="พนักงานบริษัท">พนักงานบริษัท</SelectItem>
+                                                                <SelectItem value="ข้าราชการ">ข้าราชการ</SelectItem>
+                                                                <SelectItem value="เกษตรกร">เกษตรกร</SelectItem>
+                                                                <SelectItem value="เจ้าของกิจการ">เจ้าของกิจการ</SelectItem>
+                                                                <SelectItem value="รับจ้างทั่วไป">รับจ้างทั่วไป</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>รายได้สุทธิต่อเดือน (บาท)</Label>
+                                                        <Input
+                                                            value={newCoBorrower.income}
+                                                            placeholder="0.00"
+                                                            className="text-right"
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/,/g, '');
+                                                                if (!isNaN(Number(rawValue))) {
+                                                                    const parts = rawValue.split('.');
+                                                                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                                                    setNewCoBorrower({ ...newCoBorrower, income: parts.join('.') });
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end pt-4">
+                                                    <Button onClick={handleAddCoBorrower} className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90">
+                                                        <Save className="w-4 h-4 mr-2" /> บันทึกข้อมูล
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+
+                        {/* GUARANTORS SECTION */}
+                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    <ShieldCheck className="w-5 h-5 text-gray-800" />
+                                    ผู้ค้ำประกัน
+                                    <span className="text-sm font-normal text-muted-foreground ml-2">(สามารถเพิ่มได้หลายคน)</span>
+                                </h3>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={startAddGuarantor}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" /> เพิ่มผู้ค้ำประกัน
+                                </Button>
+                            </div>
+
+                            {/* List of Guarantors */}
+                            {formData.guarantors && formData.guarantors.length > 0 && (
+                                <Card className="overflow-hidden border-border-strong">
+                                    <Table>
+                                        <TableHeader className="bg-gray-50">
+                                            <TableRow className="hover:bg-gray-50">
+                                                <TableHead className="w-[35%] text-gray-700">ชื่อ-นามสกุล</TableHead>
+                                                <TableHead className="w-[30%] text-gray-700">{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</TableHead>
+                                                <TableHead className="w-[25%] text-gray-700">ความสัมพันธ์</TableHead>
+                                                <TableHead className="w-[10%] text-gray-700"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {formData.guarantors.map((person, index) => (
+                                                <TableRow key={index} className="table-row-hover group">
+                                                    <TableCell className="font-medium py-3">
+                                                        {person.prefix} {person.firstName} {person.lastName}
+                                                        {person.verificationStatus === 'WATCHLIST' && person.watchlistReasons && person.watchlistReasons.length > 0 && (
+                                                            <div className="ml-2 inline-flex gap-1 align-top flex-wrap">
+                                                                {person.watchlistReasons.map((r: string, i: number) => (
+                                                                    <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                                                        {r}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="font-mono text-xs py-3">{person.idNumber}</TableCell>
+                                                    <TableCell className="py-3">
+                                                        {{
+                                                            spouse: "คู่สมรส",
+                                                            parent: "บิดา/มารดา",
+                                                            sibling: "พี่น้อง",
+                                                            friend: "เพื่อน/คนรู้จัก",
+                                                            other: "อื่นๆ"
+                                                        }[person.relationship as string] || person.relationship}
+                                                    </TableCell>
+                                                    <TableCell className="py-3 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-muted-foreground hover:text-chaiyo-blue hover:bg-blue-50 h-8 w-8 p-0 rounded-full"
+                                                                onClick={() => handleEditGuarantor(index)}
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                onClick={() => handleRemoveGuarantor(index)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Card>
+                            )}
+
+
+
+                            {/* Add Guarantor Dialog */}
+                            <Dialog open={isAddingGuarantor} onOpenChange={setIsAddingGuarantor}>
+                                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                                    {guarantorStage === 'KYC' ? (
+                                        <KYCProcess
+                                            title="ยืนยันตัวตนผู้ค้ำประกัน (eKYC)"
+                                            onComplete={handleGuarantorKYCComplete}
+                                            onCancel={() => setIsAddingGuarantor(false)}
+                                        />
+                                    ) : (
+                                        <>
+                                            <DialogHeader>
+                                                <DialogTitle className="text-chaiyo-orange flex items-center gap-2">
+                                                    <ShieldCheck className="w-5 h-5" /> {editingGuarantorIndex !== null ? "แก้ไขข้อมูลผู้ค้ำประกัน" : "เพิ่มข้อมูลผู้ค้ำประกัน"}
+                                                </DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-4 py-4">
+                                                {newGuarantor.verificationStatus === 'WATCHLIST' && (
+                                                    <div className="bg-orange-50 border border-orange-200 text-orange-800 p-3 rounded-md mb-4">
+                                                        <div className="flex items-center gap-2 text-sm font-bold mb-2">
+                                                            <AlertTriangle className="w-4 h-4" />
+                                                            บุคคลนี้อยู่ใน Watchlist - กรุณาตรวจสอบเอกสารเพิ่มเติม
+                                                        </div>
+                                                        {(newGuarantor.watchlistReasons || []).length > 0 && (
+                                                            <div className="flex flex-wrap gap-2 ml-6">
+                                                                {(newGuarantor.watchlistReasons || []).map
+                                                                    ((reason: string, idx: number) => (
+                                                                        <Badge key={idx} variant="outline" className="border-orange-200 bg-white text-orange-700">
+                                                                            {reason}
+                                                                        </Badge>
+                                                                    ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label>ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
+                                                        <Select
+                                                            value={newGuarantor.relationship}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, relationship: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="spouse">คู่สมรส</SelectItem>
+                                                                <SelectItem value="parent">บิดา/มารดา</SelectItem>
+                                                                <SelectItem value="sibling">พี่น้อง</SelectItem>
+                                                                <SelectItem value="friend">เพื่อน/คนรู้จัก</SelectItem>
+                                                                <SelectItem value="other">อื่นๆ</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>{formData.cardType === 'PINK_CARD' ? 'เลขประจำตัว' : 'เลขบัตรประชาชน'}</Label>
+                                                        <Input
+                                                            className="font-mono"
+                                                            value={newGuarantor.idNumber}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, idNumber: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>คำนำหน้า</Label>
+                                                        <Select
+                                                            value={newGuarantor.prefix}
+                                                            onValueChange={(val) => {
+                                                                const updatedGuarantor = { ...newGuarantor, prefix: val };
+                                                                if (val === 'นาย') {
+                                                                    updatedGuarantor.gender = 'ชาย';
+                                                                } else if (val === 'นาง' || val === 'นางสาว') {
+                                                                    updatedGuarantor.gender = 'หญิง';
+                                                                }
+                                                                setNewGuarantor(updatedGuarantor);
+                                                            }}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือก" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="นาย">นาย</SelectItem>
+                                                                <SelectItem value="นาง">นาง</SelectItem>
+                                                                <SelectItem value="นางสาว">นางสาว</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>เพศ</Label>
+                                                        <Select
+                                                            value={newGuarantor.gender}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, gender: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือกเพศ" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="ชาย">ชาย</SelectItem>
+                                                                <SelectItem value="หญิง">หญิง</SelectItem>
+                                                                <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อจริง</Label>
+                                                        <Input
+                                                            value={newGuarantor.firstName}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, firstName: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>นามสกุล</Label>
+                                                        <Input
+                                                            value={newGuarantor.lastName}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, lastName: e.target.value })}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อจริง (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newGuarantor.firstNameEn || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, firstNameEn: e.target.value })}
+                                                            disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>ชื่อกลาง (ภาษาอังกฤษ)</Label>
+                                                        <Input
+                                                            value={newGuarantor.middleNameEn || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, middleNameEn: e.target.value })}
+                                                            disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>นามสกุล (ภาษาอังกฤษ) <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newGuarantor.lastNameEn || ""}
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, lastNameEn: e.target.value })}
+                                                            disabled={newGuarantor.verificationMethod === 'DIPCHIP'}
+                                                            className={cn(newGuarantor.verificationMethod === 'DIPCHIP' ? "bg-gray-50 text-gray-600" : "bg-white")}
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>วันเกิด</Label>
+                                                        <DatePickerBE
+                                                            value={newGuarantor.birthDate}
+                                                            onChange={(val) => setNewGuarantor({ ...newGuarantor, birthDate: val })}
+                                                            inputClassName="h-12"
+                                                        />
+                                                    </div>
+
+                                                    <div className="space-y-2">
+                                                        <Label>เบอร์โทรศัพท์มือถือ <span className="text-red-500">*</span></Label>
+                                                        <Input
+                                                            value={newGuarantor.phone}
+                                                            placeholder="08x-xxx-xxxx"
+                                                            className="font-mono"
+                                                            onChange={(e) => setNewGuarantor({ ...newGuarantor, phone: formatPhoneNumber(e.target.value) })}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="pt-2">
+                                                    <AddressForm
+                                                        title="ที่อยู่ตามทะเบียนบ้าน"
+                                                        formData={newGuarantor}
+                                                        onChange={(field, val) => setNewGuarantor({ ...newGuarantor, [field]: val })}
+                                                    />
+                                                </div>
+
+                                                {/* Additional Info for Guarantor */}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label>อาชีพ</Label>
+                                                        <Select
+                                                            value={newGuarantor.occupation}
+                                                            onValueChange={(val) => setNewGuarantor({ ...newGuarantor, occupation: val })}
+                                                        >
+                                                            <SelectTrigger><SelectValue placeholder="เลือกอาชีพ" /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="พนักงานบริษัท">พนักงานบริษัท</SelectItem>
+                                                                <SelectItem value="ข้าราชการ">ข้าราชการ</SelectItem>
+                                                                <SelectItem value="เกษตรกร">เกษตรกร</SelectItem>
+                                                                <SelectItem value="เจ้าของกิจการ">เจ้าของกิจการ</SelectItem>
+                                                                <SelectItem value="รับจ้างทั่วไป">รับจ้างทั่วไป</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>รายได้สุทธิต่อเดือน (บาท)</Label>
+                                                        <Input
+                                                            value={newGuarantor.income}
+                                                            placeholder="0.00"
+                                                            className="text-right"
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/,/g, '');
+                                                                if (!isNaN(Number(rawValue))) {
+                                                                    const parts = rawValue.split('.');
+                                                                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                                                    setNewGuarantor({ ...newGuarantor, income: parts.join('.') });
+                                                                }
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end pt-4">
+                                                    <Button onClick={handleAddGuarantor} className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90">
+                                                        <Save className="w-4 h-4 mr-2" /> บันทึกข้อมูล
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                    </>
+                )
+            }
             {/* Delete Confirmation Alert Dialog */}
             <AlertDialog open={deleteConfirmation.isOpen} onOpenChange={(open) => !open && setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }))}>
                 <AlertDialogContent>
@@ -2472,6 +3054,109 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+
+            {/* Phone Ownership Verification Dialog */}
+            <Dialog open={showPhoneVerifyDialog} onOpenChange={setShowPhoneVerifyDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="text-center text-xl font-bold flex flex-col items-center gap-4">
+                            {isPhoneOwnershipVerifying ? (
+                                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center relative">
+                                    <div className="absolute inset-0 rounded-full border-4 border-chaiyo-blue/20 border-t-chaiyo-blue animate-spin" />
+                                    <Smartphone className="w-8 h-8 text-chaiyo-blue" />
+                                </div>
+                            ) : phoneOwnershipStatus === 'success' ? (
+                                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+                                    <ShieldCheck className="w-8 h-8 text-green-600" />
+                                </div>
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+                                    <AlertCircle className="w-8 h-8 text-red-600" />
+                                </div>
+                            )}
+                            {isPhoneOwnershipVerifying ? "กำลังตรวจสอบข้อมูล" :
+                                phoneOwnershipStatus === 'success' ? "ตรวจสอบข้อมูลสำเร็จ" : "ข้อมูลไม่ตรงกัน"}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="py-6 space-y-4">
+                        {isPhoneOwnershipVerifying ? (
+                            <div className="space-y-4 text-center">
+                                <p className="text-gray-600">
+                                    กำลังตรวจสอบความถูกต้องของหมายเลขโทรศัพท์กับเลขบัตรประชาชนผ่านระบบผู้ให้บริการเครือข่าย...
+                                </p>
+                                <div className="space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">หมายเลขโทรศัพท์:</span>
+                                        <span className="font-mono font-bold text-gray-800">{formData.phone}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">เลขบัตรประชาชน:</span>
+                                        <span className="font-mono font-bold text-gray-800">
+                                            {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : phoneOwnershipStatus === 'success' ? (
+                            <div className="space-y-4">
+                                <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
+                                    <p className="text-green-800 font-bold mb-1">ผลการตรวจสอบสำเร็จ</p>
+                                    <p className="text-green-700 text-sm">
+                                        หมายเลขโทรศัพท์ {formData.phone} จดทะเบียนถูกต้องภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
+                                    <Info className="w-4 h-4 shrink-0" />
+                                    <p>ระบบได้ทำการแมตช์ข้อมูลจากเอกสาร *179 ที่อัพโหลดเรียบร้อยแล้ว</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
+                                    <p className="text-red-800 font-bold mb-1">ตรวจสอบพบข้อมูลไม่ตรงกัน</p>
+                                    <p className="text-red-700 text-sm">
+                                        หมายเลขโทรศัพท์ {formData.phone} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-xs leading-relaxed border border-gray-100">
+                                    <p className="font-bold text-gray-700 mb-1 flex items-center gap-1">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                                        ข้อแนะนำเบื้องต้น:
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>ตรวจสอบการพิมพ์เลขหมายโทรศัพท์</li>
+                                        <li>ตรวจสอบเลขบัตรประชาชนในระบบ และรูปภาพที่อัพโหลด</li>
+                                        <li>ให้ลูกค้ากด *179 เพื่อขอข้อมูลใหม่อีกครั้ง</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                        {phoneOwnershipStatus === 'error' && (
+                            <Button
+                                variant="outline"
+                                className="flex-1 h-12 rounded-xl"
+                                onClick={handleVerifyPhoneOwnership}
+                            >
+                                ตรวจสอบอีกครั้ง
+                            </Button>
+                        )}
+                        <Button
+                            className={cn(
+                                "h-12 rounded-xl px-8",
+                                phoneOwnershipStatus === 'error' ? "flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                            )}
+                            onClick={() => setShowPhoneVerifyDialog(false)}
+                            disabled={isPhoneOwnershipVerifying}
+                        >
+                            ปิด
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div >
     );
 }

@@ -82,6 +82,8 @@ export interface IncomeDocument {
     name: string;
     url: string;
     type?: string;
+    status?: string;
+    uploadedAt?: string;
 }
 
 export interface ReferencePerson {
@@ -134,6 +136,28 @@ export interface IncomeOccupation {
     officePhoneExt?: string;
     officeName?: string;
     jobPositionOther?: string;
+    plantedProducts?: string;
+    produceSummary?: any[];
+    produceType?: string;
+    otherProduceType?: string;
+    plantingStartMonth?: string;
+    plantingStartYear?: string;
+    harvestEndMonth?: string;
+    harvestEndYear?: string;
+    cultivationAreaRai?: string;
+    cultivationAreaNgan?: string;
+    cultivationAreaSqWa?: string;
+    cyclesPerYear?: string;
+    irrigationZone?: string;
+    landOwnership?: string;
+    laborType?: string;
+    laborCount?: string;
+    customerSalesPerRai?: string;
+    customerCostPerRai?: string;
+    livestockType?: string;
+    otherLivestockType?: string;
+    farmingType?: 'contract' | 'self';
+    livestockCycles?: { cycleNo: number, unit: string }[];
 }
 
 export interface Child {
@@ -345,4 +369,46 @@ export interface CustomerFormData {
     zipCode?: string;
     addressLine1?: string;
 
+    // Questionnaire (แบบสอบถาม)
+    qCreditConcern?: number;
+    qDebtConcern?: number;
+    qCollateralConcern?: number;
+
+    // Financial Behavior (พฤติกรรมทางการเงิน)
+    qFinancialPonder?: number;
+    qFinancialOnTime?: number;
+    qFinancialCloseMonitor?: number;
+    qFinancialLongTermGoal?: number;
+    qFinancialCompareInfo?: number;
+
+    // Delinquency Problems (ค้างชำระ - ปัญหาด้านใด)
+    qDelinquencyHigherCost?: boolean;
+    qDelinquencyUnsold?: boolean;
+    qDelinquencyOtherDebt?: boolean;
+    qDelinquencyFamilyExpense?: boolean;
+    qDelinquencyEducationExpense?: boolean;
+    qDelinquencyAccident?: boolean;
+
+    // Delinquency Causes (ค้างชำระ - สาเหตุใด)
+    qDelinquencyFamilyDispute?: boolean;
+    qDelinquencyBusinessProblem?: boolean;
+    qDelinquencyHealthProblem?: boolean;
+    qDelinquencyHighExpense?: boolean;
+    qDelinquencyRelocation?: boolean;
+    qDelinquencyDebtProcessIgnorance?: boolean;
+    qDelinquencyLawsuit?: boolean;
+    qDelinquencyMoveBusiness?: boolean;
+    qDelinquencyEconomy?: boolean;
+    qDelinquencyNaturalDisaster?: boolean;
+    qDelinquencyGovernmentPolicy?: boolean;
+
+    // Extra Income (การหารายได้เสริม)
+    qExtraSkill?: string;
+    qExtraSkillOther?: string;
+    qAppsKnown?: string[];
+    qAppsKnownOther?: string;
+    qDebtRepaymentIntention?: number;
+    isLivingHereEveryday?: boolean;
+    isResidingOnMortgagedLand?: boolean;
+    currentResidentRelationships?: string[];
 }

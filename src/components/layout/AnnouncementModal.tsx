@@ -6,9 +6,11 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/Dialog";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Label } from "@/components/ui/Label";
+import { X } from "lucide-react";
 
 interface AnnouncementModalProps {
     open: boolean;
@@ -30,7 +32,10 @@ export function AnnouncementModal({ open, onOpenChange }: AnnouncementModalProps
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
             <DialogContent className="sm:max-w-[600px] p-0 gap-0 border-none bg-transparent shadow-none border-0 outline-none">
                 <DialogTitle className="sr-only">Announcement</DialogTitle>
-                <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-xl">
+                <div className="flex flex-col overflow-hidden bg-white rounded-lg shadow-xl relative">
+                    <DialogClose className="absolute right-3 top-3 z-10 p-1.5 rounded-full bg-black/20 hover:bg-black/30 text-white backdrop-blur-sm transition-colors border border-white/20">
+                        <X className="w-5 h-5" />
+                    </DialogClose>
                     {/* Main Image 1:1 */}
                     <a
                         href="https://google.com"

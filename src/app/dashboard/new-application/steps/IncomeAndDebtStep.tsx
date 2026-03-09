@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle } from "lucide-react";
+import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Select,
@@ -25,6 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Combobox } from "@/components/ui/combobox";
 import { SpecialIncomeDialog, SpecialIncomeSource } from "./SpecialIncomeDialog";
 import {
@@ -83,6 +84,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         categoryId?: string,
         type: 'special' | 'reference' | 'photo' | 'bankAccount' | 'incomeDocument' | 'saIncomeRow' | 'seIncomeRow' | 'seCostRow' | 'debtRow' | 'categorizedPhoto'
     } | null>(null);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [currentDocContext, setCurrentDocContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
 
     // Debt Row Handlers
     const handleAddDebtRow = () => {
@@ -206,6 +210,16 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                 return acc + roundDown2(saSum);
             }
             if (o.employmentType === 'SE') {
+                if (o.occupationCode === 'FARMER') {
+                    const std = FARM_STANDARD_PRICES[o.produceType || "others"] || { sales: 0, cost: 0 };
+                    const totalAreaRai = Number(o.cultivationAreaRai || 0) + (Number(o.cultivationAreaNgan || 0) / 4) + (Number(o.cultivationAreaSqWa || 0) / 400);
+                    const cycles = Number(o.cyclesPerYear || 1);
+                    const laborers = Number(o.laborCount || 1) || 1;
+                    const salesValue = o.customerSalesPerRai ? Number(o.customerSalesPerRai) : std.sales;
+                    const costValue = o.customerCostPerRai ? Number(o.customerCostPerRai) : std.cost;
+                    const farmerIncome = (((salesValue - costValue) * totalAreaRai * cycles) / 12) / laborers;
+                    return acc + roundDown2(Math.max(0, farmerIncome));
+                }
                 const sales = (o.seIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 const costs = (o.seCosts || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 return acc + roundDown2(sales - costs);
@@ -219,6 +233,16 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                 return acc + roundDown2(saSum);
             }
             if (o.employmentType === 'SE') {
+                if (o.occupationCode === 'FARMER') {
+                    const std = FARM_STANDARD_PRICES[o.produceType || "others"] || { sales: 0, cost: 0 };
+                    const totalAreaRai = Number(o.cultivationAreaRai || 0) + (Number(o.cultivationAreaNgan || 0) / 4) + (Number(o.cultivationAreaSqWa || 0) / 400);
+                    const cycles = Number(o.cyclesPerYear || 1);
+                    const laborers = Number(o.laborCount || 1) || 1;
+                    const salesValue = o.customerSalesPerRai ? Number(o.customerSalesPerRai) : std.sales;
+                    const costValue = o.customerCostPerRai ? Number(o.customerCostPerRai) : std.cost;
+                    const farmerIncome = (((salesValue - costValue) * totalAreaRai * cycles) / 12) / laborers;
+                    return acc + roundDown2(Math.max(0, farmerIncome));
+                }
                 const sales = (o.seIncomes || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 const costs = (o.seCosts || []).reduce((sumAcc: number, item: SAIncome) => sumAcc + (Number(item.calculatedMonthly) || 0), 0);
                 return acc + roundDown2(sales - costs);
@@ -630,6 +654,84 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         { label: "กลางคืน", value: "night" },
     ];
 
+    const FARM_STAGES = [
+        "เตรียมดินก่อนเพาะปลุก",
+        "เพาะปลูก",
+        "ระยะโต",
+        "เก็บเกี่ยวผลผลิต"
+    ];
+
+    const THAI_MONTHS_SHORT = [
+        "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+        "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+    ];
+
+    const FARMER_PRODUCE_LIST = [
+        { label: "ข้าวนาปี", value: "ข้าวนาปี" },
+        { label: "ข้าวนาปรัง", value: "ข้าวนาปรัง" },
+        { label: "ข้าวโพด", value: "ข้าวโพด" },
+        { label: "อ้อย", value: "อ้อย" },
+        { label: "มันสำปะหลัง", value: "มันสำปะหลัง" },
+        { label: "ยางพารา", value: "ยางพารา" },
+        { label: "ปาร์มน้ำมัน", value: "ปาร์มน้ำมัน" },
+        { label: "อื่นๆ", value: "others" },
+    ];
+
+    const LAND_OWNERSHIP_TYPES = [
+        { label: "เช่า", value: "rent" },
+        { label: "ตนเอง", value: "own" },
+        { label: "ครอบครัว", value: "family" },
+    ];
+
+    const YEAR_OPTIONS = Array.from({ length: 21 }, (_, i) => ({ label: `${i} ปี`, value: String(i) }));
+    const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({ label: `${i} เดือน`, value: String(i) }));
+
+    const currentYearBE = new Date().getFullYear() + 543;
+    const FARM_YEARS = Array.from({ length: 11 }, (_, i) => {
+        const year = currentYearBE - 5 + i;
+        return { label: `พ.ศ. ${year}`, value: String(year) };
+    });
+    const FARM_MONTHS = [
+        { label: "มกราคม", value: "1" },
+        { label: "กุมภาพันธ์", value: "2" },
+        { label: "มีนาคม", value: "3" },
+        { label: "เมษายน", value: "4" },
+        { label: "พฤษภาคม", value: "5" },
+        { label: "มิถุนายน", value: "6" },
+        { label: "กรกฎาคม", value: "7" },
+        { label: "สิงหาคม", value: "8" },
+        { label: "กันยายน", value: "9" },
+        { label: "ตุลาคม", value: "10" },
+        { label: "พฤศจิกายน", value: "11" },
+        { label: "ธันวาคม", value: "12" },
+    ];
+
+    const FARM_STANDARD_PRICES: Record<string, { sales: number, cost: number }> = {
+        "ข้าวนาปี": { sales: 8000, cost: 4500 },
+        "ข้าวนาปรัง": { sales: 9500, cost: 5500 },
+        "ข้าวโพด": { sales: 7500, cost: 4000 },
+        "อ้อย": { sales: 13000, cost: 7000 },
+        "มันสำปะหลัง": { sales: 11000, cost: 5000 },
+        "ยางพารา": { sales: 16000, cost: 8000 },
+        "ปาร์มน้ำมัน": { sales: 15000, cost: 7500 },
+        "others": { sales: 0, cost: 0 }
+    };
+
+    const LIVESTOCK_TYPES = [
+        { label: "หมู", value: "pig" },
+        { label: "ไก่", value: "chicken" },
+        { label: "วัว", value: "cow" },
+        { label: "เป็ด", value: "duck" },
+        { label: "ปลา", value: "fish" },
+        { label: "อื่นๆ", value: "others" },
+    ];
+
+    const LIVESTOCK_UNITS = [
+        { label: "ตัว", value: "unit" },
+        { label: "กิโลกรัม", value: "kg" },
+        { label: "ฟาร์ม", value: "farm" },
+    ];
+
     // SE Cost Handlers
     const calculateSEMonthlyCost = (item: EnterpriseIncome) => {
         const amount = Number(item.costAmount) || 0;
@@ -727,17 +829,37 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     ];
 
     const handleAddIncomeDocument = (occId: string, docType: string, label: string) => {
+        setCurrentDocContext({ occId, docType, label });
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !currentDocContext) return;
+
+        const { occId, docType } = currentDocContext;
         const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
-        const currentDocs = occ.incomeDocuments || [];
-        const newDoc = {
+
+        // Create new document
+        const newDoc: IncomeDocument = {
             id: generateId('doc'),
             type: docType,
-            name: `${label}_${new Date().toLocaleDateString('th-TH')}.pdf`,
+            name: file.name,
+            url: URL.createObjectURL(file), // used for preview
             status: 'success',
             uploadedAt: new Date().toISOString()
         };
+
+        // Enforce only 1 file: remove list, use new doc for this type
+        const currentDocs = (occ.incomeDocuments || []).filter((doc: IncomeDocument) => doc.type !== docType);
         handleOccupationChange(occId, 'incomeDocuments', [...currentDocs, newDoc]);
+
+        // Reset
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setCurrentDocContext(null);
     };
 
     const handleRemoveIncomeDocument = (occId: string, docId: string) => {
@@ -769,6 +891,13 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         <div className="flex flex-col xl:flex-row gap-6 items-start animate-in fade-in slide-in-from-bottom-2">
             {/* Main Form Container */}
             <div className="flex-1 space-y-6 w-full min-w-0">
+                <input
+                    type="file"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    accept="image/*,.pdf"
+                />
 
                 {/* ===== SECTION 1: Income (อาชีพและรายได้) ===== */}
                 <Card className="border-border-strong">
@@ -873,6 +1002,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <SelectItem value="occ1">Mockup อาชีพที่ 1</SelectItem>
                                                         <SelectItem value="occ2">Mockup อาชีพที่ 2</SelectItem>
                                                         <SelectItem value="FARMER">เกษตรกร</SelectItem>
+                                                        <SelectItem value="LIVESTOCK">เลี้ยงสัตว์</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -991,6 +1121,114 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                         </div>
                                     </div>
 
+                                    {/* 2. ที่อยู่ที่ทำงาน / กิจการ */}
+                                    <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
+                                        <AddressForm
+                                            title="ที่อยู่ที่ทำงาน / กิจการ"
+                                            prefix="work"
+                                            formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {}) : occ}
+                                            onChange={(field, val) => handleOccupationChange(occ.id, field, val)}
+                                            disabled={!!occ.isSameAsMainAddress}
+                                            headerChildren={
+                                                <div className={cn(
+                                                    "flex flex-col md:flex-row md:items-center justify-between gap-4 ",
+                                                    occ.isSameAsMainAddress && "opacity-80"
+                                                )}>
+
+                                                    {!occ.isMain && (
+                                                        <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-border-color">
+                                                            <Checkbox
+                                                                id={`same-as-main-${occ.id}`}
+                                                                checked={occ.isSameAsMainAddress || false}
+                                                                onCheckedChange={(checked) => {
+                                                                    const isChecked = !!checked;
+                                                                    handleOccupationChange(occ.id, "isSameAsMainAddress", isChecked);
+                                                                }}
+                                                            />
+                                                            <label
+                                                                htmlFor={`same-as-main-${occ.id}`}
+                                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-chaiyo-blue"
+                                                            >
+                                                                เหมือนที่อยู่อาชีพหลัก
+                                                            </label>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            }
+                                            footerChildren={
+                                                <div className="space-y-4 pt-4 border-t border-gray-100">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                                        <div className="space-y-2">
+                                                            <Label className="text-xs text-muted-foreground">บริเวณใกล้เคียง/จุดสังเกต</Label>
+                                                            <Input
+                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLandmark : occ.workLandmark) || ""}
+                                                                onChange={(e) => handleOccupationChange(occ.id, "workLandmark", e.target.value)}
+                                                                placeholder="เช่น ใกล้เซเว่น, ตรงข้ามธนาคาร"
+                                                                className="h-12 bg-white"
+                                                                disabled={!!occ.isSameAsMainAddress}
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-xs text-muted-foreground">ลักษณะที่ตั้งของกิจการ <span className="text-red-500">*</span></Label>
+                                                            <div className="flex flex-col gap-2">
+                                                                <Select
+                                                                    value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "workLocationType", val)}
+                                                                    disabled={!!occ.isSameAsMainAddress}
+                                                                >
+                                                                    <SelectTrigger className="h-12 bg-white" disabled={!!occ.isSameAsMainAddress}>
+                                                                        <SelectValue placeholder="โลเกชั่นที่ตั้ง" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="rental">พื้นที่เช่า/ร้านค้า</SelectItem>
+                                                                        <SelectItem value="shop">ห้างร้าน</SelectItem>
+                                                                        <SelectItem value="market">แผงลอยในตลาดนัด/ชุมชน</SelectItem>
+                                                                        <SelectItem value="factory">โรงงาน</SelectItem>
+                                                                        <SelectItem value="street_food">รถเข็นขายของ/ริมถนน</SelectItem>
+                                                                        <SelectItem value="company">บริษัท</SelectItem>
+                                                                        <SelectItem value="other">อื่นๆ รายละเอียดอื่นๆ</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) === 'other') && (
+                                                                    <Input
+                                                                        value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationTypeOther : occ.workLocationTypeOther) || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "workLocationTypeOther", e.target.value)}
+                                                                        placeholder="โปรดระบุรายละเอียด"
+                                                                        className="h-12 bg-white"
+                                                                        disabled={!!occ.isSameAsMainAddress}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {!(occ.employmentType === 'SE' && !['FARMER', 'LIVESTOCK'].includes(occ.occupationCode || '')) && (
+                                                        <div className="pt-4 border-t border-gray-100">
+                                                            <div className="space-y-3">
+                                                                <Label className="text-xs text-muted-foreground">สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA' || occ.employmentType === 'SE') && <span className="text-red-500">*</span>}</Label>
+                                                                <RadioGroup
+                                                                    value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "businessStatus", val)}
+                                                                    className="flex gap-6 pt-1"
+                                                                    disabled={!!occ.isSameAsMainAddress}
+                                                                >
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <RadioGroupItem value="active" id={`${occ.id}-active`} disabled={!!occ.isSameAsMainAddress} />
+                                                                        <Label htmlFor={`${occ.id}-active`} className="font-normal cursor-pointer">ดำเนินกิจการอยู่</Label>
+                                                                    </div>
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <RadioGroupItem value="closed" id={`${occ.id}-closed`} disabled={!!occ.isSameAsMainAddress} />
+                                                                        <Label htmlFor={`${occ.id}-closed`} className="font-normal cursor-pointer">ปิดกิจการ</Label>
+                                                                    </div>
+                                                                </RadioGroup>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            }
+                                        />
+                                    </div>
+
                                     {/* SA Details Section: Employment Tenure & Income Table */}
                                     {occ.employmentType === 'SA' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -1000,46 +1238,56 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                 </h4>
 
                                                 {/* Tenure Grid */}
-                                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-2">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs">อายุงานปัจจุบัน (ปี) <span className="text-red-500">*</span></Label>
-                                                        <Input
-                                                            type="text"
-                                                            value={occ.currentTenureYear || ""}
-                                                            onChange={(e) => handleOccupationChange(occ.id, "currentTenureYear", e.target.value.replace(/\D/g, ''))}
-                                                            placeholder="0"
-                                                            className="h-11 bg-white"
-                                                        />
+                                                        <Label className="text-sm font-bold text-gray-700">อายุงานปัจจุบัน <span className="text-red-500">*</span></Label>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex-1 flex items-center gap-2">
+                                                                <Input
+                                                                    type="text"
+                                                                    className="h-12 bg-white text-center rounded-xl"
+                                                                    placeholder="0"
+                                                                    value={occ.currentTenureYear || ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "currentTenureYear", e.target.value.replace(/\D/g, ''))}
+                                                                />
+                                                                <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                            </div>
+                                                            <div className="flex-1 flex items-center gap-2">
+                                                                <Input
+                                                                    type="text"
+                                                                    className="h-12 bg-white text-center rounded-xl"
+                                                                    placeholder="0"
+                                                                    value={occ.currentTenureMonth || ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "currentTenureMonth", e.target.value.replace(/\D/g, ''))}
+                                                                />
+                                                                <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs">อายุงานปัจจุบัน (เดือน) <span className="text-red-500">*</span></Label>
-                                                        <Input
-                                                            type="text"
-                                                            value={occ.currentTenureMonth || ""}
-                                                            onChange={(e) => handleOccupationChange(occ.id, "currentTenureMonth", e.target.value.replace(/\D/g, ''))}
-                                                            placeholder="0"
-                                                            className="h-11 bg-white"
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs">อายุงานก่อนหน้า (ปี) <span className="text-red-500">*</span></Label>
-                                                        <Input
-                                                            type="text"
-                                                            value={occ.prevTenureYear || ""}
-                                                            onChange={(e) => handleOccupationChange(occ.id, "prevTenureYear", e.target.value.replace(/\D/g, ''))}
-                                                            placeholder="0"
-                                                            className="h-11 bg-white"
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs">อายุงานก่อนหน้า (เดือน) <span className="text-red-500">*</span></Label>
-                                                        <Input
-                                                            type="text"
-                                                            value={occ.prevTenureMonth || ""}
-                                                            onChange={(e) => handleOccupationChange(occ.id, "prevTenureMonth", e.target.value.replace(/\D/g, ''))}
-                                                            placeholder="0"
-                                                            className="h-11 bg-white"
-                                                        />
+                                                        <Label className="text-sm font-bold text-gray-700">อายุงานก่อนหน้า <span className="text-red-500">*</span></Label>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex-1 flex items-center gap-2">
+                                                                <Input
+                                                                    type="text"
+                                                                    className="h-12 bg-white text-center rounded-xl"
+                                                                    placeholder="0"
+                                                                    value={occ.prevTenureYear || ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "prevTenureYear", e.target.value.replace(/\D/g, ''))}
+                                                                />
+                                                                <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                            </div>
+                                                            <div className="flex-1 flex items-center gap-2">
+                                                                <Input
+                                                                    type="text"
+                                                                    className="h-12 bg-white text-center rounded-xl"
+                                                                    placeholder="0"
+                                                                    value={occ.prevTenureMonth || ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "prevTenureMonth", e.target.value.replace(/\D/g, ''))}
+                                                                />
+                                                                <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1130,23 +1378,26 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                 ))
                                                             )}
                                                         </TableBody>
+                                                        <TableFooter>
+                                                            <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 transition-none">
+                                                                <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">
+                                                                    รายได้รวมต่อเดือน:
+                                                                </TableCell>
+                                                                <TableCell colSpan={2} className="text-right pr-6 py-4">
+                                                                    <div className="text-lg font-bold font-mono">
+                                                                        ฿{formatNumberWithCommas(occ.totalIncome || "0")}
+                                                                    </div>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </TableFooter>
                                                     </Table>
-                                                </div>
-
-                                                <div className="flex justify-end pt-2">
-                                                    <div className="bg-blue-50/50 border border-blue-100 rounded-xl px-4 py-3 flex items-center gap-4">
-                                                        <Label className="text-chaiyo-blue font-bold">รายได้รวมต่อเดือน:</Label>
-                                                        <div className="text-xl font-black text-blue-700 font-mono">
-                                                            ฿{formatNumberWithCommas(occ.totalIncome || "0")}
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     )}
 
                                     {/* SE Details Section: รายละเอียดกิจการ */}
-                                    {occ.employmentType === 'SE' && occ.occupationCode !== 'FARMER' && (
+                                    {occ.employmentType === 'SE' && !['FARMER', 'LIVESTOCK'].includes(occ.occupationCode || '') && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <Building className="w-5 h-5 text-chaiyo-blue" /> รายละเอียดกิจการ
@@ -1169,6 +1420,18 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                             <Label htmlFor={`${occ.id}-se-closed`} className="font-normal cursor-pointer">ปิดกิจการ</Label>
                                                         </div>
                                                     </RadioGroup>
+
+                                                    <div className="pt-2">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            className="h-10 w-full md:w-auto gap-2 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50 rounded-xl font-medium transition-all"
+                                                            onClick={() => window.open("https://datawarehouse.dbd.go.th/", "_blank")}
+                                                        >
+                                                            <Globe className="w-4 h-4" />
+                                                            ตรวจสอบ DBD Datawarehouse
+                                                        </Button>
+                                                    </div>
                                                 </div>
 
                                                 <div className="space-y-2">
@@ -1255,8 +1518,8 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <TableHeader className="bg-gray-50/50">
                                                             <TableRow>
                                                                 <TableHead className="w-[20%] text-xs">ความถี่</TableHead>
-                                                                <TableHead className="w-[20%] text-xs">จำนวนวัน/สัปดาห์</TableHead>
-                                                                <TableHead className="w-[30%] text-xs">เวลาทำการ</TableHead>
+                                                                <TableHead className="w-[10%] text-xs">จำนวน</TableHead>
+                                                                <TableHead className="w-[40%] text-xs">เวลาทำการ</TableHead>
                                                                 <TableHead className="w-[30%] text-xs text-right pr-6">ยอดขาย (บาท)</TableHead>
                                                             </TableRow>
                                                         </TableHeader>
@@ -1308,30 +1571,27 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                             )}
                                                                         </TableCell>
                                                                         <TableCell className="py-3">
-                                                                            <div className="flex flex-wrap gap-2">
-                                                                                {SE_OPERATING_HOURS.map(hour => {
-                                                                                    const isChecked = (item.operatingHours || []).includes(hour.value);
-                                                                                    return (
-                                                                                        <div key={hour.value} className="flex items-center space-x-1.5">
-                                                                                            <Checkbox
-                                                                                                id={`hour-${occ.id}-${idx}-${hour.value}`}
-                                                                                                checked={isChecked}
-                                                                                                onCheckedChange={() => {
-                                                                                                    const currentHours = item.operatingHours || [];
-                                                                                                    const newHours = isChecked
-                                                                                                        ? currentHours.filter((h: string) => h !== hour.value)
-                                                                                                        : [...currentHours, hour.value];
-                                                                                                    handleUpdateSEIncomeRow(occ.id, idx, { operatingHours: newHours });
-                                                                                                }}
-                                                                                                className="h-3.5 w-3.5 rounded-sm"
-                                                                                            />
-                                                                                            <Label htmlFor={`hour-${occ.id}-${idx}-${hour.value}`} className="text-[11px] font-normal cursor-pointer leading-none text-gray-600">
-                                                                                                {hour.label}
-                                                                                            </Label>
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                            </div>
+                                                                            <ToggleGroup
+                                                                                type="multiple"
+                                                                                variant="outline"
+                                                                                value={item.operatingHours || []}
+                                                                                onValueChange={(vals) => handleUpdateSEIncomeRow(occ.id, idx, { operatingHours: vals })}
+                                                                                className="justify-start gap-0 -space-x-px"
+                                                                            >
+                                                                                {SE_OPERATING_HOURS.map((hour) => (
+                                                                                    <ToggleGroupItem
+                                                                                        key={hour.value}
+                                                                                        value={hour.value}
+                                                                                        className={cn(
+                                                                                            "h-8 px-3 text-[11px] font-medium rounded-none first:rounded-l-lg last:rounded-r-lg transition-all",
+                                                                                            "data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white data-[state=on]:border-chaiyo-blue data-[state=on]:z-10",
+                                                                                            "hover:bg-blue-50 hover:text-chaiyo-blue"
+                                                                                        )}
+                                                                                    >
+                                                                                        {hour.label}
+                                                                                    </ToggleGroupItem>
+                                                                                ))}
+                                                                            </ToggleGroup>
                                                                         </TableCell>
                                                                         <TableCell className="py-3 pr-6">
                                                                             <Input
@@ -1386,10 +1646,10 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <TableHeader className="bg-gray-50/50">
                                                             <TableRow>
                                                                 <TableHead className="w-[20%] text-xs">ประเภทต้นทุน</TableHead>
-                                                                <TableHead className="w-[15%] text-xs">ความถี่</TableHead>
-                                                                <TableHead className="w-[15%] text-xs">จำนวนวัน/สัปดาห์</TableHead>
-                                                                <TableHead className="w-[25%] text-xs">ต้นทุน (บาท)</TableHead>
-                                                                <TableHead className="w-[15%] text-xs text-right">รวมต่อเดือน</TableHead>
+                                                                <TableHead className="w-[20%] text-xs">ความถี่</TableHead>
+                                                                <TableHead className="w-[10%] text-xs">จำนวน</TableHead>
+                                                                <TableHead className="w-[30%] text-xs">ต้นทุน (บาท)</TableHead>
+                                                                <TableHead className="w-[20%] text-xs text-right">รวมต่อเดือน</TableHead>
                                                                 <TableHead className="w-[10%] text-center text-xs">จัดการ</TableHead>
                                                             </TableRow>
                                                         </TableHeader>
@@ -1512,16 +1772,15 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                         <TableFooter>
                                                             <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 transition-none">
                                                                 <TableCell colSpan={4} className="text-right font-bold py-4 text-xs">
-                                                                    รวมต้นทุนต่อเดือน:
+                                                                    รวมต้นทุนเฉลี่ยต่อเดือน:
                                                                 </TableCell>
-                                                                <TableCell className="text-right pr-4 py-4">
+                                                                <TableCell colSpan={2} className="text-right pr-4 py-4">
                                                                     <div className="text-lg font-bold font-mono text-gray-900">
                                                                         ฿{formatNumberWithCommas(
                                                                             (occ.seCosts || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0)
                                                                         )}
                                                                     </div>
                                                                 </TableCell>
-                                                                <TableCell />
                                                             </TableRow>
                                                         </TableFooter>
                                                     </Table>
@@ -1560,117 +1819,565 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                         </div>
                                     )}
 
-                                    {/* 2. ที่อยู่ที่ทำงาน / กิจการ */}
-                                    <AddressForm
-                                        title="ที่อยู่ที่ทำงาน / กิจการ"
-                                        prefix="work"
-                                        formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {}) : occ}
-                                        onChange={(field, val) => handleOccupationChange(occ.id, field, val)}
-                                        disabled={!!occ.isSameAsMainAddress}
-                                        headerChildren={
-                                            <div className={cn(
-                                                "flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-4 border-b border-border-color",
-                                                occ.isSameAsMainAddress && "opacity-80"
-                                            )}>
-                                                <div className="flex items-center gap-2">
-                                                    {occ.isSameAsMainAddress && (
-                                                        <div className="flex items-center gap-1 bg-blue-50 text-chaiyo-blue text-[10px] px-2 py-0.5 rounded-full border border-blue-100 font-medium">
-                                                            <Link className="w-3 h-3" /> เชื่อมโยงกับอาชีพหลัก
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {!occ.isMain && (
-                                                    <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-border-color shadow-sm">
-                                                        <Checkbox
-                                                            id={`same-as-main-${occ.id}`}
-                                                            checked={occ.isSameAsMainAddress || false}
-                                                            onCheckedChange={(checked) => {
-                                                                const isChecked = !!checked;
-                                                                handleOccupationChange(occ.id, "isSameAsMainAddress", isChecked);
-                                                            }}
-                                                        />
-                                                        <label
-                                                            htmlFor={`same-as-main-${occ.id}`}
-                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-chaiyo-blue"
-                                                        >
-                                                            เหมือนที่อยู่อาชีพหลัก
-                                                        </label>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        }
-                                        footerChildren={
+                                    {/* SE Details Section: รายละเอียดกิจการ (กรณีเกษตรกร) */}
+                                    {occ.employmentType === 'SE' && occ.occupationCode === 'FARMER' && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                                <Briefcase className="w-5 h-5 text-chaiyo-blue" /> รายละเอียดของกิจการ (เกษตรกร)
+                                            </h4>
+
+                                            {/* ผลผลิต Section */}
                                             <div className="space-y-4">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                                                    <div className="space-y-2">
-                                                        <Label>บริเวณใกล้เคียง/จุดสังเกต</Label>
-                                                        <Input
-                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLandmark : occ.workLandmark) || ""}
-                                                            onChange={(e) => handleOccupationChange(occ.id, "workLandmark", e.target.value)}
-                                                            placeholder="เช่น ใกล้เซเว่น, ตรงข้ามธนาคาร"
-                                                            className="h-11 bg-white"
-                                                            disabled={!!occ.isSameAsMainAddress}
-                                                        />
+                                                <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                    <PieChart className="w-4 h-4 text-emerald-600" /> ผลผลิต
+                                                </h5>
+                                                <div className="bg-white p-5 rounded-xl border border-border-color">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                                        {/* ผลผลิตที่ปลูก */}
+                                                        <div className="space-y-2 col-span-2">
+                                                            <Label>ผลผลิตที่ปลูก <span className="text-red-500">*</span></Label>
+                                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                                <Select
+                                                                    value={occ.produceType || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "produceType", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-11 bg-gray-50/30">
+                                                                        <SelectValue placeholder="เลือกผลผลิต" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {FARMER_PRODUCE_LIST.map(item => (
+                                                                            <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                {occ.produceType === 'others' && (
+                                                                    <Input
+                                                                        value={occ.otherProduceType || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "otherProduceType", e.target.value)}
+                                                                        placeholder="โปรดระบุอื่นๆ"
+                                                                        className="h-11 bg-gray-50/30 w-full sm:max-w-xs"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* วันที่ปลูก/เลี้ยง */}
+                                                        <div className="space-y-2">
+                                                            <Label>วันที่เริ่มปลูก/เลี้ยง</Label>
+                                                            <div className="flex items-center gap-3">
+                                                                <Select
+                                                                    value={occ.plantingStartMonth || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "plantingStartMonth", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-11 bg-gray-50/30 flex-1">
+                                                                        <SelectValue placeholder="เดือน" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {FARM_MONTHS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <Select
+                                                                    value={occ.plantingStartYear || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "plantingStartYear", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-11 bg-gray-50/30 flex-1">
+                                                                        <SelectValue placeholder="ปี" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {FARM_YEARS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* วันที่คาดว่าจะเก็บเกี่ยว */}
+                                                        <div className="space-y-2">
+                                                            <Label>วันที่คาดว่าจะเก็บเกี่ยว</Label>
+                                                            <div className="flex items-center gap-3">
+                                                                <Select
+                                                                    value={occ.harvestEndMonth || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "harvestEndMonth", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-11 bg-gray-50/30 flex-1">
+                                                                        <SelectValue placeholder="เดือน" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {FARM_MONTHS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <Select
+                                                                    value={occ.harvestEndYear || ""}
+                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "harvestEndYear", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-11 bg-gray-50/30 flex-1">
+                                                                        <SelectValue placeholder="ปี" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {FARM_YEARS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* ระยะเพาะปลูก (อายุ) - Calculated */}
+                                                        <div className="col-span-2 bg-chaiyo-blue/5 border border-chaiyo-blue/10 rounded-xl p-4 flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <Info className="w-4 h-4 text-chaiyo-blue" />
+                                                                <span className="text-sm font-bold text-gray-700">ระยะเพาะปลูก (อายุ)</span>
+                                                            </div>
+                                                            {(() => {
+                                                                if (!occ.plantingStartYear || !occ.plantingStartMonth || !occ.harvestEndYear || !occ.harvestEndMonth) {
+                                                                    return <div className="text-lg font-bold text-gray-400">ระบุวันที่ให้ครบถ้วน</div>;
+                                                                }
+
+                                                                const startY = parseInt(occ.plantingStartYear);
+                                                                const startM = parseInt(occ.plantingStartMonth);
+                                                                const endY = parseInt(occ.harvestEndYear);
+                                                                const endM = parseInt(occ.harvestEndMonth);
+
+                                                                const startTotal = startY * 12 + startM;
+                                                                const endTotal = endY * 12 + endM;
+                                                                let diff = endTotal - startTotal;
+
+                                                                if (diff < 0) {
+                                                                    return <div className="text-sm font-bold text-red-500">วันที่เก็บเกี่ยวต้องอยู่หลังวันที่ปลูก</div>;
+                                                                }
+
+                                                                const resY = Math.floor(diff / 12);
+                                                                const resM = diff % 12;
+
+                                                                return (
+                                                                    <div className="text-lg font-bold text-chaiyo-blue">
+                                                                        {resY > 0 ? `${resY} ปี ` : ""}{resM > 0 ? `${resM} เดือน` : (resY === 0 ? "0 เดือน" : "")}
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+
+                                                        {/* พื้นที่เพาะปลูก */}
+                                                        <div className="space-y-3 col-span-2">
+                                                            <Label>พื้นที่เพาะปลูก</Label>
+                                                            <div className="grid grid-cols-3 gap-4">
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={occ.cultivationAreaRai || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "cultivationAreaRai", e.target.value.replace(/\D/g, ''))}
+                                                                        placeholder="0"
+                                                                        className="h-11 bg-gray-50/30 pr-8"
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ไร่</span>
+                                                                </div>
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={occ.cultivationAreaNgan || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "cultivationAreaNgan", e.target.value.replace(/\D/g, ''))}
+                                                                        placeholder="0"
+                                                                        className="h-11 bg-gray-50/30 pr-10"
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">งาน</span>
+                                                                </div>
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={occ.cultivationAreaSqWa || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "cultivationAreaSqWa", e.target.value.replace(/\D/g, ''))}
+                                                                        placeholder="0"
+                                                                        className="h-11 bg-gray-50/30 pr-16"
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ตารางวา</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* จำนวนรอบที่ปลูกต่อปี */}
+                                                        <div className="space-y-2">
+                                                            <Label>จำนวนรอบที่ปลูกต่อปี</Label>
+                                                            <Input
+                                                                type="text"
+                                                                value={occ.cyclesPerYear || ""}
+                                                                onChange={(e) => handleOccupationChange(occ.id, "cyclesPerYear", e.target.value.replace(/\D/g, ''))}
+                                                                placeholder="เช่น 1"
+                                                                className="h-11 bg-gray-50/30"
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div className="space-y-2">
-                                                        <Label>ลักษณะที่ตั้งของกิจการ <span className="text-red-500">*</span></Label>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <Select
-                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) || ""}
-                                                                onValueChange={(val) => handleOccupationChange(occ.id, "workLocationType", val)}
-                                                                disabled={!!occ.isSameAsMainAddress}
+                                                </div>
+                                            </div>
+
+                                            {/* อื่นๆ Section */}
+                                            <div className="space-y-4">
+                                                <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                    <Info className="w-4 h-4 text-chaiyo-blue" /> อื่นๆ
+                                                </h5>
+                                                <div className="bg-white p-5 rounded-xl border border-border-color">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                                        {/* เขตชลประทาน */}
+                                                        <div className="space-y-3">
+                                                            <Label>เขตชลประทาน</Label>
+                                                            <ToggleGroup
+                                                                type="single"
+                                                                value={occ.irrigationZone || ""}
+                                                                onValueChange={(val) => { if (val) handleOccupationChange(occ.id, "irrigationZone", val) }}
+                                                                className="justify-start gap-2"
                                                             >
-                                                                <SelectTrigger className="h-11 bg-white" disabled={!!occ.isSameAsMainAddress}>
-                                                                    <SelectValue placeholder="โลเกชั่นที่ตั้ง" />
+                                                                <ToggleGroupItem value="outside" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">นอกเขต</ToggleGroupItem>
+                                                                <ToggleGroupItem value="inside" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">ในเขต</ToggleGroupItem>
+                                                            </ToggleGroup>
+                                                        </div>
+
+                                                        {/* การถือครอง */}
+                                                        <div className="space-y-3">
+                                                            <Label>การถือครอง</Label>
+                                                            <Select
+                                                                value={occ.landOwnership || ""}
+                                                                onValueChange={(val) => handleOccupationChange(occ.id, "landOwnership", val)}
+                                                            >
+                                                                <SelectTrigger className="h-11 bg-gray-50/30">
+                                                                    <SelectValue placeholder="เลือกการถือครอง" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value="rental">พื้นที่เช่า/ร้านค้า</SelectItem>
-                                                                    <SelectItem value="shop">ห้างร้าน</SelectItem>
-                                                                    <SelectItem value="market">แผงลอยในตลาดนัด/ชุมชน</SelectItem>
-                                                                    <SelectItem value="factory">โรงงาน</SelectItem>
-                                                                    <SelectItem value="street_food">รถเข็นขายของ/ริมถนน</SelectItem>
-                                                                    <SelectItem value="company">บริษัท</SelectItem>
-                                                                    <SelectItem value="other">อื่นๆ รายละเอียดอื่นๆ</SelectItem>
+                                                                    {LAND_OWNERSHIP_TYPES.map(item => (
+                                                                        <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                                                                    ))}
                                                                 </SelectContent>
                                                             </Select>
-                                                            {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) === 'other') && (
+                                                        </div>
+
+                                                        {/* ทำเอง/จ้างทำ */}
+                                                        <div className="space-y-3">
+                                                            <Label>ทำเอง/จ้างทำ</Label>
+                                                            <ToggleGroup
+                                                                type="single"
+                                                                value={occ.laborType || ""}
+                                                                onValueChange={(val) => { if (val) handleOccupationChange(occ.id, "laborType", val) }}
+                                                                className="justify-start gap-2"
+                                                            >
+                                                                <ToggleGroupItem value="self" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">ทำเอง</ToggleGroupItem>
+                                                                <ToggleGroupItem value="hire" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">จ้างทำ</ToggleGroupItem>
+                                                            </ToggleGroup>
+                                                        </div>
+
+                                                        {/* ทำกี่คน (Display only if จ้างทำ is selected) */}
+                                                        {occ.laborType === 'hire' && (
+                                                            <div className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                                                                <Label>ทำกี่คน</Label>
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={occ.laborCount || ""}
+                                                                        onChange={(e) => handleOccupationChange(occ.id, "laborCount", e.target.value.replace(/\D/g, ''))}
+                                                                        placeholder="กี่คน"
+                                                                        className="h-11 bg-gray-50/30 pr-10"
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">คน</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* รายได้ต่อเดือน Table */}
+                                            <div className="space-y-4">
+                                                <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                    <DollarSign className="w-4 h-4 text-chaiyo-blue" /> รายได้ต่อเดือน
+                                                </h5>
+                                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                    <Table>
+                                                        <TableHeader className="bg-gray-50/50">
+                                                            <TableRow>
+                                                                <TableHead className="w-[40%] text-xs font-bold">รายการ</TableHead>
+                                                                <TableHead className="w-[30%] text-xs font-bold text-right">ราคามาตราฐานกลาง</TableHead>
+                                                                <TableHead className="w-[30%] text-xs font-bold text-right pr-6">ราคาของลูกค้า</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {(() => {
+                                                                const std = FARM_STANDARD_PRICES[occ.produceType || "others"] || { sales: 0, cost: 0 };
+
+                                                                const totalAreaRai = Number(occ.cultivationAreaRai || 0) + (Number(occ.cultivationAreaNgan || 0) / 4) + (Number(occ.cultivationAreaSqWa || 0) / 400);
+                                                                const cycles = Number(occ.cyclesPerYear || 1);
+                                                                const laborers = Number(occ.laborCount || 1) || 1; // avoid divide by zero
+
+                                                                const customerSales = occ.customerSalesPerRai ? Number(occ.customerSalesPerRai) : std.sales;
+                                                                const customerCost = occ.customerCostPerRai ? Number(occ.customerCostPerRai) : std.cost;
+
+                                                                const stdIncome = (((std.sales - std.cost) * totalAreaRai * cycles) / 12) / laborers;
+                                                                const customerIncome = (((customerSales - customerCost) * totalAreaRai * cycles) / 12) / laborers;
+
+                                                                return (
+                                                                    <>
+                                                                        <TableRow className="hover:bg-gray-50/30">
+                                                                            <TableCell className="py-3 text-xs font-medium text-gray-700">ขายได้ต่อไร่ต่อรอบ (บาท)</TableCell>
+                                                                            <TableCell className="py-3 text-xs text-right font-mono text-muted-foreground">{formatNumberWithCommas(std.sales)}</TableCell>
+                                                                            <TableCell className="py-3 text-right pr-6">
+                                                                                <Input
+                                                                                    type="text"
+                                                                                    value={formatNumberWithCommas(occ.customerSalesPerRai || "")}
+                                                                                    onChange={(e) => {
+                                                                                        const cleaned = e.target.value.replace(/,/g, '');
+                                                                                        if (/^\d*\.?\d*$/.test(cleaned)) {
+                                                                                            handleOccupationChange(occ.id, "customerSalesPerRai", cleaned);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="h-8 text-[11px] bg-gray-50/30 font-mono text-right w-32 ml-auto"
+                                                                                    placeholder="0.00"
+                                                                                />
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow className="hover:bg-gray-50/30 border-b">
+                                                                            <TableCell className="py-3 text-xs font-medium text-gray-700">ต้นทุนต่อไร่ต่อรอบ (บาท)</TableCell>
+                                                                            <TableCell className="py-3 text-xs text-right font-mono text-muted-foreground">{formatNumberWithCommas(std.cost)}</TableCell>
+                                                                            <TableCell className="py-3 text-right pr-6">
+                                                                                <Input
+                                                                                    type="text"
+                                                                                    value={formatNumberWithCommas(occ.customerCostPerRai || "")}
+                                                                                    onChange={(e) => {
+                                                                                        const cleaned = e.target.value.replace(/,/g, '');
+                                                                                        if (/^\d*\.?\d*$/.test(cleaned)) {
+                                                                                            handleOccupationChange(occ.id, "customerCostPerRai", cleaned);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="h-8 text-[11px] bg-gray-50/30 font-mono text-right w-32 ml-auto"
+                                                                                    placeholder="0.00"
+                                                                                />
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                        <TableRow className="bg-blue-50/30 hover:bg-blue-50/40 transition-none">
+                                                                            <TableCell className="py-4 text-xs font-bold text-chaiyo-blue">รายได้ต่อเดือน (บาท)</TableCell>
+                                                                            <TableCell className="py-4 text-sm text-right font-bold font-mono text-muted-foreground">{formatNumberWithCommas(Math.max(0, stdIncome).toFixed(2))}</TableCell>
+                                                                            <TableCell className="py-4 text-right pr-6">
+                                                                                <div className="text-sm font-bold font-mono text-chaiyo-blue">
+                                                                                    {formatNumberWithCommas(Math.max(0, customerIncome).toFixed(2))}
+                                                                                </div>
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    </>
+                                                                );
+                                                            })()}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground px-1 italic">
+                                                    * รายได้ต่อเดือน = (((ขายได้-ต้นทุน) × พื้นที่เพาะปลูก × จำนวนรอบ) / 12) / จำนวนคน
+                                                </p>
+                                            </div>
+
+                                            {/* ตารางสรุปช่วงเวลาและผลผลิต */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                        <TrendingUp className="w-4 h-4 text-chaiyo-blue" /> ตารางสรุปช่วงเวลาและผลผลิต
+                                                    </h5>
+                                                </div>
+
+                                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                    <Table>
+                                                        <TableHeader className="bg-gray-50/50">
+                                                            <TableRow>
+                                                                <TableHead className="w-[40%] text-xs font-bold">กิจกรรม/ช่วงการเพาะปลูก</TableHead>
+                                                                <TableHead className="w-[60%] text-xs font-bold">เดือน/ช่วงเวลา</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {(() => {
+                                                                const produceRows = (occ.produceSummary && occ.produceSummary.length === FARM_STAGES.length)
+                                                                    ? occ.produceSummary
+                                                                    : FARM_STAGES.map(stage => ({ stage, startMonth: "", endMonth: "" }));
+
+                                                                return produceRows.map((item: any, idx: number) => (
+                                                                    <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
+                                                                        <TableCell className="py-3 font-medium text-xs text-gray-700 bg-gray-50/20">
+                                                                            {item.stage}
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Select
+                                                                                    value={item.startMonth || ""}
+                                                                                    onValueChange={(val) => {
+                                                                                        const updated = [...produceRows];
+                                                                                        updated[idx] = { ...item, startMonth: val };
+                                                                                        handleOccupationChange(occ.id, "produceSummary", updated);
+                                                                                    }}
+                                                                                >
+                                                                                    <SelectTrigger className="h-9 text-xs bg-white border-gray-200 w-32">
+                                                                                        <SelectValue placeholder="เดือนที่เริ่ม" />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        {THAI_MONTHS_SHORT.map(m => (
+                                                                                            <SelectItem key={m} value={m} className="text-xs">{m}</SelectItem>
+                                                                                        ))}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                                <span className="text-muted-foreground text-xs">ถึง</span>
+                                                                                <Select
+                                                                                    value={item.endMonth || ""}
+                                                                                    onValueChange={(val) => {
+                                                                                        const updated = [...produceRows];
+                                                                                        updated[idx] = { ...item, endMonth: val };
+                                                                                        handleOccupationChange(occ.id, "produceSummary", updated);
+                                                                                    }}
+                                                                                >
+                                                                                    <SelectTrigger className="h-9 text-xs bg-white border-gray-200 w-32">
+                                                                                        <SelectValue placeholder="เดือนที่สิ้นสุด" />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        {THAI_MONTHS_SHORT.map(m => (
+                                                                                            <SelectItem key={m} value={m} className="text-xs">{m}</SelectItem>
+                                                                                        ))}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </div>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ));
+                                                            })()}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* SE Details Section: รายละเอียดกิจการ (กรณีปศุสัตว์) */}
+                                    {occ.employmentType === 'SE' && occ.occupationCode === 'LIVESTOCK' && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                                <Briefcase className="w-5 h-5 text-chaiyo-blue" /> รายละเอียดของกิจการ (ปศุสัตว์)
+                                            </h4>
+
+                                            {/* ประเภทปศุสัตว์ Section */}
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                                    <div className="space-y-2">
+                                                        <Label>ประเภทปศุสัตว์ <span className="text-red-500">*</span></Label>
+                                                        <div className="flex flex-col sm:flex-row gap-3">
+                                                            <Select
+                                                                value={occ.livestockType || ""}
+                                                                onValueChange={(val) => handleOccupationChange(occ.id, "livestockType", val)}
+                                                            >
+                                                                <SelectTrigger className="h-11 bg-white">
+                                                                    <SelectValue placeholder="เลือกประเภทปศุสัตว์" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {LIVESTOCK_TYPES.map(item => (
+                                                                        <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {occ.livestockType === 'others' && (
                                                                 <Input
-                                                                    value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationTypeOther : occ.workLocationTypeOther) || ""}
-                                                                    onChange={(e) => handleOccupationChange(occ.id, "workLocationTypeOther", e.target.value)}
-                                                                    placeholder="โปรดระบุรายละเอียด"
-                                                                    className="h-11 bg-white"
-                                                                    disabled={!!occ.isSameAsMainAddress}
+                                                                    value={occ.otherLivestockType || ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "otherLivestockType", e.target.value)}
+                                                                    placeholder="โปรดระบุอื่นๆ"
+                                                                    className="h-11 bg-white w-full sm:max-w-xs"
                                                                 />
                                                             )}
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {!(occ.employmentType === 'SE' && occ.occupationCode !== 'FARMER') && (
-                                                    <div className="pt-4 border-t border-gray-100">
-                                                        <div className="space-y-3">
-                                                            <Label>สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA' || occ.employmentType === 'SE') && <span className="text-red-500">*</span>}</Label>
-                                                            <RadioGroup
-                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
-                                                                onValueChange={(val) => handleOccupationChange(occ.id, "businessStatus", val)}
-                                                                className="flex gap-6 pt-1"
-                                                                disabled={!!occ.isSameAsMainAddress}
-                                                            >
-                                                                <div className="flex items-center space-x-2">
-                                                                    <RadioGroupItem value="active" id={`${occ.id}-active`} disabled={!!occ.isSameAsMainAddress} />
-                                                                    <Label htmlFor={`${occ.id}-active`} className="font-normal cursor-pointer">ดำเนินกิจการอยู่</Label>
-                                                                </div>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <RadioGroupItem value="closed" id={`${occ.id}-closed`} disabled={!!occ.isSameAsMainAddress} />
-                                                                    <Label htmlFor={`${occ.id}-closed`} className="font-normal cursor-pointer">ปิดกิจการ</Label>
-                                                                </div>
-                                                            </RadioGroup>
-                                                        </div>
+                                                    <div className="space-y-2">
+                                                        <Label>ประเภทการเลี้ยง <span className="text-red-500">*</span></Label>
+                                                        <ToggleGroup
+                                                            type="single"
+                                                            value={occ.farmingType || ""}
+                                                            onValueChange={(val) => { if (val) handleOccupationChange(occ.id, "farmingType", val) }}
+                                                            className="justify-start gap-2"
+                                                        >
+                                                            <ToggleGroupItem value="contract" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">Contract Farming</ToggleGroupItem>
+                                                            <ToggleGroupItem value="self" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">เลี้ยงเอง</ToggleGroupItem>
+                                                        </ToggleGroup>
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
-                                        }
-                                    />
+
+                                            {/* Livestock Cycles Table (Only if เลี้ยงเอง) */}
+                                            {occ.farmingType === 'self' && (
+                                                <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                                                    <div className="flex items-center justify-between">
+                                                        <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                            <TrendingUp className="w-4 h-4 text-emerald-600" /> ตารางรอบ
+                                                        </h5>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={(occ.livestockCycles?.length || 0) >= 12}
+                                                            onClick={() => {
+                                                                const current = occ.livestockCycles || [];
+                                                                handleOccupationChange(occ.id, "livestockCycles", [
+                                                                    ...current,
+                                                                    { cycleNo: current.length + 1, unit: "" }
+                                                                ]);
+                                                            }}
+                                                            className="h-8 text-xs gap-1 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                                        >
+                                                            <Plus className="w-3 h-3" /> เพิ่มรอบ
+                                                        </Button>
+                                                    </div>
+
+                                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                        <Table>
+                                                            <TableHeader className="bg-gray-50/50">
+                                                                <TableRow>
+                                                                    <TableHead className="w-[15%] text-xs font-bold text-center">ลำดับรอบ</TableHead>
+                                                                    <TableHead className="w-[85%] text-xs font-bold">หน่วย / จำนวน</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {(occ.livestockCycles || []).map((cycle, idx) => (
+                                                                    <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
+                                                                        <TableCell className="py-3 font-medium text-xs text-gray-700 bg-gray-50/20 text-center">
+                                                                            {cycle.cycleNo}
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2 pr-6">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <Input
+                                                                                    type="text"
+                                                                                    value={cycle.unit || ""}
+                                                                                    onChange={(e) => {
+                                                                                        const updated = [...(occ.livestockCycles || [])];
+                                                                                        updated[idx] = { ...cycle, unit: e.target.value };
+                                                                                        handleOccupationChange(occ.id, "livestockCycles", updated);
+                                                                                    }}
+                                                                                    placeholder="ระบุจำนวน หรือ รายละเอียด"
+                                                                                    className="h-9 text-xs bg-gray-50/30"
+                                                                                />
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    onClick={() => {
+                                                                                        const updated = (occ.livestockCycles || []).filter((_, i) => i !== idx)
+                                                                                            .map((c, i) => ({ ...c, cycleNo: i + 1 }));
+                                                                                        handleOccupationChange(occ.id, "livestockCycles", updated);
+                                                                                    }}
+                                                                                    className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                >
+                                                                                    <X className="w-3.5 h-3.5" />
+                                                                                </Button>
+                                                                            </div>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                                {(occ.livestockCycles || []).length === 0 && (
+                                                                    <TableRow>
+                                                                        <TableCell colSpan={2} className="py-8 text-center text-xs text-muted-foreground italic">
+                                                                            ยังไม่มีข้อมูลรอบการเลี้ยงสัตว์ กดปุ่ม "เพิ่มรอบ" เพื่อเริ่มบันทึกข้อมูล
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                )}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+
+
                                     {/* 3. ช่องทางการรับรายได้ */}
                                     <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6">
                                         <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
@@ -1994,12 +2701,11 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                 <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">
                                                     รวมภาระหนี้ส่วนตัวรายเดือน:
                                                 </TableCell>
-                                                <TableCell className="text-right pr-10 py-4">
+                                                <TableCell colSpan={2} className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
                                                         ฿{formatNumberWithCommas(formData.totalPersonalDebt || 0)}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell />
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
