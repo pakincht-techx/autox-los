@@ -688,10 +688,13 @@ function PreQuestionPageContent() {
         landCollateralPurpose: 'clear',
 
         // Land Appraisals
-        landAppraisals: [],
-        buildingAppraisals: [],
-        condoUnitAppraisals: [],
-        condoBalconyAppraisals: [],
+        landAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
+        buildingAppraisals: [{ source: 'treasury_department', label: 'กรมธนารักษ์', price: '', hidden: false }],
+        condoUnitAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
+        condoBalconyAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
+        appraisalSource: 'department_of_lands',
+        appraisedLandPrice: '',
+        appraisedBuildingPrice: '',
         incomeBreakdown: [
             { label: 'รายได้หลัก', price: '35000', source: 'main' },
             { label: 'รายได้เสริม', price: '5000', source: 'extra' },
@@ -1164,6 +1167,7 @@ function PreQuestionPageContent() {
 
     const handleRemoveLandAppraisal = (index: number) => {
         const updated = [...(formData.landAppraisals || [])];
+        if (updated.length <= 1) return;
         updated.splice(index, 1);
         updateOverallAppraisal(updated, formData.buildingAppraisals || []);
     };
@@ -1188,6 +1192,7 @@ function PreQuestionPageContent() {
 
     const handleRemoveBuildingAppraisal = (index: number) => {
         const updated = [...(formData.buildingAppraisals || [])];
+        if (updated.length <= 1) return;
         updated.splice(index, 1);
         updateOverallAppraisal(formData.landAppraisals || [], updated);
     };
@@ -1224,6 +1229,7 @@ function PreQuestionPageContent() {
 
     const handleRemoveCondoUnitAppraisal = (index: number) => {
         const updated = [...(formData.condoUnitAppraisals || [])];
+        if (updated.length <= 1) return;
         updated.splice(index, 1);
         updateCondoAppraisal(updated, formData.condoBalconyAppraisals || []);
     };
@@ -1248,6 +1254,7 @@ function PreQuestionPageContent() {
 
     const handleRemoveCondoBalconyAppraisal = (index: number) => {
         const updated = [...(formData.condoBalconyAppraisals || [])];
+        if (updated.length <= 1) return;
         updated.splice(index, 1);
         updateCondoAppraisal(formData.condoUnitAppraisals || [], updated);
     };
@@ -1781,13 +1788,7 @@ function PreQuestionPageContent() {
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {(formData.condoUnitAppraisals || []).length === 0 ? (
-                                                                                <TableRow>
-                                                                                    <TableCell colSpan={3} className="px-4 py-8 text-center text-gray-400 italic">
-                                                                                        ยังไม่มีข้อมูลราคาประเมิน กดปุ่มเพิ่มเพื่อเริ่มระบุ
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ) : (formData.condoUnitAppraisals || []).map((item: any, idx: number) => (
+                                                                            {(formData.condoUnitAppraisals || []).map((item: any, idx: number) => (
                                                                                 <TableRow key={idx}>
                                                                                     <TableCell className="font-medium text-gray-700">
                                                                                         <Select
@@ -1824,7 +1825,13 @@ function PreQuestionPageContent() {
                                                                                             variant="ghost"
                                                                                             size="sm"
                                                                                             onClick={() => handleRemoveCondoUnitAppraisal(idx)}
-                                                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            disabled={(formData.condoUnitAppraisals || []).length <= 1}
+                                                                                            className={cn(
+                                                                                                "h-8 w-8 p-0",
+                                                                                                (formData.condoUnitAppraisals || []).length <= 1 
+                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            )}
                                                                                         >
                                                                                             <X className="w-4 h-4" />
                                                                                         </Button>
@@ -1861,13 +1868,7 @@ function PreQuestionPageContent() {
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {(formData.condoBalconyAppraisals || []).length === 0 ? (
-                                                                                <TableRow>
-                                                                                    <TableCell colSpan={3} className="px-4 py-8 text-center text-gray-400 italic">
-                                                                                        ยังไม่มีข้อมูลราคาประเมิน กดปุ่มเพิ่มเพื่อเริ่มระบุ
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ) : (formData.condoBalconyAppraisals || []).map((item: any, idx: number) => (
+                                                                            {(formData.condoBalconyAppraisals || []).map((item: any, idx: number) => (
                                                                                 <TableRow key={idx}>
                                                                                     <TableCell className="font-medium text-gray-700">
                                                                                         <Select
@@ -1904,7 +1905,13 @@ function PreQuestionPageContent() {
                                                                                             variant="ghost"
                                                                                             size="sm"
                                                                                             onClick={() => handleRemoveCondoBalconyAppraisal(idx)}
-                                                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            disabled={(formData.condoBalconyAppraisals || []).length <= 1}
+                                                                                            className={cn(
+                                                                                                "h-8 w-8 p-0",
+                                                                                                (formData.condoBalconyAppraisals || []).length <= 1 
+                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            )}
                                                                                         >
                                                                                             <X className="w-4 h-4" />
                                                                                         </Button>
@@ -1915,9 +1922,24 @@ function PreQuestionPageContent() {
                                                                     </Table>
                                                                 </div>
                                                             </div>
-
-
-                                                        </div>
+                                                            <div className="flex justify-between items-center px-4 py-4 bg-chaiyo-blue/[0.03] border border-border-strong rounded-xl mt-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
+                                                                            <Calculator className="w-4 h-4 text-chaiyo-blue" />
+                                                                        </div>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
+                                                                            <span className="text-sm font-bold text-gray-700">รวมราคาประเมินห้องชุด</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
+                                                                            {Number(formData.appraisalPrice || 0).toLocaleString()}
+                                                                        </div>
+                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                     ) : ['ns4', 'ns3k', 'trajong_deed'].includes(formData.landDeedType) ? (
                                                         <div className="space-y-6 md:col-span-2">
                                                             {formData.landDeedType === 'trajong_deed' && (
@@ -1969,13 +1991,7 @@ function PreQuestionPageContent() {
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {(formData.landAppraisals || []).length === 0 ? (
-                                                                                <TableRow>
-                                                                                    <TableCell colSpan={3} className="px-4 py-8 text-center text-gray-400 italic">
-                                                                                        ยังไม่มีข้อมูลราคาประเมิน กดปุ่มเพิ่มเพื่อเริ่มระบุ
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ) : (formData.landAppraisals || []).map((item: any, idx: number) => (
+                                                                            {(formData.landAppraisals || []).map((item: any, idx: number) => (
                                                                                 <TableRow key={idx}>
                                                                                     <TableCell className="font-medium text-gray-700">
                                                                                         <Select
@@ -2012,7 +2028,13 @@ function PreQuestionPageContent() {
                                                                                             variant="ghost"
                                                                                             size="sm"
                                                                                             onClick={() => handleRemoveLandAppraisal(idx)}
-                                                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            disabled={(formData.landAppraisals || []).length <= 1}
+                                                                                            className={cn(
+                                                                                                "h-8 w-8 p-0",
+                                                                                                (formData.landAppraisals || []).length <= 1 
+                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            )}
                                                                                         >
                                                                                             <X className="w-4 h-4" />
                                                                                         </Button>
@@ -2049,13 +2071,7 @@ function PreQuestionPageContent() {
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {(formData.buildingAppraisals || []).length === 0 ? (
-                                                                                <TableRow>
-                                                                                    <TableCell colSpan={3} className="px-4 py-8 text-center text-gray-400 italic">
-                                                                                        ยังไม่มีข้อมูลราคาประเมิน กดปุ่มเพิ่มเพื่อเริ่มระบุ
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ) : (formData.buildingAppraisals || []).map((item: any, idx: number) => (
+                                                                            {(formData.buildingAppraisals || []).map((item: any, idx: number) => (
                                                                                 <TableRow key={idx}>
                                                                                     <TableCell className="font-medium text-gray-700">
                                                                                         <Select
@@ -2092,7 +2108,13 @@ function PreQuestionPageContent() {
                                                                                             variant="ghost"
                                                                                             size="sm"
                                                                                             onClick={() => handleRemoveBuildingAppraisal(idx)}
-                                                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            disabled={(formData.buildingAppraisals || []).length <= 1}
+                                                                                            className={cn(
+                                                                                                "h-8 w-8 p-0",
+                                                                                                (formData.buildingAppraisals || []).length <= 1 
+                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                            )}
                                                                                         >
                                                                                             <X className="w-4 h-4" />
                                                                                         </Button>
@@ -2101,6 +2123,23 @@ function PreQuestionPageContent() {
                                                                             ))}
                                                                         </TableBody>
                                                                     </Table>
+                                                                </div>
+                                                                <div className="flex justify-between items-center px-4 py-4 bg-chaiyo-blue/[0.03] border border-border-strong rounded-xl mt-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
+                                                                            <Calculator className="w-4 h-4 text-chaiyo-blue" />
+                                                                        </div>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
+                                                                            <span className="text-sm font-bold text-gray-700">รวมราคาประเมินสุทธิ</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="text-right">
+                                                                        <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
+                                                                            {Number(formData.appraisalPrice || 0).toLocaleString()}
+                                                                        </div>
+                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
