@@ -665,52 +665,55 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 {/* Secondary Options: OCR/Manual */}
                                 {stage === 'INIT' && (
                                     <div className="space-y-4">
-                                        {(formData.customerGroup === 'thai' || formData.customerGroup === 'b2b_payroll') ? null : (
-                                            <>
-                                                {formData.customerGroup !== 'ethnic' && (
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
-                                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2">หรือใช้วิธีอื่น</span>
-                                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
-                                                    </div>
-                                                )}
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {formData.customerGroup !== 'ethnic' && (
-                                                        <Button
-                                                            variant="outline"
-                                                            className="h-28 border-border-subtle hover:border-chaiyo-blue hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group"
-                                                            onClick={() => {
-                                                                setVerificationMethod('MANUAL');
-                                                                handleOCRUpload('THAI_ID');
-                                                            }}
-                                                        >
-                                                            <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                                <img src="/images/card_citizen.svg" alt="บัตรประชาชน" className="w-full h-full object-contain" />
-                                                            </div>
-                                                            <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรประชาชน</span>
-                                                        </Button>
-                                                    )}
-
-                                                    <Button
-                                                        variant="outline"
-                                                        className={cn(
-                                                            "h-28 border-border-subtle hover:border-pink-400 hover:bg-pink-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group",
-                                                            formData.customerGroup === 'ethnic' ? "md:col-span-2 py-8 h-40" : ""
-                                                        )}
-                                                        onClick={() => {
-                                                            setVerificationMethod('MANUAL');
-                                                            handleOCRUpload('PINK_CARD');
-                                                        }}
-                                                    >
-                                                        <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                            <img src="/images/card_alien.svg" alt="บัตรต่างด้าวชมพู" className="w-full h-full object-contain" />
-                                                        </div>
-                                                        <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรชมพู / อื่นๆ</span>
-                                                    </Button>
-                                                </div>
-                                            </>
+                                        {formData.customerGroup !== 'ethnic' && (
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-2">หรือใช้วิธีอื่น</span>
+                                                <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                            </div>
                                         )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Thai ID Button: Shown for Thai and B2B groups */}
+                                            {formData.customerGroup !== 'ethnic' && (
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "h-28 border-border-subtle hover:border-chaiyo-blue hover:bg-blue-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group",
+                                                        (formData.customerGroup === 'thai' || formData.customerGroup === 'b2b_payroll') ? "md:col-span-2" : ""
+                                                    )}
+                                                    onClick={() => {
+                                                        setVerificationMethod('MANUAL');
+                                                        handleOCRUpload('THAI_ID');
+                                                    }}
+                                                >
+                                                    <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <img src="/images/card_citizen.svg" alt="บัตรประชาชน" className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรประชาชน</span>
+                                                </Button>
+                                            )}
+
+                                            {/* Alien ID Button: Shown ONLY for Ethnic group */}
+                                            {formData.customerGroup === 'ethnic' && (
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "h-28 border-border-subtle hover:border-pink-400 hover:bg-pink-50/30 flex flex-col items-center justify-center gap-2 rounded-2xl transition-all group",
+                                                        "md:col-span-2 py-8 h-40"
+                                                    )}
+                                                    onClick={() => {
+                                                        setVerificationMethod('MANUAL');
+                                                        handleOCRUpload('PINK_CARD');
+                                                    }}
+                                                >
+                                                    <div className="w-12 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                        <img src="/images/card_alien.svg" alt="บัตรต่างด้าวชมพู" className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <span className="text-sm font-bold text-gray-700">ถ่ายรูปบัตรชมพู / อื่นๆ</span>
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
