@@ -96,7 +96,7 @@ export function Combobox({
                                 setFocusedIndex((prev) => (prev > 0 ? prev - 1 : prev));
                             } else if (e.key === "Enter" && focusedIndex >= 0 && focusedIndex < filtered.length) {
                                 e.preventDefault();
-                                onValueChange?.(filtered[focusedIndex].label);
+                                onValueChange?.(filtered[focusedIndex].value);
                                 setOpen(false);
                                 setSearch("");
                             } else if (e.key === "Escape") {
@@ -125,7 +125,7 @@ export function Combobox({
                                 <div
                                     key={option.value}
                                     onClick={() => {
-                                        onValueChange?.(option.label);
+                                        onValueChange?.(option.value);
                                         setOpen(false);
                                         setSearch("");
                                     }}

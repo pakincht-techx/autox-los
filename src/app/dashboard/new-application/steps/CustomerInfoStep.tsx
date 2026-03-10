@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, FileText, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal } from "lucide-react";
+import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
@@ -771,6 +771,24 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         />
                                     </div>
 
+                                    <div className="space-y-2">
+                                        <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.educationLevel || ""}
+                                            onValueChange={(val) => handleChange("educationLevel", val)}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกระดับการศึกษา" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {EDUCATION_LEVELS.map((level) => (
+                                                    <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+
                                 </div>
                             </div>
                         </div>
@@ -1267,36 +1285,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 </CardContent>
             </Card>
 
-            {/* MAIN APPLICANT - SECTION Education Info */}
-            <Card className="border-border-strong">
-                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <FileText className="w-5 h-5" />
-                        ข้อมูลการศึกษา (ผู้กู้หลัก)
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-                        <div className="space-y-2">
-                            <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
-                            <Select
-                                value={formData.educationLevel || ""}
-                                onValueChange={(val) => handleChange("educationLevel", val)}
-                            >
-                                <SelectTrigger className="h-12 bg-white">
-                                    <SelectValue placeholder="เลือกระดับการศึกษา" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {EDUCATION_LEVELS.map((level) => (
-                                        <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* MAIN APPLICANT - SECTION 3: Family Info */}
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
@@ -1663,91 +1651,111 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         </Button>
                                     )}
                                 </div>
-                                {isOtpVerified && formData.idType === 'THAI_ID' && (
-                                    <div className="mt-2 bg-slate-50 border border-slate-200 text-slate-700 p-3 rounded-xl text-xs leading-relaxed animate-in fade-in slide-in-from-top-1">
-                                        <div className="font-bold flex items-center gap-1 mb-1 text-slate-800">
-                                            <Info className="w-3.5 h-3.5" />
-                                            ตรวจสอบเบอร์มือถือ
-                                        </div>
-                                        <p className="mb-2">
-                                            ให้ลูกค้ากด <span className="font-mono bg-blue-100/50 text-blue-800 px-1 rounded mx-1">*179*เลขบัตรประชาชน 13 หลัก#</span> โทรออก จากนั้นแคปหน้าจอผลลัพธ์เพื่อใช้ยืนยันความเป็นเจ้าของเบอร์
-                                        </p>
-                                        {formData.phoneOwnershipProof ? (
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between bg-white border border-slate-200 p-2 rounded-lg">
-                                                    <span className="truncate max-w-[200px] font-medium flex items-center gap-2 text-xs">
-                                                        <CheckCircle className={cn(
-                                                            "w-3.5 h-3.5",
-                                                            phoneOwnershipStatus === 'success' ? "text-green-500" :
-                                                                phoneOwnershipStatus === 'error' ? "text-red-500" : "text-gray-400"
-                                                        )} />
-                                                        {formData.phoneOwnershipProof.name}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        onClick={() => {
-                                                            handleChange("phoneOwnershipProof", null);
-                                                            setPhoneOwnershipStatus('idle');
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-3.5 h-3.5" />
-                                                    </Button>
+                                {isOtpVerified && (
+                                    <div className={cn(
+                                        "mt-3 p-4 rounded-xl animate-in fade-in slide-in-from-top-2 duration-500",
+                                        phoneOwnershipStatus === 'success' ? "bg-green-50 border border-green-200" : "bg-blue-50/50 border border-blue-100"
+                                    )}>
+                                        {phoneOwnershipStatus === 'success' ? (
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                                                        <ShieldCheck className="w-5 h-5 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-bold text-green-800">ตรวจสอบเบอร์มือถือสำเร็จ</p>
+                                                        <p className="text-[11px] text-green-600 font-medium">ยืนยันความเป็นเจ้าของเบอร์เรียบร้อยแล้ว</p>
+                                                    </div>
                                                 </div>
                                                 <Button
-                                                    variant="outline"
+                                                    variant="ghost"
                                                     size="sm"
-                                                    onClick={handleVerifyPhoneOwnership}
-                                                    disabled={!formData.phone || !formData.idNumber}
-                                                    className={cn(
-                                                        "w-full h-10 rounded-xl transition-all duration-300",
-                                                        phoneOwnershipStatus === 'success' ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-800" :
-                                                            phoneOwnershipStatus === 'error' ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800" :
-                                                                "bg-white border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
-                                                    )}
+                                                    className="h-8 px-2 text-green-700 hover:bg-green-100/50 text-[10px] font-bold"
+                                                    onClick={() => {
+                                                        handleChange("phoneOwnershipProof", null);
+                                                        setPhoneOwnershipStatus('idle');
+                                                    }}
                                                 >
-                                                    {phoneOwnershipStatus === 'success' ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <ShieldCheck className="w-4 h-4" />
-                                                            ยืนยันความเป็นเจ้าของเรียบร้อย
-                                                        </div>
-                                                    ) : phoneOwnershipStatus === 'error' ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <AlertCircle className="w-4 h-4 text-red-500" />
-                                                            ข้อมูลไม่ตรงกัน - ตรวจสอบอีกครั้ง
-                                                        </div>
-                                                    ) : (
-                                                        "ตรวจสอบเบอร์มือถือ"
-                                                    )}
+                                                    แก้ไขข้อมูล
                                                 </Button>
                                             </div>
                                         ) : (
-                                            <div>
-                                                <Input
-                                                    type="file"
-                                                    id="phoneOwnershipProof"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            handleChange("phoneOwnershipProof", file);
-                                                            // Reset the value so the same file could be selected again if removed
-                                                            e.target.value = '';
-                                                        }
-                                                    }}
-                                                />
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-8 text-slate-600 border-slate-300 hover:bg-slate-100 hover:text-slate-800 w-full rounded-lg bg-white"
-                                                    onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
-                                                >
-                                                    <Upload className="w-3.5 h-3.5 mr-1" />
-                                                    อัพโหลดรูปถ่ายหน้าจอ
-                                                </Button>
-                                            </div>
+                                            <>
+                                                <div className="flex items-center gap-2 mb-3 text-chaiyo-blue font-bold">
+                                                    <span className="text-sm">ตรวจสอบเบอร์มือถือ</span>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <div className="bg-white border border-blue-100 p-3 rounded-lg">
+                                                        <p className="text-xs text-gray-500 mb-2">ให้ลูกค้ากดรหัสเพื่อยืนยันความเป็นเจ้าของจากมือถือ:</p>
+                                                        <div className="bg-gray-50 p-2 rounded-md font-mono text-center text-sm font-bold text-chaiyo-blue tracking-wider border border-gray-100">
+                                                            *179*เลขบัตรประชาชน 13 หลัก# โทรออก
+                                                        </div>
+                                                        <p className="text-[10px] text-gray-400 mt-2 italic">* กรุณาแคปหน้าจอผลลัพธ์เพื่อนำมาอัปโหลด</p>
+                                                    </div>
+
+                                                    {formData.phoneOwnershipProof ? (
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between bg-white border border-red-100 p-2.5 rounded-lg">
+                                                                <span className="truncate max-w-[200px] font-medium flex items-center gap-2 text-xs text-gray-700">
+                                                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                                                    {formData.phoneOwnershipProof.name}
+                                                                </span>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                                                                    onClick={() => {
+                                                                        handleChange("phoneOwnershipProof", null);
+                                                                        setPhoneOwnershipStatus('idle');
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                </Button>
+                                                            </div>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={handleVerifyPhoneOwnership}
+                                                                disabled={!formData.phone || !formData.idNumber}
+                                                                className={cn(
+                                                                    "w-full h-11 rounded-xl transition-all duration-300 font-bold bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
+                                                                )}
+                                                            >
+                                                                <div className="flex items-center gap-2 justify-center">
+                                                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                                                    ข้อมูลไม่ตรงกัน - ตรวจสอบอีกครั้ง
+                                                                </div>
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div>
+                                                            <Input
+                                                                type="file"
+                                                                id="phoneOwnershipProof"
+                                                                className="hidden"
+                                                                accept="image/*"
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) {
+                                                                        handleChange("phoneOwnershipProof", file);
+                                                                        e.target.value = '';
+                                                                        handleVerifyPhoneOwnership();
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <Button
+                                                                variant="outline"
+                                                                className="w-full h-11 border-dashed border-chaiyo-blue/50 text-chaiyo-blue bg-white hover:bg-blue-50/50 rounded-xl"
+                                                                onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
+                                                            >
+                                                                <Upload className="w-4 h-4 mr-2" />
+                                                                อัปโหลดรูปภาพ
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -2086,11 +2094,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             <SelectValue placeholder="เลือกความสามารถพิเศษ" />
                                         </SelectTrigger>
                                         <SelectContent>
+                                            <SelectItem value="none">ไม่มี</SelectItem>
+                                            <SelectItem value="cooking">ทำกับข้าวขาย</SelectItem>
                                             <SelectItem value="online_sales">ขายของออนไลน์</SelectItem>
-                                            <SelectItem value="delivery">ขับรถส่งอาหาร/เดลิเวอรี่</SelectItem>
-                                            <SelectItem value="handmade">รับจ้างผลิตสินค้า (Handmade)</SelectItem>
-                                            <SelectItem value="technician">บริการช่างซ่อมต่างๆ</SelectItem>
-                                            <SelectItem value="tutor">ติวเตอร์/สอนพิเศษ</SelectItem>
+                                            <SelectItem value="labor">รับจ้างใช้แรงงาน</SelectItem>
+                                            <SelectItem value="housekeeper">แม่บ้าน พนักงานทำความสะอาด</SelectItem>
+                                            <SelectItem value="musician">เล่นดนตรี นักร้อง</SelectItem>
+                                            <SelectItem value="caregiver">เลี้ยงเด็ก ดูแลผู้ป่วย</SelectItem>
                                             <SelectItem value="other">อื่นๆ โปรดระบุ</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -3085,31 +3095,29 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <p className="text-gray-600">
                                     กำลังตรวจสอบความถูกต้องของหมายเลขโทรศัพท์กับเลขบัตรประชาชนผ่านระบบผู้ให้บริการเครือข่าย...
                                 </p>
-                                <div className="space-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">หมายเลขโทรศัพท์:</span>
-                                        <span className="font-mono font-bold text-gray-800">{formData.phone}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">เลขบัตรประชาชน:</span>
-                                        <span className="font-mono font-bold text-gray-800">
-                                            {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
-                                        </span>
-                                    </div>
-                                </div>
+
                             </div>
                         ) : phoneOwnershipStatus === 'success' ? (
                             <div className="space-y-4">
                                 <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
                                     <p className="text-green-800 font-bold mb-1">ผลการตรวจสอบสำเร็จ</p>
-                                    <p className="text-green-700 text-sm">
-                                        หมายเลขโทรศัพท์ {formData.phone} จดทะเบียนถูกต้องภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
-                                    </p>
+                                    <div className="mx-auto w-fit space-y-2 mt-4 text-left">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                                            <p className="text-green-700 text-sm font-mono tracking-tight">
+                                                เบอร์: {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                                            <p className="text-green-700 text-sm font-mono tracking-tight">
+                                                บัตร: {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
+                                            </p>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
-                                    <Info className="w-4 h-4 shrink-0" />
-                                    <p>ระบบได้ทำการแมตช์ข้อมูลจากเอกสาร *179 ที่อัพโหลดเรียบร้อยแล้ว</p>
-                                </div>
+
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -3134,27 +3142,28 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         )}
                     </div>
 
-                    <div className="flex gap-3 pt-2">
-                        {phoneOwnershipStatus === 'error' && (
-                            <Button
-                                variant="outline"
-                                className="flex-1 h-12 rounded-xl"
-                                onClick={handleVerifyPhoneOwnership}
-                            >
-                                ตรวจสอบอีกครั้ง
-                            </Button>
-                        )}
-                        <Button
-                            className={cn(
-                                "h-12 rounded-xl px-8",
-                                phoneOwnershipStatus === 'error' ? "flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                    {!isPhoneOwnershipVerifying && (
+                        <div className="flex gap-3 pt-2">
+                            {phoneOwnershipStatus === 'error' && (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 h-12 rounded-xl"
+                                    onClick={handleVerifyPhoneOwnership}
+                                >
+                                    ตรวจสอบอีกครั้ง
+                                </Button>
                             )}
-                            onClick={() => setShowPhoneVerifyDialog(false)}
-                            disabled={isPhoneOwnershipVerifying}
-                        >
-                            ปิด
-                        </Button>
-                    </div>
+                            <Button
+                                className={cn(
+                                    "h-12 rounded-xl px-8",
+                                    phoneOwnershipStatus === 'error' ? "flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                                )}
+                                onClick={() => setShowPhoneVerifyDialog(false)}
+                            >
+                                ปิด
+                            </Button>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div >

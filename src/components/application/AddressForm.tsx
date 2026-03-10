@@ -176,10 +176,10 @@ export const AddressForm = ({
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-xs text-muted-foreground">ถนน <span className="text-red-500">*</span></Label>
-                                    <Combobox
-                                        options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
+                                    <Input
+                                        className="bg-white h-12"
                                         value={formData[getField('street')] || ""}
-                                        onValueChange={(val) => onChange(getField('street'), val)}
+                                        onChange={(e) => onChange(getField('street'), e.target.value)}
                                         disabled={disabled}
                                         placeholder="ระบุถนน"
                                     />
