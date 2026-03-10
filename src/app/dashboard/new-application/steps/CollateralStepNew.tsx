@@ -228,6 +228,78 @@ const OWNER_RELATIONSHIPS = [
     { value: "อื่นๆ", label: "อื่นๆ" }
 ];
 
+const VEHICLE_CONDITION = [
+    { value: "ปรับสภาพโดยไม่ลงทะเบียน", label: "ปรับสภาพโดยไม่ลงทะเบียน" },
+    { value: "มือสอง-ปรับสภาพแล้ว", label: "มือสอง-ปรับสภาพแล้ว" },
+    { value: "ใช้แล้ว", label: "ใช้แล้ว" },
+    { value: "ใหม่", label: "ใหม่" }
+];
+
+const FUEL_TYPES = [
+    { value: "ดีเซล", label: "ดีเซล" },
+    { value: "น้ำมัน", label: "น้ำมัน" },
+    { value: "ไฟฟ้า", label: "ไฟฟ้า" },
+    { value: "ไฮบริด", label: "ไฮบริด" },
+    { value: "LPG", label: "LPG" }
+];
+
+const VEHICLE_COLORS = [
+    { value: "แดง", label: "แดง" },
+    { value: "ดำ", label: "ดำ" },
+    { value: "ขาว", label: "ขาว" },
+    { value: "เทา", label: "เทา" },
+    { value: "เงิน", label: "เงิน" },
+    { value: "น้ำเงิน", label: "น้ำเงิน" },
+    { value: "เขียว", label: "เขียว" },
+    { value: "เหลือง", label: "เหลือง" },
+    { value: "ส้ม", label: "ส้ม" },
+    { value: "ม่วง", label: "ม่วง" },
+    { value: "น้ำตาล", label: "น้ำตาล" },
+    { value: "ครีม", label: "ครีม" }
+];
+
+const VEHICLE_CLASSES_RY = [
+    { value: "รย.1", label: "รย.1 รถจดทะเบียนนั่งส่วนบุคคลไม่เกิน 7 คน" },
+    { value: "รย.2", label: "รย.2 รถจดทะเบียนนั่งส่วนบุคคลเกิน 7 คน" },
+    { value: "รย.3", label: "รย.3 รถบรรทุกส่วนบุคคล" },
+    { value: "รย.4", label: "รย.4 รถยนต์สามล้อส่วนบุคคล" },
+    { value: "รย.5", label: "รย.5 รถรับจ้างระหว่างจังหวัด" },
+    { value: "รย.6", label: "รย.6 รถรับจ้างบรรทุกคนโดยสารไม่เกิน 7 คน" },
+    { value: "รย.7", label: "รย.7 รถสี่ล้อเล็กรับจ้าง" },
+    { value: "รย.8", label: "รย.8 รถรับจ้างสามล้อ" },
+    { value: "รย.9", label: "รย.9 รถรับจ้างสามล้อ" },
+    { value: "รย.10", label: "รย.10 รถบริการทัศนาจร" },
+    { value: "รย.11", label: "รย.11 รถบริการให้เช่า" },
+    { value: "รย.12", label: "รย.12 รถจักรยานยนต์" },
+    { value: "รย.13", label: "รย.13 รถแทรกเตอร์" },
+    { value: "รย.14", label: "รย.14 รถบดถนน" },
+    { value: "รย.15", label: "รย.15 รถใช้งานเกษตรกรรม" },
+    { value: "รย.16", label: "รย.16 รถพ่วง" },
+    { value: "รย.17", label: "รย.17 รถจักรยานยนต์สาธารณะ" },
+    { value: "รย.18", label: "รย.18 รถยนต์รับจ้างผ่านระบบอิเล็กทรอนิกส์หรือแอปพลิเคชัน" }
+];
+
+const CAR_TYPES = [
+    { value: "รถกระบะ", label: "รถกระบะ" },
+    { value: "รถตู้", label: "รถตู้" },
+    { value: "รถยนต์ส่วนบุคคล", label: "รถยนต์ส่วนบุคคล" },
+    { value: "อื่นๆ", label: "อื่นๆ" }
+];
+
+const TRUCK_TYPES = [
+    { value: "รถบรรทุก 10 ล้อ", label: "รถบรรทุก 10 ล้อ" },
+    { value: "รถบรรทุก 4 ล้อ", label: "รถบรรทุก 4 ล้อ" },
+    { value: "รถบรรทุก 6 ล้อ", label: "รถบรรทุก 6 ล้อ" },
+    { value: "รถบรรทุกมากกว่า 10 ล้อ", label: "รถบรรทุกมากกว่า 10 ล้อ" },
+    { value: "หางพ่วง", label: "หางพ่วง" }
+];
+
+const AGRI_TYPES = [
+    { value: "ดาวน์มากกว่า 25%", label: "ดาวน์มากกว่า 25%" },
+    { value: "ดาวน์มากกว่า 35%", label: "ดาวน์มากกว่า 35%" },
+    { value: "รถเกษตรเก่า", label: "รถเกษตรเก่า" }
+];
+
 const getPhotoDocs = (type: string) => {
     if (type === 'land') {
         return [
@@ -937,6 +1009,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
                                 </div>
                             ) : (
+                                <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">ลักษณสภาพรถ</Label>
@@ -1025,27 +1098,93 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">สี</Label>
-                                        <Input
+                                        <Select
                                             value={formData.color || ""}
-                                            onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
+                                            onValueChange={(val) => setFormData({ ...formData, color: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกสี" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {VEHICLE_COLORS.map((color) => (
+                                                    <SelectItem key={color.value} value={color.value}>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: color.value === "แดง" ? "#EF4444" : color.value === "ดำ" ? "#000000" : color.value === "ขาว" ? "#FFFFFF" : color.value === "เทา" ? "#9CA3AF" : color.value === "เงิน" ? "#E5E7EB" : color.value === "น้ำเงิน" ? "#3B82F6" : color.value === "เขียว" ? "#10B981" : color.value === "เหลือง" ? "#FCD34D" : color.value === "ส้ม" ? "#F97316" : color.value === "ม่วง" ? "#A855F7" : color.value === "น้ำตาล" ? "#92400E" : "#FEF3C7" }} />
+                                                            {color.label}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลข รย.</Label>
-                                        <Input
+                                        <Label className="text-[13px] text-muted-foreground ml-1">เลข รย. <span className="text-red-500">*</span></Label>
+                                        <Select
                                             value={formData.ryNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, ryNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
+                                            onValueChange={(val) => setFormData({ ...formData, ryNumber: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกเลข รย." />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {VEHICLE_CLASSES_RY.map((ry) => (
+                                                    <SelectItem key={ry.value} value={ry.value}>
+                                                        {ry.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะสภาพรถ</Label>
+                                        <Select
+                                            value={formData.vehicleCondition || "ใช้แล้ว"}
+                                            onValueChange={(val) => setFormData({ ...formData, vehicleCondition: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {VEHICLE_CONDITION.map((cond) => (
+                                                    <SelectItem key={cond.value} value={cond.value}>
+                                                        {cond.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะ</Label>
-                                        <Input
-                                            value={formData.appearance || ""}
-                                            onChange={(e) => setFormData({ ...formData, appearance: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
+                                        <Select
+                                            value={formData.vehicleType || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกลักษณะ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {formData.collateralType === 'car' && CAR_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                                {formData.collateralType === 'moto' && (
+                                                    <SelectItem value="รถจักรยานยนต์">
+                                                        รถจักรยานยนต์
+                                                    </SelectItem>
+                                                )}
+                                                {formData.collateralType === 'truck' && TRUCK_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                                {formData.collateralType === 'agri' && AGRI_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">ประเภทการใช้งาน</Label>
@@ -1057,11 +1196,21 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เชื้อเพลิง</Label>
-                                        <Input
+                                        <Select
                                             value={formData.fuelType || ""}
-                                            onChange={(e) => setFormData({ ...formData, fuelType: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
+                                            onValueChange={(val) => setFormData({ ...formData, fuelType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกเชื้อเพลิง" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {FUEL_TYPES.map((fuel) => (
+                                                    <SelectItem key={fuel.value} value={fuel.value}>
+                                                        {fuel.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เลขเครื่องยนต์</Label>
@@ -1080,14 +1229,30 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">บริเวณสถานที่ตั้งรถ</Label>
-                                        <Input
+                                        <Label className="text-[13px] text-muted-foreground ml-1">บริเวณสถานที่ตั้งรถ (จังหวัด)</Label>
+                                        <Combobox
+                                            options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
                                             value={formData.location || ""}
-                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            onValueChange={(val) => setFormData({ ...formData, location: val })}
+                                            className="h-10 rounded-xl"
+                                            placeholder="เลือกจังหวัด"
                                         />
                                     </div>
                                 </div>
+
+                                <div className="flex items-center gap-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl mt-6">
+                                    <input
+                                        type="checkbox"
+                                        id="vehicleVerified"
+                                        checked={formData.vehicleVerified || false}
+                                        onChange={(e) => setFormData({ ...formData, vehicleVerified: e.target.checked })}
+                                        className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
+                                    />
+                                    <label htmlFor="vehicleVerified" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                        ✓ ตรวจสอบหลักประกันรถแล้ว
+                                    </label>
+                                </div>
+                                </>
                             )}
 
                             {COLLATERAL_QUESTIONS[formData.collateralType]?.length > 0 && !(formData.collateralType === 'land' && formData.landDeedType === 'อ.ช. 2') && (
