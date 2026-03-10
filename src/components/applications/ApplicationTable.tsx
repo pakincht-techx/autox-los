@@ -60,20 +60,19 @@ export function ApplicationTable({ data }: ApplicationTableProps) {
             <Table>
                 <TableHeader className="bg-gray-50/50 border-b border-border-subtle">
                     <TableRow className="hover:bg-transparent">
-                        <TableHead className="w-[150px]">รหัสคำขอ</TableHead>
-                        <TableHead>ผู้กู้</TableHead>
+                        <TableHead className="w-[150px]">เลขที่ใบสมัคร</TableHead>
+                        <TableHead>ชื่อ-นามสกุลผู้กู้</TableHead>
                         <TableHead>ประเภทสินเชื่อ</TableHead>
-                        <TableHead className="text-right">วงเงินที่ขอ</TableHead>
                         <TableHead className="text-center">สถานะ</TableHead>
-                        <TableHead>วันที่ยื่น</TableHead>
-                        <TableHead>ผู้บันทึก</TableHead>
+                        <TableHead>วันที่สร้างใบสมัคร</TableHead>
+                        <TableHead>ผู้สร้างใบสมัคร</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={7} className="h-32 text-center text-muted">
-                                ไม่พบข้อมูลรายการคำขอ
+                            <TableCell colSpan={6} className="h-32 text-center text-muted">
+                                ไม่พบข้อมูลรายการใบสมัคร
                             </TableCell>
                         </TableRow>
                     ) : (
@@ -88,9 +87,7 @@ export function ApplicationTable({ data }: ApplicationTableProps) {
                                     <span className="font-semibold text-foreground text-[13px]">{app.applicantName}</span>
                                 </TableCell>
                                 <TableCell className="text-muted">{app.productType}</TableCell>
-                                <TableCell className="text-right font-medium">
-                                    {app.requestedAmount.toLocaleString('th-TH', { minimumFractionDigits: 0 })}
-                                </TableCell>
+
                                 <TableCell className="text-center">
                                     <Badge variant={getStatusColor(app.status)}>
                                         {getStatusLabel(app.status)}

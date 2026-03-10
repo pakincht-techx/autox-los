@@ -1364,7 +1364,7 @@ function PreQuestionPageContent() {
 
     useEffect(() => {
         setBreadcrumbs([
-            { label: "รายการคำขอ", href: "/dashboard/applications" },
+            { label: "รายการใบสมัคร", href: "/dashboard/applications" },
             { label: "แนะนำผลิตภัณฑ์", isActive: true }
         ]);
         return () => {
@@ -1495,8 +1495,7 @@ function PreQuestionPageContent() {
                 {currentStep === 1 && (
                     <div className="max-w-4xl mx-auto print:hidden animate-in slide-in-from-right-8 duration-300 pb-20 pt-4">
                         <div className="space-y-1 mb-8 text-center">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">แบบสอบถามเบื้องต้น</h2>
-                            <p className="text-gray-500">กรุณากรอกข้อมูลเพื่อประเมินผลิตภัณฑ์สินเชื่อที่เหมาะสม</p>
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">คำนวนวงเงินเบื้องต้น</h2>
                         </div>
 
                         {/* Section 1: Collateral Info */}
@@ -1828,8 +1827,8 @@ function PreQuestionPageContent() {
                                                                                             disabled={(formData.condoUnitAppraisals || []).length <= 1}
                                                                                             className={cn(
                                                                                                 "h-8 w-8 p-0",
-                                                                                                (formData.condoUnitAppraisals || []).length <= 1 
-                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                (formData.condoUnitAppraisals || []).length <= 1
+                                                                                                    ? "text-gray-300 cursor-not-allowed"
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
@@ -1908,8 +1907,8 @@ function PreQuestionPageContent() {
                                                                                             disabled={(formData.condoBalconyAppraisals || []).length <= 1}
                                                                                             className={cn(
                                                                                                 "h-8 w-8 p-0",
-                                                                                                (formData.condoBalconyAppraisals || []).length <= 1 
-                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                (formData.condoBalconyAppraisals || []).length <= 1
+                                                                                                    ? "text-gray-300 cursor-not-allowed"
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
@@ -1923,23 +1922,23 @@ function PreQuestionPageContent() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex justify-between items-center px-4 py-4 bg-chaiyo-blue/[0.03] border border-border-strong rounded-xl mt-4">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
-                                                                            <Calculator className="w-4 h-4 text-chaiyo-blue" />
-                                                                        </div>
-                                                                        <div className="flex flex-col">
-                                                                            <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
-                                                                            <span className="text-sm font-bold text-gray-700">รวมราคาประเมินห้องชุด</span>
-                                                                        </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
+                                                                        <Calculator className="w-4 h-4 text-chaiyo-blue" />
                                                                     </div>
-                                                                    <div className="text-right">
-                                                                        <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
-                                                                            {Number(formData.appraisalPrice || 0).toLocaleString()}
-                                                                        </div>
-                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
+                                                                        <span className="text-sm font-bold text-gray-700">รวมราคาประเมินห้องชุด</span>
                                                                     </div>
                                                                 </div>
+                                                                <div className="text-right">
+                                                                    <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
+                                                                        {Number(formData.appraisalPrice || 0).toLocaleString()}
+                                                                    </div>
+                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
+                                                                </div>
                                                             </div>
+                                                        </div>
                                                     ) : ['ns4', 'ns3k', 'trajong_deed'].includes(formData.landDeedType) ? (
                                                         <div className="space-y-6 md:col-span-2">
                                                             {formData.landDeedType === 'trajong_deed' && (
@@ -2031,8 +2030,8 @@ function PreQuestionPageContent() {
                                                                                             disabled={(formData.landAppraisals || []).length <= 1}
                                                                                             className={cn(
                                                                                                 "h-8 w-8 p-0",
-                                                                                                (formData.landAppraisals || []).length <= 1 
-                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                (formData.landAppraisals || []).length <= 1
+                                                                                                    ? "text-gray-300 cursor-not-allowed"
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
@@ -2111,8 +2110,8 @@ function PreQuestionPageContent() {
                                                                                             disabled={(formData.buildingAppraisals || []).length <= 1}
                                                                                             className={cn(
                                                                                                 "h-8 w-8 p-0",
-                                                                                                (formData.buildingAppraisals || []).length <= 1 
-                                                                                                    ? "text-gray-300 cursor-not-allowed" 
+                                                                                                (formData.buildingAppraisals || []).length <= 1
+                                                                                                    ? "text-gray-300 cursor-not-allowed"
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >

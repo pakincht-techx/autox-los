@@ -44,7 +44,7 @@ const getStatusLabel = (status: ApplicationStatus) => {
         case 'Rejected': return 'ปฏิเสธ';
         case 'In Review': return 'รอพิจารณา';
         case 'Sent Back': return 'ส่งกลับ';
-        case 'Cancelled': return 'ยกเลิกคำขอ';
+        case 'Cancelled': return 'ยกเลิกใบสมัคร';
         case 'Draft': return 'แบบร่าง';
         default: return status;
     }
@@ -168,7 +168,7 @@ export function ApplicationActivitySidebar({
         {
             id: '4',
             title: status === 'Cancelled' ? 'ยกเลิกการทำรายการ' : 'ผลการพิจารณา',
-            description: status === 'Approved' ? 'อนุมัติสินเชื่อ' : status === 'Rejected' ? 'ปฏิเสธสินเชื่อ' : status === 'Cancelled' ? 'ลูกค้ายกเลิกคำขอสินเชื่อ' : 'รอการพิจารณา',
+            description: status === 'Approved' ? 'อนุมัติสินเชื่อ' : status === 'Rejected' ? 'ปฏิเสธสินเชื่อ' : status === 'Cancelled' ? 'ลูกค้ายกเลิกใบสมัครสินเชื่อ' : 'รอการพิจารณา',
             actor: currentUserName,
             position: currentUserPosition,
             date: status === 'Cancelled' ? '20/02/2569' : '-',
@@ -196,7 +196,7 @@ export function ApplicationActivitySidebar({
 
         {
             id: '2',
-            title: 'ยื่นคำขอ (Submitted)',
+            title: 'ยื่นใบสมัคร (Submitted)',
             description: 'ยืนยันข้อมูลและส่งพิจารณา',
             actor: 'สมหญิง ใจดี',
             position: 'พนักงานสาขา',
@@ -210,8 +210,8 @@ export function ApplicationActivitySidebar({
         },
         {
             id: '1',
-            title: 'สร้างคำขอ',
-            description: 'สร้างร่างคำขอสินเชื่อเข้าระบบ',
+            title: 'สร้างใบสมัคร',
+            description: 'สร้างร่างใบสมัครสินเชื่อเข้าระบบ',
             actor: 'สมหญิง ใจดี',
             position: 'พนักงานสาขา',
             date: '01/10/2566',
@@ -284,7 +284,7 @@ export function ApplicationActivitySidebar({
 
         const newActivity: SubmittedActivity = {
             id: `submitted-${Date.now()}`,
-            title: 'ยื่นคำขอ',
+            title: 'ยื่นใบสมัคร',
             description: comment || 'แก้ไขข้อมูลและส่งพิจารณาอีกครั้ง',
             actor: currentUserName,
             position: currentUserPosition,
@@ -471,7 +471,7 @@ export function ApplicationActivitySidebar({
                             <Send className="w-3 h-3 text-blue-600" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 leading-none">ส่งคำขอโดย</span>
+                            <span className="text-[10px] text-gray-400 leading-none">ส่งใบสมัครโดย</span>
                             <span className="text-[11px] font-bold text-gray-700">{currentUserName}</span>
                             <span className="text-[10px] text-gray-400">{currentUserPosition}</span>
                         </div>
@@ -488,7 +488,7 @@ export function ApplicationActivitySidebar({
                             onClick={handleMakerResubmit}
                         >
                             <Send className="w-3.5 h-3.5 mr-1.5" />
-                            ยื่นคำขอใหม่
+                            ยื่นใบสมัครใหม่
                         </Button>
                     </div>
                 </div>

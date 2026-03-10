@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Filter, Calculator } from "lucide-react";
+import { Search, Filter, Calculator, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -110,7 +110,7 @@ export default function ApplicationsPage() {
         { label: "ส่งกลับ", value: "Sent Back" },
         { label: "อนุมัติ", value: "Approved" },
         { label: "ถูกปฎิเสธ", value: "Rejected" },
-        { label: "ยกเลิกคำขอ", value: "Cancelled" },
+        { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
     ];
 
     const filteredData = MOCK_DATA.filter((app) => {
@@ -138,13 +138,14 @@ export default function ApplicationsPage() {
                 {/* Page Title Header */}
                 <div className="flex flex-row items-start justify-between gap-4">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการคำขอ</h1>
-                        <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการคำขอสินเชื่อทั้งหมดของคุณ</p>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการใบสมัคร</h1>
+                        <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการใบสมัครสินเชื่อทั้งหมดของคุณ</p>
                     </div>
 
                     <Link href="/dashboard/pre-question">
-                        <Button className="font-bold active:scale-95 transition-all shadow-sm">
-                            แนะนำผลิตภัณฑ์
+                        <Button className="font-bold active:scale-95 transition-all shadow-sm gap-2">
+                            <Plus className="w-4 h-4" />
+                            สร้างใบสมัครใหม่
                         </Button>
                     </Link>
                 </div>
@@ -180,7 +181,7 @@ export default function ApplicationsPage() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted hover:text-chaiyo-blue transition-colors z-10" />
                             <Input
                                 type="text"
-                                placeholder="ค้นหาชื่อ หรือเลขที่คำขอ..."
+                                placeholder="ค้นหาชื่อ หรือเลขที่ใบสมัคร..."
                                 value={searchQuery}
                                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                                 className="pl-9 pr-4 h-9 shadow-none border-gray-200"

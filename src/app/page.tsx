@@ -38,7 +38,7 @@ export default function Home() {
           </h2>
           <p className="text-white/80 mb-10 text-[16px] leading-relaxed">
             กรุณาคลิกปุ่มด้านล่างเพื่อเข้าสู่ระบบงานหลัก<br />
-            และเริ่มต้นจัดการคำขอสินเชื่อของคุณ
+            และเริ่มต้นจัดการใบสมัครสินเชื่อของคุณ
           </p>
 
           <Link href="/dashboard/applications" className="w-full">

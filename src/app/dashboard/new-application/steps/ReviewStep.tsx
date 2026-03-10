@@ -233,7 +233,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                     <ShieldCheck className="w-10 h-10 text-chaiyo-gold" />
                 </div>
                 <h3 className="text-2xl font-bold">ตรวจสอบข้อมูลและยืนยัน</h3>
-                <p className="text-muted text-sm max-w-md mx-auto">กรุณาตรวจสอบความถูกต้องของข้อมูลและยอมรับเงื่อนไขก่อนยื่นใบคำขอ</p>
+                <p className="text-muted text-sm max-w-md mx-auto">กรุณาตรวจสอบความถูกต้องของข้อมูลและยอมรับเงื่อนไขก่อนยื่นใบสมัคร</p>
             </div>
 
             <div className="grid gap-6 grid-cols-1 w-full">
@@ -1152,7 +1152,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             <AlertCircle className="w-10 h-10 text-amber-500" />
                                         </div>
                                         <h3 className="2xl font-bold mb-1">รอผลการพิจารณา</h3>
-                                        <p className="text-amber-900/80 text-sm">ใบคำขอของท่านต้องได้รับการตรวจสอบเพิ่มเติม</p>
+                                        <p className="text-amber-900/80 text-sm">ใบสมัครของท่านต้องได้รับการตรวจสอบเพิ่มเติม</p>
                                     </div>
                                 </div>
                                 <CardContent className="p-8 space-y-6">

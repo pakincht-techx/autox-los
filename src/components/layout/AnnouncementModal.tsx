@@ -64,7 +64,7 @@ export function AnnouncementModal({ open, onOpenChange }: AnnouncementModalProps
                                 htmlFor="dont-show"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-600 cursor-pointer select-none"
                             >
-                                ไม่ต้องแสดงอีกในภายหลัง
+                                ไม่ต้องแสดงอีกในวันนี้
                             </Label>
                         </div>
                     </div>

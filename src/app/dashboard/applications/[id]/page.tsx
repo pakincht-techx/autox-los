@@ -97,7 +97,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
     useEffect(() => {
         setBreadcrumbs([
-            { label: "รายการคำขอ", href: "/dashboard/applications" },
+            { label: "รายการใบสมัคร", href: "/dashboard/applications" },
             { label: app.applicationNo, isActive: true }
         ]);
         return () => {
@@ -132,14 +132,14 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                                 className="h-9 transition-all text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300 font-medium"
                                             >
                                                 <X className="w-4 h-4 mr-1.5" />
-                                                ยกเลิกคำขอ
+                                                ยกเลิกใบสมัคร
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[425px]">
                                             <DialogHeader>
-                                                <DialogTitle>ยืนยันการยกเลิกคำขอ</DialogTitle>
+                                                <DialogTitle>ยืนยันการยกเลิกใบสมัคร</DialogTitle>
                                                 <DialogDescription className="pt-2 text-sm text-gray-500">
-                                                    คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำขอ <strong>{app.applicationNo}</strong> ? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                                    คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสมัคร <strong>{app.applicationNo}</strong> ? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                                                 </DialogDescription>
                                             </DialogHeader>
                                             <DialogFooter className="mt-4 flex sm:justify-end gap-2">
@@ -162,7 +162,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                         onClick={() => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=draft`)}
                                     >
                                         <Pencil className="w-4 h-4 mr-1.5" />
-                                        แก้ไขคำขอ
+                                        แก้ไขใบสมัคร
                                     </Button>
                                 </div>
                             )}

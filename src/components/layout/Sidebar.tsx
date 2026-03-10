@@ -64,7 +64,7 @@ const navigationGroups = [
     {
         title: "จัดการ",
         items: [
-            { name: "รายการคำขอ", href: "/dashboard/applications", icon: Files, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
+            { name: "รายการใบสมัคร", href: "/dashboard/applications", icon: Files, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
             { name: "ลูกค้า", href: "/dashboard/customers", icon: Users, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
         ]
     },

@@ -62,7 +62,7 @@ export function ActionMenu({ onView, onEdit, onNewApplication, onDelete, items }
         }
         if (onNewApplication) {
             menuItems.push({
-                label: "สร้างใบคำขอใหม่",
+                label: "สร้างใบสมัครใหม่",
                 icon: <PlusCircle className="w-3.5 h-3.5" />,
                 onClick: onNewApplication,
                 variant: 'primary',

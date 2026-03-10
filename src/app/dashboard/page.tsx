@@ -29,7 +29,7 @@ const minutesAgo = (m: number) => new Date(Date.now() - m * 60000).toISOString()
 
 const kpiData = [
     { label: "งานที่เสี่ยงหลุด SLA", value: "3", sub: "เหลือ < 5 นาที", icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
-    { label: "คำขอใหม่ (วันนี้)", value: "12", sub: "+2 รายการ", icon: Files, color: "text-blue-600" },
+    { label: "ใบสมัครใหม่ (วันนี้)", value: "12", sub: "+2 รายการ", icon: Files, color: "text-blue-600" },
     { label: "เวลาเฉลี่ย/เคส", value: "14m", sub: "เป้าหมาย: 20m", icon: Clock, color: "text-emerald-600" },
 ];
 
@@ -129,7 +129,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
                 <div className="flex items-center justify-between px-2">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-bold text-foreground">ใบคำขอที่รอดำเนินการ</h2>
+                        <h2 className="text-sm font-bold text-foreground">ใบสมัครที่รอดำเนินการ</h2>
                         <span className="px-2 py-0.5 text-[10px] font-bold bg-chaiyo-blue/10 text-chaiyo-blue rounded-full">4 รายการ</span>
                     </div>
                     <div className="flex items-center gap-2">

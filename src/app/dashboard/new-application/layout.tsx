@@ -61,7 +61,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     useEffect(() => {
         setBreadcrumbs([
             {
-                label: "รายการคำขอ",
+                label: "รายการใบสมัคร",
                 onClick: () => {
                     if (isApplicationStarted) {
                         setConfirmLeaveDialog(true);
@@ -70,7 +70,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     }
                 }
             },
-            { label: isApplicationStarted && appId ? appId : "สร้างใบคำขอ", isActive: true }
+            { label: isApplicationStarted && appId ? appId : "สร้างใบสมัคร", isActive: true }
         ]);
 
         if (isApplicationStarted) {
@@ -79,7 +79,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     <Button
                         variant="outline"
                         onClick={() => toast.success("บันทึกแบบร่างสำเร็จ", {
-                            description: "ข้อมูลใบคำขอของคุณถูกบันทึกเรียบร้อยแล้ว",
+                            description: "ข้อมูลใบสมัครของคุณถูกบันทึกเรียบร้อยแล้ว",
                             duration: 3000,
                         })}
                     >
@@ -89,7 +89,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                         variant="default"
                         onClick={() => setIsSubmitDialogOpen(true)}
                     >
-                        <Send className="w-4 h-4 mr-2" /> ส่งใบคำขอ
+                        <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
                     </Button>
                 </div>
             );
@@ -112,7 +112,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                 {/* Header Title Section */}
                 <div className="px-2">
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-chaiyo-blue to-blue-800">
-                        {isApplicationStarted ? `ใบคำขอเลขที่ ${appId}` : "ตรวจสอบสถานะลูกค้า"}
+                        {isApplicationStarted ? `ใบสมัครเลขที่ ${appId}` : "ตรวจสอบสถานะลูกค้า"}
                     </h1>
                     <p className="text-muted mt-1">
                         {!isApplicationStarted
@@ -257,10 +257,10 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                                 <Send className="w-6 h-6 text-chaiyo-blue" />
                             </div>
-                            <DialogTitle className="text-xl">ส่งใบคำขอสินเชื่อ</DialogTitle>
+                            <DialogTitle className="text-xl">ส่งใบสมัครสินเชื่อ</DialogTitle>
                         </div>
                         <DialogDescription className="text-base mt-2">
-                            กรุณาระบุหมายเหตุหรือคำแนะนำเพิ่มเติมสำหรับการส่งพิจารณาใบคำขอนี้
+                            กรุณาระบุหมายเหตุหรือคำแนะนำเพิ่มเติมสำหรับการส่งพิจารณาใบสมัครนี้
                         </DialogDescription>
                     </DialogHeader>
 
@@ -291,8 +291,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                                 setTimeout(() => {
                                     setIsSubmitting(false);
                                     setIsSubmitDialogOpen(false);
-                                    toast.success("ส่งใบคำขอสำเร็จ", {
-                                        description: "ใบคำขอของคุณถูกส่งเข้าสู่ระบบการพิจารณาแล้ว",
+                                    toast.success("ส่งใบสมัครสำเร็จ", {
+                                        description: "ใบสมัครของคุณถูกส่งเข้าสู่ระบบการพิจารณาแล้ว",
                                     });
                                     router.push(`/dashboard/applications/${appId || 'app-256700001'}`);
                                 }, 1500);

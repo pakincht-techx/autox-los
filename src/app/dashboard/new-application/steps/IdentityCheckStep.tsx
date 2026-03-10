@@ -1013,7 +1013,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                     setAlertDialog({
                                                         isOpen: true,
                                                         title: "บันทึกฉบับร่างสำเร็จ",
-                                                        description: "ระบบได้บันทึกข้อมูลใบคำขอไว้ในรายการฉบับร่างแล้ว เมื่อลูกค้ากลับมาต้องทำการตรวจสอบจากบัตรและใบหน้าใหม่อีกครั้ง",
+                                                        description: "ระบบได้บันทึกข้อมูลใบสมัครไว้ในรายการฉบับร่างแล้ว เมื่อลูกค้ากลับมาต้องทำการตรวจสอบจากบัตรและใบหน้าใหม่อีกครั้ง",
                                                         type: "success",
                                                         action: () => window.location.href = '/dashboard'
                                                     });
@@ -1297,7 +1297,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         </div>
                         <AlertDialogTitle className="text-2xl font-black text-gray-900">ยืนยันการออกจากหน้านี้</AlertDialogTitle>
                         <AlertDialogDescription className="text-base text-gray-500">
-                            ข้อมูลทั้งหมดจะถูกบันทึกเป็น 'ฉบับร่าง' โดยอัตโนมัติ คุณสามารถกลับมาดำเนินการต่อได้จากรายการใบคำขอ
+                            ข้อมูลทั้งหมดจะถูกบันทึกเป็น 'ฉบับร่าง' โดยอัตโนมัติ คุณสามารถกลับมาดำเนินการต่อได้จากรายการใบสมัคร
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 
@@ -1428,7 +1428,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             onClick={() => window.location.href = '/dashboard'}
                             className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold h-12 rounded-xl flex items-center justify-center gap-2 flex-1 order-2 sm:order-1"
                         >
-                            ยกเลิกการสร้างใบคำขอ
+                            ยกเลิกการสร้างใบสมัคร
                         </Button>
                         <AlertDialogAction
                             onClick={() => {

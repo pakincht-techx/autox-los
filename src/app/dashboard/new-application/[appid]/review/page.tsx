@@ -11,8 +11,8 @@ export default function ReviewPage() {
     const { formData, setFormData, appId } = useApplication();
 
     const handleSubmit = () => {
-        toast.success("ส่งคำขอสำเร็จ", {
-            description: "ใบคำขอสินเชื่อถูกส่งเรียบร้อยแล้ว! ระบบกำลังดำเนินการพิจารณา",
+        toast.success("ส่งใบสมัครสำเร็จ", {
+            description: "ใบสมัครสินเชื่อถูกส่งเรียบร้อยแล้ว! ระบบกำลังดำเนินการพิจารณา",
         });
         setTimeout(() => router.push("/dashboard/applications"), 1500);
     };
