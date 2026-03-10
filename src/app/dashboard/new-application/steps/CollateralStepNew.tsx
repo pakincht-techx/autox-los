@@ -237,7 +237,7 @@ const VEHICLE_CONDITION = [
 
 const FUEL_TYPES = [
     { value: "ดีเซล", label: "ดีเซล" },
-    { value: "เบนซิน(Default)", label: "เบนซิน(Default)" },
+    { value: "เบนซิน", label: "เบนซิน" },
     { value: "ไฟฟ้า", label: "ไฟฟ้า" },
     { value: "ไฮบริด", label: "ไฮบริด" },
     { value: "LPG", label: "LPG" }
@@ -440,7 +440,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 usageType: formData.usageType || "ส่วนบุคคล",
                 fuelType: formData.fuelType || "เบนซิน",
                 engineNumber: formData.engineNumber || "R18Z1-7842516",
-                chassisNumber: formData.chassisNumber || "MRHFC1650JPXXXXXX",
+                chassisNumber: formData.chassisNumber || "MRHFC16501P000001",
                 location: formData.location || "กรุงเทพมหานคร",
                 selectedAppraisalMethods: formData.selectedAppraisalMethods || ["หนังสือรับรองจากสำนักงานที่ดิน"],
                 appraisalMethodsData: formData.appraisalMethodsData || {
@@ -1010,227 +1010,227 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
                             ) : (
                                 <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขทะเบียน</Label>
-                                        <Input
-                                            value={formData.licensePlate || ""}
-                                            onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">จังหวัด</Label>
-                                        <Combobox
-                                            options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
-                                            value={formData.province || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, province: val })}
-                                            className="h-10 rounded-xl"
-                                            placeholder="เลือกจังหวัด"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">วันที่ครบกำหนดเสียภาษี</Label>
-                                        <DatePickerBE
-                                            value={formData.taxDueDate}
-                                            onChange={(val) => setFormData({ ...formData, taxDueDate: val })}
-                                            inputClassName={cn(
-                                                "h-10 transition-all focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20",
-                                                aiDetectedFields.includes('taxDueDate') && "border-purple-300 ring-1 ring-purple-100 bg-purple-50/30 font-bold text-purple-700"
-                                            )}
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ยี่ห้อรถ</Label>
-                                        <Input
-                                            value={formData.brand || ""}
-                                            onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">รุ่นรถ</Label>
-                                        <Input
-                                            value={formData.model || ""}
-                                            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">รุ่นปี ค.ศ.</Label>
-                                        <Input
-                                            value={formData.year || ""}
-                                            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">หมายเลขรุ่นย่อย</Label>
-                                        <Input
-                                            value={formData.subModel || ""}
-                                            onChange={(e) => setFormData({ ...formData, subModel: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ซีซี (CC)</Label>
-                                        <Input
-                                            value={formData.cc || ""}
-                                            onChange={(e) => setFormData({ ...formData, cc: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">แรงม้า</Label>
-                                        <Input
-                                            value={formData.horsePower || ""}
-                                            onChange={(e) => setFormData({ ...formData, horsePower: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">สี</Label>
-                                        <Select
-                                            value={formData.color || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, color: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกสี" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {VEHICLE_COLORS.map((color) => (
-                                                    <SelectItem key={color.value} value={color.value}>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: color.value === "แดง" ? "#EF4444" : color.value === "ดำ" ? "#000000" : color.value === "ขาว" ? "#FFFFFF" : color.value === "เทา" ? "#9CA3AF" : color.value === "เงิน" ? "#E5E7EB" : color.value === "น้ำเงิน" ? "#3B82F6" : color.value === "เขียว" ? "#10B981" : color.value === "เหลือง" ? "#FCD34D" : color.value === "ส้ม" ? "#F97316" : color.value === "ม่วง" ? "#A855F7" : color.value === "น้ำตาล" ? "#92400E" : "#FEF3C7" }} />
-                                                            {color.label}
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลข รย. <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={formData.ryNumber || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, ryNumber: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกเลข รย." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {VEHICLE_CLASSES_RY.map((ry) => (
-                                                    <SelectItem key={ry.value} value={ry.value}>
-                                                        {ry.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะสภาพรถ</Label>
-                                        <Select
-                                            value={formData.vehicleCondition || "ใช้แล้ว"}
-                                            onValueChange={(val) => setFormData({ ...formData, vehicleCondition: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {VEHICLE_CONDITION.map((cond) => (
-                                                    <SelectItem key={cond.value} value={cond.value}>
-                                                        {cond.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะ</Label>
-                                        <Select
-                                            value={formData.vehicleType || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกลักษณะ" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {formData.collateralType === 'car' && CAR_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                                {formData.collateralType === 'moto' && (
-                                                    <SelectItem value="รถจักรยานยนต์">
-                                                        รถจักรยานยนต์
-                                                    </SelectItem>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">เลขทะเบียน</Label>
+                                            <Input
+                                                value={formData.licensePlate || ""}
+                                                onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">จังหวัด</Label>
+                                            <Combobox
+                                                options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
+                                                value={formData.province || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, province: val })}
+                                                className="h-10 rounded-xl"
+                                                placeholder="เลือกจังหวัด"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">วันที่ครบกำหนดเสียภาษี</Label>
+                                            <DatePickerBE
+                                                value={formData.taxDueDate}
+                                                onChange={(val) => setFormData({ ...formData, taxDueDate: val })}
+                                                inputClassName={cn(
+                                                    "h-10 transition-all focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20",
+                                                    aiDetectedFields.includes('taxDueDate') && "border-purple-300 ring-1 ring-purple-100 bg-purple-50/30 font-bold text-purple-700"
                                                 )}
-                                                {formData.collateralType === 'truck' && TRUCK_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                                {formData.collateralType === 'agri' && AGRI_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ยี่ห้อรถ</Label>
+                                            <Input
+                                                value={formData.brand || ""}
+                                                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">รุ่นรถ</Label>
+                                            <Input
+                                                value={formData.model || ""}
+                                                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">รุ่นปี ค.ศ.</Label>
+                                            <Input
+                                                value={formData.year || ""}
+                                                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">หมายเลขรุ่นย่อย</Label>
+                                            <Input
+                                                value={formData.subModel || ""}
+                                                onChange={(e) => setFormData({ ...formData, subModel: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ซีซี (CC)</Label>
+                                            <Input
+                                                value={formData.cc || ""}
+                                                onChange={(e) => setFormData({ ...formData, cc: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">แรงม้า</Label>
+                                            <Input
+                                                value={formData.horsePower || ""}
+                                                onChange={(e) => setFormData({ ...formData, horsePower: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">สี</Label>
+                                            <Select
+                                                value={formData.color || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, color: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue placeholder="เลือกสี" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {VEHICLE_COLORS.map((color) => (
+                                                        <SelectItem key={color.value} value={color.value}>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: color.value === "แดง" ? "#EF4444" : color.value === "ดำ" ? "#000000" : color.value === "ขาว" ? "#FFFFFF" : color.value === "เทา" ? "#9CA3AF" : color.value === "เงิน" ? "#E5E7EB" : color.value === "น้ำเงิน" ? "#3B82F6" : color.value === "เขียว" ? "#10B981" : color.value === "เหลือง" ? "#FCD34D" : color.value === "ส้ม" ? "#F97316" : color.value === "ม่วง" ? "#A855F7" : color.value === "น้ำตาล" ? "#92400E" : "#FEF3C7" }} />
+                                                                {color.label}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">เลข รย. <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.ryNumber || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, ryNumber: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue placeholder="เลือกเลข รย." />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {VEHICLE_CLASSES_RY.map((ry) => (
+                                                        <SelectItem key={ry.value} value={ry.value}>
+                                                            {ry.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะสภาพรถ</Label>
+                                            <Select
+                                                value={formData.vehicleCondition || "ใช้แล้ว"}
+                                                onValueChange={(val) => setFormData({ ...formData, vehicleCondition: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {VEHICLE_CONDITION.map((cond) => (
+                                                        <SelectItem key={cond.value} value={cond.value}>
+                                                            {cond.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ลักษณะ</Label>
+                                            <Select
+                                                value={formData.vehicleType || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, vehicleType: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue placeholder="เลือกลักษณะ" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {formData.collateralType === 'car' && CAR_TYPES.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                    {formData.collateralType === 'moto' && (
+                                                        <SelectItem value="รถจักรยานยนต์">
+                                                            รถจักรยานยนต์
+                                                        </SelectItem>
+                                                    )}
+                                                    {formData.collateralType === 'truck' && TRUCK_TYPES.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                    {formData.collateralType === 'agri' && AGRI_TYPES.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ประเภทการใช้งาน</Label>
+                                            <Input
+                                                value={formData.usageType || ""}
+                                                onChange={(e) => setFormData({ ...formData, usageType: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">เชื้อเพลิง</Label>
+                                            <Select
+                                                value={formData.fuelType || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, fuelType: val })}
+                                            >
+                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue placeholder="เลือกเชื้อเพลิง" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {FUEL_TYPES.map((fuel) => (
+                                                        <SelectItem key={fuel.value} value={fuel.value}>
+                                                            {fuel.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">เลขเครื่องยนต์</Label>
+                                            <Input
+                                                value={formData.engineNumber || ""}
+                                                onChange={(e) => setFormData({ ...formData, engineNumber: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium font-mono text-[12px] focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">เลขตัวถัง</Label>
+                                            <Input
+                                                value={formData.chassisNumber || ""}
+                                                onChange={(e) => setFormData({ ...formData, chassisNumber: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium font-mono text-[12px] focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">บริเวณสถานที่ตั้งรถ (จังหวัด)</Label>
+                                            <Combobox
+                                                options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
+                                                value={formData.location || ""}
+                                                onValueChange={(val) => setFormData({ ...formData, location: val })}
+                                                className="h-10 rounded-xl"
+                                                placeholder="เลือกจังหวัด"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทการใช้งาน</Label>
-                                        <Input
-                                            value={formData.usageType || ""}
-                                            onChange={(e) => setFormData({ ...formData, usageType: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เชื้อเพลิง</Label>
-                                        <Select
-                                            value={formData.fuelType || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, fuelType: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกเชื้อเพลิง" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {FUEL_TYPES.map((fuel) => (
-                                                    <SelectItem key={fuel.value} value={fuel.value}>
-                                                        {fuel.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขเครื่องยนต์</Label>
-                                        <Input
-                                            value={formData.engineNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, engineNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium font-mono text-[12px] focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขตัวถัง</Label>
-                                        <Input
-                                            value={formData.chassisNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, chassisNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium font-mono text-[12px] focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">บริเวณสถานที่ตั้งรถ (จังหวัด)</Label>
-                                        <Combobox
-                                            options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
-                                            value={formData.location || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, location: val })}
-                                            className="h-10 rounded-xl"
-                                            placeholder="เลือกจังหวัด"
-                                        />
-                                    </div>
-                                </div>
 
                                 </>
                             )}
