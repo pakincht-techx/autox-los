@@ -237,7 +237,7 @@ const VEHICLE_CONDITION = [
 
 const FUEL_TYPES = [
     { value: "ดีเซล", label: "ดีเซล" },
-    { value: "น้ำมัน", label: "น้ำมัน" },
+    { value: "เบนซิน(Default)", label: "เบนซิน(Default)" },
     { value: "ไฟฟ้า", label: "ไฟฟ้า" },
     { value: "ไฮบริด", label: "ไฮบริด" },
     { value: "LPG", label: "LPG" }
@@ -1012,14 +1012,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ลักษณสภาพรถ</Label>
-                                        <Input
-                                            value={formData.vehicleCondition || ""}
-                                            onChange={(e) => setFormData({ ...formData, vehicleCondition: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เลขทะเบียน</Label>
                                         <Input
                                             value={formData.licensePlate || ""}
@@ -1240,18 +1232,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl mt-6">
-                                    <input
-                                        type="checkbox"
-                                        id="vehicleVerified"
-                                        checked={formData.vehicleVerified || false}
-                                        onChange={(e) => setFormData({ ...formData, vehicleVerified: e.target.checked })}
-                                        className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
-                                    />
-                                    <label htmlFor="vehicleVerified" className="text-sm font-medium text-gray-700 cursor-pointer">
-                                        ✓ ตรวจสอบหลักประกันรถแล้ว
-                                    </label>
-                                </div>
                                 </>
                             )}
 
@@ -1263,40 +1243,56 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </h4>
                                     <div className="space-y-2">
                                         {COLLATERAL_QUESTIONS[formData.collateralType]?.map((q) => (
-                                            <div key={q.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
-                                                <span className="text-sm text-gray-700 font-bold">{q.text}</span>
-                                                <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setFormData({
-                                                            ...formData,
-                                                            collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' }
-                                                        })}
-                                                        className={cn(
-                                                            "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                            formData.collateralQuestions?.[q.id] === 'yes'
-                                                                ? "bg-gray-200 text-gray-700 shadow-sm"
-                                                                : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                                                        )}
-                                                    >
-                                                        ใช่
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setFormData({
-                                                            ...formData,
-                                                            collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' }
-                                                        })}
-                                                        className={cn(
-                                                            "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                            formData.collateralQuestions?.[q.id] === 'no'
-                                                                ? "bg-chaiyo-blue text-white shadow-sm"
-                                                                : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                                                        )}
-                                                    >
-                                                        ไม่ใช่
-                                                    </button>
+                                            <div key={q.id}>
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
+                                                    <span className="text-sm text-gray-700 font-bold">{q.text}</span>
+                                                    <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData({
+                                                                ...formData,
+                                                                collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' }
+                                                            })}
+                                                            className={cn(
+                                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                formData.collateralQuestions?.[q.id] === 'yes'
+                                                                    ? "bg-gray-200 text-gray-700 shadow-sm"
+                                                                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                                                            )}
+                                                        >
+                                                            ใช่
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setFormData({
+                                                                ...formData,
+                                                                collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' }
+                                                            })}
+                                                            className={cn(
+                                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                formData.collateralQuestions?.[q.id] === 'no'
+                                                                    ? "bg-chaiyo-blue text-white shadow-sm"
+                                                                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                                                            )}
+                                                        >
+                                                            ไม่ใช่
+                                                        </button>
+                                                    </div>
                                                 </div>
+                                                {q.id === 'car_q16' && (
+                                                    <div className="flex items-center gap-2 p-4 bg-blue-50/50 border border-blue-100 rounded-xl mt-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="vehicleVerified"
+                                                            checked={formData.vehicleVerified || false}
+                                                            onChange={(e) => setFormData({ ...formData, vehicleVerified: e.target.checked })}
+                                                            className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
+                                                        />
+                                                        <label htmlFor="vehicleVerified" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                                            ตรวจสอบหลักประกันรถแล้ว
+                                                        </label>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
