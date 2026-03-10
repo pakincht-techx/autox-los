@@ -1302,17 +1302,17 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </CardContent>
                 </Card>
 
-                {/* SECTION 2: ข้อมูลผู้ถือกรรมสิทธิ์ */}
+                {/* SECTION 2: ข้อมูลผู้ถือครอง/กรรมสิทธิ์ */}
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <UserCheck className="w-5 h-5" />
-                            ข้อมูลผู้ถือกรรมสิทธิ์
+                            ข้อมูลผู้ถือครอง/กรรมสิทธิ์
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครองกรรมสิทธิ์</h3>
+                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครอง/กรรมสิทธิ์</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <Label className="text-[13px] text-muted-foreground ml-1">คำนำหน้า</Label>
@@ -1376,13 +1376,27 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                             {/* Group: ข้อมูลเจ้าของเดิม */}
                             <div className="pt-4 border-t border-gray-100">
-                                <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Book className="w-4 h-4 text-blue-500" />
-                                    ข้อมูลเจ้าของเดิม
-                                </h4>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                        <Book className="w-4 h-4 text-blue-500" />
+                                        ข้อมูลเจ้าของเดิม
+                                    </h4>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            const currentOwnerName = `${formData.ownerTitle || 'นาย'} ${formData.ownerFirstName || ''} ${formData.ownerLastName || ''}`.trim();
+                                            setFormData({ ...formData, previousOwnerName: currentOwnerName });
+                                        }}
+                                        className="text-xs gap-1"
+                                    >
+                                        คัดลอกจากผู้ถือครองปัจจุบัน
+                                    </Button>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เจ้าของกรรมสิทธิ์เดิม</Label>
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ชื่อผู้ถือครองกรรมสิทธิ์</Label>
                                         <Input
                                             placeholder="ชื่อ-นามสกุล เจ้าของเดิม"
                                             value={formData.previousOwnerName || ""}
@@ -1404,12 +1418,12 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
                             </div>
 
-                            {/* Group: ข้อมูลผู้ถือครองกรรมสิทธิ์ */}
+                            {/* Group: ข้อมูลผู้ถือครอง/กรรมสิทธิ์ */}
                             <div className="pt-4 border-t border-gray-100">
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                                         <UserCheck className="w-4 h-4 text-blue-600" />
-                                        ข้อมูลผู้ถือครองกรรมสิทธิ์ <span className="text-red-500">*</span>
+                                        ข้อมูลผู้ถือครอง/กรรมสิทธิ์ <span className="text-red-500">*</span>
                                     </h4>
                                     {(formData.landOwners || []).length < 5 && (
                                         <Button
