@@ -564,26 +564,48 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         <div className="divide-y divide-border-subtle">
                             {/* COLLATERAL TYPE SELECT */}
                             <div className="p-6 bg-gray-50/30">
-                                <div className="max-w-xs space-y-1">
-                                    <Label className="text-[13px] text-muted-foreground ml-1">ประเภทหลักประกัน <span className="text-red-500">*</span></Label>
-                                    <Select
-                                        value={formData.collateralType || "car"}
-                                        onValueChange={(val) => setFormData({ ...formData, collateralType: val })}
-                                    >
-                                        <SelectTrigger className="h-12 rounded-xl bg-white border-chaiyo-blue font-bold text-chaiyo-blue shadow-sm">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {PRODUCTS.map(p => (
-                                                <SelectItem key={p.id} value={p.id}>
-                                                    <div className="flex items-center gap-2">
-                                                        <p.icon className="w-4 h-4" />
-                                                        {p.label}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทหลักประกัน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.collateralType || "car"}
+                                            onValueChange={(val) => setFormData({ ...formData, collateralType: val })}
+                                        >
+                                            <SelectTrigger className="h-12 rounded-xl bg-white border-chaiyo-blue font-bold text-chaiyo-blue shadow-sm">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {PRODUCTS.map(p => (
+                                                    <SelectItem key={p.id} value={p.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            <p.icon className="w-4 h-4" />
+                                                            {p.label}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {formData.collateralType === 'land' && (
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">ประเภทโฉนดที่ดิน <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.landDeedType || "น.ส. 4"}
+                                                onValueChange={(val) => setFormData({ ...formData, landDeedType: val })}
+                                            >
+                                                <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {DEED_TYPES.map((type) => (
+                                                        <SelectItem key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -832,65 +854,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             {formData.collateralType === 'land' ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทโฉนด</Label>
-                                        <Select
-                                            value={formData.landDeedType || "น.ส. 4"}
-                                            onValueChange={(val) => setFormData({ ...formData, landDeedType: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {DEED_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขโฉนดที่ดิน <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landDeedNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, landDeedNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขที่ <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, landNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">เล่ม <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landVol || ""}
-                                            onChange={(e) => setFormData({ ...formData, landVol: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">หน้า <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landPage || ""}
-                                            onChange={(e) => setFormData({ ...formData, landPage: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ไม่พบที่ตั้งที่ดินตามโฉนด</Label>
-                                        <Input
-                                            value={formData.landLocationNotFound || ""}
-                                            onChange={(e) => setFormData({ ...formData, landLocationNotFound: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">จังหวัดที่ตั้งที่ดิน <span className="text-red-500">*</span></Label>
                                         <Combobox
                                             options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
@@ -933,6 +896,47 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             disabled={!formData.landDistrict}
                                             className="h-10 rounded-xl"
                                             placeholder="เลือกตำบล/แขวง"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขโฉนดที่ดิน <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            value={formData.landDeedNumber || ""}
+                                            onChange={(e) => setFormData({ ...formData, landDeedNumber: e.target.value })}
+                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">เลขที่ <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            value={formData.landNumber || ""}
+                                            onChange={(e) => setFormData({ ...formData, landNumber: e.target.value })}
+                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">เล่ม <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            value={formData.landVol || ""}
+                                            onChange={(e) => setFormData({ ...formData, landVol: e.target.value })}
+                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">หน้า <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            value={formData.landPage || ""}
+                                            onChange={(e) => setFormData({ ...formData, landPage: e.target.value })}
+                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ไม่พบที่ตั้งที่ดินตามโฉนด</Label>
+                                        <Input
+                                            value={formData.landLocationNotFound || ""}
+                                            onChange={(e) => setFormData({ ...formData, landLocationNotFound: e.target.value })}
+                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -1302,17 +1306,17 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </CardContent>
                 </Card>
 
-                {/* SECTION 2: ข้อมูลผู้ถือครอง/กรรมสิทธิ์ */}
+                {/* SECTION 2: ข้อมูลผู้ถือกรรมสิทธิ์/ถือครอง */}
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <UserCheck className="w-5 h-5" />
-                            ข้อมูลผู้ถือครอง/กรรมสิทธิ์
+                            ข้อมูลผู้ถือกรรมสิทธิ์/ถือครอง
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครอง/กรรมสิทธิ์</h3>
+                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือกรรมสิทธิ์/ถือครอง</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <Label className="text-[13px] text-muted-foreground ml-1">คำนำหน้า</Label>
