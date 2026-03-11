@@ -1515,12 +1515,11 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <UserCheck className="w-5 h-5" />
-                            ข้อมูลผู้ถือครอง/กรรมสิทธิ์ <span className="text-red-500 text-base">min:1</span>
+                            ข้อมูลผู้ถือครอง/กรรมสิทธิ์
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครอง/กรรมสิทธิ์</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <Label className="text-[13px] text-muted-foreground ml-1">คำนำหน้า</Label>
