@@ -1603,7 +1603,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ชื่อผู้ถือครองกรรมสิทธิ์</Label>
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ความสัมพันธ์กับผู้กู้</Label>
                                         <Input
                                             placeholder="ชื่อ-นามสกุล เจ้าของเดิม"
                                             value={formData.previousOwnerName || ""}
