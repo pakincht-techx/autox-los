@@ -943,63 +943,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </div>
 
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">สำนักงานที่ดิน <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={formData.landOffice || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, landOffice: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกสำนักงานที่ดิน" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {LAND_OFFICES.map((office) => (
-                                                    <SelectItem key={office.value} value={office.value}>
-                                                        {office.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">การใช้ประโยชน์ของที่ดิน <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={formData.landUseType || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, landUseType: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกการใช้ประโยชน์" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {LAND_USE_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทกรรมสิทธิ์ <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={formData.ownershipType || ""}
-                                            onValueChange={(val) => setFormData({ ...formData, ownershipType: val })}
-                                        >
-                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                <SelectValue placeholder="เลือกประเภทกรรมสิทธิ์" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {OWNERSHIP_TYPES.map((type) => (
-                                                    <SelectItem key={type.value} value={type.value}>
-                                                        {type.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เลขโฉนดที่ดิน <span className="text-red-500">*</span></Label>
                                         <Input
                                             value={formData.landDeedNumber || ""}
@@ -1113,6 +1056,65 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             />
                                         </div>
                                     )}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 pt-4">
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">สำนักงานที่ดิน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.landOffice || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, landOffice: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกสำนักงานที่ดิน" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LAND_OFFICES.map((office) => (
+                                                    <SelectItem key={office.value} value={office.value}>
+                                                        {office.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">การใช้ประโยชน์ของที่ดิน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.landUseType || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, landUseType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกการใช้ประโยชน์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LAND_USE_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทกรรมสิทธิ์ <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.ownershipType || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, ownershipType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกประเภทกรรมสิทธิ์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {OWNERSHIP_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
 
                                 <div className="pt-6 border-t border-gray-100">
