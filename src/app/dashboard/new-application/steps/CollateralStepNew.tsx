@@ -1022,6 +1022,11 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                         />
                                     </div>
+                                </div>
+
+                                <div className="border-t border-gray-100 my-4"></div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">ไร่ <span className="text-red-500">*</span></Label>
                                         <Input
