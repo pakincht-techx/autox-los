@@ -864,6 +864,18 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             className="h-10 rounded-xl"
                                             placeholder="เลือกจังหวัด"
                                         />
+                                        <div className="flex items-center gap-2 mt-3 p-2 bg-blue-50/30 rounded-lg">
+                                            <input
+                                                type="checkbox"
+                                                id="landLocationNotFound"
+                                                checked={formData.landLocationNotFound === "yes" || false}
+                                                onChange={(e) => setFormData({ ...formData, landLocationNotFound: e.target.checked ? "yes" : "" })}
+                                                className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
+                                            />
+                                            <label htmlFor="landLocationNotFound" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                                ไม่พบที่ตั้งที่ดินตามโฉนด
+                                            </label>
+                                        </div>
                                     </div>
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">อำเภอ/เขต <span className="text-red-500">*</span></Label>
@@ -936,14 +948,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         </>
                                     )}
                                     <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">ไม่พบที่ตั้งที่ดินตามโฉนด</Label>
-                                        <Input
-                                            value={formData.landLocationNotFound || ""}
-                                            onChange={(e) => setFormData({ ...formData, landLocationNotFound: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">เลขระวาง</Label>
                                         <Input
                                             value={formData.landRavang || ""}
@@ -959,22 +963,26 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                         />
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">หมายเลข <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landMapNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, landMapNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">แผ่นที่ <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landSheetNumber || ""}
-                                            onChange={(e) => setFormData({ ...formData, landSheetNumber: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
+                                    {formData.landDeedType !== "น.ส. 4" && (
+                                        <>
+                                            <div className="space-y-1">
+                                                <Label className="text-[13px] text-muted-foreground ml-1">หมายเลข <span className="text-red-500">*</span></Label>
+                                                <Input
+                                                    value={formData.landMapNumber || ""}
+                                                    onChange={(e) => setFormData({ ...formData, landMapNumber: e.target.value })}
+                                                    className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-[13px] text-muted-foreground ml-1">แผ่นที่ <span className="text-red-500">*</span></Label>
+                                                <Input
+                                                    value={formData.landSheetNumber || ""}
+                                                    onChange={(e) => setFormData({ ...formData, landSheetNumber: e.target.value })}
+                                                    className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">หน้าสำรวจ</Label>
                                         <Input
@@ -1007,14 +1015,16 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                         />
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">พื้นที่ห้องชุด (ตารางเมตร) <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={formData.landUnitArea || ""}
-                                            onChange={(e) => setFormData({ ...formData, landUnitArea: e.target.value })}
-                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                        />
-                                    </div>
+                                    {formData.landDeedType !== "น.ส. 4" && (
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">พื้นที่ห้องชุด (ตารางเมตร) <span className="text-red-500">*</span></Label>
+                                            <Input
+                                                value={formData.landUnitArea || ""}
+                                                onChange={(e) => setFormData({ ...formData, landUnitArea: e.target.value })}
+                                                className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <>
