@@ -90,7 +90,6 @@ const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
         { id: 'car_q3', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
         { id: 'car_q4', text: 'เป็นหรือเคยเป็น รถแท็กซี่/รถสองแถว/รถรับส่งผู้โดยสาร/รถอาสามูลนิธิ' },
         { id: 'car_q5', text: 'เป็นรถสไลด์ที่ดัดแปลงจากรถกระบะ' },
-        { id: 'car_q6', text: 'เป็นรถล้อเกินซุ้มล้อ' },
         { id: 'car_q7', text: 'เป็นรถที่ตัดแต่งคัสซี / ตัดเว้าคัสซี' },
         { id: 'car_q8', text: 'รถที่เปลี่ยนเครื่องยนต์ กรณีเปลี่ยนเครื่องยนต์ใช้เครื่องยนต์รุ่นเดียวกัน' },
         { id: 'car_q9', text: 'รถติดก๊าซ LPG / NGV โดยการติดตั้งเอง รวมถึงรถที่เคยมีประวัติติดตั้งก๊าซ (ยกเว้น การติดตั้งมาตรฐานจากโรงงานผู้ผลิตรถยนต์ของยี่ห้อนั้นๆ)' },
@@ -101,6 +100,7 @@ const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
         { id: 'car_q14', text: 'รอยบุบ รอยชน สนิม ผุ เคาะพ่นสีใหม่ทั้งคัน' },
         { id: 'car_q15', text: 'รถเปลี่ยนสีใหม่ไม่ใช่สีเดิม' },
         { id: 'car_q16', text: 'รถดัดแปลงสภาพช่วงล่าง รถเสริมแหนบ ต่อเติมเสริมคอกกระบะ (เกินตัวรถ) ต่อเติมตู้ทึบจากกระบะ' },
+        { id: 'car_q17', text: 'เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่' },
     ],
     moto: [
         { id: 'moto_q1', text: 'เป็นรถจากเต้นท์' },
@@ -1510,17 +1510,17 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </CardContent>
                 </Card>
 
-                {/* SECTION 2: ข้อมูลผู้ถือกรรมสิทธิ์/ถือครอง */}
+                {/* SECTION 2: ข้อมูลผู้ถือครอง/กรรมสิทธิ์ */}
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <UserCheck className="w-5 h-5" />
-                            ข้อมูลผู้ถือกรรมสิทธิ์/ถือครอง
+                            ข้อมูลผู้ถือครอง/กรรมสิทธิ์ <span className="text-red-500 text-base">min:1</span>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือกรรมสิทธิ์/ถือครอง</h3>
+                            <h3 className="text-lg font-bold text-gray-900">ผู้ถือครอง/กรรมสิทธิ์</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <Label className="text-[13px] text-muted-foreground ml-1">คำนำหน้า</Label>
