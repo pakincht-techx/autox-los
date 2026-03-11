@@ -54,24 +54,18 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
             {/* Staff Instruction Banner */}
             {showStaffBanner && (
-                <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm -mt-2">
+                <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex items-center gap-4 shadow-sm -mt-2">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
                             <User className="w-6 h-6 text-orange-600" />
                         </div>
                         <div>
-                            <h3 className="text-orange-900 font-bold text-lg mb-0.5">พนักงาน : กรุณายื่นอุปกรณ์ให้ลูกค้า</h3>
+                            <h3 className="text-orange-900 font-bold text-lg mb-0.5">พนักงานต้องยื่น iPad ให้ลูกค้า</h3>
                             <p className="text-orange-700 text-sm">
-                                เพื่อให้ลูกค้าอ่านรายละเอียดและกดยอมรับด้วยตนเอง
+                                เพื่อให้ลูกค้าอ่านรายละเอียด และกดยอมรับด้วยตนเอง
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowStaffBanner(false)}
-                        className="p-1 hover:bg-orange-100 rounded-lg transition-colors text-orange-500"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
                 </div>
             )}
 
@@ -79,16 +73,16 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Shield className="w-8 h-8 text-chaiyo-blue" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">เอกสารและหนังสือความยินยอม</h2>
-                <p className="text-muted-foreground">กรุณาอ่านและทำความเข้าใจรายละเอียดเอกสารก่อนดำเนินการต่อ</p>
+                <h2 className="text-2xl font-bold text-gray-800">ประกาศความเป็นนโยบายส่วนตัว (Privacy notice)</h2>
+                <p className="text-muted-foreground">บริษัท ออโต้ เอกซ์ จำกัด</p>
             </div>
 
             {/* 1. PDPA & NCB Consent */}
             <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mt-6">
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                     <div className="flex items-center gap-2 font-semibold text-gray-700">
-                        <FileText className="w-4 h-4 text-chaiyo-blue" />
-                        ข้อกำหนดและเงื่อนไข (Privacy Notice)
+
+                        กรุณาอ่านและทำความเข้าใจรายละเอียดเอกสารก่อนดำเนินการต่อ
                     </div>
                     {!hasReadPrivacy && (
                         <div className="text-xs text-orange-500 flex items-center gap-1 animate-pulse">
@@ -144,11 +138,11 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                 <label
                     htmlFor="accept-privacy"
                     className={cn(
-                        "text-sm cursor-pointer select-none",
+                        "cursor-pointer select-none",
                         !hasReadPrivacy ? "text-gray-400" : "text-gray-700"
                     )}
                 >
-                    <span className="font-bold">ข้าพเจ้าได้อ่านและยอมรับข้อกำหนดและเงื่อนไข (Privacy Notice)</span>
+                    <span className="font-bold">ข้าพเจ้าได้อ่านและรับทราบประกาศนโยบายความเป็นส่วนตัว (Privacy Notice)</span>
                     <br />
 
                     {!hasReadPrivacy && (
@@ -177,8 +171,8 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                             : "bg-gray-200 text-gray-400 shadow-none hover:bg-gray-200 cursor-not-allowed"
                     )}
                 >
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    ยืนยันความยินยอม
+
+                    รับทราบ
                 </Button>
             </div>
         </div>

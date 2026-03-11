@@ -130,7 +130,7 @@ export interface IncomeOccupation {
     prevTenureMonth?: string;
     employeeCount?: string;
     businessAgeYear?: string;
-    isSameAsMainAddress?: boolean;
+    isSameAsMainAddress?: string;
     mainAddress?: string;
     officeAddress?: string;
     officePhone?: string;
@@ -182,6 +182,7 @@ export interface IncomeOccupation {
     residenceDurationMonths?: string;
     residenceLivingWith?: string;
     residenceLivingWithRelationships?: string[];
+    remarks?: string;
 }
 
 export interface Child {

@@ -117,17 +117,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     return (
         <div className="h-full bg-sidebar">
             <div className="max-w-7xl mx-auto space-y-6 p-6 lg:px-8 lg:py-6 pb-32">
-                {/* Header Title Section */}
-                {!isApplicationPhase && (
-                    <div className="px-2">
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-chaiyo-blue to-blue-800">
-                            ตรวจสอบสถานะลูกค้า
-                        </h1>
-                        <p className="text-muted mt-1">
-                            ขั้นตอนการตรวจสอบข้อมูลและสถานะของลูกค้า
-                        </p>
-                    </div>
-                )}
+
+
 
                 {/* Sticky Borrower Name Header — application phase only, full-width */}
                 {isApplicationPhase && borrowerDisplayName && (

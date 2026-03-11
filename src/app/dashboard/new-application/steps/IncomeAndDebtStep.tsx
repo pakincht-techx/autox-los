@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin } from "lucide-react";
+import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Select,
@@ -191,6 +191,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         occId?: string,
         name?: string,
         categoryId?: string,
+        photoIndex?: number,
         type: 'special' | 'reference' | 'photo' | 'bankAccount' | 'incomeDocument' | 'saIncomeRow' | 'seIncomeRow' | 'seCostRow' | 'debtRow' | 'categorizedPhoto' | 'occupation'
     } | null>(null);
 
@@ -270,7 +271,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
         } else if (itemToDelete.type === 'reference' && itemToDelete.index !== undefined) {
             handleRemoveReference(itemToDelete.index);
         } else if (itemToDelete.type === 'categorizedPhoto' && itemToDelete.categoryId) {
-            handleRemoveCategorizedPhoto(itemToDelete.categoryId);
+            handleRemoveCategorizedPhoto(itemToDelete.categoryId, itemToDelete.photoIndex);
         } else if (itemToDelete.type === 'bankAccount' && itemToDelete.occId && itemToDelete.index !== undefined) {
             handleRemoveBankAccount(itemToDelete.occId, itemToDelete.index);
         } else if (itemToDelete.type === 'incomeDocument' && itemToDelete.occId && itemToDelete.id) {
@@ -480,7 +481,11 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handleRemoveOccupation = (id: string) => {
-        const newOccupations = occupations.filter((o: IncomeOccupation) => o.id !== id);
+        const newOccupations = occupations
+            .filter((o: IncomeOccupation) => o.id !== id)
+            .map((o: IncomeOccupation) =>
+                o.isSameAsMainAddress === id ? { ...o, isSameAsMainAddress: "" } : o
+            );
         handleChange("occupations", newOccupations);
         if (activeTab === id) {
             setActiveTab("main");
@@ -496,21 +501,35 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
     };
 
     const handlePhotoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !currentPhotoCategory) return;
+        const files = e.target.files;
+        if (!files || files.length === 0 || !currentPhotoCategory) return;
 
-        const url = URL.createObjectURL(file);
         const currentPhotos = formData.incomePhotos || {};
-        handleChange("incomePhotos", { ...currentPhotos, [currentPhotoCategory]: url });
+        const existing = currentPhotos[currentPhotoCategory] || [];
+        const newUrls = Array.from(files).map(file => URL.createObjectURL(file));
+        handleChange("incomePhotos", {
+            ...currentPhotos,
+            [currentPhotoCategory]: [...existing, ...newUrls]
+        });
 
         // Reset
         if (photoInputRef.current) photoInputRef.current.value = '';
         setCurrentPhotoCategory(null);
     };
 
-    const handleRemoveCategorizedPhoto = (categoryId: string) => {
+    const handleRemoveCategorizedPhoto = (categoryId: string, photoIndex?: number) => {
         const currentPhotos = { ...(formData.incomePhotos || {}) };
-        delete currentPhotos[categoryId];
+        if (photoIndex !== undefined) {
+            const arr = [...(currentPhotos[categoryId] || [])];
+            arr.splice(photoIndex, 1);
+            if (arr.length === 0) {
+                delete currentPhotos[categoryId];
+            } else {
+                currentPhotos[categoryId] = arr;
+            }
+        } else {
+            delete currentPhotos[categoryId];
+        }
         handleChange("incomePhotos", currentPhotos);
         setItemToDelete(null);
     };
@@ -1310,7 +1329,18 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                 <SelectValue placeholder="เลือกประเทศ" />
                                                             </SelectTrigger>
                                                             <SelectContent>
-                                                                <SelectItem value="TH">ไทย</SelectItem>
+                                                                <SelectItem value="TH">ไทย (Thai)</SelectItem>
+                                                                <SelectItem value="MM">พม่า (Myanmar)</SelectItem>
+                                                                <SelectItem value="LA">ลาว (Laos)</SelectItem>
+                                                                <SelectItem value="KH">กัมพูชา (Cambodia)</SelectItem>
+                                                                <SelectItem value="CN">จีน (China)</SelectItem>
+                                                                <SelectItem value="JP">ญี่ปุ่น (Japan)</SelectItem>
+                                                                <SelectItem value="VN">เวียดนาม (Vietnam)</SelectItem>
+                                                                <SelectItem value="MY">มาเลเซีย (Malaysia)</SelectItem>
+                                                                <SelectItem value="SG">สิงคโปร์ (Singapore)</SelectItem>
+                                                                <SelectItem value="US">สหรัฐอเมริกา (USA)</SelectItem>
+                                                                <SelectItem value="GB">สหราชอาณาจักร (UK)</SelectItem>
+                                                                <SelectItem value="OTHER">อื่นๆ (Other)</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                     </div>
@@ -1346,34 +1376,58 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                 <AddressForm
                                                     title="ที่อยู่ที่ทำงาน / กิจการ"
                                                     prefix="work"
-                                                    formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {}) : occ}
+                                                    formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {}) : occ}
                                                     onChange={(field, val) => handleOccupationChange(occ.id, field, val)}
                                                     disabled={!!occ.isSameAsMainAddress}
+                                                    requiredFields={['province', 'district', 'subDistrict', 'zipCode']}
                                                     headerChildren={
-                                                        <div className={cn(
-                                                            "flex flex-col md:flex-row md:items-center justify-between gap-4 ",
-                                                            occ.isSameAsMainAddress && "opacity-80"
-                                                        )}>
-
-                                                            {!occ.isMain && (
-                                                                <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-border-color">
-                                                                    <Checkbox
-                                                                        id={`same-as-main-${occ.id}`}
-                                                                        checked={occ.isSameAsMainAddress || false}
-                                                                        onCheckedChange={(checked) => {
-                                                                            const isChecked = !!checked;
-                                                                            handleOccupationChange(occ.id, "isSameAsMainAddress", isChecked);
+                                                        !occ.isMain ? (
+                                                            <div className="space-y-4 mb-4 mt-2">
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm">เลือกที่อยู่ที่ทำงาน</Label>
+                                                                    <Select
+                                                                        value={occ.isSameAsMainAddress || "_none"}
+                                                                        onValueChange={(val) => {
+                                                                            handleOccupationChange(occ.id, "isSameAsMainAddress", val === "_none" ? "" : val);
                                                                         }}
-                                                                    />
-                                                                    <label
-                                                                        htmlFor={`same-as-main-${occ.id}`}
-                                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-chaiyo-blue"
                                                                     >
-                                                                        เหมือนที่อยู่อาชีพหลัก
-                                                                    </label>
+                                                                        <SelectTrigger className="h-12 bg-white">
+                                                                            <SelectValue placeholder="เลือกแหล่งที่มาของที่อยู่" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="_none">ระบุที่อยู่ใหม่</SelectItem>
+                                                                            {occupations
+                                                                                .filter((o: IncomeOccupation) => o.id !== occ.id)
+                                                                                .map((o: IncomeOccupation) => {
+                                                                                    const label = o.isMain
+                                                                                        ? "อาชีพหลัก"
+                                                                                        : `อาชีพเสริม ${occupations.filter((x: IncomeOccupation) => !x.isMain).findIndex((x: IncomeOccupation) => x.id === o.id) + 1}`;
+                                                                                    const occName = o.occupationCode
+                                                                                        ? OCCUPATIONS.find(oc => (oc.value || oc.label) === o.occupationCode)?.label
+                                                                                        : undefined;
+                                                                                    return (
+                                                                                        <SelectItem key={o.id} value={o.id}>
+                                                                                            ที่อยู่{label}{occName ? ` (${occName})` : ""}
+                                                                                        </SelectItem>
+                                                                                    );
+                                                                                })}
+                                                                        </SelectContent>
+                                                                    </Select>
                                                                 </div>
-                                                            )}
-                                                        </div>
+                                                                {occ.isSameAsMainAddress && (() => {
+                                                                    const sourceOcc = occupations.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress);
+                                                                    const sourceLabel = sourceOcc?.isMain
+                                                                        ? "อาชีพหลัก"
+                                                                        : `อาชีพเสริม ${occupations.filter((x: IncomeOccupation) => !x.isMain).findIndex((x: IncomeOccupation) => x.id === sourceOcc?.id) + 1}`;
+                                                                    return (
+                                                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                                                            <Info className="w-4 h-4" />
+                                                                            ใช้ข้อมูลที่อยู่เดียวกับที่อยู่{sourceLabel}
+                                                                        </div>
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                        ) : undefined
                                                     }
                                                     footerChildren={
                                                         <div className="space-y-4 pt-4 border-t border-gray-100">
@@ -1381,7 +1435,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                 <div className="space-y-2">
                                                                     <Label className="text-xs text-muted-foreground">บริเวณใกล้เคียง/จุดสังเกต</Label>
                                                                     <Input
-                                                                        value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLandmark : occ.workLandmark) || ""}
+                                                                        value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).workLandmark : occ.workLandmark) || ""}
                                                                         onChange={(e) => handleOccupationChange(occ.id, "workLandmark", e.target.value)}
                                                                         placeholder="เช่น ใกล้เซเว่น, ตรงข้ามธนาคาร"
                                                                         className="h-12 bg-white"
@@ -1392,7 +1446,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                     <Label className="text-xs text-muted-foreground">ลักษณะที่ตั้งของกิจการ <span className="text-red-500">*</span></Label>
                                                                     <div className="flex flex-col gap-2">
                                                                         <Select
-                                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) || ""}
+                                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).workLocationType : occ.workLocationType) || ""}
                                                                             onValueChange={(val) => handleOccupationChange(occ.id, "workLocationType", val)}
                                                                             disabled={!!occ.isSameAsMainAddress}
                                                                         >
@@ -1409,9 +1463,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                                 <SelectItem value="other">อื่นๆ รายละเอียดอื่นๆ</SelectItem>
                                                                             </SelectContent>
                                                                         </Select>
-                                                                        {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationType : occ.workLocationType) === 'other') && (
+                                                                        {((occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).workLocationType : occ.workLocationType) === 'other') && (
                                                                             <Input
-                                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).workLocationTypeOther : occ.workLocationTypeOther) || ""}
+                                                                                value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).workLocationTypeOther : occ.workLocationTypeOther) || ""}
                                                                                 onChange={(e) => handleOccupationChange(occ.id, "workLocationTypeOther", e.target.value)}
                                                                                 placeholder="โปรดระบุรายละเอียด"
                                                                                 className="h-12 bg-white"
@@ -1427,7 +1481,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                     <div className="space-y-3">
                                                                         <Label className="text-xs text-muted-foreground">สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA' || occ.employmentType === 'SE') && <span className="text-red-500">*</span>}</Label>
                                                                         <RadioGroup
-                                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === 'main') || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
+                                                                            value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
                                                                             onValueChange={(val) => handleOccupationChange(occ.id, "businessStatus", val)}
                                                                             className="flex gap-6 pt-1"
                                                                             disabled={!!occ.isSameAsMainAddress}
@@ -3068,10 +3122,10 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                                                                                 type="text"
                                                                                                 value={formatNumberWithCommas(cycle.quantity || "")}
                                                                                                 onChange={(e) => updateCycle({ quantity: e.target.value.replace(/,/g, '') })}
-                                                                                                className="h-8 text-right font-mono text-xs pr-7 bg-white border-blue-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                                                                                className="h-8 text-right font-mono text-xs pr-7 bg-white"
                                                                                                 placeholder="0"
                                                                                             />
-                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-400">ตัว</span>
+                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold">ตัว</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
@@ -3350,6 +3404,161 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                             )}
                                         </>
                                     )}
+                                    {/* อัพโหลดรูปประกอบกิจการ */}
+                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
+                                        <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                            <ImagePlus className="w-5 h-5 text-chaiyo-blue" /> อัพโหลดรูปประกอบกิจการ
+                                        </h4>
+
+
+
+                                        <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+                                            {PHOTO_GUIDES.map((guide) => {
+                                                const raw = formData.incomePhotos?.[guide.id];
+                                                const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+                                                const hasPhotos = photos.length > 0;
+                                                return (
+                                                    <div key={guide.id} className="space-y-3">
+                                                        {/* 1. Label and Info Icon for Guidelines */}
+                                                        <div className="flex items-center justify-between group">
+                                                            <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
+                                                                {guide.title}
+                                                                {guide.required && <span className="text-red-500 ml-0.5">*</span>}
+                                                                {hasPhotos && (
+                                                                    <span className="ml-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                                                                        {photos.length}
+                                                                    </span>
+                                                                )}
+                                                            </Label>
+                                                            <Dialog>
+                                                                <DialogTrigger asChild>
+                                                                    <button
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
+                                                                        title="ดูคำแนะนำการถ่ายภาพ"
+                                                                    >
+                                                                        <Info className="w-4 h-4" />
+                                                                    </button>
+                                                                </DialogTrigger>
+                                                                <DialogContent className="max-w-md">
+                                                                    <DialogHeader>
+                                                                        <DialogTitle className="flex items-center gap-2">
+                                                                            <div className="w-8 h-8 rounded-lg bg-chaiyo-blue/10 text-chaiyo-blue flex items-center justify-center">
+                                                                                <guide.icon className="w-4 h-4" />
+                                                                            </div>
+                                                                            {guide.title}
+                                                                        </DialogTitle>
+                                                                        <DialogDescription className="text-sm pt-2">
+                                                                            {guide.description}
+                                                                        </DialogDescription>
+                                                                    </DialogHeader>
+                                                                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 mt-4 relative">
+                                                                        <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                    </div>
+                                                                </DialogContent>
+                                                            </Dialog>
+                                                        </div>
+
+                                                        {/* 2. Photo Upload Area */}
+                                                        {hasPhotos ? (
+                                                            <div className="space-y-2">
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    {photos.map((photoUrl: string, pIdx: number) => (
+                                                                        <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
+                                                                            <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
+                                                                            <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
+                                                                                <CheckCircle2 className="w-3 h-3" />
+                                                                            </div>
+                                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        // Flatten all photos for lightbox
+                                                                                        const allPhotos = Object.values(formData.incomePhotos || {}).flat();
+                                                                                        const flatIdx = allPhotos.indexOf(photoUrl);
+                                                                                        if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                    }}
+                                                                                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+                                                                                >
+                                                                                    <Eye className="w-4 h-4" />
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setItemToDelete({
+                                                                                            categoryId: guide.id,
+                                                                                            photoIndex: pIdx,
+                                                                                            name: `${guide.title} (รูปที่ ${pIdx + 1})`,
+                                                                                            type: 'categorizedPhoto'
+                                                                                        });
+                                                                                    }}
+                                                                                    className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                    {/* Add more photos button */}
+                                                                    <div
+                                                                        className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
+                                                                        onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                                    >
+                                                                        <Plus className="w-6 h-6 text-gray-400" />
+                                                                        <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div
+                                                                className={cn(
+                                                                    "relative aspect-[4/3] rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden",
+                                                                    guide.required
+                                                                        ? "border-dashed border-amber-200 bg-amber-50/5 hover:bg-amber-50/30 hover:border-amber-400"
+                                                                        : "border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400"
+                                                                )}
+                                                                onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                            >
+                                                                <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
+                                                                    <div className={cn(
+                                                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110",
+                                                                        guide.required ? "bg-amber-100 text-amber-600 border border-amber-200" : "bg-gray-100 text-gray-400 border border-gray-200"
+                                                                    )}>
+                                                                        <guide.icon className="w-7 h-7" />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <p className={cn(
+                                                                            "text-xs font-bold leading-tight",
+                                                                            guide.required ? "text-amber-700" : "text-gray-600"
+                                                                        )}>
+                                                                            แตะเพื่ออัพโหลด
+                                                                        </p>
+                                                                        <p className="text-[10px] text-muted-foreground">
+                                                                            รองรับไฟล์ภาพ JPEG, PNG (เลือกได้หลายรูป)
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* หมายเหตุ per occupation */}
+                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
+                                        <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                            <MessageSquare className="w-5 h-5 text-chaiyo-blue" /> หมายเหตุ
+                                        </h4>
+                                        <Textarea
+                                            value={occ.remarks || ""}
+                                            onChange={(e) => handleOccupationChange(occ.id, "remarks", e.target.value)}
+                                            placeholder="บันทึกหมายเหตุเพิ่มเติมสำหรับอาชีพนี้ (ถ้ามี)"
+                                            className="min-h-[100px] resize-none bg-white"
+                                        />
+                                    </div>
                                 </TabsContent>
                             ))
                             }
@@ -3623,18 +3832,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                             </div>
                         </div>
 
-                        {/* Remarks */}
-                        <div className="space-y-4">
-                            <h4 className="text-sm font-bold text-gray-700 flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <Briefcase className="w-4 h-4" /> หมายเหตุอื่นๆ
-                            </h4>
-                            <Textarea
-                                value={formData.incomeRemarks || ""}
-                                onChange={(e) => handleChange("incomeRemarks", e.target.value)}
-                                placeholder="ระบุหมายเหตุเพิ่มเติม (ถ้ามี)"
-                                className="min-h-[100px] resize-none"
-                            />
-                        </div>
+
                     </CardContent>
                 </Card>
 
@@ -3644,14 +3842,17 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Users className="w-5 h-5 text-chaiyo-blue" />
-                                <CardTitle className="text-lg text-chaiyo-blue">
-                                    บุคคลอ้างอิง
-                                    {!occupations.some((occ: IncomeOccupation) => (occ.incomeDocuments || []).length > 0) ? (
-                                        <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น กรณีไม่มีเอกสารแสดงรายได้) *</span>
-                                    ) : (
-                                        <span className="text-muted-foreground ml-1.5 text-xs font-normal">(ถ้ามี)</span>
-                                    )}
-                                </CardTitle>
+                                <div>
+                                    <CardTitle className="text-lg text-chaiyo-blue">
+                                        บุคคลอ้างอิง
+                                        {!occupations.some((occ: IncomeOccupation) => (occ.incomeDocuments || []).length > 0) ? (
+                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น กรณีไม่มีเอกสารแสดงรายได้) *</span>
+                                        ) : (
+                                            <span className="text-muted-foreground ml-1.5 text-xs font-normal">(ถ้ามี)</span>
+                                        )}
+                                    </CardTitle>
+                                    <p className="text-xs text-muted-foreground mt-0.5">บุคคลอ้างอิงห้ามเป็นกู้/ผู้ค้า/คนในครอบครัว/คนใกล้ชิด/ลูกจ้าง</p>
+                                </div>
                             </div>
                             <Button
                                 variant="outline"
@@ -3746,149 +3947,6 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                     </CardContent>
                 </Card>
 
-                {/* ===== SECTION 4: Upload Photos (อัพโหลดรูปประกอบกิจการ) ===== */}
-                <Card className="border-border-strong bg-white overflow-hidden">
-                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                                <ImagePlus className="w-6 h-6 text-chaiyo-blue" />
-                                <CardTitle className="text-lg text-chaiyo-blue">
-
-                                    อัพโหลดรูปประกอบกิจการ
-                                </CardTitle>
-                            </div>
-
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="p-6">
-                        <input
-                            type="file"
-                            ref={photoInputRef}
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handlePhotoFileSelect}
-                        />
-
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-8">
-                            {PHOTO_GUIDES.map((guide) => {
-                                const photoUrl = formData.incomePhotos?.[guide.id];
-                                return (
-                                    <div key={guide.id} className="space-y-3">
-                                        {/* 1. Label and Info Icon for Guidelines */}
-                                        <div className="flex items-center justify-between group">
-                                            <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
-                                                {guide.title}
-                                                {guide.required && <span className="text-red-500 ml-0.5">*</span>}
-                                            </Label>
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <button
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
-                                                        title="ดูคำแนะนำการถ่ายภาพ"
-                                                    >
-                                                        <Info className="w-4 h-4" />
-                                                    </button>
-                                                </DialogTrigger>
-                                                <DialogContent className="max-w-md">
-                                                    <DialogHeader>
-                                                        <DialogTitle className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-lg bg-chaiyo-blue/10 text-chaiyo-blue flex items-center justify-center">
-                                                                <guide.icon className="w-4 h-4" />
-                                                            </div>
-                                                            {guide.title}
-                                                        </DialogTitle>
-                                                        <DialogDescription className="text-sm pt-2">
-                                                            {guide.description}
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 mt-4 relative">
-                                                        <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
-                                                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
-                                                    </div>
-
-                                                </DialogContent>
-                                            </Dialog>
-                                        </div>
-
-                                        {/* 2. Photo Upload Area */}
-                                        <div
-                                            className={cn(
-                                                "relative aspect-[4/3] rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden",
-                                                photoUrl
-                                                    ? "border-emerald-100 bg-emerald-50/10 shadow-sm"
-                                                    : guide.required
-                                                        ? "border-dashed border-amber-200 bg-amber-50/5 hover:bg-amber-50/30 hover:border-amber-400"
-                                                        : "border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400"
-                                            )}
-                                            onClick={() => !photoUrl && handleTriggerPhotoUpload(guide.id)}
-                                        >
-                                            {photoUrl ? (
-                                                <div className="relative w-full h-full group">
-                                                    <img src={photoUrl} alt={guide.title} className="w-full h-full object-cover" />
-
-                                                    {/* Success Checkmark */}
-                                                    <div className="absolute top-2 right-2 w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg border-2 border-white z-20">
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                    </div>
-
-                                                    {/* Hover Overlay */}
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3 z-30 backdrop-blur-[1px]">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                const values = Object.values(formData.incomePhotos || {});
-                                                                const idx = values.indexOf(photoUrl);
-                                                                if (idx !== -1) setLightboxIndex(idx);
-                                                            }}
-                                                            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all transform hover:scale-110 active:scale-95 shadow-xl"
-                                                        >
-                                                            <Eye className="w-5 h-5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setItemToDelete({
-                                                                    categoryId: guide.id,
-                                                                    name: guide.title,
-                                                                    type: 'categorizedPhoto'
-                                                                });
-                                                            }}
-                                                            className="w-10 h-10 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all transform hover:scale-110 active:scale-95 shadow-xl"
-                                                        >
-                                                            <Trash2 className="w-5 h-5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
-                                                    <div className={cn(
-                                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110",
-                                                        guide.required ? "bg-amber-100 text-amber-600 border border-amber-200" : "bg-gray-100 text-gray-400 border border-gray-200"
-                                                    )}>
-                                                        <guide.icon className="w-7 h-7" />
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <p className={cn(
-                                                            "text-xs font-bold leading-tight",
-                                                            guide.required ? "text-amber-700" : "text-gray-600"
-                                                        )}>
-                                                            แตะเพื่ออัพโหลด
-                                                        </p>
-                                                        <p className="text-[10px] text-muted-foreground">
-                                                            รองรับไฟล์ภาพ JPEG, PNG
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* ===== SECTION 5: Workplace Assessor (ผู้ประเมินสถานที่ทำงาน) ===== */}
                 <Card className="border-border-strong">
@@ -4019,16 +4077,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                             </div>
                         </div>
 
-                        {/* หมายเหตุ */}
-                        <div className="p-4 border-t border-gray-100 space-y-2">
-                            <Label className="text-sm text-gray-700 font-medium">หมายเหตุ</Label>
-                            <Textarea
-                                value={formData.incomeRemarks || ""}
-                                onChange={(e) => handleChange("incomeRemarks", e.target.value)}
-                                placeholder="บันทึกหมายเหตุเพิ่มเติม..."
-                                className="resize-none h-24 bg-white text-sm"
-                            />
-                        </div>
+
                     </CardContent>
                 </Card>
             </div>
@@ -4038,6 +4087,16 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                 onOpenChange={setIsSpecialIncomeDialogOpen}
                 onSave={handleSaveSpecialIncome}
                 initialData={editingSpecialIncome}
+            />
+
+            {/* Hidden file input for photo uploads - must be at root level, not inside TabsContent */}
+            <input
+                type="file"
+                ref={photoInputRef}
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoFileSelect}
             />
 
             <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => !open && setItemToDelete(null)}>
@@ -4073,8 +4132,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
             </AlertDialog>
 
             {/* Photo Lightbox */}
-            {
-                lightboxIndex !== null && formData.incomePhotos && (
+            {(() => {
+                const allPhotos: string[] = Object.values(formData.incomePhotos || {}).flat() as string[];
+                return lightboxIndex !== null && allPhotos.length > 0 && (
                     <div
                         className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
                         onClick={() => setLightboxIndex(null)}
@@ -4087,13 +4147,12 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                         </button>
 
                         {/* Navigation */}
-                        {(formData.incomePhotos && Object.keys(formData.incomePhotos).length > 1) && (
+                        {allPhotos.length > 1 && (
                             <>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        const total = Object.keys(formData.incomePhotos || {}).length;
-                                        setLightboxIndex(prev => prev !== null ? (prev - 1 + total) % total : 0);
+                                        setLightboxIndex(prev => prev !== null ? (prev - 1 + allPhotos.length) % allPhotos.length : 0);
                                     }}
                                     className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
                                 >
@@ -4102,8 +4161,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        const total = Object.keys(formData.incomePhotos || {}).length;
-                                        setLightboxIndex(prev => prev !== null ? (prev + 1) % total : 0);
+                                        setLightboxIndex(prev => prev !== null ? (prev + 1) % allPhotos.length : 0);
                                     }}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
                                 >
@@ -4114,7 +4172,7 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
                         {/* Main Image */}
                         <img
-                            src={Object.values(formData.incomePhotos || {})[lightboxIndex ?? 0]}
+                            src={allPhotos[lightboxIndex ?? 0]}
                             alt={`Business Photo ${(lightboxIndex ?? 0) + 1}`}
                             className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
                             onClick={(e) => e.stopPropagation()}
@@ -4122,9 +4180,9 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
 
                         {/* Thumbnail Strip */}
                         <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto pb-2" onClick={(e) => e.stopPropagation()}>
-                            {Object.entries(formData.incomePhotos || {}).map(([key, url], idx) => (
+                            {allPhotos.map((url, idx) => (
                                 <button
-                                    key={key}
+                                    key={idx}
                                     onClick={() => setLightboxIndex(idx)}
                                     className={cn(
                                         "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0",
@@ -4137,11 +4195,11 @@ export function IncomeAndDebtStep({ formData, setFormData, isExistingCustomer = 
                         </div>
 
                         <div className="absolute top-4 left-4 text-white/80 font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                            {(lightboxIndex ?? 0) + 1} / {Object.keys(formData.incomePhotos || {}).length}
+                            {(lightboxIndex ?? 0) + 1} / {allPhotos.length}
                         </div>
                     </div>
-                )
-            }
+                );
+            })()}
         </div>
     );
 }
