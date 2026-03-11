@@ -30,6 +30,13 @@ import {
 } from "@/data/vehicle-data";
 import { THAI_ADDRESS_DATA } from "@/data/thai-address-data";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
+import dynamic from "next/dynamic";
+import { MapPin, ExternalLink, RefreshCcw, Navigation } from "lucide-react";
+
+const MapContents = dynamic(() => import('@/components/application/MapContents').then(mod => mod.MapContents || mod.default), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-gray-100 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>
+});
 
 interface CollateralStepProps {
     formData: any;
@@ -298,6 +305,27 @@ const AGRI_TYPES = [
     { value: "ดาวน์มากกว่า 25%", label: "ดาวน์มากกว่า 25%" },
     { value: "ดาวน์มากกว่า 35%", label: "ดาวน์มากกว่า 35%" },
     { value: "รถเกษตรเก่า", label: "รถเกษตรเก่า" }
+];
+
+const LAND_OFFICES = [
+    { value: "กรุงเทพมหานคร", label: "สำนักงานที่ดินกรุงเทพมหานคร" },
+    { value: "นนทบุรี", label: "สำนักงานที่ดินนนทบุรี" },
+    { value: "ปทุมธานี", label: "สำนักงานที่ดินปทุมธานี" },
+    { value: "สมุทรปราการ", label: "สำนักงานที่ดินสมุทรปราการ" },
+    { value: "จังหวัดอื่น ๆ", label: "จังหวัดอื่น ๆ" }
+];
+
+const LAND_USE_TYPES = [
+    { value: "ที่อยู่อาศัย", label: "ที่อยู่อาศัย" },
+    { value: "ที่ประกอบการ", label: "ที่ประกอบการ" },
+    { value: "ที่เกษตรกรรม", label: "ที่เกษตรกรรม" },
+    { value: "ที่อื่น ๆ", label: "ที่อื่น ๆ" }
+];
+
+const OWNERSHIP_TYPES = [
+    { value: "กรรมสิทธิ์เดี่ยว", label: "กรรมสิทธิ์เดี่ยว" },
+    { value: "กรรมสิทธิ์ร่วม", label: "กรรมสิทธิ์ร่วม" },
+    { value: "อื่น ๆ", label: "อื่น ๆ" }
 ];
 
 const getPhotoDocs = (type: string) => {
@@ -852,19 +880,22 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             </h3>
 
                             {formData.collateralType === 'land' ? (
+                                <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                                    <div className="space-y-1">
-                                        <Label className="text-[13px] text-muted-foreground ml-1">จังหวัดที่ตั้งที่ดิน <span className="text-red-500">*</span></Label>
-                                        <Combobox
-                                            options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
-                                            value={formData.landProvince || ""}
-                                            onValueChange={(val) => {
-                                                setFormData({ ...formData, landProvince: val, landDistrict: "", landSubDistrict: "" });
-                                            }}
-                                            className="h-10 rounded-xl"
-                                            placeholder="เลือกจังหวัด"
-                                        />
-                                        <div className="flex items-center gap-2 mt-3 p-2 bg-blue-50/30 rounded-lg">
+                                    <div className="space-y-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[13px] text-muted-foreground ml-1">จังหวัดที่ตั้งที่ดิน <span className="text-red-500">*</span></Label>
+                                            <Combobox
+                                                options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
+                                                value={formData.landProvince || ""}
+                                                onValueChange={(val) => {
+                                                    setFormData({ ...formData, landProvince: val, landDistrict: "", landSubDistrict: "" });
+                                                }}
+                                                className="h-10 rounded-xl"
+                                                placeholder="เลือกจังหวัด"
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-2 p-2 bg-blue-50/30 rounded-lg">
                                             <input
                                                 type="checkbox"
                                                 id="landLocationNotFound"
@@ -909,6 +940,63 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             className="h-10 rounded-xl"
                                             placeholder="เลือกตำบล/แขวง"
                                         />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">สำนักงานที่ดิน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.landOffice || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, landOffice: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกสำนักงานที่ดิน" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LAND_OFFICES.map((office) => (
+                                                    <SelectItem key={office.value} value={office.value}>
+                                                        {office.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">การใช้ประโยชน์ของที่ดิน <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.landUseType || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, landUseType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกการใช้ประโยชน์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LAND_USE_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[13px] text-muted-foreground ml-1">ประเภทกรรมสิทธิ์ <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.ownershipType || ""}
+                                            onValueChange={(val) => setFormData({ ...formData, ownershipType: val })}
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                <SelectValue placeholder="เลือกประเภทกรรมสิทธิ์" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {OWNERSHIP_TYPES.map((type) => (
+                                                    <SelectItem key={type.value} value={type.value}>
+                                                        {type.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
                                     <div className="space-y-1">
@@ -1026,6 +1114,73 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         </div>
                                     )}
                                 </div>
+
+                                <div className="pt-6 border-t border-gray-100">
+                                    <div className="flex flex-col gap-4">
+                                        <div className="relative group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden min-h-[220px] flex flex-col">
+                                            <div className="flex-1 bg-gray-100 relative shadow-inner overflow-hidden">
+                                                {formData.landLat && formData.landLng ? (
+                                                    <div className="absolute inset-0 z-0 scale-100 group-hover:scale-105 transition-transform duration-500">
+                                                        <MapContents
+                                                            center={[parseFloat(formData.landLat), parseFloat(formData.landLng)]}
+                                                            zoom={15}
+                                                            position={[parseFloat(formData.landLat), parseFloat(formData.landLng)]}
+                                                            onLocationSelect={() => { }}
+                                                        />
+                                                        <div
+                                                            className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+                                                            onClick={() => {}}
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div
+                                                        className="absolute inset-0 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                                                    >
+                                                        <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center">
+                                                            <MapPin className="w-6 h-6 text-gray-400 group-hover:text-chaiyo-blue transition-colors" />
+                                                        </div>
+                                                        <p className="text-xs font-bold text-gray-500">คลิกเพื่อระบุตำแหน่ง</p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="p-3 bg-white border-t border-gray-100 flex flex-col gap-2">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">พิกัดสถานที่ที่ดิน</span>
+                                                </div>
+
+                                                {formData.landLat && formData.landLng ? (
+                                                    <div className="flex items-center justify-between bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 bg-chaiyo-blue rounded-md flex items-center justify-center shrink-0">
+                                                                <Navigation className="w-3.5 h-3.5 text-white" />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
+                                                                    {parseFloat(formData.landLat).toFixed(6)}
+                                                                </span>
+                                                                <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
+                                                                    {parseFloat(formData.landLng).toFixed(6)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 rounded-full text-chaiyo-blue hover:bg-blue-100"
+                                                            onClick={() => window.open(`https://www.google.com/maps?q=${formData.landLat},${formData.landLng}`, '_blank')}
+                                                        >
+                                                            <ExternalLink className="w-3.5 h-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-[10px] text-muted-foreground">ยังไม่ได้ระบุตำแหน่ง</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </>
                             ) : (
                                 <>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
