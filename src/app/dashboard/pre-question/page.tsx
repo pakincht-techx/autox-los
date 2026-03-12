@@ -701,12 +701,12 @@ function PreQuestionPageContent() {
             { label: 'รายได้รวม', price: '40000', source: 'total' },
         ],
         debtBreakdown: [
-            { label: 'ค่าผ่อนบ้าน/คอนโด/ที่ดิน/ ค่าที่อยู่อาศัย', price: '0', source: 'housing' },
-            { label: 'ค่าใช้จ่าย-ผ่อนสินเชื่ออื่นๆ (ไม่รวมของ เงินไชโย)', price: '5000', source: 'other_loan' },
-            { label: 'ค่าผ่อนบัตรกดเงินสด', price: '3000', source: 'cash_card' },
-            { label: 'ค่าผ่อนบัตรเครดิต', price: '0', source: 'credit_card' },
-            { label: 'ค่าเช่าบ้าน-ที่พักอาศัย', price: '0', source: 'rent' },
-            { label: 'จ่ายหนี้นอกระบบ', price: '0', source: 'informal' },
+            { label: 'ผ่อนบ้าน/ค่าเช่าบ้าน', price: '0', source: 'housing' },
+            { label: 'ผ่อนรถ', price: '0', source: 'car' },
+            { label: 'ผ่อนบัตรเครดิต/บัตรกดเงินสด', price: '3000', source: 'card' },
+            { label: 'ผ่อนสินเชื่ออื่นๆ (ไม่รวมสินเชื่อเงินไชโย)', price: '5000', source: 'other_loan' },
+            { label: 'ผ่อนเงินกู้สหกรณ์', price: '0', source: 'coop' },
+            { label: 'ผ่อนเงินกู้นอกระบบ', price: '0', source: 'informal' },
         ],
     });
 

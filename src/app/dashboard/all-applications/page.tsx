@@ -26,7 +26,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        previousProcessorName: "มาลี ศรีเมือง"
+        previousProcessorName: "มาลี ศรีเมือง",
+        lastActionTime: "01/10/2566 10:30"
     },
     {
         id: "b2",
@@ -37,7 +38,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 45000,
         status: "Rejected",
         productType: "สินเชื่อส่วนบุคคล",
-        previousProcessorName: "ทรงพล รวยทรัพย์"
+        previousProcessorName: "ทรงพล รวยทรัพย์",
+        lastActionTime: "05/10/2566 16:45"
     },
     {
         id: "b3",
@@ -48,7 +50,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 320000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        previousProcessorName: "สมชาย ยิ่งเจริญ"
+        previousProcessorName: "สมชาย ยิ่งเจริญ",
+        lastActionTime: "10/10/2566 09:15"
     },
     {
         id: "b4",
@@ -58,7 +61,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "12/10/2566",
         requestedAmount: 150000,
         status: "Cancelled",
-        productType: "สินเชื่อโฉนดที่ดิน"
+        productType: "สินเชื่อโฉนดที่ดิน",
+        lastActionTime: "12/10/2566 11:20"
     },
     {
         id: "b5",
@@ -68,7 +72,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "15/10/2566",
         requestedAmount: 780000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถบรรทุก"
+        productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
+        lastActionTime: "15/10/2566 13:05"
     },
     {
         id: "b6",
@@ -78,7 +83,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "18/10/2566",
         requestedAmount: 60000,
         status: "Rejected",
-        productType: "สินเชื่อนาโนไฟแนนซ์"
+        productType: "สินเชื่อนาโนไฟแนนซ์",
+        lastActionTime: "18/10/2566 14:50"
     },
     {
         id: "b7",
@@ -88,7 +94,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "20/10/2566",
         requestedAmount: 420000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "20/10/2566 08:30"
     },
     {
         id: "b8",
@@ -98,7 +105,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "22/10/2566",
         requestedAmount: 90000,
         status: "Cancelled",
-        productType: "สินเชื่อส่วนบุคคล"
+        productType: "สินเชื่อส่วนบุคคล",
+        lastActionTime: "22/10/2566 15:10"
     },
     {
         id: "b9",
@@ -108,7 +116,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "25/10/2566",
         requestedAmount: 250000,
         status: "Rejected",
-        productType: "สินเชื่อโฉนดที่ดิน"
+        productType: "สินเชื่อโฉนดที่ดิน",
+        lastActionTime: "25/10/2566 10:00"
     },
     {
         id: "b10",
@@ -118,7 +127,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "28/10/2566",
         requestedAmount: 650000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "28/10/2566 17:30"
     },
 ];
 

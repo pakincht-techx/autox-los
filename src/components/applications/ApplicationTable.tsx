@@ -4,7 +4,7 @@ import { Application, ApplicationStatus } from "./types";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export type SortKey = 'applicationNo' | 'applicantName' | 'productType' | 'status' | 'submissionDate' | 'makerName' | 'previousProcessorName';
+export type SortKey = 'applicationNo' | 'applicantName' | 'productType' | 'status' | 'submissionDate' | 'makerName' | 'previousProcessorName' | 'lastActionTime';
 export type SortDirection = 'asc' | 'desc' | null;
 
 interface ApplicationTableProps {
@@ -96,6 +96,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                         <SortableHead label="ประเภทสินเชื่อ" columnKey="productType" />
                         <SortableHead label="สถานะใบสมัคร" columnKey="status" className="text-center" />
                         <SortableHead label="วันที่สร้างใบสมัคร" columnKey="submissionDate" />
+                        <SortableHead label="วัน/เวลา ที่ดำเนินการล่าสุด" columnKey="lastActionTime" />
                         <SortableHead label="ผู้ดำเนินการก่อนหน้า" columnKey="previousProcessorName" />
                         <SortableHead label="ผู้สร้างใบสมัคร" columnKey="makerName" />
                     </TableRow>
@@ -126,6 +127,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-muted">{app.submissionDate}</TableCell>
+                                <TableCell className="text-muted text-[13px]">{app.lastActionTime || '-'}</TableCell>
                                 <TableCell className="text-muted text-[13px]">{app.previousProcessorName || '-'}</TableCell>
                                 <TableCell className="text-muted text-[13px]">{app.makerName}</TableCell>
                             </TableRow>

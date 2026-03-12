@@ -44,7 +44,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     const [dipchipError, setDipchipError] = useState(false);
     const [isSimulatingError, setIsSimulatingError] = useState(false);
     const [isMockCamera, setIsMockCamera] = useState(true); // Toggle this for real camera
-    const [showSummaryDialog, setShowSummaryDialog] = useState(false);
+
 
     // Liveness Failure Simulation
     const [livenessAttempts, setLivenessAttempts] = useState(0);
@@ -335,7 +335,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
         // Skip DOPA check for Alien/Pink Cards
         if (dataToVerify.cardType === 'PINK_CARD') {
-            setShowSummaryDialog(true);
+            setStage('FACE_VERIFY');
             return;
         }
 
@@ -386,7 +386,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     title: "บัตรประจำตัวประชาชนใกล้หมดอายุ",
                     description: `บัตรประจำตัวประชาชนจะหมดอายุในอีก ${diffDays} วัน`,
                     type: "warning",
-                    action: () => setShowSummaryDialog(true)
+                    action: () => setStage('FACE_VERIFY')
                 });
                 // For near expiry, we often proceed after warning
                 // If it's manual, stay on review; if it's dipchip, we might proceed or stay.
@@ -397,7 +397,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
         }
 
         // Mock: Pass DOPA
-        setShowSummaryDialog(true);
+        setStage('FACE_VERIFY');
     };
 
 
@@ -851,15 +851,26 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                         </div>
                                     </div>
 
-                                    {/* Simulation Toggle */}
-                                    <div className="flex items-center gap-2 bg-white/50 px-2.5 py-1 rounded-full border border-chaiyo-blue/10 scale-90 origin-right">
-                                        <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none"
-                                            style={{ backgroundColor: simulateLivenessFail ? '#10069F' : '#e5e7eb' }}
-                                            onClick={() => setSimulateLivenessFail(!simulateLivenessFail)}
-                                        >
-                                            <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", simulateLivenessFail ? "translate-x-4" : "translate-x-1")} />
+                                    <div className="flex items-center gap-4">
+                                        {/* Simulation Toggle */}
+                                        <div className="flex items-center gap-2 bg-white/50 px-2.5 py-1 rounded-full border border-chaiyo-blue/10 scale-90 origin-right">
+                                            <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none"
+                                                style={{ backgroundColor: simulateLivenessFail ? '#10069F' : '#e5e7eb' }}
+                                                onClick={() => setSimulateLivenessFail(!simulateLivenessFail)}
+                                            >
+                                                <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", simulateLivenessFail ? "translate-x-4" : "translate-x-1")} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-chaiyo-blue uppercase tracking-wider">จำลองข้อผิดพลาด</span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-chaiyo-blue uppercase tracking-wider">จำลองข้อผิดพลาด</span>
+
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => setShowNotContinueDialog(true)}
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-bold"
+                                        >
+                                            <XCircle className="w-5 h-5 mr-1" />
+                                            ออกจากการทำรายการ
+                                        </Button>
                                     </div>
                                 </div>
 
@@ -926,13 +937,13 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
 
                                         <div className="flex flex-col items-center gap-4 w-full max-w-sm mt-12">
-                                            <Button size="default" className="w-full bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 font-bold rounded-2xl shadow-xl shadow-blue-100" onClick={handleCreateProfile}>
+                                            <Button size="default" className="w-full bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 font-bold shadow-xl shadow-blue-100" onClick={handleCreateProfile}>
                                                 ดำเนินการต่อ <ArrowRight className="ml-2 w-6 h-6" />
                                             </Button>
 
                                             <Button
                                                 variant="outline"
-                                                className="w-full h-12 text-chaiyo-blue font-bold hover:bg-blue-50 rounded-xl"
+                                                className="w-full h-12 text-chaiyo-blue font-bold hover:bg-blue-50"
                                                 onClick={() => setShowNotContinueDialog(true)}
                                             >
                                                 ไว้ภายหลัง
@@ -1345,76 +1356,6 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Summary Dialog after DOPA/OCR Success */}
-            <AlertDialog open={showSummaryDialog} onOpenChange={setShowSummaryDialog}>
-                <AlertDialogContent className="max-w-md rounded-3xl p-8">
-                    <AlertDialogHeader className="items-center text-center">
-                        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                            <Info className="w-8 h-8 text-chaiyo-blue" />
-                        </div>
-                        <AlertDialogTitle className="text-2xl font-black text-gray-900">ระบุข้อมูลการติดต่อเพิ่มเติม</AlertDialogTitle>
-                        <AlertDialogDescription className="text-base text-gray-500">
-                            กรุณาระบุข้อมูลการติดต่อของลูกค้า เพื่อความสะดวกในการติดตามสถานะและประสานงาน
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-
-                    <div className="space-y-6 py-6">
-                        <div className="space-y-1">
-                            <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">ชื่อ-นามสกุล ลูกค้า</Label>
-                            <p className="text-lg font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
-                        </div>
-
-                        <div className="grid gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-muted tracking-tight">เบอร์ติดต่อ</Label>
-                                <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="0xx-xxx-xxxx"
-                                        value={formData.phoneNumber || ""}
-                                        onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                        className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9 bg-white"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-muted tracking-tight">LINE ID</Label>
-                                <div className="relative">
-                                    <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="@lineid"
-                                        value={formData.lineId || ""}
-                                        onChange={(e) => setFormData({ ...formData, lineId: e.target.value })}
-                                        className="rounded-xl h-11 border-gray-200 focus:border-chaiyo-blue pl-9 bg-white"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
-
-                        <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/dashboard'}
-                            className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-bold h-12 rounded-xl flex items-center justify-center gap-2 flex-1 order-2 sm:order-1"
-                        >
-                            ยกเลิกการสร้างใบสมัคร
-                        </Button>
-                        <AlertDialogAction
-                            onClick={() => {
-                                setShowSummaryDialog(false);
-                                setStage('FACE_VERIFY');
-                            }}
-                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 flex-1 order-1 sm:order-2"
-                        >
-                            ดำเนินการต่อ <ArrowRight className="w-4 h-4" />
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </>
     );
 }

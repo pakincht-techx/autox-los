@@ -28,7 +28,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        previousProcessorName: "มาลี ศรีเมือง"
+        previousProcessorName: "มาลี ศรีเมือง",
+        lastActionTime: "01/10/2566 10:30"
     },
     {
         id: "2",
@@ -39,7 +40,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 120000,
         status: "In Review",
         productType: "สินเชื่อโฉนดที่ดิน",
-        previousProcessorName: "ทรงพล รวยทรัพย์"
+        previousProcessorName: "ทรงพล รวยทรัพย์",
+        lastActionTime: "02/10/2566 11:15"
     },
     {
         id: "3",
@@ -50,7 +52,8 @@ const MOCK_DATA: Application[] = [
         requestedAmount: 35000,
         status: "In Review",
         productType: "สินเชื่อนาโนไฟแนนซ์",
-        previousProcessorName: "สมชาย ยิ่งเจริญ"
+        previousProcessorName: "สมชาย ยิ่งเจริญ",
+        lastActionTime: "03/10/2566 14:20"
     },
     {
         id: "4",
@@ -60,7 +63,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "04/10/2566",
         requestedAmount: 850000,
         status: "Draft",
-        productType: "สินเชื่อจำนำทะเบียนรถบรรทุก"
+        productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
+        lastActionTime: "04/10/2566 09:45"
     },
     {
         id: "5",
@@ -70,7 +74,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "05/10/2566",
         requestedAmount: 45000,
         status: "Rejected",
-        productType: "สินเชื่อส่วนบุคคล"
+        productType: "สินเชื่อส่วนบุคคล",
+        lastActionTime: "05/10/2566 16:10"
     },
     {
         id: "6",
@@ -80,7 +85,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "06/10/2566",
         requestedAmount: 200000,
         status: "In Review",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "06/10/2566 13:30"
     },
     {
         id: "7",
@@ -90,7 +96,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "07/10/2566",
         requestedAmount: 350000,
         status: "Sent Back",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "07/10/2566 08:50"
     },
     {
         id: "8",
@@ -100,7 +107,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "08/10/2566",
         requestedAmount: 180000,
         status: "Sent Back",
-        productType: "สินเชื่อโฉนดที่ดิน"
+        productType: "สินเชื่อโฉนดที่ดิน",
+        lastActionTime: "08/10/2566 15:25"
     },
 ];
 
@@ -224,7 +232,7 @@ export default function ApplicationsPage() {
                     <Link href="/dashboard/pre-question">
                         <Button className="font-bold active:scale-95 transition-all shadow-sm gap-2">
                             <Plus className="w-4 h-4" />
-                            สร้างใบสมัครใหม่
+                            เช็คราคา/สร้างใบสมัครใหม่
                         </Button>
                     </Link>
                 </div>

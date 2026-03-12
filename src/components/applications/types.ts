@@ -10,6 +10,7 @@ export interface Application {
     status: ApplicationStatus;
     productType: string;
     previousProcessorName?: string;
+    lastActionTime?: string;
     avatarUrl?: string; // Added for consistency
 }
 
