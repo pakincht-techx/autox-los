@@ -4,7 +4,7 @@ import { Application, ApplicationStatus } from "./types";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-export type SortKey = 'applicationNo' | 'applicantName' | 'productType' | 'status' | 'submissionDate' | 'makerName';
+export type SortKey = 'applicationNo' | 'applicantName' | 'productType' | 'status' | 'submissionDate' | 'makerName' | 'previousProcessorName';
 export type SortDirection = 'asc' | 'desc' | null;
 
 interface ApplicationTableProps {
@@ -94,15 +94,16 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                         <SortableHead label="เลขที่ใบสมัคร" columnKey="applicationNo" className="w-[170px]" />
                         <SortableHead label="ชื่อ-นามสกุลผู้กู้" columnKey="applicantName" />
                         <SortableHead label="ประเภทสินเชื่อ" columnKey="productType" />
-                        <SortableHead label="สถานะ" columnKey="status" className="text-center" />
+                        <SortableHead label="สถานะใบสมัคร" columnKey="status" className="text-center" />
                         <SortableHead label="วันที่สร้างใบสมัคร" columnKey="submissionDate" />
+                        <SortableHead label="ผู้ดำเนินการก่อนหน้า" columnKey="previousProcessorName" />
                         <SortableHead label="ผู้สร้างใบสมัคร" columnKey="makerName" />
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={6} className="h-32 text-center text-muted">
+                            <TableCell colSpan={7} className="h-32 text-center text-muted">
                                 ไม่พบข้อมูลรายการใบสมัคร
                             </TableCell>
                         </TableRow>
@@ -125,6 +126,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-muted">{app.submissionDate}</TableCell>
+                                <TableCell className="text-muted text-[13px]">{app.previousProcessorName || '-'}</TableCell>
                                 <TableCell className="text-muted text-[13px]">{app.makerName}</TableCell>
                             </TableRow>
                         ))

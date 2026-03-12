@@ -9,6 +9,7 @@ export interface Application {
     requestedAmount: number;
     status: ApplicationStatus;
     productType: string;
+    previousProcessorName?: string;
     avatarUrl?: string; // Added for consistency
 }
 

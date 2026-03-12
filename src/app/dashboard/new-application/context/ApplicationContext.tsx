@@ -14,7 +14,8 @@ export const ALL_FLOW_STEPS = [
     { slug: 'salesheet', getPath: () => '/dashboard/new-application/salesheet', phase: 'screening' as const },
     { slug: 'customer-info', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/customer-info`, phase: 'application' as const },
     { slug: 'collateral-info', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/collateral-info`, phase: 'application' as const },
-    { slug: 'income-and-debt', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/income-and-debt`, phase: 'application' as const },
+    { slug: 'income', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/income`, phase: 'application' as const },
+    { slug: 'debt', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/debt`, phase: 'application' as const },
     { slug: 'loan-calculator', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/loan-calculator`, phase: 'application' as const },
     { slug: 'documents', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/documents`, phase: 'application' as const },
     { slug: 'review', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/review`, phase: 'application' as const },
@@ -24,10 +25,11 @@ export const ALL_FLOW_STEPS = [
 export const APPLICATION_STEPS = [
     { id: 1, slug: 'customer-info', title: 'ข้อมูลผู้กู้', description: 'Customer Info', icon: User },
     { id: 2, slug: 'collateral-info', title: 'หลักประกัน', description: 'Collateral', icon: Car },
-    { id: 3, slug: 'income-and-debt', title: 'รายได้และหนี้สิน', description: 'Income & Debt', icon: DollarSign },
-    { id: 4, slug: 'loan-calculator', title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
-    { id: 5, slug: 'documents', title: 'เอกสาร', description: 'Documents', icon: FileText },
-    { id: 6, slug: 'review', title: 'ตรวจสอบ', description: 'Review', icon: Check },
+    { id: 3, slug: 'income', title: 'อาชีพและรายได้', description: 'Income', icon: DollarSign },
+    { id: 4, slug: 'debt', title: 'ภาระหนี้สิน', description: 'Debt', icon: FileText },
+    { id: 5, slug: 'loan-calculator', title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
+    { id: 6, slug: 'documents', title: 'เอกสาร', description: 'Documents', icon: FileText },
+    { id: 7, slug: 'review', title: 'ตรวจสอบ', description: 'Review', icon: Check },
 ];
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────

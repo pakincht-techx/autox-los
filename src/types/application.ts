@@ -67,6 +67,7 @@ export interface EnterpriseIncome {
     weeksPerMonth?: string | number;
     operatingHours?: string[];
     customType?: string;
+    costDetail?: string;
 }
 
 export interface SpecialIncome {

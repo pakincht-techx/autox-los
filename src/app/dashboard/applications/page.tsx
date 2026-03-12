@@ -11,6 +11,12 @@ import { Application, ApplicationStatus } from "@/components/applications/types"
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
+import { Label } from "@/components/ui/Label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Combobox } from "@/components/ui/combobox";
+import { DatePickerBE } from "@/components/ui/DatePickerBE";
+
 // Mock Data
 const MOCK_DATA: Application[] = [
     {
@@ -21,7 +27,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "01/10/2566",
         requestedAmount: 500000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        previousProcessorName: "มาลี ศรีเมือง"
     },
     {
         id: "2",
@@ -31,7 +38,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "02/10/2566",
         requestedAmount: 120000,
         status: "In Review",
-        productType: "สินเชื่อโฉนดที่ดิน"
+        productType: "สินเชื่อโฉนดที่ดิน",
+        previousProcessorName: "ทรงพล รวยทรัพย์"
     },
     {
         id: "3",
@@ -41,7 +49,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "03/10/2566",
         requestedAmount: 35000,
         status: "In Review",
-        productType: "สินเชื่อนาโนไฟแนนซ์"
+        productType: "สินเชื่อนาโนไฟแนนซ์",
+        previousProcessorName: "สมชาย ยิ่งเจริญ"
     },
     {
         id: "4",
@@ -118,6 +127,27 @@ export default function ApplicationsPage() {
         setCurrentPage(1);
     };
 
+    // Filter State
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [filterName, setFilterName] = useState("");
+    const [filterProduct, setFilterProduct] = useState("all");
+    const [filterStatus, setFilterStatus] = useState("all");
+    const [filterStartDate, setFilterStartDate] = useState("");
+    const [filterEndDate, setFilterEndDate] = useState("");
+
+    const clearFilters = () => {
+        setFilterName("");
+        setFilterProduct("all");
+        setFilterStatus("all");
+        setFilterStartDate("");
+        setFilterEndDate("");
+    };
+
+    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "";
+
+    // Generate unique options for Comboboxes
+    const applicantNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.applicantName))).map(name => ({ label: name, value: name }));
+
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
         { label: "แบบร่าง", value: "Draft" },
@@ -133,7 +163,23 @@ export default function ApplicationsPage() {
         const matchesSearch =
             app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             app.applicationNo.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesTab && matchesSearch;
+
+        // Dialog Filters
+        const matchesName = filterName ? app.applicantName.toLowerCase().includes(filterName.toLowerCase()) : true;
+        const matchesProduct = filterProduct !== "all" ? app.productType === filterProduct : true;
+        const matchesStatus = filterStatus !== "all" ? app.status === filterStatus : true;
+
+        let matchesDate = true;
+        if (filterStartDate || filterEndDate) {
+            const [d, m, y] = app.submissionDate.split('/');
+            const appYearAD = parseInt(y) - 543;
+            const appDatePath = `${appYearAD}-${m}-${d}`;
+
+            if (filterStartDate && appDatePath < filterStartDate) matchesDate = false;
+            if (filterEndDate && appDatePath > filterEndDate) matchesDate = false;
+        }
+
+        return matchesTab && matchesSearch && matchesName && matchesProduct && matchesStatus && matchesDate;
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
@@ -220,6 +266,97 @@ export default function ApplicationsPage() {
                                 className="pl-9 pr-4 h-9 shadow-none border-gray-200"
                             />
                         </div>
+
+                        <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant={hasActiveFilters ? "default" : "outline"} size="icon" className="h-9 w-9 shrink-0 relative">
+                                    <Filter className="w-4 h-4" />
+                                    {hasActiveFilters && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
+                                    )}
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[450px]">
+                                <DialogHeader>
+                                    <DialogTitle>ตัวกรอง</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-5 py-4">
+                                    <div className="space-y-2">
+                                        <Label>ชื่อ-นามสกุล ผู้กู้</Label>
+                                        <Combobox
+                                            options={applicantNameOptions}
+                                            value={filterName}
+                                            onValueChange={setFilterName}
+                                            placeholder="ระบุชื่อหรือนามสกุล"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ประเภทสินเชื่อ</Label>
+                                        <Select
+                                            value={filterProduct === "all" ? "" : filterProduct}
+                                            onValueChange={(v) => setFilterProduct(v || "all")}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="ทั้งหมด" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">ทั้งหมด</SelectItem>
+                                                <SelectItem value="สินเชื่อจำนำทะเบียนรถยนต์">สินเชื่อจำนำทะเบียนรถยนต์</SelectItem>
+                                                <SelectItem value="สินเชื่อจำนำทะเบียนรถบรรทุก">สินเชื่อจำนำทะเบียนรถบรรทุก</SelectItem>
+                                                <SelectItem value="สินเชื่อส่วนบุคคล">สินเชื่อส่วนบุคคล</SelectItem>
+                                                <SelectItem value="สินเชื่อโฉนดที่ดิน">สินเชื่อโฉนดที่ดิน</SelectItem>
+                                                <SelectItem value="สินเชื่อนาโนไฟแนนซ์">สินเชื่อนาโนไฟแนนซ์</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>สถานะใบสมัคร</Label>
+                                        <Select
+                                            value={filterStatus === "all" ? "" : filterStatus}
+                                            onValueChange={(v) => setFilterStatus(v || "all")}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="ทั้งหมด" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">ทั้งหมด</SelectItem>
+                                                <SelectItem value="Draft">แบบร่าง</SelectItem>
+                                                <SelectItem value="In Review">รอพิจารณา</SelectItem>
+                                                <SelectItem value="Sent Back">ส่งกลับ</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ช่วงของวันที่สร้างใบสมัคร</Label>
+                                        <div className="flex items-center gap-2">
+                                            <DatePickerBE
+                                                value={filterStartDate}
+                                                onChange={setFilterStartDate}
+                                                placeholder="ตั้งแต่ (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                            <span className="text-muted-foreground">-</span>
+                                            <DatePickerBE
+                                                value={filterEndDate}
+                                                onChange={setFilterEndDate}
+                                                placeholder="ถึง (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full">
+                                    <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
+                                        ล้างตัวกรอง
+                                    </Button>
+                                    <DialogClose asChild>
+                                        <Button className="font-semibold px-8" onClick={() => setCurrentPage(1)}>
+                                            ตกลง
+                                        </Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
 

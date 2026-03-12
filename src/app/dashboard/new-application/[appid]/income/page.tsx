@@ -1,13 +1,13 @@
 "use client";
 
-import { IncomeAndDebtStep } from "../../steps/IncomeAndDebtStep";
+import { IncomeStep } from "../../steps/IncomeStep";
 import { useApplication } from "../../context/ApplicationContext";
 
-export default function IncomeAndDebtPage() {
+export default function IncomePage() {
     const { formData, setFormData, isExistingCustomer } = useApplication();
 
     return (
-        <IncomeAndDebtStep
+        <IncomeStep
             formData={formData}
             setFormData={setFormData}
             isExistingCustomer={isExistingCustomer}

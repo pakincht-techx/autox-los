@@ -25,7 +25,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "01/10/2566",
         requestedAmount: 500000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        previousProcessorName: "มาลี ศรีเมือง"
     },
     {
         id: "b2",
@@ -35,7 +36,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "05/10/2566",
         requestedAmount: 45000,
         status: "Rejected",
-        productType: "สินเชื่อส่วนบุคคล"
+        productType: "สินเชื่อส่วนบุคคล",
+        previousProcessorName: "ทรงพล รวยทรัพย์"
     },
     {
         id: "b3",
@@ -45,7 +47,8 @@ const MOCK_DATA: Application[] = [
         submissionDate: "10/10/2566",
         requestedAmount: 320000,
         status: "Approved",
-        productType: "สินเชื่อจำนำทะเบียนรถยนต์"
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        previousProcessorName: "สมชาย ยิ่งเจริญ"
     },
     {
         id: "b4",
@@ -323,7 +326,7 @@ export default function AllApplicationsPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>สถานะ</Label>
+                                        <Label>สถานะใบสมัคร</Label>
                                         <Select
                                             value={filterStatus === "all" ? "" : filterStatus}
                                             onValueChange={(v) => setFilterStatus(v || "all")}

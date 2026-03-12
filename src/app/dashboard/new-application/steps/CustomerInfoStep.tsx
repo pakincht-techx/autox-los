@@ -1301,8 +1301,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         <div className="space-y-2">
                             <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
                             <Select
-                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : (formData.isHouseholdHeadBorrower === "none" ? "none" : ""))}
-                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true" ? true : (val === "false" ? false : "none"))}
+                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
+                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
                             >
                                 <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
@@ -1310,12 +1310,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <SelectContent>
                                     <SelectItem value="true">ใช่</SelectItem>
                                     <SelectItem value="false">ไม่ใช่</SelectItem>
-                                    <SelectItem value="none">ไม่มี</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        {formData.isHouseholdHeadBorrower !== "none" && (
+                        {formData.isHouseholdHeadBorrower !== undefined && (
                             <>
                                 <div className="space-y-2">
                                     <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
@@ -2263,7 +2262,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     onChange={(v) => handleChange("qDebtConcern", v)}
                                 />
                                 <RatingGroup
-                                    label="ท่านมีความกังวลหลักประกันที่จะถูกยึด"
+                                    label="ท่านมีความกังวลที่จะถูกยึดหลักประกัน"
                                     value={formData.qCollateralConcern}
                                     onChange={(v) => handleChange("qCollateralConcern", v)}
                                 />
@@ -2286,7 +2285,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
                                     />
                                     <YesNoGroup
-                                        label="ขายสินค้าไม่ออก เช่นผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
+                                        label="ขายสินค้าไม่ออก เช่น ผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
                                         value={formData.qDelinquencyUnsold}
                                         onChange={(v) => handleChange("qDelinquencyUnsold", v)}
                                     />
@@ -2306,13 +2305,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
                                     />
                                     <YesNoGroup
-                                        label="อุบัติเหตุ/ความเจ็บป่วยหรือถึงแก่กรรม"
+                                        label="อุบัติเหตุ/ความเจ็บป่วย หรือถึงแก่กรรม"
                                         value={formData.qDelinquencyAccident}
                                         onChange={(v) => handleChange("qDelinquencyAccident", v)}
                                     />
 
                                     <YesNoGroup
-                                        label="เกิดปัญหาในครอบครัวเช่นหย่าร้าง หรือคู่สมรสเสียชีวิต"
+                                        label="เกิดปัญหาในครอบครัว เช่น หย่าร้าง หรือคู่สมรสเสียชีวิต"
                                         value={formData.qDelinquencyFamilyDispute}
                                         onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
                                     />

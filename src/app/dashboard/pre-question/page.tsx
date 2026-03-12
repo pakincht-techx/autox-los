@@ -967,7 +967,7 @@ function PreQuestionPageContent() {
         },
         {
             id: "agri",
-            label: "รถเพื่อการเกษตร",
+            label: "รถเก่าเพื่อการเกษตร",
             desc: "เล่มทะเบียน หรือ ใบอินวอยซ์/ใบเสร็จซื้อขาย",
             icon: Tractor,
             color: "bg-green-100 text-green-100" // Use a very pale green for the bg
@@ -1364,7 +1364,7 @@ function PreQuestionPageContent() {
     useEffect(() => {
         setBreadcrumbs([
             { label: "รายการใบสมัคร", href: "/dashboard/applications" },
-            { label: "แนะนำผลิตภัณฑ์", isActive: true }
+            { label: "สร้างใบสมัครใหม่", isActive: true }
         ]);
         return () => {
             setBreadcrumbs([]);
