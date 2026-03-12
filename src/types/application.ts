@@ -40,6 +40,7 @@ export interface PersonalDebt {
     amount: number;
     installment: number;
     customType?: string;
+    isDefault?: boolean;
 }
 
 export interface ChaiyoLoan {
@@ -129,7 +130,7 @@ export interface IncomeOccupation {
     prevTenureMonth?: string;
     employeeCount?: string;
     businessAgeYear?: string;
-    isSameAsMainAddress?: boolean;
+    isSameAsMainAddress?: string;
     mainAddress?: string;
     officeAddress?: string;
     officePhone?: string;
@@ -138,6 +139,7 @@ export interface IncomeOccupation {
     jobPositionOther?: string;
     plantedProducts?: string;
     produceSummary?: any[];
+    livestockSchedule?: any[];
     produceType?: string;
     otherProduceType?: string;
     plantingStartMonth?: string;
@@ -156,8 +158,31 @@ export interface IncomeOccupation {
     customerCostPerRai?: string;
     livestockType?: string;
     otherLivestockType?: string;
+    farmIsHigherThanStandard?: boolean;
     farmingType?: 'contract' | 'self';
-    livestockCycles?: { cycleNo: number, unit: string }[];
+    livestockCyclesPerYear?: string;
+    livestockCycles?: {
+        cycleNo: number;
+        quantity?: string;
+        isHigherThanStandard?: boolean;
+        customerPrice?: string;
+        customerCost?: string;
+        incomeBeforeExpenses?: string;
+        incomeAfterExpenses?: string;
+        otherExpenses?: string;
+        netIncome?: string;
+    }[];
+
+    // Residence info (ที่พักอาศัย) - shown when income channel is cash
+    residenceLocationStatus?: string;
+    residenceHousingType?: string;
+    residenceHousingTypeOther?: string;
+    residenceHousingStatus?: string;
+    residenceDurationYears?: string;
+    residenceDurationMonths?: string;
+    residenceLivingWith?: string;
+    residenceLivingWithRelationships?: string[];
+    remarks?: string;
 }
 
 export interface Child {
@@ -269,7 +294,7 @@ export interface CustomerFormData {
     occupation?: string;
     occupations?: IncomeOccupation[];
     specialIncomes?: SpecialIncome[];
-    incomePhotos?: string[];
+    incomePhotos?: Record<string, string>;
     totalIncome?: number;
     totalDebt?: number;
     totalPersonalDebt?: number;
@@ -287,6 +312,21 @@ export interface CustomerFormData {
     chaiyoInsuranceInstallment?: number;
     referencePersons?: ReferencePerson[];
     incomeRemarks?: string;
+
+    // Workplace Assessor (ผู้ประเมินสถานที่ทำงาน)
+    workplaceAssessorId?: string;
+    workplaceAssessorPhone?: string;
+    workplaceAssessmentDate?: string;
+
+    // Chaiyo Limits
+    chaiyoTotalLimit?: number;
+    chaiyoMotorcycleLimit?: number;
+    chaiyoCarLimit?: number;
+    chaiyoTruckLimit?: number;
+    chaiyoAgriLimit?: number;
+    chaiyoLandPledgeLimit?: number;
+    chaiyoLandMortgageLimit?: number;
+    chaiyoOtherLimit?: number;
 
     // Financial & Application Status
     income?: number;

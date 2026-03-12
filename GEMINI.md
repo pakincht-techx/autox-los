@@ -144,9 +144,41 @@ Full design rules: `.agent/workflows/design-rules.md` — run `/design-rules` to
 ## Dates & Calendar
 
 - **Buddhist Era (พ.ศ.) only** — never show A.D. years in the UI.
-- Use text inputs with formatting logic for date entry (DD/MM/YYYY in B.E.).
-- Day ≤ 31, Month ≤ 12 — validate in `onChange`.
-- Convert to A.D. only for internal logic (`year - 543`).
+- Day ≤ 31, Month ≤ 12 — validated internally.
+- All date storage is in **ISO A.D. format** (`YYYY-MM-DD`) internally; conversion is done at the component level.
+
+### `DatePickerBE` — Standard Date Input Component
+
+**Always use `<DatePickerBE />` for any date field** — never use a plain `<Input>` with manual date formatting.
+
+```tsx
+import { DatePickerBE } from "@/components/ui/DatePickerBE";
+
+// value: stored as "YYYY-MM-DD" (A.D.) in formData
+// Displays to user as "วว/ดด/ปปปป (พ.ศ.)"
+<DatePickerBE
+    value={formData.someDate ?? ""}
+    onChange={(val) => handleChange("someDate", val)}
+    inputClassName="h-12 rounded-xl"
+/>
+```
+
+**Props:**
+| Prop | Type | Description |
+|---|---|---|
+| `value` | `string` | ISO A.D. date string `YYYY-MM-DD` (or `""`) |
+| `onChange` | `(val: string) => void` | Fires with ISO A.D. date after user completes 8 digits |
+| `placeholder` | `string` | Defaults to `"วว/ดด/ปปปป (พ.ศ.)"` |
+| `inputClassName` | `string` | Class applied to the inner `<Input>` |
+| `disabled` / `readOnly` | `boolean` | Disables interaction |
+| `error` | `boolean` | Applies red border |
+
+**Behavior:**
+- User types 8 digits (no slashes needed); slashes are auto-inserted.
+- If user types an A.D. year (< 2400), it auto-converts to B.E. (`+543`).
+- `onChange` only fires when all 8 digits are complete and the date is valid.
+- On blur, display resyncs to match the stored A.D. value.
+
 
 ## Language & Locale
 

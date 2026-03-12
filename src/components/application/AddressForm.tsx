@@ -14,6 +14,8 @@ const MapContents = dynamic(() => import('./MapContents').then(mod => mod.MapCon
     loading: () => <div className="absolute inset-0 flex items-center justify-center bg-gray-50"><Loader2 className="w-6 h-6 animate-spin text-chaiyo-blue" /></div>
 });
 
+const DEFAULT_REQUIRED_FIELDS = ['houseNumber', 'street', 'province', 'district', 'subDistrict', 'zipCode'];
+
 interface AddressFormProps {
     title: string;
     prefix?: string;
@@ -23,6 +25,7 @@ interface AddressFormProps {
     headerChildren?: React.ReactNode;
     footerChildren?: React.ReactNode;
     hideFields?: boolean;
+    requiredFields?: string[];
 }
 
 export const AddressForm = ({
@@ -33,7 +36,8 @@ export const AddressForm = ({
     disabled = false,
     headerChildren,
     footerChildren,
-    hideFields = false
+    hideFields = false,
+    requiredFields = DEFAULT_REQUIRED_FIELDS
 }: AddressFormProps) => {
     const [showMapDialog, setShowMapDialog] = React.useState(false);
     const getField = (name: string) => prefix ? `${prefix}${name.charAt(0).toUpperCase() + name.slice(1)}` : name;
@@ -99,7 +103,7 @@ export const AddressForm = ({
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-1 md:col-span-2">
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">เลขที่บ้าน <span className="text-red-500">*</span></Label>
+                                    <Label className="text-xs text-muted-foreground">เลขที่บ้าน {requiredFields.includes('houseNumber') && <span className="text-red-500">*</span>}</Label>
                                     <Input
                                         className="bg-white h-12"
                                         value={formData[getField('houseNumber')] || ""}
@@ -175,11 +179,11 @@ export const AddressForm = ({
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">ถนน <span className="text-red-500">*</span></Label>
-                                    <Combobox
-                                        options={[{ label: "สุขุมวิท", value: "สุขุมวิท" }, { label: "เพชรเกษม", value: "เพชรเกษม" }, { label: "พหลโยธิน", value: "พหลโยธิน" }]}
+                                    <Label className="text-xs text-muted-foreground">ถนน {requiredFields.includes('street') && <span className="text-red-500">*</span>}</Label>
+                                    <Input
+                                        className="bg-white h-12"
                                         value={formData[getField('street')] || ""}
-                                        onValueChange={(val) => onChange(getField('street'), val)}
+                                        onChange={(e) => onChange(getField('street'), e.target.value)}
                                         disabled={disabled}
                                         placeholder="ระบุถนน"
                                     />
@@ -187,7 +191,7 @@ export const AddressForm = ({
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">จังหวัด <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">จังหวัด {requiredFields.includes('province') && <span className="text-red-500">*</span>}</Label>
                                 <Combobox
                                     options={THAI_ADDRESS_DATA.map(p => ({ label: p.name, value: p.name }))}
                                     value={formData[getField('province')] || ""}
@@ -202,7 +206,7 @@ export const AddressForm = ({
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">อำเภอ/เขต <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">อำเภอ/เขต {requiredFields.includes('district') && <span className="text-red-500">*</span>}</Label>
                                 <Combobox
                                     options={
                                         THAI_ADDRESS_DATA.find(p => p.name === formData[getField('province')])
@@ -219,7 +223,7 @@ export const AddressForm = ({
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">ตำบล/แขวง <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">ตำบล/แขวง {requiredFields.includes('subDistrict') && <span className="text-red-500">*</span>}</Label>
                                 <Combobox
                                     options={
                                         THAI_ADDRESS_DATA.find(p => p.name === formData[getField('province')])
@@ -241,7 +245,7 @@ export const AddressForm = ({
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์ <span className="text-red-500">*</span></Label>
+                                <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์ {requiredFields.includes('zipCode') && <span className="text-red-500">*</span>}</Label>
                                 <Input
                                     className="bg-white h-12"
                                     value={formData[getField('zipCode')] || ""}

@@ -47,6 +47,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         navigateNext,
         navigatePrev,
         hideLayoutNav,
+        formData,
     } = useApplication();
 
     const [confirmLeaveDialog, setConfirmLeaveDialog] = useState(false);
@@ -56,6 +57,13 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
     // Determine if we're in the application phase
     const isApplicationPhase = applicationStepIndex >= 0;
+
+    // Borrower name from formData
+    const borrowerDisplayName = [
+        formData.prefix,
+        formData.firstName,
+        formData.lastName,
+    ].filter(Boolean).join(" ") || null;
 
     // ── Breadcrumbs ─────────────────────────────────────────────────────────
     useEffect(() => {
@@ -109,18 +117,25 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     return (
         <div className="h-full bg-sidebar">
             <div className="max-w-7xl mx-auto space-y-6 p-6 lg:px-8 lg:py-6 pb-32">
-                {/* Header Title Section */}
-                <div className="px-2">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-chaiyo-blue to-blue-800">
-                        {isApplicationStarted ? `ใบสมัครเลขที่ ${appId}` : "ตรวจสอบสถานะลูกค้า"}
-                    </h1>
-                    <p className="text-muted mt-1">
-                        {!isApplicationStarted
-                            ? "ขั้นตอนการตรวจสอบข้อมูลและสถานะของลูกค้า"
-                            : "กรอกข้อมูลผู้สมัครและยื่นเอกสารเพื่อพิจารณาสินเชื่อ"
-                        }
-                    </p>
-                </div>
+
+
+
+                {/* Sticky Borrower Name Header — application phase only, full-width */}
+                {isApplicationPhase && borrowerDisplayName && (
+                    <div className="sticky top-0 z-30 bg-white py-3 border-b border-border-subtle shadow-sm -mt-6 -mx-6 lg:-mx-8 px-6 lg:px-8">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
+                                    <User className="w-4.5 h-4.5 text-chaiyo-blue" />
+                                </div>
+                                <div>
+                                    <p className="text-[11px] text-muted-foreground leading-none mb-0.5">ผู้กู้</p>
+                                    <p className="text-base font-semibold text-foreground leading-tight">{borrowerDisplayName}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── SCREENING PHASE: No stepper, simple card ─────────────── */}
                 {isScreeningPhase && (

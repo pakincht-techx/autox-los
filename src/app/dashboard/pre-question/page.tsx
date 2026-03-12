@@ -697,7 +697,7 @@ function PreQuestionPageContent() {
         appraisedBuildingPrice: '',
         incomeBreakdown: [
             { label: 'รายได้หลัก', price: '35000', source: 'main' },
-            { label: 'รายได้เสริม', price: '5000', source: 'extra' },
+            { label: 'รายได้เสริม (ถ้ามี)', price: '5000', source: 'extra' },
             { label: 'รายได้รวม', price: '40000', source: 'total' },
         ],
         debtBreakdown: [
@@ -1004,10 +1004,9 @@ function PreQuestionPageContent() {
             { id: 'car_q1', text: 'เป็นรถจากเต้นท์' },
             { id: 'car_q2', text: 'เป็นรถดัดแปลงสภาพ, รถแข่ง, รถแต่งเกิน 50%, รถดัดแปลงเครื่องยนต์' },
             { id: 'car_q3', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
-            { id: 'car_q4', text: 'เป็นหรือเคยเป็น รถแท็กซี่ รถสองแถว/รถกะป๊อ /รถจากอาสามูลนิธิ' },
+            { id: 'car_q4', text: 'เป็นหรือเคยเป็น รถแท็กซี่ รถรับส่งผู้โดยสาร/รถกะป๊อ/รถอาสามูลนิธิ' },
             { id: 'car_q5', text: 'เป็นรถสไลด์ที่ดัดแปลงจากรถกระบะ' },
-            { id: 'car_q6', text: 'เป็นรถล้อเกินซุ้มล้อ' },
-            { id: 'car_q7', text: 'เป็นรถที่ตัดแต่งคัสซี / ตัดเว้าคัสซี' },
+            { id: 'car_q6', text: 'เป็นรถที่ตัดแต่งคัสซี / ตัดเว้าคัสซี' },
         ],
         moto: [
             { id: 'moto_q1', text: 'เป็นรถจากเต้นท์' },
@@ -1442,6 +1441,9 @@ function PreQuestionPageContent() {
         // Deed type filtering
         if (p.deedTypeExclude && p.deedTypeExclude.includes(formData.landDeedType)) return false;
 
+        // Collateral status filtering (land uses 'clear' and 'pledge')
+        if (!p.collateralStatus.includes(currentStatus)) return false;
+
         if (p.specialProject === 'b2b_payroll') {
             if (formData.specialProject !== 'b2b_payroll') return false;
         } else {
@@ -1519,6 +1521,7 @@ function PreQuestionPageContent() {
                                                         year: '',
                                                         appraisalPrice: 0,
                                                         requestedDuration: maxTenure,
+                                                        collateralStatus: 'clear',
                                                         // Automatically default to 'ns4' when land is selected
                                                         ...(p.id === 'land' ? { landDeedType: 'ns4' } : {})
                                                     });
@@ -1548,7 +1551,7 @@ function PreQuestionPageContent() {
                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                                         <div>
                                                             <h4 className="text-lg font-bold text-gray-900">
-                                                                อัพโหลดรูปถ่ายหลักประกัน
+                                                                อัพโหลดรูปถ่ายหลักประกัน (ถ้ามี)
                                                             </h4>
                                                         </div>
                                                         <div className="flex items-center gap-3">
@@ -1711,18 +1714,6 @@ function PreQuestionPageContent() {
                                                                 className={!formData.model ? "opacity-50 pointer-events-none" : ""}
                                                             />
                                                         </div>
-
-                                                        <div className="space-y-2">
-                                                            <Label>สถานะหลักประกัน <span className="text-red-500">*</span></Label>
-                                                            <Select value={formData.collateralStatus || 'clear'} onValueChange={(val) => setFormData({ ...formData, collateralStatus: val })}>
-                                                                <SelectTrigger className="bg-white"><SelectValue placeholder="เลือกสถานะ" /></SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="clear">ปลอดภาระ</SelectItem>
-                                                                    <SelectItem value="pledge">จำนำ</SelectItem>
-                                                                    <SelectItem value="hire_purchase">เช่าซื้อ</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             ) : (
@@ -1740,24 +1731,34 @@ function PreQuestionPageContent() {
                                                                 <SelectItem value="ns4">น.ส.4</SelectItem>
                                                                 <SelectItem value="ns3k">น.ส.3ก</SelectItem>
                                                                 <SelectItem value="orchor2">อ.ช.2</SelectItem>
-                                                                <SelectItem value="trajong_deed">โฉนดตาจอง</SelectItem>
+                                                                <SelectItem value="trajong_deed">โฉนดตราจอง</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                     </div>
 
-                                                    {/* 8. หลักประกันที่เอามาใช้ */}
-                                                    <div className="space-y-2">
-                                                        <Label className="text-sm text-gray-700">หลักประกันที่เอามาใช้ <span className="text-red-500">*</span></Label>
-                                                        <Select value={formData.landCollateralPurpose || ''} onValueChange={(val) => setFormData({ ...formData, landCollateralPurpose: val })}>
-                                                            <SelectTrigger className="bg-white text-base h-12 rounded-xl">
-                                                                <SelectValue placeholder="เลือกชนิดหลักประกัน" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="clear">ปลอดภาระ</SelectItem>
-                                                                <SelectItem value="refinance">Refinance</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
+                                                    {formData.landDeedType === 'trajong_deed' && (
+                                                        <div className="space-y-2">
+                                                            <Label className="text-sm text-gray-700">
+                                                                จังหวัดที่ระบุในโฉนดตราจอง <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <Select
+                                                                value={formData.landProvince || ''}
+                                                                onValueChange={(val) => setFormData({ ...formData, landProvince: val })}
+                                                            >
+                                                                <SelectTrigger className="bg-white text-base h-12 rounded-xl">
+                                                                    <SelectValue placeholder="เลือกจังหวัด..." />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="phitsanulok">พิษณุโลก</SelectItem>
+                                                                    <SelectItem value="sukhothai">สุโขทัย</SelectItem>
+                                                                    <SelectItem value="phichit">พิจิตร</SelectItem>
+                                                                    <SelectItem value="uttaradit">อุตรดิตถ์</SelectItem>
+                                                                    <SelectItem value="nakhon_sawan">นครสวรรค์</SelectItem>
+                                                                    <SelectItem value="other">จังหวัดอื่นๆ (ไม่อยู่ในเงื่อนไข)</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    )}
 
                                                     {/* 6. ราคาประเมิน */}
                                                     {formData.landDeedType === 'orchor2' ? (
@@ -1941,30 +1942,6 @@ function PreQuestionPageContent() {
                                                         </div>
                                                     ) : ['ns4', 'ns3k', 'trajong_deed'].includes(formData.landDeedType) ? (
                                                         <div className="space-y-6 md:col-span-2">
-                                                            {formData.landDeedType === 'trajong_deed' && (
-                                                                <div>
-                                                                    <Label className="text-sm text-gray-700">
-                                                                        จังหวัดที่ระบุในโฉนดตราจอง <span className="text-red-500">*</span>
-                                                                    </Label>
-                                                                    <Select
-                                                                        value={formData.landProvince || ''}
-                                                                        onValueChange={(val) => setFormData({ ...formData, landProvince: val })}
-                                                                    >
-                                                                        <SelectTrigger className="bg-white text-base h-12 rounded-xl">
-                                                                            <SelectValue placeholder="เลือกจังหวัด..." />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="phitsanulok">พิษณุโลก</SelectItem>
-                                                                            <SelectItem value="sukhothai">สุโขทัย</SelectItem>
-                                                                            <SelectItem value="phichit">พิจิตร</SelectItem>
-                                                                            <SelectItem value="uttaradit">อุตรดิตถ์</SelectItem>
-                                                                            <SelectItem value="nakhon_sawan">นครสวรรค์</SelectItem>
-                                                                            <SelectItem value="other">จังหวัดอื่นๆ (ไม่อยู่ในเงื่อนไข)</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-
-                                                                </div>
-                                                            )}
                                                             {/* ราคาประเมินที่ดิน Table */}
                                                             <div className="space-y-2">
                                                                 <div className="flex items-center justify-between">
@@ -2262,7 +2239,7 @@ function PreQuestionPageContent() {
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div>
-                                                                <h4 className="text-lg font-bold text-gray-900">การประเมินสภาพทรัพย์สินเพิ่มเติม</h4>
+                                                                <h4 className="text-lg font-bold text-gray-900">ประเมินสภาพหลักประกัน</h4>
                                                             </div>
                                                         </div>
                                                         <div className={cn(
@@ -2286,7 +2263,7 @@ function PreQuestionPageContent() {
                                                                 <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
                                                                     <button
                                                                         onClick={() => setFormData({ ...formData, collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' } })}
-                                                                        className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'yes' ? "bg-gray-200 text-gray-700" : "text-gray-500 hover:bg-gray-100")}
+                                                                        className={cn("px-5 py-2 rounded-lg text-sm font-bold transition-all", formData.collateralQuestions?.[q.id] === 'yes' ? "bg-chaiyo-blue text-white" : "text-gray-500 hover:bg-gray-100")}
                                                                     >
                                                                         ใช่
                                                                     </button>
@@ -2355,8 +2332,8 @@ function PreQuestionPageContent() {
                                                 <Select value={formData.occupationGroup} onValueChange={(val) => setFormData({ ...formData, occupationGroup: val })}>
                                                     <SelectTrigger className="bg-white"><SelectValue placeholder="เลือกกลุ่มอาชีพ" /></SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="employee">พนักงานประจำ</SelectItem>
-                                                        <SelectItem value="business_owner">เจ้าของกิจการ</SelectItem>
+                                                        <SelectItem value="employee">พนักงานประจำ/ข้าราชการ/ลูกจ้าง</SelectItem>
+                                                        <SelectItem value="business_owner">เจ้าของกิจการ/ธุรกิจส่วนตัว/รับจ้าง</SelectItem>
                                                         <SelectItem value="farmer">เกษตรกร</SelectItem>
                                                     </SelectContent>
                                                 </Select>
@@ -2386,7 +2363,7 @@ function PreQuestionPageContent() {
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div>
-                                                    <h4 className="text-lg font-bold text-gray-900">แหล่งที่มารายได้และภาระหนี้สิน</h4>
+                                                    <h4 className="text-lg font-bold text-gray-900">ข้อมูลรายได้และภาระหนี้</h4>
                                                 </div>
                                             </div>
                                             <div className={cn(
@@ -2496,10 +2473,28 @@ function PreQuestionPageContent() {
                             {/* Section 3: Loan Suggestion */}
                             <div className="relative pt-4">
                                 <div className="space-y-3 mt-4">
-                                    <h3 className="text-xl font-bold text-gray-900">แนะนำวงเงินและข้อเสนอ</h3>
+                                    <h3 className="text-xl font-bold text-gray-900">ข้อมูลวงเงินที่ต้องการ</h3>
                                     <div className="border border-border-strong rounded-xl bg-white overflow-hidden divide-y divide-border-subtle">
                                         <div className="p-6">
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+
+                                                <div className="space-y-2">
+                                                    <Label>ประเภทสินเชื่อ <span className="text-red-500">*</span></Label>
+                                                    <Select value={formData.collateralStatus || 'clear'} onValueChange={(val) => setFormData({ ...formData, collateralStatus: val })}>
+                                                        <SelectTrigger className="h-12 bg-white"><SelectValue placeholder="เลือกสถานะ" /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="clear">ปลอดภาระ</SelectItem>
+                                                            {formData.collateralType === 'land' ? (
+                                                                <SelectItem value="pledge">Refinance</SelectItem>
+                                                            ) : (
+                                                                <>
+                                                                    <SelectItem value="pledge">Refinance จากจำนำ</SelectItem>
+                                                                    <SelectItem value="hire_purchase">Refinance จากเช่าซื้อ</SelectItem>
+                                                                </>
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
 
                                                 <div className="space-y-2">
                                                     <Label>วงเงินที่ต้องการกู้ (บาท) <span className="text-red-500">*</span></Label>
@@ -2547,7 +2542,7 @@ function PreQuestionPageContent() {
                                                 <div className="flex items-end">
                                                     <Button
                                                         onClick={() => setShowProducts(true)}
-                                                        className="h-12 w-full bg-chaiyo-blue text-white hover:bg-blue-800 font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+                                                        className="h-12 w-full bg-chaiyo-blue text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
                                                     >
                                                         ค้นหาผลิตภัณฑ์
                                                     </Button>
@@ -2597,81 +2592,82 @@ function PreQuestionPageContent() {
                                                                                 </div>
                                                                             </div>
                                                                             <Button
-                                                                                variant="outline"
+                                                                                variant="ghost"
                                                                                 size="sm"
                                                                                 onClick={handlePrint}
-                                                                                className=" bg-white/10 hover:bg-white/20 border-white/20 text-white rounded-full h-6 px-3 text-[11px] backdrop-blur-sm transition-all flex items-center gap-1.5 font-bold"
+                                                                                className=" bg-white rounded-full h-6 px-3 text-[11px] backdrop-blur-sm transition-all flex items-center gap-1.5 font-bold"
                                                                             >
-                                                                                <span>อ่านรายละเอียด</span>
+                                                                                <span>ดูเอกสารประกอบ</span>
                                                                             </Button>
                                                                         </div>
                                                                         <h3 className="text-xl font-bold pr-4 mt-2">{product.name}</h3>
 
 
-                                                                        {/* Requested Amount Block */}
-                                                                        <div className="mt-5 backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-white/20 to-white/5 border-white/20 shadow-inner group/amount transition-all duration-300">
-                                                                            <div className="flex items-center justify-between mb-2">
-                                                                                <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-200/90">
-                                                                                    {actualReqAmount > maxAmount ? "วงเงินสูงสุดที่แนะนำ" : "วงเงินที่ต้องการ"}
-                                                                                </p>
+                                                                        {/* Loan Amount Blocks */}
+                                                                        <div className={cn("mt-5 gap-2.5", hasDifferentMax ? "grid grid-cols-2" : "")}>
+                                                                            {/* Requested Amount Block */}
+                                                                            <div className="backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-white/20 to-white/5 border-white/20 shadow-inner group/amount transition-all duration-300">
+                                                                                <div className="flex items-center justify-between mb-2">
+                                                                                    <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-blue-200/90">
+                                                                                        {actualReqAmount > maxAmount ? "วงเงินสูงสุดที่แนะนำ" : "วงเงินที่ต้องการ"}
+                                                                                    </p>
+                                                                                </div>
                                                                                 <div className="flex items-baseline gap-1.5">
-                                                                                    <span className="text-3xl font-black leading-none tracking-tighter text-white drop-shadow-sm">
+                                                                                    <span className="text-2xl font-black leading-none tracking-tighter">
                                                                                         {requestedAmount.toLocaleString()}
                                                                                     </span>
                                                                                     <span className="text-xs font-bold text-white/60">บาท</span>
                                                                                 </div>
-                                                                            </div>
-                                                                            <div className="flex items-center justify-between border-t border-white/10 pt-2.5 mt-1.5">
-                                                                                <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
-                                                                                <div className="flex items-baseline gap-1">
-                                                                                    <p className="font-black text-lg leading-tight text-white">
-                                                                                        {(() => {
-                                                                                            const duration = Number(formData.requestedDuration) || 12;
-                                                                                            if (selectedPlan === 'balloon') {
-                                                                                                return calcBalloonMonthly(requestedAmount).toLocaleString();
-                                                                                            }
-                                                                                            return calcMonthly(requestedAmount, duration).toLocaleString();
-                                                                                        })()}
-                                                                                    </p>
-                                                                                    <span className="text-[10px] font-bold text-white/50">บาท/งวด</span>
+                                                                                <div className="border-t border-white/10 pt-2.5 mt-2.5">
+                                                                                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
+                                                                                    <div className="flex items-baseline gap-1">
+                                                                                        <p className="font-black text-lg leading-tight text-white">
+                                                                                            {(() => {
+                                                                                                const duration = Number(formData.requestedDuration) || 12;
+                                                                                                if (selectedPlan === 'balloon') {
+                                                                                                    return calcBalloonMonthly(requestedAmount).toLocaleString();
+                                                                                                }
+                                                                                                return calcMonthly(requestedAmount, duration).toLocaleString();
+                                                                                            })()}
+                                                                                        </p>
+                                                                                        <span className="text-[10px] font-bold text-white/50">บาท/งวด</span>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
-                                                                        </div>
 
-                                                                        {/* Max Amount Block (Only if different) */}
-                                                                        {hasDifferentMax && (
-                                                                            <div className="mt-2.5 backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-chaiyo-gold/25 to-chaiyo-gold/10 border-chaiyo-gold/30 shadow-lg shadow-black/5 group/max transition-all duration-300">
-                                                                                <div className="flex items-center justify-between mb-2">
-                                                                                    <div className="flex items-center gap-2">
-                                                                                        <div className="bg-chaiyo-gold rounded-full p-1 animate-pulse">
-                                                                                            <Star className="w-2.5 h-2.5 text-chaiyo-blue fill-chaiyo-blue" />
+                                                                            {/* Max Amount Block (Only if different) */}
+                                                                            {hasDifferentMax && (
+                                                                                <div className="backdrop-blur-md rounded-2xl p-4 border bg-gradient-to-br from-chaiyo-gold/25 to-chaiyo-gold/10 border-chaiyo-gold/30 shadow-lg shadow-black/5 group/max transition-all duration-300">
+                                                                                    <div className="flex items-center justify-between mb-2">
+                                                                                        <div className="flex items-center gap-2">
+
+                                                                                            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-chaiyo-gold">วงเงินสูงสุดที่แนะนำ</p>
                                                                                         </div>
-                                                                                        <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-chaiyo-gold">วงเงินสูงสุดที่แนะนำ</p>
                                                                                     </div>
                                                                                     <div className="flex items-baseline gap-1.5">
-                                                                                        <span className="text-2xl font-black leading-none tracking-tighter text-chaiyo-gold drop-shadow-sm group-hover/max:scale-105 transition-transform">
+                                                                                        <span className="text-2xl font-black leading-none tracking-tighter text-chaiyo-gold">
                                                                                             {maxAmount.toLocaleString()}
                                                                                         </span>
                                                                                         <span className="text-xs font-bold text-chaiyo-gold/60">บาท</span>
                                                                                     </div>
-                                                                                </div>
-                                                                                <div className="flex items-center justify-between border-t border-chaiyo-gold/10 pt-2.5 mt-1.5">
-                                                                                    <p className="text-chaiyo-gold/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
-                                                                                    <div className="flex items-baseline gap-1">
-                                                                                        <p className="font-black text-lg leading-tight text-chaiyo-gold">
-                                                                                            {(() => {
-                                                                                                const duration = Number(formData.requestedDuration) || 12;
-                                                                                                if (selectedPlan === 'balloon') {
-                                                                                                    return calcBalloonMonthly(maxAmount).toLocaleString();
-                                                                                                }
-                                                                                                return calcMonthly(maxAmount, duration).toLocaleString();
-                                                                                            })()}
-                                                                                        </p>
-                                                                                        <span className="text-[10px] font-bold text-chaiyo-gold/50">บาท/งวด</span>
+                                                                                    <div className="border-t border-chaiyo-gold/10 pt-2.5 mt-2.5">
+                                                                                        <p className="text-chaiyo-gold/60 text-[10px] font-bold uppercase tracking-wider">ค่างวดประมาณ</p>
+                                                                                        <div className="flex items-baseline gap-1">
+                                                                                            <p className="font-black text-lg leading-tight text-chaiyo-gold">
+                                                                                                {(() => {
+                                                                                                    const duration = Number(formData.requestedDuration) || 12;
+                                                                                                    if (selectedPlan === 'balloon') {
+                                                                                                        return calcBalloonMonthly(maxAmount).toLocaleString();
+                                                                                                    }
+                                                                                                    return calcMonthly(maxAmount, duration).toLocaleString();
+                                                                                                })()}
+                                                                                            </p>
+                                                                                            <span className="text-[10px] font-bold text-chaiyo-gold/50">บาท/งวด</span>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
-                                                                            </div>
-                                                                        )}
+                                                                            )}
+                                                                        </div>
                                                                         {/* Duration & Interest Row */}
                                                                         <div className="mt-4 grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
                                                                             <div className="flex flex-col gap-0.5">
@@ -2681,7 +2677,7 @@ function PreQuestionPageContent() {
                                                                                     <span className="text-[10px] font-bold text-white/70">งวด</span>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-4">
+                                                                            <div className="flex flex-col gap-0.5 ">
                                                                                 <p className="text-[10px] font-bold uppercase tracking-wider text-blue-200">อัตราดอกเบี้ย</p>
                                                                                 <div className="flex items-baseline gap-1">
                                                                                     <span className="text-xl font-black text-white">{product.interestRate}</span>
@@ -2779,7 +2775,7 @@ function PreQuestionPageContent() {
                                 case 'land': return { name: 'สินเชื่อโฉนดที่ดิน', tagline: 'สินเชื่อโฉนดที่ดินไชโย' };
                                 case 'moto': return { name: 'สินเชื่อรถจักรยานยนต์', tagline: 'สินเชื่อรถจักรยานยนต์ไชโย' };
                                 case 'truck': return { name: 'สินเชื่อรถบรรทุก', tagline: 'สินเชื่อรถบรรทุกไชโย' };
-                                case 'agri': return { name: 'สินเชื่อรถเพื่อการเกษตร', tagline: 'สินเชื่อรถเพื่อการเกษตรไชโย' };
+                                case 'agri': return { name: 'สินเชื่อรถเก่าเพื่อการเกษตร', tagline: 'สินเชื่อรถเก่าเพื่อการเกษตรไชโย' };
                                 default: return { name: 'สินเชื่อรถยนต์', tagline: 'สินเชื่อรถยนต์ไชโย' };
                             }
                         })();
