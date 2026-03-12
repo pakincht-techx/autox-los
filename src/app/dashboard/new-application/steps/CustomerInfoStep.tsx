@@ -1050,6 +1050,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
                                                         <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
                                                         <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
+                                                        <SelectItem value="คอนโด">คอนโด</SelectItem>
                                                         <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
                                                         <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
                                                         <SelectItem value="เพิง">เพิง</SelectItem>
@@ -1355,7 +1356,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ (คน)</Label>
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ (คน) <span className="text-red-500">*</span></Label>
                                 <Input
                                     type="number"
                                     className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"
@@ -1365,7 +1366,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 />
                             </div>
                             <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ (คน)</Label>
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ (คน) <span className="text-red-500">*</span></Label>
                                 <Input
                                     type="number"
                                     className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"

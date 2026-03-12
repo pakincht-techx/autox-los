@@ -1640,6 +1640,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
                                                                         <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
                                                                         <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
+                                                                        <SelectItem value="คอนโด">คอนโด</SelectItem>
                                                                         <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
                                                                         <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
                                                                         <SelectItem value="เพิง">เพิง</SelectItem>
