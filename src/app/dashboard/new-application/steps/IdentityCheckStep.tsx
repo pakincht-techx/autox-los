@@ -218,12 +218,12 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
         // Mock Data
         const mockData = {
             idNumber: "1-2345-67890-12-3",
-            firstName: "สมชาย",
+            firstName: "ดีใจ",
             middleName: "",
-            lastName: "รักชาติ",
-            firstNameEn: "SOMCHAI",
+            lastName: "ไชโย",
+            firstNameEn: "DEEJAI",
             middleNameEn: "",
-            lastNameEn: "RAKCHAT",
+            lastNameEn: "CHAIYO",
             prefix: "นาย",
             gender: "ชาย",
             birthDate: "1990-01-01",
@@ -247,7 +247,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
         const updatedData = { ...formData, ...mockData };
         setFormData(updatedData);
-        setMockChipPhoto("https://api.dicebear.com/7.x/avataaars/svg?seed=Somchai&backgroundColor=e6e6e6");
+        setMockChipPhoto("https://api.dicebear.com/7.x/avataaars/svg?seed=Deejai&backgroundColor=e6e6e6");
 
         // Skip review for Dipchip, go straight to DOPA
         handleDOPAVerify(updatedData);
@@ -280,9 +280,9 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
             let mockData: any = {
                 idNumber: formData.cardType === 'PINK_CARD' ? "0-1234-56789-01-2" : "3-3345-67890-12-3",
-                firstName: formData.cardType === 'PINK_CARD' ? "ออง" : "สมหญิง",
-                middleName: formData.cardType === 'PINK_CARD' ? "" : "มณี",
-                lastName: formData.cardType === 'PINK_CARD' ? "มิน" : "ใจงาม",
+                firstName: formData.cardType === 'PINK_CARD' ? "ออง" : "ดีใจ",
+                middleName: formData.cardType === 'PINK_CARD' ? "" : "",
+                lastName: formData.cardType === 'PINK_CARD' ? "มิน" : "ไชโย",
                 prefix: formData.cardType === 'PINK_CARD' ? "นาย" : "นางสาว",
                 gender: formData.cardType === 'PINK_CARD' ? "ชาย" : "หญิง",
                 birthDate: formData.cardType === 'PINK_CARD' ? "1998-08-08" : "1995-05-05",
@@ -466,7 +466,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             isExisting = true;
             profile = {
                 customerId: "CUST-555001",
-                fullName: "คุณสมชาย ใจดี",
+                fullName: "คุณดีใจ ไชโย",
                 activeLoans: 2,
                 lastContact: "2023-12-01",
                 creditGrade: "A"
@@ -617,7 +617,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                             {stage === 'READING_CARD' ? (
                                                 <>
                                                     <Loader2 className="w-16 h-16 text-chaiyo-blue animate-spin mb-4" />
-                                                    <h3 className="text-xl font-bold text-chaiyo-blue">กำลังอ่านข้อมูลจากบัตร...</h3>
+                                                    <h3 className="text-xl font-bold text-chaiyo-blue">กำลังอ่านข้อมูล...</h3>
                                                 </>
                                             ) : dipchipError ? (
                                                 <div className="animate-in fade-in zoom-in-95 duration-500 w-full flex flex-col items-center">
@@ -638,7 +638,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                             }}
                                                             className="font-bold h-12 px-8 rounded-xl"
                                                         >
-                                                            ถ่ายรูปบัตรแทน
+                                                            ถ่ายรูปบัตรประชาชน
                                                         </Button>
                                                         <Button
                                                             onClick={handleReadCard}
@@ -663,7 +663,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 )}
 
                                 {/* Secondary Options: OCR/Manual */}
-                                {stage === 'INIT' && (
+                                {stage === 'INIT' && !dipchipError && (
                                     <div className="space-y-4">
                                         {formData.customerGroup !== 'ethnic' && (
                                             <div className="flex items-center gap-4">
@@ -986,16 +986,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                     </div>
                                                 </div>
                                             </div>
-                                            <Button
-                                                variant="outline"
-                                                className="w-full h-12 rounded-xl border-chaiyo-blue text-chaiyo-blue font-bold flex items-center justify-center gap-2 hover:bg-blue-50"
-                                                onClick={() => {
-                                                    const pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
-                                                    window.open(pdfPath, '_blank');
-                                                }}
-                                            >
-                                                <Printer className="w-5 h-5" /> พิมพ์ Salesheet
-                                            </Button>
+
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
@@ -1158,7 +1149,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                                     <div className="w-1.5 h-1.5 rounded-full bg-chaiyo-blue"></div>
                                                                     <p className="font-bold text-chaiyo-blue text-sm">กรณีไม่ทราบวันหรือเดือนเกิด</p>
                                                                 </div>
-                                                                <p className="text-muted-foreground">หากลูกค้าไม่ทราบวันหรือเดือนเกิด ให้ระบุเป็น <code className="bg-red-50 text-red-600 px-1 rounded font-bold">--</code> ในช่องที่กำกับ</p>
+                                                                <p className="text-muted-foreground">ให้ระบุเป็น <code className="bg-red-50 text-red-600 px-1 rounded font-bold">--</code> ในช่องที่กำกับ</p>
                                                                 <div className="bg-gray-50 p-3 rounded-xl border border-border-subtle space-y-2">
                                                                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">ตัวอย่างการระบุ</p>
                                                                     <div className="flex justify-between items-center border-b border-gray-200/50 pb-1.5">
@@ -1334,16 +1325,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             </div>
                         </div>
 
-                        <Button
-                            variant="outline"
-                            className="w-full h-12 rounded-xl border-chaiyo-blue text-chaiyo-blue font-bold flex items-center justify-center gap-2 hover:bg-blue-50"
-                            onClick={() => {
-                                const pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
-                                window.open(pdfPath, '_blank');
-                            }}
-                        >
-                            <Printer className="w-5 h-5" /> พิมพ์ Salesheet
-                        </Button>
+
                     </div>
 
                     <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
@@ -1409,16 +1391,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             </div>
                         </div>
 
-                        <Button
-                            variant="outline"
-                            className="w-full h-12 rounded-xl border-chaiyo-blue text-chaiyo-blue font-bold flex items-center justify-center gap-2 hover:bg-blue-50"
-                            onClick={() => {
-                                const pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
-                                window.open(pdfPath, '_blank');
-                            }}
-                        >
-                            <Printer className="w-5 h-5" /> พิมพ์ Salesheet
-                        </Button>
+
                     </div>
 
                     <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">

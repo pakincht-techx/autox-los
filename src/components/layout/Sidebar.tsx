@@ -9,8 +9,8 @@ import { AnnouncementModal } from "@/components/layout/AnnouncementModal";
 import {
     LayoutGrid,
     PlusSquare,
-    Users,
     Files,
+    FolderOpen,
     CheckSquare,
     Car,
     LogOut,
@@ -50,6 +50,7 @@ type UserRole = 'Maker' | 'Checker' | 'Approver';
 const mockUser = {
     name: 'สมหญิง จริงใจ',
     role: 'Maker' as UserRole,
+    position: 'เจ้าหน้าที่สินเชื่อสาขา',
     branch: 'สาขาลาดพร้าว'
 };
 
@@ -64,14 +65,13 @@ const navigationGroups = [
     {
         title: "จัดการ",
         items: [
-            { name: "รายการใบสมัคร", href: "/dashboard/applications", icon: Files, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
-            { name: "ลูกค้า", href: "/dashboard/customers", icon: Users, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
+            { name: "รายการใบสมัครของฉัน", href: "/dashboard/applications", icon: Files, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
+            { name: "รายการใบสมัครทั้งหมด", href: "/dashboard/all-applications", icon: FolderOpen, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
         ]
     },
     {
         title: "ตั้งค่า",
         items: [
-            { name: "บัญชี", href: "/dashboard/profile", icon: UserCircle, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
             { name: "การตั้งค่า", href: "/dashboard/settings", icon: Settings, allowedRoles: ['Approver'] as UserRole[] },
         ]
     }
@@ -144,22 +144,55 @@ export function Sidebar() {
                             <h1 className="font-semibold text-base leading-none truncate text-white/90 tracking-wide">เงินไชโย</h1>
                             <div
                                 className="flex items-center gap-1.5 cursor-pointer group mt-1"
-                                onClick={() => setIsBranchInfoOpen(true)}
                             >
                                 <div className="text-[11px] font-medium text-white/60 group-hover:text-white/90 transition-colors truncate">
                                     {branchInfo.name} ({branchInfo.code})
                                 </div>
-                                <Info className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-colors shrink-0" />
                             </div>
                         </div>
                     )}
                 </div>
             </div>
 
-
+            {/* User Account */}
+            <div className={cn("pl-4 pr-2 pt-4 pb-2", isCollapsed && "pl-4 pr-2")}>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className={cn(
+                            "flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
+                            isCollapsed && "justify-center p-1"
+                        )}>
+                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                JS
+                            </div>
+                            {!isCollapsed && (
+                                <>
+                                    <div className="flex-1 overflow-hidden text-left">
+                                        <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
+                                        <p className="text-[10px] text-white/60 truncate">{mockUser.position}</p>
+                                    </div>
+                                    <ChevronsUpDown className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                </>
+                            )}
+                        </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
+                        <DropdownMenuLabel>บัญชีของฉัน</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setIsAccountOpen(true)}>
+                            <UserCircle className="mr-2 h-4 w-4" />
+                            <span>ข้อมูลผู้ใช้</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => console.log("Logout")}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>ออกจากระบบ</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 pl-4 pr-2 space-y-6">
+            <nav className="flex-1 py-4 pl-4 pr-2 space-y-6">
 
 
                 {filteredGroups.map((group) => (
@@ -221,79 +254,46 @@ export function Sidebar() {
                     )}
                 </div>
 
-                {/* Account Details */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className={cn(
-                            "flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
-                            isCollapsed && "justify-center p-1"
-                        )}>
-                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                                JS
-                            </div>
-                            {!isCollapsed && (
-                                <>
-                                    <div className="flex-1 overflow-hidden text-left">
-                                        <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
-                                        <p className="text-[10px] text-white/60 truncate">{mockUser.role}</p>
-                                    </div>
-                                    <ChevronsUpDown className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
-                                </>
-                            )}
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
-                        <DropdownMenuLabel>บัญชีของฉัน</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setIsAccountOpen(true)}>
-                            <UserCircle className="mr-2 h-4 w-4" />
-                            <span>ข้อมูลผู้ใช้</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => console.log("Logout")}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>ออกจากระบบ</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+
             </div>
 
             <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>ข้อมูลผู้ใช้</DialogTitle>
+                        <DialogTitle>ข้อมูลผู้ใช้งาน</DialogTitle>
                         <DialogDescription>
                             ข้อมูลส่วนตัวและข้อมูลสาขาของคุณ
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">รหัสสาขา</Label>
-                            <div className="col-span-3 font-medium">108</div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">ชื่อสาขา</Label>
-                            <div className="col-span-3 font-medium">สาขาลาดพร้าว</div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">สนง.เขต</Label>
-                            <div className="col-span-3 font-medium">สำนักงานเขตจตุจักร</div>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">ภาค</Label>
-                            <div className="col-span-3 font-medium">กรุงเทพมหานคร 2</div>
-                        </div>
-                        <div className="border-t border-border-subtle my-2" />
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">รหัสพนง.</Label>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">พนักงาน</Label>
                             <div className="col-span-3 font-medium">1234567</div>
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">ชื่อ-สกุล</Label>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">ชื่อ-สกุล</Label>
                             <div className="col-span-3 font-medium">นางสาวสมหญิง จริงใจ</div>
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right text-muted-foreground">ตำแหน่ง</Label>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">ตำแหน่ง</Label>
                             <div className="col-span-3 font-medium">เจ้าหน้าที่สินเชื่อสาขา</div>
+                        </div>
+                        <div className="border-t border-border-subtle my-2" />
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">รหัสสาขา / OC Code</Label>
+                            <div className="col-span-3 font-medium">108</div>
+                        </div>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">ชื่อสาขา / ทีม</Label>
+                            <div className="col-span-3 font-medium">สาขาลาดพร้าว</div>
+                        </div>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">เขต / ฝ่าย</Label>
+                            <div className="col-span-3 font-medium">สำนักงานเขตจตุจักร</div>
+                        </div>
+                        <div className="grid grid-cols-5 items-center gap-4">
+                            <Label className="col-span-2 text-left text-muted-foreground">ภาค / สายงาน</Label>
+                            <div className="col-span-3 font-medium">กรุงเทพมหานคร 2</div>
                         </div>
                     </div>
                 </DialogContent>

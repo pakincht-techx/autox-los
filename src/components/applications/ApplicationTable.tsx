@@ -2,9 +2,16 @@ import { Badge } from "@/components/ui/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Application, ApplicationStatus } from "./types";
 import { useRouter } from "next/navigation";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+
+export type SortKey = 'applicationNo' | 'applicantName' | 'productType' | 'status' | 'submissionDate' | 'makerName';
+export type SortDirection = 'asc' | 'desc' | null;
 
 interface ApplicationTableProps {
     data: Application[];
+    sortKey?: SortKey | null;
+    sortDirection?: SortDirection | null;
+    onSort?: (key: SortKey) => void;
 }
 
 const getStatusColor = (status: ApplicationStatus) => {
@@ -44,7 +51,7 @@ const getStatusLabel = (status: ApplicationStatus) => {
     }
 };
 
-export function ApplicationTable({ data }: ApplicationTableProps) {
+export function ApplicationTable({ data, sortKey, sortDirection, onSort }: ApplicationTableProps) {
     const router = useRouter();
 
     const handleRowClick = (app: Application) => {
@@ -55,17 +62,41 @@ export function ApplicationTable({ data }: ApplicationTableProps) {
         }
     };
 
+    const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
+        if (!onSort) return null;
+        if (sortKey !== columnKey || !sortDirection) {
+            return <ArrowUpDown className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-50 transition-opacity" />;
+        }
+        return sortDirection === 'asc' ? (
+            <ArrowUp className="ml-2 h-4 w-4 text-chaiyo-blue" />
+        ) : (
+            <ArrowDown className="ml-2 h-4 w-4 text-chaiyo-blue" />
+        );
+    };
+
+    const SortableHead = ({ label, columnKey, className = "" }: { label: string, columnKey: SortKey, className?: string }) => (
+        <TableHead
+            className={`group cursor-pointer hover:bg-gray-100/50 transition-colors ${className}`}
+            onClick={() => onSort && onSort(columnKey)}
+        >
+            <div className={`flex items-center ${className.includes('text-center') ? 'justify-center' : ''}`}>
+                <span>{label}</span>
+                <SortIcon columnKey={columnKey} />
+            </div>
+        </TableHead>
+    );
+
     return (
         <div className="rounded-xl border border-border-subtle overflow-hidden">
             <Table>
                 <TableHeader className="bg-gray-50/50 border-b border-border-subtle">
                     <TableRow className="hover:bg-transparent">
-                        <TableHead className="w-[150px]">เลขที่ใบสมัคร</TableHead>
-                        <TableHead>ชื่อ-นามสกุลผู้กู้</TableHead>
-                        <TableHead>ประเภทสินเชื่อ</TableHead>
-                        <TableHead className="text-center">สถานะ</TableHead>
-                        <TableHead>วันที่สร้างใบสมัคร</TableHead>
-                        <TableHead>ผู้สร้างใบสมัคร</TableHead>
+                        <SortableHead label="เลขที่ใบสมัคร" columnKey="applicationNo" className="w-[170px]" />
+                        <SortableHead label="ชื่อ-นามสกุลผู้กู้" columnKey="applicantName" />
+                        <SortableHead label="ประเภทสินเชื่อ" columnKey="productType" />
+                        <SortableHead label="สถานะ" columnKey="status" className="text-center" />
+                        <SortableHead label="วันที่สร้างใบสมัคร" columnKey="submissionDate" />
+                        <SortableHead label="ผู้สร้างใบสมัคร" columnKey="makerName" />
                     </TableRow>
                 </TableHeader>
                 <TableBody>

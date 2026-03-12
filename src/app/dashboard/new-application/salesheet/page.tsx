@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { FileText, User, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { FileText, User, X, ChevronLeft, ChevronRight, Printer } from "lucide-react";
 import { useApplication } from "../context/ApplicationContext";
 
 const PdfViewer = dynamic(
@@ -36,18 +36,13 @@ export default function SalesheetPage() {
                             <User className="w-6 h-6 text-orange-600" />
                         </div>
                         <div>
-                            <h3 className="text-orange-900 font-bold text-lg mb-0.5">พนักงาน : กรุณายื่นอุปกรณ์ให้ลูกค้า</h3>
+                            <h3 className="text-orange-900 font-bold text-lg mb-0.5">พนักงานต้องยื่น iPad ให้ลูกค้า</h3>
                             <p className="text-orange-700 text-sm leading-relaxed">
                                 เพื่อให้ลูกค้าอ่านรายละเอียดและกดยืนยันด้วยตนเอง และแจ้งลูกค้าว่ามีการอัดเสียงในขั้นตอนนี้
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowStaffBanner(false)}
-                        className="p-1 hover:bg-orange-100 rounded-lg transition-colors text-orange-500"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+
                 </div>
             )}
 
@@ -57,7 +52,6 @@ export default function SalesheetPage() {
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">เอกสารแนะนำผลิตภัณฑ์ (Salesheet)</h2>
-                    <p className="text-gray-500 text-sm">กรุณาอธิบายรายละเอียดให้ลูกค้าทราบและให้ลูกค้าอ่านเอกสารก่อนทำรายการต่อ</p>
                 </div>
             </div>
 
@@ -74,7 +68,7 @@ export default function SalesheetPage() {
                 />
                 <label
                     htmlFor="salesheet-read"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-gray-800"
+                    className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-gray-800"
                 >
                     ข้าพเจ้าได้อธิบายรายละเอียด Salesheet ให้ลูกค้าทราบ และลูกค้าได้อ่านทำความเข้าใจแล้ว
                 </label>
@@ -89,14 +83,24 @@ export default function SalesheetPage() {
                 >
                     <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
                 </Button>
-                <Button
-                    size="xl"
-                    onClick={() => router.push(`/dashboard/new-application/${appId || "app-256700001"}/customer-info`)}
-                    disabled={!formData.isSalesheetRead}
-                    className="px-8 font-bold"
-                >
-                    ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="xl"
+                        onClick={() => window.open(pdfPath, '_blank')}
+                        className="px-6 font-bold border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                    >
+                        <Printer className="w-4 h-4 mr-2" /> พิมพ์ Salesheet
+                    </Button>
+                    <Button
+                        size="xl"
+                        onClick={() => router.push(`/dashboard/new-application/${appId || "app-256700001"}/customer-info`)}
+                        disabled={!formData.isSalesheetRead}
+                        className="px-8 font-bold"
+                    >
+                        ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
+                </div>
             </div>
         </div>
     );

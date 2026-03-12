@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { CheckCircle, Shield, FileText, ChevronDown, User, X } from "lucide-react";
+import { Shield, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Printer } from "lucide-react";
+import { privacyNoticeHtml } from "@/data/privacy-notice-content";
 
 interface PrivacyConsentStepProps {
     onAccept: () => void;
@@ -13,35 +14,8 @@ interface PrivacyConsentStepProps {
 }
 
 export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: PrivacyConsentStepProps) => {
-    const [hasReadPrivacy, setHasReadPrivacy] = useState(false);
     const [isPrivacyAccepted, setIsPrivacyAccepted] = useState(false);
     const [showStaffBanner, setShowStaffBanner] = useState(true);
-
-    const privacyScrollRef = useRef<HTMLDivElement | null>(null);
-
-    const checkScrollable = () => {
-        if (privacyScrollRef.current) {
-            const { scrollHeight, clientHeight } = privacyScrollRef.current;
-            if (scrollHeight <= clientHeight) {
-                setHasReadPrivacy(true);
-            }
-        }
-    };
-
-    useEffect(() => {
-        checkScrollable();
-        window.addEventListener('resize', checkScrollable);
-        return () => window.removeEventListener('resize', checkScrollable);
-    }, []);
-
-    const handleScroll = (ref: React.RefObject<HTMLDivElement | null>, setReadState: (val: boolean) => void) => {
-        if (ref.current) {
-            const { scrollTop, scrollHeight, clientHeight } = ref.current;
-            if (scrollTop + clientHeight >= scrollHeight - 30) {
-                setReadState(true);
-            }
-        }
-    };
 
     const handleOpenSalesSheet = () => {
         const pdfPath = collateralType === 'land'
@@ -81,49 +55,14 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
             <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mt-6">
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                     <div className="flex items-center gap-2 font-semibold text-gray-700">
-
                         กรุณาอ่านและทำความเข้าใจรายละเอียดเอกสารก่อนดำเนินการต่อ
                     </div>
-                    {!hasReadPrivacy && (
-                        <div className="text-xs text-orange-500 flex items-center gap-1 animate-pulse">
-                            <ChevronDown className="w-3 h-3" />
-                            กรุณาเลื่อนอ่านจนจบ
-                        </div>
-                    )}
                 </div>
 
                 <div
-                    ref={privacyScrollRef}
-                    onScroll={() => handleScroll(privacyScrollRef, setHasReadPrivacy)}
-                    className="h-[400px] overflow-y-auto p-6 text-sm text-gray-600 space-y-4 leading-relaxed scroll-smooth"
-                >
-                    <p>
-                        <strong>1. การเก็บรวบรวมข้อมูลส่วนบุคคล</strong><br />
-                        บริษัทฯ จะเก็บรวบรวมข้อมูลส่วนบุคคลของท่านเท่าที่จำเป็นเพื่อวัตถุประสงค์ในการให้บริการสินเชื่อ โดยข้อมูลที่เก็บรวบรวมอาจรวมถึงแต่ไม่จำกัดเพียง ชื่อ-นามสกุล, ที่อยู่, เบอร์โทรศัพท์, ข้อมูลทางการเงิน และข้อมูลเครดิตบูโร (NCB)
-                    </p>
-                    <p>
-                        <strong>2. วัตถุประสงค์ในการใช้ข้อมูล</strong><br />
-                        ข้อมูลของท่านจะถูกนำไปใช้เพื่อการวิเคราะห์สินเชื่อ, การติดต่อสื่อสาร, การนำเสนอผลิตภัณฑ์ที่เหมาะสม, และการปฏิบัติตามกฎหมายที่เกี่ยวข้อง รวมถึงการตรวจสอบตัวตน (KYC) และการตรวจสอบข้อมูลเครดิต
-                    </p>
-                    <p>
-                        <strong>3. การเปิดเผยข้อมูล</strong><br />
-                        บริษัทฯ อาจเปิดเผยข้อมูลของท่านให้แก่หน่วยงานราชการ, บริษัทในเครือ, หรือพันธมิตรทางธุรกิจที่เกี่ยวข้อง เท่าที่จำเป็นตามกฎหมายหรือเพื่อการให้บริการ
-                    </p>
-                    <p>
-                        <strong>4. สิทธิของเจ้าของข้อมูล</strong><br />
-                        ท่านมีสิทธิในการขอเข้าถึง, แก้ไข, ลบ, หรือระงับการใช้ข้อมูลส่วนบุคคลของท่าน ตามหลักเกณฑ์ที่กฎหมายกำหนด โดยสามารถติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคลของบริษัทฯ
-                    </p>
-                    <p>
-                        <strong>5. ระยะเวลาในการเก็บรักษา</strong><br />
-                        บริษัทฯ จะเก็บรักษาข้อมูลของท่านไว้เป็นระยะเวลาตามที่กฎหมายกำหนด หรือเท่าที่จำเป็นต่อการดำเนินธุรกิจ หลังจากนั้นข้อมูลจะถูกทำลายหรือทำให้ไม่สามารถระบุตัวตนได้
-                    </p>
-
-                    <p>
-                        -------------------------------------------------<br />
-                        ข้าพเจ้าได้อ่านและทำความเข้าใจข้อความข้างต้นทั้งหมดแล้ว และตกลงยินยอมตามเงื่อนไขที่ระบุไว้ทุกประการ
-                    </p>
-                    <div className="h-10"></div>
-                </div>
+                    className="h-[500px] overflow-y-auto p-6 text-sm text-gray-700 leading-relaxed scroll-smooth privacy-content"
+                    dangerouslySetInnerHTML={{ __html: privacyNoticeHtml }}
+                />
             </div>
 
             {/* Checkbox: Privacy & NCB */}
@@ -133,21 +72,12 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                     className="mt-1"
                     checked={isPrivacyAccepted}
                     onCheckedChange={(checked) => setIsPrivacyAccepted(checked as boolean)}
-                    disabled={!hasReadPrivacy}
                 />
                 <label
                     htmlFor="accept-privacy"
-                    className={cn(
-                        "cursor-pointer select-none",
-                        !hasReadPrivacy ? "text-gray-400" : "text-gray-700"
-                    )}
+                    className="cursor-pointer select-none text-gray-700"
                 >
                     <span className="font-bold">ข้าพเจ้าได้อ่านและรับทราบประกาศนโยบายความเป็นส่วนตัว (Privacy Notice)</span>
-                    <br />
-
-                    {!hasReadPrivacy && (
-                        <p className="text-xs text-orange-500 mt-1">* กรุณาเลื่อนอ่านรายละเอียดด้านบนให้ครบถ้วนก่อนยอมรับ</p>
-                    )}
                 </label>
             </div>
 

@@ -136,7 +136,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                         !hasReadConsent ? "text-gray-400" : "text-gray-700"
                     )}
                 >
-                    <span className="font-bold">ข้าพเจ้าได้อ่านและรับทราบการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อน</span>
+                    <span className="font-bold">ข้าพเจ้าได้อ่าน และรับทราบการเก็บรวบรวมการใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อน</span>
                     {!hasReadConsent && (
                         <p className="text-xs text-orange-500 mt-1">* กรุณาเลื่อนอ่านรายละเอียดด้านบนให้ครบถ้วนก่อนยอมรับ</p>
                     )}

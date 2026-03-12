@@ -103,7 +103,7 @@ export const AddressForm = ({
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 col-span-1 md:col-span-2">
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">เลขที่บ้าน {requiredFields.includes('houseNumber') && <span className="text-red-500">*</span>}</Label>
+                                    <Label className="text-xs text-muted-foreground">บ้านเลขที่ {requiredFields.includes('houseNumber') && <span className="text-red-500">*</span>}</Label>
                                     <Input
                                         className="bg-white h-12"
                                         value={formData[getField('houseNumber')] || ""}
@@ -169,13 +169,13 @@ export const AddressForm = ({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
                                 <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">ตรอก</Label>
+                                    <Label className="text-xs text-muted-foreground">แยก</Label>
                                     <Input
                                         className="bg-white h-12"
                                         value={formData[getField('trohk')] || ""}
                                         onChange={(e) => onChange(getField('trohk'), e.target.value)}
                                         disabled={disabled}
-                                        placeholder="ระบุตรอก"
+                                        placeholder="ระบุแยก"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -335,7 +335,7 @@ export const AddressForm = ({
                                         onClick={() => setShowMapDialog(true)}
                                         className="w-full bg-chaiyo-blue text-white h-9 rounded-xl text-xs font-bold"
                                     >
-                                        <MapPin className="w-3.5 h-3.5 mr-2" /> ระบุตำแหน่งพิกัด
+                                        <MapPin className="w-3.5 h-3.5 mr-2" /> ระบุตำแหน่ง
                                     </Button>
                                 )}
                             </div>

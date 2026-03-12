@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal } from "lucide-react";
+import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal, Camera } from "lucide-react";
 import {
     InputOTP,
     InputOTPGroup,
@@ -80,13 +80,13 @@ const SocialIcon = ({ platform }: { platform: string }) => {
 };
 
 const COUNTRIES = [
-    { label: "ไทย (Thai)", value: "Thai" },
-    { label: "พม่า (Myanmar)", value: "Myanmar" },
-    { label: "ลาว (Laos)", value: "Laos" },
-    { label: "กัมพูชา (Cambodia)", value: "Cambodia" },
-    { label: "จีน (China)", value: "China" },
-    { label: "ญี่ปุ่น (Japan)", value: "Japan" },
-    { label: "อื่นๆ (Other)", value: "Other" },
+    { label: "ไทย", value: "ไทย" },
+    { label: "พม่า", value: "พม่า" },
+    { label: "ลาว", value: "ลาว" },
+    { label: "กัมพูชา", value: "กัมพูชา" },
+    { label: "จีน", value: "จีน" },
+    { label: "ญี่ปุ่น", value: "ญี่ปุ่น" },
+    { label: "อื่นๆ", value: "อื่นๆ" },
 ];
 
 const ID_TYPES = [
@@ -116,23 +116,31 @@ const EDUCATION_LEVELS = [
 
 const RatingGroup = ({ label, value, onChange }: { label: string, value?: number, onChange: (v: number) => void }) => {
     return (
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 py-4 border-b border-border-subtle/50 last:border-0">
-            <span className="text-sm font-bold text-gray-700">{label}</span>
-            <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1.5 rounded-xl shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-1 border-b border-border-subtle/50 last:border-0">
+            <span className="text-sm font-bold text-gray-700 md:max-w-[55%] leading-relaxed pr-2">{label}</span>
+            <div className="flex items-start justify-between md:justify-end gap-1.5 sm:gap-3 shrink-0 mt-3 md:mt-0">
                 {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                        key={num}
-                        type="button"
-                        onClick={() => onChange(num)}
-                        className={cn(
-                            "w-10 h-10 rounded-lg text-sm font-bold transition-all flex items-center justify-center",
-                            value === num
-                                ? "bg-chaiyo-blue text-white shadow-sm"
-                                : "bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                        )}
-                    >
-                        {num}
-                    </button>
+                    <div key={num} className="flex flex-col items-center gap-1.5 w-12 sm:w-14 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => onChange(num)}
+                            className={cn(
+                                "w-10 h-10 sm:w-11 sm:h-11 rounded-full text-base font-bold transition-all flex items-center justify-center border-2 border-white ring-1 shadow-sm shrink-0",
+                                value === num
+                                    ? "bg-chaiyo-blue ring-chaiyo-blue text-white shadow-md scale-105"
+                                    : "bg-gray-50 ring-gray-200 text-gray-400 hover:ring-chaiyo-blue/50 hover:text-chaiyo-blue hover:bg-blue-50/50"
+                            )}
+                        >
+                            {num}
+                        </button>
+                        <span className={cn(
+                            "text-[10px] whitespace-nowrap text-center transition-colors min-h-[15px]",
+                            value === num ? "text-chaiyo-blue font-bold" : "text-gray-400 font-medium",
+                            (num === 1 || num === 5) ? "opacity-100" : "opacity-0 pointer-events-none"
+                        )}>
+                            {num === 1 ? "น้อยที่สุด" : num === 5 ? "มากที่สุด" : " "}
+                        </span>
+                    </div>
                 ))}
             </div>
         </div>
@@ -753,23 +761,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             inputClassName="h-12"
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label>อายุ <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            value={(() => {
-                                                if (!formData.birthDate) return "";
-                                                const parts = formData.birthDate.split('-');
-                                                if (parts.length < 1) return "";
-                                                const y = parseInt(parts[0]);
-                                                if (isNaN(y)) return "";
-                                                const today = new Date();
-                                                const age = today.getFullYear() - y;
-                                                return age >= 0 ? age.toString() : "0";
-                                            })()}
-                                            disabled
-                                            className="bg-gray-50 text-gray-600 h-12"
-                                        />
-                                    </div>
+
 
                                     <div className="space-y-2">
                                         <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
@@ -828,13 +820,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         </div>
                                         {formData.verificationMethod === 'DIPCHIP' ? (
                                             <Input
-                                                value={formData.issueCountry || "Thailand"}
+                                                value={formData.issueCountry || "ไทย"}
                                                 disabled
                                                 className="bg-gray-50 text-gray-600 h-12"
                                             />
                                         ) : (
                                             <Select
-                                                value={formData.issueCountry || "Thailand"}
+                                                value={formData.issueCountry || "ไทย"}
                                                 onValueChange={(val) => handleChange("issueCountry", val)}
                                             >
                                                 <SelectTrigger className="h-12 bg-white">
@@ -855,7 +847,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         </div>
                                         {formData.verificationMethod === 'DIPCHIP' ? (
                                             <Input
-                                                value={formData.nationality || "Thai"}
+                                                value={formData.nationality || "ไทย"}
                                                 disabled
                                                 className="bg-gray-50 text-gray-600 h-12"
                                             />
@@ -1173,15 +1165,17 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </div>
                                             <div className="col-span-1 md:col-span-2 mt-2 rounded-xl border border-border-subtle overflow-hidden bg-white">
                                                 <YesNoGroup
-                                                    label="ท่านพักอาศัยอยู่ที่เดิมเป็นประจำทุกวัน"
+                                                    label="อาศัยอยู่ที่นี้เป็นประจำหรือไม่"
                                                     value={formData.isLivingHereEveryday}
                                                     onChange={(val) => handleChange("isLivingHereEveryday", val)}
                                                 />
-                                                <YesNoGroup
-                                                    label="สถานที่พักปัจจุบันตั้งอยู่บนที่ดินที่ติดการจำนอง"
-                                                    value={formData.isResidingOnMortgagedLand}
-                                                    onChange={(val) => handleChange("isResidingOnMortgagedLand", val)}
-                                                />
+                                                {formData.collateralType === 'land' && (
+                                                    <YesNoGroup
+                                                        label="ที่อยู่อาศัยปัจจุบันอยู่บนที่ดินที่เป็นหลักประกันหรือไม่"
+                                                        value={formData.isResidingOnMortgagedLand}
+                                                        onChange={(val) => handleChange("isResidingOnMortgagedLand", val)}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -1240,20 +1234,15 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 prefix="contact"
                                 formData={formData}
                                 onChange={handleChange}
-                                hideFields={!!(formData.contactAddressSource && formData.contactAddressSource !== 'new')}
+                                hideFields={true}
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
                                             <Label className="text-sm">เลือกที่อยู่ที่สามารถติดต่อได้</Label>
                                             <Select
-                                                value={formData.contactAddressSource || "new"}
+                                                value={formData.contactAddressSource || "id"}
                                                 onValueChange={(val) => {
                                                     handleChange("contactAddressSource", val);
-                                                    if (val !== 'new') {
-                                                        // Copy logic if needed, or just let AddressForm handle display
-                                                        // For consistency with other forms, we might want to sync data
-                                                        // but the user just requested "can use", so selection is enough.
-                                                    }
                                                 }}
                                             >
                                                 <SelectTrigger className="h-12 bg-white">
@@ -1263,20 +1252,17 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     <SelectItem value="id">ที่อยู่ตามบัตรประชาชน</SelectItem>
                                                     <SelectItem value="current">ที่อยู่ปัจจุบัน</SelectItem>
                                                     <SelectItem value="shipping">ที่อยู่จัดส่งเอกสาร</SelectItem>
-                                                    <SelectItem value="new">ระบุที่อยู่ใหม่</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {formData.contactAddressSource && formData.contactAddressSource !== 'new' && (
-                                            <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
-                                                <Info className="w-4 h-4" />
-                                                ใช้ข้อมูลที่อยู่เดียวกับ{
-                                                    formData.contactAddressSource === 'id' ? 'ที่อยู่ตามบัตรประชาชน' :
-                                                        formData.contactAddressSource === 'current' ? 'ที่อยู่ปัจจุบัน' :
-                                                            'ที่อยู่จัดส่งเอกสาร'
-                                                }
-                                            </div>
-                                        )}
+                                        <div className="p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-sm text-chaiyo-blue flex items-center gap-2">
+                                            <Info className="w-4 h-4" />
+                                            ใช้ข้อมูลที่อยู่เดียวกับ{
+                                                (formData.contactAddressSource || 'id') === 'id' ? 'ที่อยู่ตามบัตรประชาชน' :
+                                                    formData.contactAddressSource === 'current' ? 'ที่อยู่ปัจจุบัน' :
+                                                        'ที่อยู่จัดส่งเอกสาร'
+                                            }
+                                        </div>
                                     </div>
                                 }
                             />
@@ -1315,8 +1301,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         <div className="space-y-2">
                             <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
                             <Select
-                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
-                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
+                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : (formData.isHouseholdHeadBorrower === "none" ? "none" : ""))}
+                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true" ? true : (val === "false" ? false : "none"))}
                             >
                                 <SelectTrigger className="h-12 bg-white">
                                     <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
@@ -1324,37 +1310,42 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <SelectContent>
                                     <SelectItem value="true">ใช่</SelectItem>
                                     <SelectItem value="false">ไม่ใช่</SelectItem>
+                                    <SelectItem value="none">ไม่มี</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
-                            <Select
-                                value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
-                                onValueChange={(val) => handleChange("householdHeadGender", val)}
-                            >
-                                <SelectTrigger className="h-12 bg-white">
-                                    <SelectValue placeholder="เลือกเพศ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ชาย">ชาย</SelectItem>
-                                    <SelectItem value="หญิง">หญิง</SelectItem>
-                                    <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {formData.isHouseholdHeadBorrower !== "none" && (
+                            <>
+                                <div className="space-y-2">
+                                    <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
+                                        onValueChange={(val) => handleChange("householdHeadGender", val)}
+                                    >
+                                        <SelectTrigger className="h-12 bg-white">
+                                            <SelectValue placeholder="เลือกเพศ" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="ชาย">ชาย</SelectItem>
+                                            <SelectItem value="หญิง">หญิง</SelectItem>
+                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                        <div className="space-y-2">
-                            <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
-                            <Input
-                                type="number"
-                                className="h-12 bg-white"
-                                placeholder="ระบุอายุ"
-                                value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
-                                onChange={(e) => handleChange("householdHeadAge", e.target.value)}
-                            />
-                        </div>
+                                <div className="space-y-2">
+                                    <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        type="number"
+                                        className="h-12 bg-white"
+                                        placeholder="ระบุอายุ"
+                                        value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
+                                        onChange={(e) => handleChange("householdHeadAge", e.target.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
 
 
                     </div>
@@ -1449,11 +1440,14 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                             <SelectItem value="living_together">อยู่ด้วยกัน</SelectItem>
                                                             <SelectItem value="separated">แยกกันอยู่</SelectItem>
                                                             <SelectItem value="deceased">เสียชีวิตแล้ว</SelectItem>
+                                                            {rel.id === 'spouse' && (
+                                                                <SelectItem value="none">ไม่มี</SelectItem>
+                                                            )}
                                                         </SelectContent>
                                                     </Select>
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {memberData.status !== 'deceased' ? (
+                                                    {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
                                                         <Input
                                                             type="number"
                                                             placeholder="อายุ"
@@ -1467,7 +1461,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <div className="flex justify-center w-full min-w-[120px]">
-                                                        {memberData.status !== 'deceased' ? (
+                                                        {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
                                                             <Select
                                                                 value={memberData.hasInsurance || "no"}
                                                                 onValueChange={(val) => updateMember("hasInsurance", val)}
@@ -1487,7 +1481,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <div className="flex justify-center w-full min-w-[180px]">
-                                                        {memberData.status !== 'deceased' ? (
+                                                        {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
                                                             <Select
                                                                 value={memberData.hasHealthExp || "no"}
                                                                 onValueChange={(val) => updateMember("hasHealthExp", val)}
@@ -1687,11 +1681,11 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                                 <div className="space-y-3">
                                                     <div className="bg-white border border-blue-100 p-3 rounded-lg">
-                                                        <p className="text-xs text-gray-500 mb-2">ให้ลูกค้ากดรหัสเพื่อยืนยันความเป็นเจ้าของจากมือถือ:</p>
+                                                        <p className="text-xs text-gray-500 mb-2">ให้ลูกค้าดำเนินการบนมือถือตัวเองดังนี้</p>
                                                         <div className="bg-gray-50 p-2 rounded-md font-mono text-center text-sm font-bold text-chaiyo-blue tracking-wider border border-gray-100">
-                                                            *179*เลขบัตรประชาชน 13 หลัก# โทรออก
+                                                            กด '*179* เลขบัตรประชาชน 13 หลัก #
+                                                            แล้วโทรออก
                                                         </div>
-                                                        <p className="text-[10px] text-gray-400 mt-2 italic">* กรุณาแคปหน้าจอผลลัพธ์เพื่อนำมาอัปโหลด</p>
                                                     </div>
 
                                                     {formData.phoneOwnershipProof ? (
@@ -1730,11 +1724,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                         </div>
                                                     ) : (
                                                         <div>
-                                                            <Input
+                                                            <input
                                                                 type="file"
                                                                 id="phoneOwnershipProof"
                                                                 className="hidden"
                                                                 accept="image/*"
+                                                                capture="environment"
                                                                 onChange={(e) => {
                                                                     const file = e.target.files?.[0];
                                                                     if (file) {
@@ -1749,8 +1744,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                                 className="w-full h-11 border-dashed border-chaiyo-blue/50 text-chaiyo-blue bg-white hover:bg-blue-50/50 rounded-xl"
                                                                 onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
                                                             >
-                                                                <Upload className="w-4 h-4 mr-2" />
-                                                                อัปโหลดรูปภาพ
+                                                                <Camera className="w-4 h-4 mr-2" />
+                                                                ถ่ายรูปหน้าจอผลการตรวจสอบ
                                                             </Button>
                                                         </div>
                                                     )}
@@ -2083,6 +2078,15 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             </div>
 
                             <div className="space-y-4 pt-2">
+                                {/* Intention Rating */}
+                                <div className="pb-2 border-b border-gray-100">
+                                    <RatingGroup
+                                        label="ความตั้งใจ ในการสร้างรายได้ เพื่อชำระหนี้"
+                                        value={formData.qDebtRepaymentIntention}
+                                        onChange={(v) => handleChange("qDebtRepaymentIntention", v)}
+                                    />
+                                </div>
+
                                 {/* Skill Select */}
                                 <div className="space-y-2">
                                     <Label className="text-sm font-medium text-gray-700">ความสามารถพิเศษอื่นๆ ที่จะสร้างรายได้เพิ่ม</Label>
@@ -2122,7 +2126,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {[
                                             { id: "Tiktok", label: "Tiktok", logo: "/application/tiktok.png" },
-                                            { id: "Shoppee", label: "Shoppee", logo: "/application/shoppee.png" },
+                                            { id: "Shopee", label: "Shopee", logo: "/application/shopee.png" },
                                             { id: "Lazada", label: "Lazada", logo: "/application/lazada.png" },
                                             { id: "Grab", label: "Grab", logo: "/application/grab.png" },
                                             { id: "Lineman", label: "Lineman", logo: "/application/lineman.png" },
@@ -2196,22 +2200,6 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Intention Rating */}
-                                <div className="pt-2 border-t border-gray-100">
-                                    <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
-                                        <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
-                                            <div>
-                                                <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <RatingGroup
-                                        label="ความตั้งใจ ในการสร้างรายได้ เพื่อชำระหนี้"
-                                        value={formData.qDebtRepaymentIntention}
-                                        onChange={(v) => handleChange("qDebtRepaymentIntention", v)}
-                                    />
-                                </div>
                             </div>
                         </div>
 
@@ -2223,13 +2211,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 </div>
                                 <h3 className="text-sm font-bold text-gray-700">พฤติกรรมทางการเงิน</h3>
                             </div>
-                            <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
-                                <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
-                                    <div>
-                                        <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
-                                    </div>
-                                </div>
-                            </div>
+
 
                             <div className="flex flex-col gap-0 text-gray-800">
                                 <RatingGroup
@@ -2268,13 +2250,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 </div>
                                 <h3 className="text-sm font-bold text-gray-700">การชำระหนี้</h3>
                             </div>
-                            <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-xl space-y-2 mb-2">
-                                <div className="flex items-start gap-2 text-xs text-blue-800 leading-relaxed italic">
-                                    <div>
-                                        <p>กรุณาประเมินพฤติกรรมทางการเงินที่เกี่ยวข้องกับลูกค้า เลือกในช่องที่ตรงกับความเห็นของท่านมากที่สุดเพียงข้อเดียว (5 เห็นด้วยมากที่สุด)</p>
-                                    </div>
-                                </div>
-                            </div>
+
                             <div className="flex flex-col gap-0 text-gray-800">
                                 <RatingGroup
                                     label="ท่านมีความกังวลข้อมูลเครดิต"
@@ -2300,109 +2276,96 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                                     <AlertCircle className="w-4 h-4 text-red-500" />
                                 </div>
-                                <h3 className="text-sm font-bold text-gray-700">การค้างชำระ</h3>
+                                <h3 className="text-sm font-bold text-gray-700">หากจำเป็นต้องค้างชำระเงินกู้ สาเหตุของปัญหาคือด้านใด</h3>
                             </div>
-                            <div className="flex flex-col gap-4">
-                                <div className="rounded-xl border border-gray-100 bg-white/40 overflow-hidden">
-                                    <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
-                                        <div className="w-1 h-4 bg-chaiyo-blue rounded-full" />
-                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">หากจำเป็นต้องค้างชำระเงินกู้อาจเกิดจากปัญหาด้านใด</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <YesNoGroup
-                                            label="ต้นทุนสูงขึ้น (ค่าใช้จ่ายของการผลิตสูงขึ้น)"
-                                            value={formData.qDelinquencyHigherCost}
-                                            onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ขายสินค้าไม่ออก เช่นผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
-                                            value={formData.qDelinquencyUnsold}
-                                            onChange={(v) => handleChange("qDelinquencyUnsold", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="มีรายจ่ายหนี้สินอื่นๆ"
-                                            value={formData.qDelinquencyOtherDebt}
-                                            onChange={(v) => handleChange("qDelinquencyOtherDebt", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="มีค่าใช้จ่ายภายในครอบครัว"
-                                            value={formData.qDelinquencyFamilyExpense}
-                                            onChange={(v) => handleChange("qDelinquencyFamilyExpense", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="มีค่าใช้จ่ายในการศึกษาบุตรเพิ่มขึ้น"
-                                            value={formData.qDelinquencyEducationExpense}
-                                            onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="อุบัติเหตุ/ความเจ็บป่วยหรือถึงแก่กรรม"
-                                            value={formData.qDelinquencyAccident}
-                                            onChange={(v) => handleChange("qDelinquencyAccident", v)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="rounded-xl border border-gray-100 bg-white/40 overflow-hidden">
-                                    <div className="px-4 py-3 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
-                                        <div className="w-1 h-4 bg-chaiyo-blue rounded-full" />
-                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">หากจำเป็นต้องมีการค้างชำระเงินกู้อาจเกิดจากสาเหตุใด</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <YesNoGroup
-                                            label="เกิดปัญหาในครอบครัวเช่นหย่าร้าง หรือคู่สมรสเสียชีวิต"
-                                            value={formData.qDelinquencyFamilyDispute}
-                                            onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="กิจการที่ทำอยู่ประสบปัญหา"
-                                            value={formData.qDelinquencyBusinessProblem}
-                                            onChange={(v) => handleChange("qDelinquencyBusinessProblem", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ประสบปัญหาด้านสุขภาพ"
-                                            value={formData.qDelinquencyHealthProblem}
-                                            onChange={(v) => handleChange("qDelinquencyHealthProblem", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="มีค่าใช้จ่ายหลายทาง/ภาระค่าใช้จ่ายสูง"
-                                            value={formData.qDelinquencyHighExpense}
-                                            onChange={(v) => handleChange("qDelinquencyHighExpense", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="การย้ายถิ่นที่อยู่อาศัย"
-                                            value={formData.qDelinquencyRelocation}
-                                            onChange={(v) => handleChange("qDelinquencyRelocation", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ขาดความเข้าใจในกระบวนการ/ขั้นตอนการจัดการหนี้"
-                                            value={formData.qDelinquencyDebtProcessIgnorance}
-                                            onChange={(v) => handleChange("qDelinquencyDebtProcessIgnorance", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ถูกฟ้องให้ชำระหนี้สิน"
-                                            value={formData.qDelinquencyLawsuit}
-                                            onChange={(v) => handleChange("qDelinquencyLawsuit", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ย้ายไปประกอบธุรกิจที่จังหวัดอื่น"
-                                            value={formData.qDelinquencyMoveBusiness}
-                                            onChange={(v) => handleChange("qDelinquencyMoveBusiness", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="ภาวะทางเศรษฐกิจ"
-                                            value={formData.qDelinquencyEconomy}
-                                            onChange={(v) => handleChange("qDelinquencyEconomy", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="เกิดภัยธรรมชาติ"
-                                            value={formData.qDelinquencyNaturalDisaster}
-                                            onChange={(v) => handleChange("qDelinquencyNaturalDisaster", v)}
-                                        />
-                                        <YesNoGroup
-                                            label="รัฐบาลเปลี่ยนแปลงนโยบายบ่อย"
-                                            value={formData.qDelinquencyGovernmentPolicy}
-                                            onChange={(v) => handleChange("qDelinquencyGovernmentPolicy", v)}
-                                        />
-                                    </div>
+                            <div className="">
+                                <div className="flex flex-col">
+                                    <YesNoGroup
+                                        label="ต้นทุนสูงขึ้น (ค่าใช้จ่ายของการผลิตสูงขึ้น)"
+                                        value={formData.qDelinquencyHigherCost}
+                                        onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ขายสินค้าไม่ออก เช่นผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
+                                        value={formData.qDelinquencyUnsold}
+                                        onChange={(v) => handleChange("qDelinquencyUnsold", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="มีรายจ่ายหนี้สินอื่นๆ"
+                                        value={formData.qDelinquencyOtherDebt}
+                                        onChange={(v) => handleChange("qDelinquencyOtherDebt", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="มีค่าใช้จ่ายภายในครอบครัว"
+                                        value={formData.qDelinquencyFamilyExpense}
+                                        onChange={(v) => handleChange("qDelinquencyFamilyExpense", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="มีค่าใช้จ่ายในการศึกษาบุตรเพิ่มขึ้น"
+                                        value={formData.qDelinquencyEducationExpense}
+                                        onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="อุบัติเหตุ/ความเจ็บป่วยหรือถึงแก่กรรม"
+                                        value={formData.qDelinquencyAccident}
+                                        onChange={(v) => handleChange("qDelinquencyAccident", v)}
+                                    />
+
+                                    <YesNoGroup
+                                        label="เกิดปัญหาในครอบครัวเช่นหย่าร้าง หรือคู่สมรสเสียชีวิต"
+                                        value={formData.qDelinquencyFamilyDispute}
+                                        onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="กิจการที่ทำอยู่ประสบปัญหา"
+                                        value={formData.qDelinquencyBusinessProblem}
+                                        onChange={(v) => handleChange("qDelinquencyBusinessProblem", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ประสบปัญหาด้านสุขภาพ"
+                                        value={formData.qDelinquencyHealthProblem}
+                                        onChange={(v) => handleChange("qDelinquencyHealthProblem", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="มีค่าใช้จ่ายหลายทาง/ภาระค่าใช้จ่ายสูง"
+                                        value={formData.qDelinquencyHighExpense}
+                                        onChange={(v) => handleChange("qDelinquencyHighExpense", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="การย้ายถิ่นที่อยู่อาศัย"
+                                        value={formData.qDelinquencyRelocation}
+                                        onChange={(v) => handleChange("qDelinquencyRelocation", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ขาดความเข้าใจในกระบวนการ/ขั้นตอนการจัดการหนี้"
+                                        value={formData.qDelinquencyDebtProcessIgnorance}
+                                        onChange={(v) => handleChange("qDelinquencyDebtProcessIgnorance", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ถูกฟ้องให้ชำระหนี้สิน"
+                                        value={formData.qDelinquencyLawsuit}
+                                        onChange={(v) => handleChange("qDelinquencyLawsuit", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ย้ายไปประกอบธุรกิจที่จังหวัดอื่น"
+                                        value={formData.qDelinquencyMoveBusiness}
+                                        onChange={(v) => handleChange("qDelinquencyMoveBusiness", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="ภาวะทางเศรษฐกิจ"
+                                        value={formData.qDelinquencyEconomy}
+                                        onChange={(v) => handleChange("qDelinquencyEconomy", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="เกิดภัยธรรมชาติ"
+                                        value={formData.qDelinquencyNaturalDisaster}
+                                        onChange={(v) => handleChange("qDelinquencyNaturalDisaster", v)}
+                                    />
+                                    <YesNoGroup
+                                        label="รัฐบาลเปลี่ยนแปลงนโยบายบ่อย"
+                                        value={formData.qDelinquencyGovernmentPolicy}
+                                        onChange={(v) => handleChange("qDelinquencyGovernmentPolicy", v)}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -3100,18 +3063,17 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         ) : phoneOwnershipStatus === 'success' ? (
                             <div className="space-y-4">
                                 <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
-                                    <p className="text-green-800 font-bold mb-1">ผลการตรวจสอบสำเร็จ</p>
                                     <div className="mx-auto w-fit space-y-2 mt-4 text-left">
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-green-500" />
                                             <p className="text-green-700 text-sm font-mono tracking-tight">
-                                                เบอร์: {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"}
+                                                เบอร์มือถือ: {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-green-500" />
                                             <p className="text-green-700 text-sm font-mono tracking-tight">
-                                                บัตร: {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
+                                                เลขบัตรประชาชน: {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
                                             </p>
                                         </div>
                                     </div>
@@ -3122,9 +3084,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         ) : (
                             <div className="space-y-4">
                                 <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
-                                    <p className="text-red-800 font-bold mb-1">ตรวจสอบพบข้อมูลไม่ตรงกัน</p>
                                     <p className="text-red-700 text-sm">
-                                        หมายเลขโทรศัพท์ {formData.phone} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
+                                        หมายเลขโทรศัพท์ {(() => { const d = formData.phone?.replace(/\D/g, '') || ''; return d.length >= 5 ? d.slice(0, 3) + '-XXX-XX' + d.slice(-2) : formData.phone; })()} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
                                     </p>
                                 </div>
                                 <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-xs leading-relaxed border border-gray-100">
@@ -3133,8 +3094,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         ข้อแนะนำเบื้องต้น:
                                     </p>
                                     <ul className="list-disc list-inside space-y-1">
-                                        <li>ตรวจสอบการพิมพ์เลขหมายโทรศัพท์</li>
-                                        <li>ตรวจสอบเลขบัตรประชาชนในระบบ และรูปภาพที่อัพโหลด</li>
+                                        <li>ตรวจสอบการพิมพ์เลขหมายโทรศัพท์ และเลขบัตรประชาชน</li>
                                         <li>ให้ลูกค้ากด *179 เพื่อขอข้อมูลใหม่อีกครั้ง</li>
                                     </ul>
                                 </div>
@@ -3150,18 +3110,26 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     className="flex-1 h-12 rounded-xl"
                                     onClick={handleVerifyPhoneOwnership}
                                 >
-                                    ตรวจสอบอีกครั้ง
+                                    ถ่ายรูปหน้าจออีกครั้ง
                                 </Button>
                             )}
                             <Button
+
                                 className={cn(
                                     "h-12 rounded-xl px-8",
-                                    phoneOwnershipStatus === 'error' ? "flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                                    phoneOwnershipStatus === 'error' ? "flex-1 bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
                                 )}
-                                onClick={() => setShowPhoneVerifyDialog(false)}
+                                onClick={() => {
+                                    if (phoneOwnershipStatus === 'error') {
+                                        handleChange("phoneOwnershipProof", null);
+                                        setPhoneOwnershipStatus('idle');
+                                    }
+                                    setShowPhoneVerifyDialog(false);
+                                }}
                             >
                                 ปิด
                             </Button>
+
                         </div>
                     )}
                 </DialogContent>

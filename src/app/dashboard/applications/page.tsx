@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
-import { ApplicationTable } from "@/components/applications/ApplicationTable";
+import { ApplicationTable, SortKey, SortDirection } from "@/components/applications/ApplicationTable";
 import { Application, ApplicationStatus } from "@/components/applications/types";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
@@ -103,17 +103,32 @@ export default function ApplicationsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
 
+    // Sort state
+    const [sortKey, setSortKey] = useState<SortKey | null>('submissionDate');
+    const [sortDirection, setSortDirection] = useState<SortDirection | null>('desc');
+
+    const handleSort = (key: SortKey) => {
+        if (sortKey === key) {
+            if (sortDirection === 'asc') setSortDirection('desc');
+            else { setSortKey(null); setSortDirection(null); }
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
+        }
+        setCurrentPage(1);
+    };
+
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
         { label: "แบบร่าง", value: "Draft" },
         { label: "รอพิจารณา", value: "In Review" },
         { label: "ส่งกลับ", value: "Sent Back" },
-        { label: "อนุมัติ", value: "Approved" },
-        { label: "ถูกปฎิเสธ", value: "Rejected" },
-        { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
     ];
 
+    const excludedStatuses: ApplicationStatus[] = ['Approved', 'Rejected', 'Cancelled'];
+
     const filteredData = MOCK_DATA.filter((app) => {
+        if (excludedStatuses.includes(app.status)) return false;
         const matchesTab = currentTab === "all" || app.status === currentTab;
         const matchesSearch =
             app.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -121,9 +136,27 @@ export default function ApplicationsPage() {
         return matchesTab && matchesSearch;
     });
 
-    const totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+    const sortedData = [...filteredData].sort((a, b) => {
+        if (!sortKey || !sortDirection) return 0;
+
+        if (sortKey === 'submissionDate') {
+            const dateA = a.submissionDate.split('/').reverse().join('');
+            const dateB = b.submissionDate.split('/').reverse().join('');
+            return sortDirection === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+        }
+
+        const valA = a[sortKey as keyof Application];
+        const valB = b[sortKey as keyof Application];
+
+        if (valA === undefined || valB === undefined) return 0;
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(sortedData.length / rowsPerPage));
     const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+    const paginatedData = sortedData.slice(startIndex, startIndex + rowsPerPage);
 
     const { setBreadcrumbs, setRightContent } = useSidebar();
 
@@ -138,7 +171,7 @@ export default function ApplicationsPage() {
                 {/* Page Title Header */}
                 <div className="flex flex-row items-start justify-between gap-4">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการใบสมัคร</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">รายการใบสมัครของฉัน</h1>
                         <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการใบสมัครสินเชื่อทั้งหมดของคุณ</p>
                     </div>
 
@@ -191,7 +224,12 @@ export default function ApplicationsPage() {
                 </div>
 
                 {/* Application List Table */}
-                <ApplicationTable data={paginatedData} />
+                <ApplicationTable
+                    data={paginatedData}
+                    sortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                />
 
                 <div className="flex items-center justify-between px-2">
                     <p className="text-xs text-muted">
@@ -222,6 +260,6 @@ export default function ApplicationsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -34,11 +34,10 @@ export default function Home() {
         {/* Form / Main Action Container */}
         <div className="flex-1 flex flex-col justify-center max-w-sm w-full mx-auto py-12">
           <h2 className="text-[32px] md:text-[40px] font-bold mb-2 tracking-tight text-white">
-            ยินดีต้อนรับเข้าใช้งาน
+            ยินดีต้อนรับ
           </h2>
           <p className="text-white/80 mb-10 text-[16px] leading-relaxed">
-            กรุณาคลิกปุ่มด้านล่างเพื่อเข้าสู่ระบบงานหลัก<br />
-            และเริ่มต้นจัดการใบสมัครสินเชื่อของคุณ
+            กรุณาคลิกปุ่มด้านล่างเพื่อเข้าสู่ระบบขอสินเชื่อ
           </p>
 
           <Link href="/dashboard/applications" className="w-full">

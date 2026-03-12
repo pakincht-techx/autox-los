@@ -315,3 +315,53 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+/* Privacy Notice Inline Content Styles */
+.privacy-content header {
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.privacy-content h4.title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.privacy-content p {
+  margin-bottom: 0.5rem;
+}
+
+.privacy-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin: 0.75rem 0;
+}
+
+.privacy-content table td,
+.privacy-content table th {
+  border: 1px solid #d1d5db;
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.privacy-content table tr:first-child td {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.privacy-content ol,
+.privacy-content ul {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.privacy-content li {
+  margin-bottom: 0.25rem;
+}
