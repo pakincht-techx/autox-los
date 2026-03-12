@@ -159,11 +159,10 @@ export default function ApplicationsPage() {
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
         { label: "แบบร่าง", value: "Draft" },
-        { label: "รอพิจารณา", value: "In Review" },
         { label: "ส่งกลับ", value: "Sent Back" },
     ];
 
-    const excludedStatuses: ApplicationStatus[] = ['Approved', 'Rejected', 'Cancelled'];
+    const excludedStatuses: ApplicationStatus[] = ['Approved', 'Rejected', 'Cancelled', 'In Review'];
 
     const filteredData = MOCK_DATA.filter((app) => {
         if (excludedStatuses.includes(app.status)) return false;

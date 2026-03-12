@@ -130,6 +130,17 @@ const MOCK_DATA: Application[] = [
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
         lastActionTime: "28/10/2566 17:30"
     },
+    {
+        id: "b11",
+        applicationNo: "app-256700030",
+        applicantName: "วิชัย อดทน",
+        makerName: "สมหญิง จริงใจ",
+        submissionDate: "30/10/2566",
+        requestedAmount: 400000,
+        status: "In Review",
+        productType: "สินเชื่อส่วนบุคคล",
+        lastActionTime: "30/10/2566 11:20"
+    },
 ];
 
 export default function AllApplicationsPage() {
@@ -179,6 +190,7 @@ export default function AllApplicationsPage() {
 
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
+        { label: "รอพิจารณา", value: "In Review" },
         { label: "อนุมัติ", value: "Approved" },
         { label: "ถูกปฎิเสธ", value: "Rejected" },
         { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
