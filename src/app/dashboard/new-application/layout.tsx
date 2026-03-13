@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Loader2, ChevronLeft, ChevronRight, Save, Send, User, Car, DollarSign, Calculator, FileText, Check } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Save, Send, User, Car, Calculator, FileText, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";

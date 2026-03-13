@@ -24,7 +24,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700001",
         applicantName: "สมชาย ใจดี",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "01/10/2566",
+        submissionDate: "01/10/2566 09:00",
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -36,7 +36,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700002",
         applicantName: "วิภาวดี รักษ์ไทย",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "02/10/2566",
+        submissionDate: "02/10/2566 08:30",
         requestedAmount: 120000,
         status: "In Review",
         productType: "สินเชื่อโฉนดที่ดิน",
@@ -48,7 +48,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700003",
         applicantName: "กมล คนขยัน",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "03/10/2566",
+        submissionDate: "03/10/2566 10:15",
         requestedAmount: 35000,
         status: "In Review",
         productType: "สินเชื่อนาโนไฟแนนซ์",
@@ -60,7 +60,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700004",
         applicantName: "ดาริน สวยงาม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "04/10/2566",
+        submissionDate: "04/10/2566 13:45",
         requestedAmount: 850000,
         status: "Draft",
         productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
@@ -71,7 +71,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700005",
         applicantName: "เอกชัย มั่นคง",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "05/10/2566",
+        submissionDate: "05/10/2566 11:00",
         requestedAmount: 45000,
         status: "Rejected",
         productType: "สินเชื่อส่วนบุคคล",
@@ -82,7 +82,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700006",
         applicantName: "มานะ อดทน",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "06/10/2566",
+        submissionDate: "06/10/2566 14:20",
         requestedAmount: 200000,
         status: "In Review",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -93,7 +93,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700007",
         applicantName: "ประภาส เจริญดี",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "07/10/2566",
+        submissionDate: "07/10/2566 09:30",
         requestedAmount: 350000,
         status: "Sent Back",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -104,7 +104,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700008",
         applicantName: "สุนีย์ แสงทอง",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "08/10/2566",
+        submissionDate: "08/10/2566 16:00",
         requestedAmount: 180000,
         status: "Sent Back",
         productType: "สินเชื่อโฉนดที่ดิน",
@@ -142,6 +142,10 @@ export default function ApplicationsPage() {
     const [filterStatus, setFilterStatus] = useState("all");
     const [filterStartDate, setFilterStartDate] = useState("");
     const [filterEndDate, setFilterEndDate] = useState("");
+    const [filterPreviousProcessor, setFilterPreviousProcessor] = useState("");
+    const [filterLastActionStartDate, setFilterLastActionStartDate] = useState("");
+    const [filterLastActionEndDate, setFilterLastActionEndDate] = useState("");
+    const [filterMaker, setFilterMaker] = useState("");
 
     const clearFilters = () => {
         setFilterName("");
@@ -149,12 +153,18 @@ export default function ApplicationsPage() {
         setFilterStatus("all");
         setFilterStartDate("");
         setFilterEndDate("");
+        setFilterPreviousProcessor("");
+        setFilterLastActionStartDate("");
+        setFilterLastActionEndDate("");
+        setFilterMaker("");
     };
 
-    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "";
+    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "" || filterMaker !== "";
 
     // Generate unique options for Comboboxes
     const applicantNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.applicantName))).map(name => ({ label: name, value: name }));
+    const makerNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.makerName))).map(name => ({ label: name, value: name }));
+    const previousProcessorOptions = Array.from(new Set(MOCK_DATA.map(app => app.previousProcessorName).filter(Boolean))).map(name => ({ label: name!, value: name! }));
 
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
@@ -175,10 +185,13 @@ export default function ApplicationsPage() {
         const matchesName = filterName ? app.applicantName.toLowerCase().includes(filterName.toLowerCase()) : true;
         const matchesProduct = filterProduct !== "all" ? app.productType === filterProduct : true;
         const matchesStatus = filterStatus !== "all" ? app.status === filterStatus : true;
+        const matchesMaker = filterMaker ? app.makerName.toLowerCase().includes(filterMaker.toLowerCase()) : true;
+        const matchesPreviousProcessor = filterPreviousProcessor ? (app.previousProcessorName?.toLowerCase().includes(filterPreviousProcessor.toLowerCase()) ?? false) : true;
 
         let matchesDate = true;
         if (filterStartDate || filterEndDate) {
-            const [d, m, y] = app.submissionDate.split('/');
+            const [datePart] = app.submissionDate.split(' ');
+            const [d, m, y] = datePart.split('/');
             const appYearAD = parseInt(y) - 543;
             const appDatePath = `${appYearAD}-${m}-${d}`;
 
@@ -186,15 +199,29 @@ export default function ApplicationsPage() {
             if (filterEndDate && appDatePath > filterEndDate) matchesDate = false;
         }
 
-        return matchesTab && matchesSearch && matchesName && matchesProduct && matchesStatus && matchesDate;
+        // Last Action Date Filter
+        let matchesLastActionDate = true;
+        if ((filterLastActionStartDate || filterLastActionEndDate) && app.lastActionTime) {
+            const [datePart] = app.lastActionTime.split(' ');
+            const [d2, m2, y2] = datePart.split('/');
+            const actionYearAD = parseInt(y2) - 543;
+            const actionDatePath = `${actionYearAD}-${m2}-${d2}`;
+
+            if (filterLastActionStartDate && actionDatePath < filterLastActionStartDate) matchesLastActionDate = false;
+            if (filterLastActionEndDate && actionDatePath > filterLastActionEndDate) matchesLastActionDate = false;
+        }
+
+        return matchesTab && matchesSearch && matchesName && matchesProduct && matchesStatus && matchesDate && matchesMaker && matchesPreviousProcessor && matchesLastActionDate;
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
         if (!sortKey || !sortDirection) return 0;
 
         if (sortKey === 'submissionDate') {
-            const dateA = a.submissionDate.split('/').reverse().join('');
-            const dateB = b.submissionDate.split('/').reverse().join('');
+            const [datePartA, timePartA = ''] = a.submissionDate.split(' ');
+            const [datePartB, timePartB = ''] = b.submissionDate.split(' ');
+            const dateA = datePartA.split('/').reverse().join('') + timePartA.replace(':', '');
+            const dateB = datePartB.split('/').reverse().join('') + timePartB.replace(':', '');
             return sortDirection === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
         }
 
@@ -328,13 +355,13 @@ export default function ApplicationsPage() {
                                             <SelectContent>
                                                 <SelectItem value="all">ทั้งหมด</SelectItem>
                                                 <SelectItem value="Draft">แบบร่าง</SelectItem>
-                                                <SelectItem value="In Review">รอพิจารณา</SelectItem>
+
                                                 <SelectItem value="Sent Back">ส่งกลับ</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ช่วงของวันที่สร้างใบสมัคร</Label>
+                                        <Label>ช่วงของวันเวลาสร้างใบสมัคร</Label>
                                         <div className="flex items-center gap-2">
                                             <DatePickerBE
                                                 value={filterStartDate}
@@ -350,6 +377,42 @@ export default function ApplicationsPage() {
                                                 inputClassName="h-12 rounded-xl flex-1"
                                             />
                                         </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ช่วงของวันเวลาดำเนินการล่าสุด</Label>
+                                        <div className="flex items-center gap-2">
+                                            <DatePickerBE
+                                                value={filterLastActionStartDate}
+                                                onChange={setFilterLastActionStartDate}
+                                                placeholder="ตั้งแต่ (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                            <span className="text-muted-foreground">-</span>
+                                            <DatePickerBE
+                                                value={filterLastActionEndDate}
+                                                onChange={setFilterLastActionEndDate}
+                                                placeholder="ถึง (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ผู้ดำเนินการก่อนหน้า</Label>
+                                        <Combobox
+                                            options={previousProcessorOptions}
+                                            value={filterPreviousProcessor}
+                                            onValueChange={setFilterPreviousProcessor}
+                                            placeholder="ระบุชื่อผู้ดำเนินการ"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ผู้สร้างใบสมัคร</Label>
+                                        <Combobox
+                                            options={makerNameOptions}
+                                            value={filterMaker}
+                                            onValueChange={setFilterMaker}
+                                            placeholder="ระบุชื่อผู้สร้างใบสมัคร"
+                                        />
                                     </div>
                                 </div>
                                 <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full">

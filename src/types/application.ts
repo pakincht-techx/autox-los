@@ -30,6 +30,7 @@ export interface SAIncome {
     type?: string;
     detail?: string;
     amount?: number | string;
+    sourceDocType?: string;
 }
 
 export interface PersonalDebt {
@@ -86,6 +87,8 @@ export interface IncomeDocument {
     type?: string;
     status?: string;
     uploadedAt?: string;
+    isLocked?: boolean;
+    password?: string;
 }
 
 export interface ReferencePerson {
@@ -109,6 +112,7 @@ export interface IncomeOccupation {
     seIncomes?: EnterpriseIncome[];
     seCosts?: EnterpriseIncome[];
     incomeDocuments?: IncomeDocument[];
+    customDocTypes?: { id: string; label: string }[];
     incomeChannels?: string[];
     bankAccounts?: BankAccount[];
     workLandmark?: string;
@@ -161,6 +165,7 @@ export interface IncomeOccupation {
     otherLivestockType?: string;
     farmIsHigherThanStandard?: boolean;
     farmingType?: 'contract' | 'self';
+    livestockUnit?: 'head' | 'cycle';
     livestockCyclesPerYear?: string;
     livestockCycles?: {
         cycleNo: number;

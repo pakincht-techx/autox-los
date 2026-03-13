@@ -241,7 +241,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             issueDate: "2020-05-20",
             expiryDate: "2029-05-19",
             laserId: "ME1-2345678-90",
-            nationality: "Thai",
+            nationality: "ไทย",
             verificationMethod: 'DIPCHIP',
         };
 
@@ -297,7 +297,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                 issueDate: "2022-10-10",
                 expiryDate: "2031-10-09",
                 laserId: formData.cardType === 'PINK_CARD' ? "PNK-0000000-01" : "JT2-9876543-21",
-                nationality: formData.cardType === 'PINK_CARD' ? "Myanmar" : "Thai",
+                nationality: formData.cardType === 'PINK_CARD' ? "พม่า" : "ไทย",
                 verificationMethod: 'MANUAL',
             };
 
@@ -1229,14 +1229,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 </Card>
                             </div>
                         )}
-                        {/* FINAL ACTIONS */}
-                        {stage === 'COMPLETE' && (
-                            <div className="pt-4 flex justify-center">
-                                <Button size="lg" className="w-full max-w-md bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-14 text-lg font-bold shadow-lg" onClick={handleCreateProfile}>
-                                    {isExistingMember ? "ดำเนินการต่อ" : "สร้างข้อมูลลูกค้าและเริ่มงาน"}
-                                </Button>
-                            </div>
-                        )}
+
                     </div>
                 </div>
             </div>

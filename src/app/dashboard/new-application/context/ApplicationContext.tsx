@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams, useParams } from "next/navigation";
-import { User, Car, DollarSign, Calculator, FileText, Check } from "lucide-react";
+import { User, Car, Calculator, FileText, Check } from "lucide-react";
+import { BahtSign } from "@/components/icons/BahtSign";
 
 // ─── Step Definitions ────────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ export const ALL_FLOW_STEPS = [
 export const APPLICATION_STEPS = [
     { id: 1, slug: 'customer-info', title: 'ข้อมูลผู้กู้', description: 'Customer Info', icon: User },
     { id: 2, slug: 'collateral-info', title: 'หลักประกัน', description: 'Collateral', icon: Car },
-    { id: 3, slug: 'income', title: 'อาชีพและรายได้', description: 'Income', icon: DollarSign },
+    { id: 3, slug: 'income', title: 'อาชีพและรายได้', description: 'Income', icon: BahtSign },
     { id: 4, slug: 'debt', title: 'ภาระหนี้สิน', description: 'Debt', icon: FileText },
     { id: 5, slug: 'loan-calculator', title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
     { id: 6, slug: 'documents', title: 'เอกสาร', description: 'Documents', icon: FileText },
@@ -102,7 +103,7 @@ const DEFAULT_FORM_DATA = {
     guarantors: [],
     // Context mapping
     customerGroup: "thai",
-    nationality: "thai",
+    nationality: "ไทย",
     specialProject: "none",
 };
 
@@ -243,7 +244,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
                     monthlyDebt: salesTalkData.monthlyDebt || prev.monthlyDebt,
                     occupation: salesTalkData.occupation || prev.occupation,
                     customerGroup: salesTalkData.customerGroup || prev.customerGroup || "thai",
-                    nationality: salesTalkData.nationality || prev.nationality || "thai",
+                    nationality: salesTalkData.nationality || prev.nationality || "ไทย",
                     specialProject: salesTalkData.specialProject || prev.specialProject || "none",
                 }));
                 localStorage.removeItem('salesTalkData');

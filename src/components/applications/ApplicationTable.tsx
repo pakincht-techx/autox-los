@@ -96,7 +96,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                         <SortableHead label="ประเภทสินเชื่อ" columnKey="productType" />
                         <SortableHead label="สถานะใบสมัคร" columnKey="status" className="text-center" />
                         <SortableHead label="วันที่สร้างใบสมัคร" columnKey="submissionDate" />
-                        <SortableHead label="วัน/เวลา ที่ดำเนินการล่าสุด" columnKey="lastActionTime" />
+                        <SortableHead label="วันที่ดำเนินการล่าสุด" columnKey="lastActionTime" />
                         <SortableHead label="ผู้ดำเนินการก่อนหน้า" columnKey="previousProcessorName" />
                         <SortableHead label="ผู้สร้างใบสมัคร" columnKey="makerName" />
                     </TableRow>

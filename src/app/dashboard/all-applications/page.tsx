@@ -22,7 +22,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700001",
         applicantName: "สมชาย ใจดี",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "01/10/2566",
+        submissionDate: "01/10/2566 08:15",
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -34,7 +34,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700005",
         applicantName: "เอกชัย มั่นคง",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "05/10/2566",
+        submissionDate: "05/10/2566 10:30",
         requestedAmount: 45000,
         status: "Rejected",
         productType: "สินเชื่อส่วนบุคคล",
@@ -46,7 +46,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700010",
         applicantName: "จันทร์ แสงงาม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "10/10/2566",
+        submissionDate: "10/10/2566 09:45",
         requestedAmount: 320000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -58,7 +58,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700012",
         applicantName: "พิมพ์ใจ รักสวย",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "12/10/2566",
+        submissionDate: "12/10/2566 14:00",
         requestedAmount: 150000,
         status: "Cancelled",
         productType: "สินเชื่อโฉนดที่ดิน",
@@ -69,7 +69,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700015",
         applicantName: "วิทยา เก่งกล้า",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "15/10/2566",
+        submissionDate: "15/10/2566 11:20",
         requestedAmount: 780000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
@@ -80,7 +80,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700018",
         applicantName: "อรุณ ศรีสวัสดิ์",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "18/10/2566",
+        submissionDate: "18/10/2566 13:30",
         requestedAmount: 60000,
         status: "Rejected",
         productType: "สินเชื่อนาโนไฟแนนซ์",
@@ -91,7 +91,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700020",
         applicantName: "ธนพล เจริญผล",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "20/10/2566",
+        submissionDate: "20/10/2566 07:50",
         requestedAmount: 420000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -102,7 +102,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700022",
         applicantName: "นิตยา อ่อนน้อม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "22/10/2566",
+        submissionDate: "22/10/2566 15:45",
         requestedAmount: 90000,
         status: "Cancelled",
         productType: "สินเชื่อส่วนบุคคล",
@@ -113,7 +113,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700025",
         applicantName: "ปราโมทย์ ใจเย็น",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "25/10/2566",
+        submissionDate: "25/10/2566 09:00",
         requestedAmount: 250000,
         status: "Rejected",
         productType: "สินเชื่อโฉนดที่ดิน",
@@ -124,7 +124,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700028",
         applicantName: "สุดา แก้วมณี",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "28/10/2566",
+        submissionDate: "28/10/2566 16:15",
         requestedAmount: 650000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
@@ -135,7 +135,7 @@ const MOCK_DATA: Application[] = [
         applicationNo: "app-256700030",
         applicantName: "วิชัย อดทน",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "30/10/2566",
+        submissionDate: "30/10/2566 10:00",
         requestedAmount: 400000,
         status: "In Review",
         productType: "สินเชื่อส่วนบุคคล",
@@ -172,6 +172,9 @@ export default function AllApplicationsPage() {
     const [filterStartDate, setFilterStartDate] = useState("");
     const [filterEndDate, setFilterEndDate] = useState("");
     const [filterMaker, setFilterMaker] = useState("");
+    const [filterPreviousProcessor, setFilterPreviousProcessor] = useState("");
+    const [filterLastActionStartDate, setFilterLastActionStartDate] = useState("");
+    const [filterLastActionEndDate, setFilterLastActionEndDate] = useState("");
 
     const clearFilters = () => {
         setFilterName("");
@@ -180,13 +183,17 @@ export default function AllApplicationsPage() {
         setFilterStartDate("");
         setFilterEndDate("");
         setFilterMaker("");
+        setFilterPreviousProcessor("");
+        setFilterLastActionStartDate("");
+        setFilterLastActionEndDate("");
     };
 
-    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterMaker !== "";
+    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterMaker !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "";
 
     // Generate unique options for Comboboxes
     const applicantNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.applicantName))).map(name => ({ label: name, value: name }));
     const makerNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.makerName))).map(name => ({ label: name, value: name }));
+    const previousProcessorOptions = Array.from(new Set(MOCK_DATA.map(app => app.previousProcessorName).filter(Boolean))).map(name => ({ label: name!, value: name! }));
 
     const tabs = [
         { label: "ทั้งหมด", value: "all" },
@@ -210,13 +217,13 @@ export default function AllApplicationsPage() {
         const matchesMaker = filterMaker ? app.makerName.toLowerCase().includes(filterMaker.toLowerCase()) : true;
         const matchesProduct = filterProduct !== "all" ? app.productType === filterProduct : true;
         const matchesStatus = filterStatus !== "all" ? app.status === filterStatus : true;
+        const matchesPreviousProcessor = filterPreviousProcessor ? (app.previousProcessorName?.toLowerCase().includes(filterPreviousProcessor.toLowerCase()) ?? false) : true;
 
-        // Date Filter (simple string comparison since it's mock DD/MM/YYYY vs ISO YYYY-MM-DD from DatePicker. Let's do a basic check if implemented, or skip deep parsing for prototype)
-        // Note: DatePicker returns YYYY-MM-DD, Mock Data has DD/MM/BBBB (2566)
+        // Date Filter (simple string comparison since it's mock DD/MM/YYYY HH:MM vs ISO YYYY-MM-DD from DatePicker)
         let matchesDate = true;
         if (filterStartDate || filterEndDate) {
-            // Rough logic: convert mock format (DD/MM/YYYY Thai) to comparable string
-            const [d, m, y] = app.submissionDate.split('/');
+            const [datePart] = app.submissionDate.split(' ');
+            const [d, m, y] = datePart.split('/');
             const appYearAD = parseInt(y) - 543;
             const appDatePath = `${appYearAD}-${m}-${d}`;
 
@@ -224,15 +231,29 @@ export default function AllApplicationsPage() {
             if (filterEndDate && appDatePath > filterEndDate) matchesDate = false;
         }
 
-        return matchesTab && matchesSearch && matchesName && matchesMaker && matchesProduct && matchesStatus && matchesDate;
+        // Last Action Date Filter
+        let matchesLastActionDate = true;
+        if ((filterLastActionStartDate || filterLastActionEndDate) && app.lastActionTime) {
+            const [datePart] = app.lastActionTime.split(' ');
+            const [d2, m2, y2] = datePart.split('/');
+            const actionYearAD = parseInt(y2) - 543;
+            const actionDatePath = `${actionYearAD}-${m2}-${d2}`;
+
+            if (filterLastActionStartDate && actionDatePath < filterLastActionStartDate) matchesLastActionDate = false;
+            if (filterLastActionEndDate && actionDatePath > filterLastActionEndDate) matchesLastActionDate = false;
+        }
+
+        return matchesTab && matchesSearch && matchesName && matchesMaker && matchesProduct && matchesStatus && matchesDate && matchesPreviousProcessor && matchesLastActionDate;
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
         if (!sortKey || !sortDirection) return 0;
 
         if (sortKey === 'submissionDate') {
-            const dateA = a.submissionDate.split('/').reverse().join('');
-            const dateB = b.submissionDate.split('/').reverse().join('');
+            const [datePartA, timePartA = ''] = a.submissionDate.split(' ');
+            const [datePartB, timePartB = ''] = b.submissionDate.split(' ');
+            const dateA = datePartA.split('/').reverse().join('') + timePartA.replace(':', '');
+            const dateB = datePartB.split('/').reverse().join('') + timePartB.replace(':', '');
             return sortDirection === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
         }
 
@@ -365,7 +386,7 @@ export default function AllApplicationsPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ช่วงของวันที่สร้างใบสมัคร</Label>
+                                        <Label>ช่วงของวันเวลาสร้างใบสมัคร</Label>
                                         <div className="flex items-center gap-2">
                                             <DatePickerBE
                                                 value={filterStartDate}
@@ -383,7 +404,34 @@ export default function AllApplicationsPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>ชื่อผู้สร้าง</Label>
+                                        <Label>ช่วงของวันเวลาดำเนินการล่าสุด</Label>
+                                        <div className="flex items-center gap-2">
+                                            <DatePickerBE
+                                                value={filterLastActionStartDate}
+                                                onChange={setFilterLastActionStartDate}
+                                                placeholder="ตั้งแต่ (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                            <span className="text-muted-foreground">-</span>
+                                            <DatePickerBE
+                                                value={filterLastActionEndDate}
+                                                onChange={setFilterLastActionEndDate}
+                                                placeholder="ถึง (วว/ดด/ปปปป)"
+                                                inputClassName="h-12 rounded-xl flex-1"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ผู้ดำเนินการก่อนหน้า</Label>
+                                        <Combobox
+                                            options={previousProcessorOptions}
+                                            value={filterPreviousProcessor}
+                                            onValueChange={setFilterPreviousProcessor}
+                                            placeholder="ระบุชื่อผู้ดำเนินการ"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>ผู้สร้างใบสมัคร</Label>
                                         <Combobox
                                             options={makerNameOptions}
                                             value={filterMaker}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare } from "lucide-react";
+import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Select,
@@ -126,16 +126,8 @@ const OCCUPATIONS = [
 ];
 
 const DEFAULT_DEBT_TYPES = [
-    "สินเชื่อเพื่อการพาณิชย์",
-    "สินเชื่อวงเงินเบิกเกินบัญชี",
-    "สินเชื่อบุคคล",
-    "สินเชื่อที่อยู่อาศัย",
-    "สินเชื่อให้เช่าแบบลีสซิ่งรถยนต์",
-    "สินเชื่อเช่าซื้ออื่น ๆ",
-    "สินเชื่อบัตรเครดิต",
-    "สินเชื่อเช่าซื้อรถยนต์",
-    "สินเชื่อเพื่อการเกษตร",
     "เงินกู้สหกรณ์",
+    "เงินกู้นอกระบบ",
 ];
 
 const ADDITIONAL_DEBT_TYPES = [
@@ -181,6 +173,19 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
     const idCounterRef = useRef(0);
     const generateId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
     const occupations = formData.occupations || [{ id: 'main', isMain: true }];
+
+    // Determine required reference person count based on income channel
+    const hasCashChannel = occupations.some(
+        (occ: IncomeOccupation) => (occ.incomeChannels || []).includes('cash')
+    );
+    const isSAWithPayslipOrStatement = occupations.some(
+        (occ: IncomeOccupation) =>
+            occ.employmentType === 'SA' &&
+            (occ.incomeDocuments || []).some(
+                (doc: IncomeDocument) => doc.type === 'payslip' || doc.type === 'statement'
+            )
+    ) && !hasCashChannel;
+    const requiredReferenceCount = hasCashChannel ? 2 : isSAWithPayslipOrStatement ? 0 : 1;
 
     const [isSpecialIncomeDialogOpen, setIsSpecialIncomeDialogOpen] = useState(false);
     const [editingSpecialIncome, setEditingSpecialIncome] = useState<SpecialIncomeSource | null>(null);
@@ -443,6 +448,19 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
             handleChange("personalDebts", combined);
         }
     }, []);
+
+    // Auto-add reference person rows when requiredReferenceCount changes
+    useEffect(() => {
+        const currentRefs = formData.referencePersons || [];
+        if (currentRefs.length < requiredReferenceCount) {
+            const toAdd = requiredReferenceCount - currentRefs.length;
+            const newRefs = [...currentRefs];
+            for (let i = 0; i < toAdd; i++) {
+                newRefs.push({ name: "", phone: "", relationship: "", customRelationship: "" });
+            }
+            handleChange("referencePersons", newRefs);
+        }
+    }, [requiredReferenceCount]);
 
     // Reference Persons
     const handleAddReference = () => {
@@ -1086,7 +1104,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                             <div className="md:col-span-2 space-y-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <h5 className="font-bold text-gray-700 flex items-center gap-2">
-                                        <span>ภาระหนี้ส่วนตัวรายเดือน (รวมที่อื่น)</span>
+                                        <span>ภาระหนี้นอกระบบ</span>
                                     </h5>
                                     <Button
                                         type="button"
@@ -1129,30 +1147,12 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                                                         {item.type}
                                                                     </div>
                                                                 ) : (
-                                                                    <Select
+                                                                    <Input
                                                                         value={item.type || ""}
-                                                                        onValueChange={(val) => handleUpdateDebtRow(idx, 'type', val)}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20">
-                                                                            <SelectValue placeholder="เลือกประเภทสินเชื่อ" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {ADDITIONAL_DEBT_TYPES.map(label => (
-                                                                                <SelectItem key={label} value={label} className="text-sm cursor-pointer">{label}</SelectItem>
-                                                                            ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                )}
-
-                                                                {item.type === 'โปรดระบุ' && (
-                                                                    <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
-                                                                        <Input
-                                                                            value={item.customType || ""}
-                                                                            onChange={(e) => handleUpdateDebtRow(idx, 'customType', e.target.value)}
-                                                                            placeholder="ระบุประเภทหนี้ (เช่น เงินกู้นอกระบบ)"
-                                                                            className="h-8 text-xs bg-white border-dashed border-gray-300 focus:border-chaiyo-blue"
-                                                                        />
-                                                                    </div>
+                                                                        onChange={(e) => handleUpdateDebtRow(idx, 'type', e.target.value)}
+                                                                        placeholder="ระบุประเภทหนี้"
+                                                                        className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20"
+                                                                    />
                                                                 )}
                                                             </div>
                                                         </TableCell>
@@ -1215,65 +1215,32 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                             <TableRow className="hover:bg-transparent border-none">
                                                 <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
                                                 <TableHead className="w-[50%] text-xs">รายละเอียด</TableHead>
-                                                <TableHead className="w-[40%] text-right pr-10 text-xs">ค่างวดกับเงินไชโย (บาท/เดือน)</TableHead>
+                                                <TableHead className="w-[40%] text-right pr-10 text-xs">ค่างวด (บาท/เดือน)</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {(() => {
-                                                const rows = [];
-
-                                                // Specific loans
-                                                if ((formData.chaiyoLoans || []).length > 0) {
-                                                    (formData.chaiyoLoans || []).forEach((loan: ChaiyoLoan) => {
-                                                        rows.push({
-                                                            label: loan.type || "สินเชื่อกับเงินไชโย",
-                                                            amount: loan.amount || 0
-                                                        });
-                                                    });
-                                                } else if (!formData.chaiyoLoanInstallment) {
-                                                    // Only add default if there's no legacy installment either
-                                                    rows.push({
-                                                        label: "สินเชื่อกับเงินไชโย",
-                                                        amount: 0
-                                                    });
-                                                }
-
-                                                // Legacy fallback
-                                                if (Number(formData.chaiyoLoanInstallment || 0) > 0) {
-                                                    rows.push({
-                                                        label: "สินเชื่อกับเงินไชโยอื่นๆ",
-                                                        amount: formData.chaiyoLoanInstallment ?? 0
-                                                    });
-                                                }
-
-                                                // Insurance (Always show according to Turn 158/178 instruction for consistency)
-                                                rows.push({
-                                                    label: "ค่างวดประกันผ่อนกับเงินไชโย",
-                                                    amount: formData.chaiyoInsuranceInstallment || 0
-                                                });
-
-                                                return (
-                                                    <>
-                                                        {rows.map((row, idx) => (
-                                                            <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors border-border-subtle">
-                                                                <TableCell className="text-center text-xs text-gray-400">{idx + 1}</TableCell>
-                                                                <TableCell className="text-sm text-gray-700">{row.label}</TableCell>
-                                                                <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                                    {formatNumberWithCommas(row.amount)}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                        <TableRow className="bg-gray-100/80 transition-none">
-                                                            <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">ภาระหนี้ที่ลูกค้ามีกับเงินไชโยรวม:</TableCell>
-                                                            <TableCell className="text-right pr-10 py-4">
-                                                                <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
-                                                                    ฿{formatNumberWithCommas(formData.totalChaiyoDebt || 0)}
-                                                                </div>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </>
-                                                );
-                                            })()}
+                                            <TableRow className="hover:bg-gray-50/50 transition-colors border-border-subtle">
+                                                <TableCell className="text-center text-xs text-gray-400">1</TableCell>
+                                                <TableCell className="text-sm text-gray-700">ค่างวดสินเชื่อ</TableCell>
+                                                <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
+                                                    {formatNumberWithCommas(formData.chaiyoLoanInstallment || 0)}
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow className="hover:bg-gray-50/50 transition-colors border-border-subtle">
+                                                <TableCell className="text-center text-xs text-gray-400">2</TableCell>
+                                                <TableCell className="text-sm text-gray-700">ค่างวดประกัน</TableCell>
+                                                <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
+                                                    {formatNumberWithCommas(formData.chaiyoInsuranceInstallment || 0)}
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow className="bg-gray-100/80 transition-none">
+                                                <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">ภาระหนี้ที่ลูกค้ามีกับเงินไชโยรวมรายเดือน:</TableCell>
+                                                <TableCell className="text-right pr-10 py-4">
+                                                    <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
+                                                        ฿{formatNumberWithCommas(formData.totalChaiyoDebt || 0)}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
                                         </TableBody>
                                     </Table>
                                 </div>
@@ -1283,7 +1250,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                             <div className="md:col-span-2 space-y-4 pt-4 mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
                                 <div className="flex items-center justify-between">
                                     <h5 className="font-bold text-gray-700 flex items-center gap-2">
-                                        วงเงินสินเชื่อเดิมของลูกค้า (เงินไชโย)
+                                        สินเชื่อที่มีทั้งหมดกับเงินไชโย
                                     </h5>
                                 </div>
 
@@ -1292,19 +1259,19 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow className="hover:bg-transparent border-none">
                                                 <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
-                                                <TableHead className="w-[60%] text-xs">ประเภทวงเงิน</TableHead>
-                                                <TableHead className="w-[30%] text-right pr-10 text-xs">ยอดรวมวงเงิน (บาท)</TableHead>
+                                                <TableHead className="w-[60%] text-xs">ประเภทสินเชื่อ</TableHead>
+                                                <TableHead className="w-[30%] text-right pr-10 text-xs">วงเงินรวม (บาท)</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {[
-                                                { label: "ยอดรวมวงเงินสินเชื่อรถจักรยานยนต์ AutoX", value: formData.chaiyoMotorcycleLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่อรถยนต์ AutoX", value: formData.chaiyoCarLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่อรถบรรทุก AutoX", value: formData.chaiyoTruckLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่อรถเพื่อการเกษตร AutoX", value: formData.chaiyoAgriLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่อจำนำที่ดิน AutoX", value: formData.chaiyoLandPledgeLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่อจำนองที่ดิน AutoX", value: formData.chaiyoLandMortgageLimit },
-                                                { label: "ยอดรวมวงเงินสินเชื่ออื่น ๆ AutoX", value: formData.chaiyoOtherLimit },
+                                                { label: "สินเชื่อรถจักรยานยนต์", value: formData.chaiyoMotorcycleLimit },
+                                                { label: "สินเชื่อรถยนต์", value: formData.chaiyoCarLimit },
+                                                { label: "สินเชื่อรถบรรทุก", value: formData.chaiyoTruckLimit },
+                                                { label: "สินเชื่อรถเพื่อการเกษตร", value: formData.chaiyoAgriLimit },
+                                                { label: "สินเชื่อจำนำที่ดิน", value: formData.chaiyoLandPledgeLimit },
+                                                { label: "สินเชื่อจำนองที่ดิน", value: formData.chaiyoLandMortgageLimit },
+                                                { label: "สินเชื่ออื่นๆ", value: formData.chaiyoOtherLimit },
                                             ].map((row, idx) => (
                                                 <TableRow
                                                     key={idx}
@@ -1321,9 +1288,9 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                             ))}
                                         </TableBody>
                                         <TableFooter>
-                                            <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 transition-none">
+                                            <TableRow className="bg-gray-100/80 hover:bg-gray-100/80 transition-none">
                                                 <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">
-                                                    ยอดรวมวงเงินทุกสินเชื่อ ของเงินไชโย:
+                                                    ยอดรวมวงเงินทุกสินเชื่อของเงินไชโย:
                                                 </TableCell>
                                                 <TableCell className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
@@ -1350,8 +1317,10 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                 <div>
                                     <CardTitle className="text-lg text-chaiyo-blue">
                                         บุคคลอ้างอิง
-                                        {!occupations.some((occ: IncomeOccupation) => (occ.incomeDocuments || []).length > 0) ? (
-                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น กรณีไม่มีเอกสารแสดงรายได้) *</span>
+                                        {requiredReferenceCount >= 2 ? (
+                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น อย่างน้อย 2 คน) *</span>
+                                        ) : requiredReferenceCount === 1 ? (
+                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น อย่างน้อย 1 คน) *</span>
                                         ) : (
                                             <span className="text-muted-foreground ml-1.5 text-xs font-normal">(ถ้ามี)</span>
                                         )}
@@ -1430,18 +1399,20 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="py-2 text-center text-gray-500">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                        onClick={() => setItemToDelete({
-                                                            index,
-                                                            name: ref.name || `บุคคลที่ ${index + 1}`,
-                                                            type: 'reference'
-                                                        })}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    {index >= requiredReferenceCount ? (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                            onClick={() => setItemToDelete({
+                                                                index,
+                                                                name: ref.name || `บุคคลที่ ${index + 1}`,
+                                                                type: 'reference'
+                                                            })}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    ) : null}
                                                 </TableCell>
                                             </TableRow>
                                         ))
@@ -1558,13 +1529,14 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                     ภาระหนี้ <TrendingDown className="w-4 h-4" />
                                 </h4>
                                 <div className="space-y-1.5 text-sm">
+
                                     <div className="flex justify-between text-gray-600">
-                                        <span>หนี้ส่วนตัวรวม</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalPersonalDebt || 0)).toFixed(2))}</span>
+                                        <span>ภาระหนี้ในระบบ (NCB include เงินไชโย)</span>
+                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
-                                        <span>หนี้เงินไชโยรวม</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
+                                        <span>ภาระหนี้นอกระบบ</span>
+                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalPersonalDebt || 0)).toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
                                         <span>รวมภาระหนี้</span>

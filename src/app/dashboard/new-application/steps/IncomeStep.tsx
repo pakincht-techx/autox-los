@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { DollarSign, Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare } from "lucide-react";
+import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock } from "lucide-react";
+import { BahtSign } from "@/components/icons/BahtSign";
 import { cn } from "@/lib/utils";
 import {
     Select,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
@@ -27,6 +29,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Combobox } from "@/components/ui/combobox";
+import { DocumentScanner } from "@/components/application/DocumentScanner";
 import { SpecialIncomeDialog, SpecialIncomeSource } from "./SpecialIncomeDialog";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
 import {
@@ -163,6 +166,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         type: 'special' | 'reference' | 'photo' | 'bankAccount' | 'incomeDocument' | 'saIncomeRow' | 'seIncomeRow' | 'seCostRow' | 'debtRow' | 'categorizedPhoto' | 'occupation'
     } | null>(null);
 
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
     const [currentDocContext, setCurrentDocContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
@@ -417,15 +422,32 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         // Apply mask if it's the account number field
         let finalValue = value;
         if (field === 'accountNo') {
-            const numbers = value.replace(/\D/g, '').slice(0, 10);
-            if (numbers.length > 0) {
-                finalValue = numbers.slice(0, 3);
-                if (numbers.length > 3) {
-                    finalValue += "-" + numbers.slice(3, 4);
-                    if (numbers.length > 4) {
-                        finalValue += "-" + numbers.slice(4, 9);
-                        if (numbers.length > 9) {
-                            finalValue += "-" + numbers.slice(9, 10);
+            const bankName = currentAccounts[index]?.bankName;
+            const numbers = value.replace(/\D/g, '');
+            if (bankName === 'TRUEMONEY') {
+                // Phone format: 0XX-XXX-XXXX
+                const digits = numbers.slice(0, 10);
+                if (digits.length > 0) {
+                    finalValue = digits.slice(0, 3);
+                    if (digits.length > 3) {
+                        finalValue += "-" + digits.slice(3, 6);
+                        if (digits.length > 6) {
+                            finalValue += "-" + digits.slice(6, 10);
+                        }
+                    }
+                }
+            } else {
+                // Bank account format: 000-0-00000-0
+                const digits = numbers.slice(0, 10);
+                if (digits.length > 0) {
+                    finalValue = digits.slice(0, 3);
+                    if (digits.length > 3) {
+                        finalValue += "-" + digits.slice(3, 4);
+                        if (digits.length > 4) {
+                            finalValue += "-" + digits.slice(4, 9);
+                            if (digits.length > 9) {
+                                finalValue += "-" + digits.slice(9, 10);
+                            }
                         }
                     }
                 }
@@ -446,11 +468,11 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     };
 
     // SA Income Handlers
-    const handleAddSAIncomeRow = (occId: string) => {
+    const handleAddSAIncomeRow = (occId: string, sourceDocType?: string) => {
         const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
         const currentIncomes = occ.saIncomes || [];
-        handleOccupationChange(occId, 'saIncomes', [...currentIncomes, { type: '', detail: '', amount: '' }]);
+        handleOccupationChange(occId, 'saIncomes', [...currentIncomes, { type: '', detail: '', amount: '', sourceDocType }]);
     };
 
     const handleUpdateSAIncomeRow = (occId: string, index: number, field: string, value: string) => {
@@ -732,7 +754,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         "chicken": { sales: 150, cost: 90 },
         "cow": { sales: 35000, cost: 20000 },
         "duck": { sales: 120, cost: 70 },
-        "fish": { sales: 80, cost: 45 },
+        "fish": { sales: 0, cost: 0 },
+        "shrimp": { sales: 0, cost: 0 },
         "others": { sales: 0, cost: 0 }
     };
 
@@ -742,8 +765,11 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         { label: "วัว", value: "cow" },
         { label: "เป็ด", value: "duck" },
         { label: "ปลา", value: "fish" },
+        { label: "กุ้ง", value: "shrimp" },
         { label: "อื่นๆ", value: "others" },
     ];
+
+    const AQUATIC_TYPES = ["fish", "shrimp"];
 
     const LIVESTOCK_UNITS = [
         { label: "ตัว", value: "unit" },
@@ -849,36 +875,123 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
     const handleAddIncomeDocument = (occId: string, docType: string, label: string) => {
         setCurrentDocContext({ occId, docType, label });
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
+        setIsUploadDialogOpen(true);
+    };
+
+    const generateMockOCRIncomeRows = (docType: string): SAIncome[] => {
+        const sourceDocType = docType;
+        if (docType === 'payslip') {
+            return [
+                { type: 'salary', detail: 'เงินเดือน', amount: '25000', sourceDocType },
+                { type: 'other_income', detail: 'ค่าล่วงเวลา', amount: '3500', sourceDocType },
+                { type: 'fixed_income', detail: 'ค่าตำแหน่ง', amount: '2000', sourceDocType },
+                { type: 'bonus', detail: 'เบี้ยขยัน', amount: '1000', sourceDocType },
+            ];
+        } else if (docType.startsWith('statement_')) {
+            return [
+                { type: 'other_income', detail: 'เงินโอนเข้าบัญชี (เฉลี่ย 6 เดือน)', amount: '35000', sourceDocType }
+            ];
+        } else if (docType === 'tavi50') {
+            return [
+                { type: 'salary', detail: 'รายได้พึงประเมิน', amount: '45000', sourceDocType }
+            ];
+        } else if (docType === 'salary_cert') {
+            return [
+                { type: 'salary', detail: 'เงินเดือนหนังสือรับรอง', amount: '30000', sourceDocType }
+            ];
+        }
+        return [];
+    };
+
+    const handleUploadMethodSelect = (method: 'file' | 'camera') => {
+        // Do not close the dialog so user can see uploads and edit them
+        if (method === 'file' && fileInputRef.current) {
+            fileInputRef.current?.click();
+        } else if (method === 'camera') {
+            // Temporarily hide dialog to avoid Radix focus trap blocking scanner
+            setIsUploadDialogOpen(false);
+            setIsScannerOpen(true);
         }
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !currentDocContext) return;
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0 || !currentDocContext) return;
 
         const { occId, docType } = currentDocContext;
         const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
 
-        // Create new document
-        const newDoc: IncomeDocument = {
+        const newDocs: IncomeDocument[] = files.map(file => ({
             id: generateId('doc'),
             type: docType,
             name: file.name,
             url: URL.createObjectURL(file), // used for preview
             status: 'success',
             uploadedAt: new Date().toISOString()
+        }));
+
+        // Allow multiple files per type: keep existing, just append new ones
+        const currentDocs = occ.incomeDocuments || [];
+
+        // Mock OCR Integration: Add simulated income rows based on uploaded document type
+        const newMockOCRRows = generateMockOCRIncomeRows(docType);
+        const currentIncomes = occ.saIncomes || [];
+        const updatedIncomes = [...currentIncomes, ...newMockOCRRows];
+        const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+
+        handleOccupationChange(occId, {
+            incomeDocuments: [...currentDocs, ...newDocs],
+            saIncomes: updatedIncomes,
+            totalIncome: totalIncome
+        });
+
+        // Reset file input only, DO NOT close dialog or clear context
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleScanComplete = (pages: string[]) => {
+        setIsScannerOpen(false);
+        if (pages.length === 0 || !currentDocContext) return;
+
+        const { occId, docType } = currentDocContext;
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+
+        // Ensure upload dialog stays open after scan
+        setIsUploadDialogOpen(true);
+
+        // Save multiple pages as a single entry just by taking the first page for the preview URL
+        // In a real app, pages would be compiled to a PDF or uploaded individually.
+        const newDoc: IncomeDocument = {
+            id: generateId('doc'),
+            type: docType,
+            name: `สแกน_${new Date().getTime()}.pdf`,
+            url: pages[0], // Use first page as main preview
+            status: 'success',
+            uploadedAt: new Date().toISOString()
         };
 
-        // Enforce only 1 file: remove list, use new doc for this type
-        const currentDocs = (occ.incomeDocuments || []).filter((doc: IncomeDocument) => doc.type !== docType);
-        handleOccupationChange(occId, 'incomeDocuments', [...currentDocs, newDoc]);
+        const currentDocs = occ.incomeDocuments || [];
 
-        // Reset
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        setCurrentDocContext(null);
+        // Mock OCR Integration: Add simulated income rows based on scanned document type
+        const newMockOCRRows = generateMockOCRIncomeRows(docType);
+        const currentIncomes = occ.saIncomes || [];
+        const updatedIncomes = [...currentIncomes, ...newMockOCRRows];
+        const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+
+        handleOccupationChange(occId, {
+            incomeDocuments: [...currentDocs, newDoc],
+            saIncomes: updatedIncomes,
+            totalIncome: totalIncome
+        });
+    };
+
+    const handleUpdateIncomeDocument = (occId: string, docId: string, updates: Partial<IncomeDocument>) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentDocs = (occ.incomeDocuments || []).map((d: IncomeDocument) => d.id === docId ? { ...d, ...updates } : d);
+        handleOccupationChange(occId, 'incomeDocuments', currentDocs);
     };
 
     const handleRemoveIncomeDocument = (occId: string, docId: string) => {
@@ -897,6 +1010,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         { label: "ธนาคารกรุงไทย", value: "KTB", logo: "/bank-logo/Type=Krungthai Bank.svg" },
         { label: "ธนาคารทหารไทยธนชาต", value: "ttb", logo: "/bank-logo/Type=TTB.svg" },
         { label: "ธนาคารออมสิน", value: "GSB", logo: "/bank-logo/Type=GSB.svg" },
+        { label: "ทรูมันนี่", value: "TRUEMONEY", logo: "/bank-logo/Type=Truemoney.svg" },
     ];
 
     const INCOME_DOC_TYPES = [
@@ -916,6 +1030,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                     ref={fileInputRef}
                     onChange={handleFileSelect}
                     accept="image/*,.pdf"
+                    multiple
                 />
 
                 {/* ===== SECTION 1: Income (อาชีพและรายได้) ===== */}
@@ -1351,13 +1466,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                             {/* 3. ช่องทางการรับรายได้ */}
                                             <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6">
                                                 <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
-                                                    <DollarSign className="w-5 h-5 text-chaiyo-blue" /> ช่องทางการรับรายได้
+                                                    <BahtSign className="w-5 h-5 text-chaiyo-blue" /> ช่องทางการรับรายได้
                                                 </h4>
 
                                                 <div className="space-y-6">
                                                     {/* Payment Channels Selection */}
                                                     <div className="space-y-3">
-                                                        <Label className="text-sm font-bold text-gray-700">ช่องทางการรับเงิน <span className="text-red-500">*</span></Label>
+                                                        <Label className="text-sm font-bold text-gray-700"> ช่องทางการรับรายได้<span className="text-red-500">*</span></Label>
                                                         <div className="flex flex-wrap gap-6 mt-1">
                                                             <div className="flex items-center space-x-2">
                                                                 <Checkbox
@@ -1373,7 +1488,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     checked={(occ.incomeChannels || []).includes('bank')}
                                                                     onCheckedChange={() => toggleIncomeChannel(occ.id, 'bank')}
                                                                 />
-                                                                <Label htmlFor={`bank-${occ.id}`} className="font-normal cursor-pointer">บัญชีธนาคาร</Label>
+                                                                <Label htmlFor={`bank-${occ.id}`} className="font-normal cursor-pointer">เข้าบัญชีธนาคาร</Label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1382,7 +1497,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     {(occ.incomeChannels || []).includes('bank') && (
                                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                                             <div className="flex items-center justify-between mb-2">
-                                                                <Label className="text-sm font-bold text-gray-700">รายการบัญชีธนาคาร</Label>
+                                                                <Label className="text-sm font-bold text-gray-700">บัญชีธนาคาร</Label>
                                                                 <Button
                                                                     type="button"
                                                                     variant="outline"
@@ -1448,9 +1563,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         <Input
                                                                                             value={account.accountNo}
                                                                                             onChange={(e) => handleUpdateBankAccount(occ.id, idx, 'accountNo', e.target.value)}
-                                                                                            placeholder="000-0-00000-0"
+                                                                                            placeholder={account.bankName === 'TRUEMONEY' ? '0XX-XXX-XXXX' : '000-0-00000-0'}
                                                                                             className="h-9 text-sm bg-gray-50/30 font-mono tracking-wider"
-                                                                                            maxLength={13} // 10 digits + 3 dashes
+                                                                                            maxLength={12} // 10 digits + 2-3 dashes
                                                                                         />
                                                                                     </TableCell>
                                                                                     <TableCell className="text-right">
@@ -1479,8 +1594,22 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                     {/* Income Proof Documents Table */}
                                                     <div className="space-y-3 pt-2">
-                                                        <Label className="text-sm font-bold text-gray-700">เอกสารรับรองรายได้ <span className="text-red-500">*</span></Label>
-
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <Label className="text-sm font-bold text-gray-700">เอกสารแสดงรายได้ ({(occ.incomeDocuments || []).length}/50 ไฟล์)<span className="text-red-500">*</span></Label>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const current = occ.customDocTypes || [];
+                                                                    const newId = `other_${Date.now()}`;
+                                                                    handleOccupationChange(occ.id, 'customDocTypes', [...current, { id: newId, label: 'เอกสารอื่นๆ' }]);
+                                                                }}
+                                                                className="h-8 text-xs font-medium"
+                                                            >
+                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มเอกสารอื่นๆ
+                                                            </Button>
+                                                        </div>
                                                         <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
                                                             <Table>
                                                                 <TableHeader className="bg-gray-50/50">
@@ -1491,9 +1620,142 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     </TableRow>
                                                                 </TableHeader>
                                                                 <TableBody>
-                                                                    {INCOME_DOC_TYPES.map((docType) => {
-                                                                        const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
+                                                                    {(() => {
+                                                                        // Build dynamic doc types: replace 'statement' with one per bank account
+                                                                        const bankAccounts = occ.bankAccounts || [];
+                                                                        const dynamicDocTypes: { id: string; label: string; isCustom?: boolean }[] = [];
 
+                                                                        INCOME_DOC_TYPES.forEach(docType => {
+                                                                            if (docType.id === 'statement') {
+                                                                                if (bankAccounts.length > 0) {
+                                                                                    bankAccounts.forEach((account: BankAccount, accIdx: number) => {
+                                                                                        const bankInfo = THAI_BANKS.find(b => b.value === account.bankName);
+                                                                                        const bankLabel = bankInfo?.label || `บัญชีที่ ${accIdx + 1}`;
+                                                                                        dynamicDocTypes.push({
+                                                                                            id: `statement_${accIdx}`,
+                                                                                            label: `รายการเดินบัญชี - ${bankLabel}${account.accountNo ? ` (${account.accountNo})` : ''}`,
+                                                                                        });
+                                                                                    });
+                                                                                } else {
+                                                                                    dynamicDocTypes.push(docType);
+                                                                                }
+                                                                            } else {
+                                                                                dynamicDocTypes.push(docType);
+                                                                            }
+                                                                        });
+
+                                                                        // Add custom "เอกสารอื่นๆ" rows from customDocTypes array
+                                                                        const customTypes = occ.customDocTypes || [];
+                                                                        customTypes.forEach((ct: { id: string; label: string }) => {
+                                                                            dynamicDocTypes.push({ id: ct.id, label: ct.label, isCustom: true });
+                                                                        });
+
+                                                                        return dynamicDocTypes.map((docType) => {
+                                                                            const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
+
+                                                                            return (
+                                                                                <TableRow key={docType.id} className="hover:bg-transparent">
+                                                                                    <TableCell className="py-4">
+                                                                                        <div className="flex items-center gap-3">
+                                                                                            <div className={cn(
+                                                                                                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                                                                                                uploadedDocs.length > 0 ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                                            )}>
+                                                                                                {uploadedDocs.length > 0 ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                                            </div>
+                                                                                            {docType.isCustom ? (
+                                                                                                <Input
+                                                                                                    value={docType.label}
+                                                                                                    onChange={(e) => {
+                                                                                                        const updated = (occ.customDocTypes || []).map((ct: { id: string; label: string }) =>
+                                                                                                            ct.id === docType.id ? { ...ct, label: e.target.value } : ct
+                                                                                                        );
+                                                                                                        handleOccupationChange(occ.id, 'customDocTypes', updated);
+                                                                                                    }}
+                                                                                                    className="h-8 text-sm font-medium w-[200px]"
+                                                                                                    placeholder="ชื่อเอกสาร"
+                                                                                                />
+                                                                                            ) : (
+                                                                                                <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{docType.label}</span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </TableCell>
+                                                                                    <TableCell>
+                                                                                        {uploadedDocs.length > 0 ? (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                                className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                                            >
+                                                                                                <FileText className="w-3.5 h-3.5" />
+                                                                                                {uploadedDocs.length} ไฟล์
+                                                                                            </button>
+                                                                                        ) : (
+                                                                                            <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                                        )}
+                                                                                    </TableCell>
+                                                                                    <TableCell className="text-right">
+                                                                                        <div className="flex items-center justify-end gap-1">
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="outline"
+                                                                                                size="sm"
+                                                                                                onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                                className="h-8 text-xs gap-1.5 font-medium"
+                                                                                            >
+                                                                                                <Plus className="w-3.5 h-3.5" />
+                                                                                                เพิ่มเอกสาร
+                                                                                            </Button>
+                                                                                            {docType.isCustom && (
+                                                                                                <Button
+                                                                                                    type="button"
+                                                                                                    variant="ghost"
+                                                                                                    size="sm"
+                                                                                                    onClick={() => {
+                                                                                                        // Remove custom doc type and its documents
+                                                                                                        const updatedTypes = (occ.customDocTypes || []).filter((ct: { id: string; label: string }) => ct.id !== docType.id);
+                                                                                                        handleOccupationChange(occ.id, 'customDocTypes', updatedTypes);
+                                                                                                        // Also remove any uploaded docs for this type
+                                                                                                        const updatedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type !== docType.id);
+                                                                                                        handleOccupationChange(occ.id, 'incomeDocuments', updatedDocs);
+                                                                                                    }}
+                                                                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                                                    title="ลบประเภทเอกสาร"
+                                                                                                >
+                                                                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                                                                </Button>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </TableCell>
+                                                                                </TableRow>
+                                                                            );
+                                                                        });
+                                                                    })()}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Occupation Proof Documents Table */}
+                                                    <div className="space-y-3 pt-2">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <Label className="text-sm font-bold text-gray-700">เอกสารยืนยันอาชีพ</Label>
+                                                        </div>
+                                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                            <Table>
+                                                                <TableHeader className="bg-gray-50/50">
+                                                                    <TableRow>
+                                                                        <TableHead className="w-[45%] text-xs">ประเภทเอกสาร</TableHead>
+                                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                                        <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                                    </TableRow>
+                                                                </TableHeader>
+                                                                <TableBody>
+                                                                    {[
+                                                                        { id: 'occ_doc_1', label: 'เอกสารประกอบอาชีพ 1' },
+                                                                        { id: 'occ_doc_2', label: 'เอกสารประกอบอาชีพ 2' },
+                                                                    ].map((docType) => {
+                                                                        const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
                                                                         return (
                                                                             <TableRow key={docType.id} className="hover:bg-transparent">
                                                                                 <TableCell className="py-4">
@@ -1509,33 +1771,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 </TableCell>
                                                                                 <TableCell>
                                                                                     {uploadedDocs.length > 0 ? (
-                                                                                        <div className="space-y-1">
-                                                                                            {uploadedDocs.map((doc: IncomeDocument) => (
-                                                                                                <div key={doc.id} className="flex items-center gap-1.5 text-xs text-chaiyo-blue bg-blue-50/50 px-2 py-1 rounded-md border border-blue-100 w-fit max-w-[220px]">
-                                                                                                    <Eye className="w-3 h-3 shrink-0 opacity-60" />
-                                                                                                    <a
-                                                                                                        href={doc.url}
-                                                                                                        target="_blank"
-                                                                                                        rel="noopener noreferrer"
-                                                                                                        className="truncate hover:underline cursor-pointer"
-                                                                                                        title={doc.name}
-                                                                                                    >
-                                                                                                        {doc.name}
-                                                                                                    </a>
-                                                                                                    <button
-                                                                                                        onClick={() => setItemToDelete({
-                                                                                                            id: doc.id,
-                                                                                                            occId: occ.id,
-                                                                                                            name: doc.name,
-                                                                                                            type: 'incomeDocument'
-                                                                                                        })}
-                                                                                                        className="text-gray-400 hover:text-red-500 ml-0.5 shrink-0"
-                                                                                                    >
-                                                                                                        <X className="w-3 h-3" />
-                                                                                                    </button>
-                                                                                                </div>
-                                                                                            ))}
-                                                                                        </div>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                                        >
+                                                                                            <FileText className="w-3.5 h-3.5" />
+                                                                                            {uploadedDocs.length} ไฟล์
+                                                                                        </button>
                                                                                     ) : (
                                                                                         <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
                                                                                     )}
@@ -1548,8 +1791,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
                                                                                         className="h-8 text-xs gap-1.5 font-medium"
                                                                                     >
-                                                                                        <UploadCloud className="w-3.5 h-3.5" />
-                                                                                        อัพโหลด
+                                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                                        เพิ่มเอกสาร
                                                                                     </Button>
                                                                                 </TableCell>
                                                                             </TableRow>
@@ -1558,205 +1801,10 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 </TableBody>
                                                             </Table>
                                                         </div>
-                                                        <p className="text-[10px] text-muted-foreground italic">* รองรับไฟล์ PDF, JPG, PNG (ขนาดไม่เกิน 10MB)</p>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* 4. ที่พักอาศัย (Residence) - shown when cash income channel is selected */}
-                                            {(occ.incomeChannels || []).includes('cash') && (
-                                                <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-                                                    <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
-                                                        <Home className="w-5 h-5 text-chaiyo-blue" /> ที่พักอาศัย
-                                                    </h4>
-
-                                                    {/* Sub-section: สถานที่ตั้ง */}
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                                            <MapPin className="w-4 h-4 text-chaiyo-blue" />
-                                                            สถานที่ตั้ง
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                            <div className="space-y-2 md:col-span-2">
-                                                                <Label>ที่อยู่ปัจจุบัน</Label>
-                                                                <Textarea
-                                                                    value={(() => {
-                                                                        const parts = [
-                                                                            formData.currentHouseNumber ? `${formData.currentHouseNumber}` : '',
-                                                                            formData.currentFloorNumber ? `ชั้น ${formData.currentFloorNumber}` : '',
-                                                                            formData.currentVillage || '',
-                                                                            formData.currentMoo ? `หมู่ ${formData.currentMoo}` : '',
-                                                                            formData.currentSoi ? `ซอย ${formData.currentSoi}` : '',
-                                                                            formData.currentStreet ? `ถนน ${formData.currentStreet}` : '',
-                                                                            formData.currentSubDistrict ? `ต.${formData.currentSubDistrict}` : '',
-                                                                            formData.currentDistrict ? `อ.${formData.currentDistrict}` : '',
-                                                                            formData.currentProvince ? `จ.${formData.currentProvince}` : '',
-                                                                            formData.currentZipCode || '',
-                                                                        ].filter(Boolean);
-                                                                        return parts.join(' ') || 'ยังไม่ได้ระบุที่อยู่ปัจจุบัน';
-                                                                    })()}
-                                                                    readOnly
-                                                                    className="resize-none h-20 bg-gray-50 text-gray-600 cursor-default"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <Label>สถานที่ตั้ง <span className="text-red-500">*</span></Label>
-                                                                <Select
-                                                                    value={occ.residenceLocationStatus || ""}
-                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "residenceLocationStatus", val)}
-                                                                >
-                                                                    <SelectTrigger className="h-12 bg-white">
-                                                                        <SelectValue placeholder="เลือกสถานะสถานที่ตั้ง" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="correct">สถานที่ตั้งถูกต้อง</SelectItem>
-                                                                        <SelectItem value="incorrect">สถานที่ตั้งไม่ถูกต้อง</SelectItem>
-                                                                        <SelectItem value="not_found">ไม่พบสถานที่ตั้ง</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Separator */}
-                                                    <div className="border-t border-gray-200" />
-
-                                                    {/* Sub-section: ลักษณะที่พักอาศัย */}
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                                            ลักษณะที่พักอาศัย
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                                            <div className="space-y-2">
-                                                                <Label>ลักษณะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
-                                                                <Select
-                                                                    value={occ.residenceHousingType || ""}
-                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "residenceHousingType", val)}
-                                                                >
-                                                                    <SelectTrigger className="h-12 bg-white">
-                                                                        <SelectValue placeholder="ระบุลักษณะที่อยู่อาศัย" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="บ้านเดี่ยว 2 ชั้น">บ้านเดี่ยว 2 ชั้น</SelectItem>
-                                                                        <SelectItem value="บ้านเดี่ยว 1 ชั้น">บ้านเดี่ยว 1 ชั้น</SelectItem>
-                                                                        <SelectItem value="ทาวน์เฮ้าส์">ทาวน์เฮ้าส์</SelectItem>
-                                                                        <SelectItem value="คอนโด">คอนโด</SelectItem>
-                                                                        <SelectItem value="อาคารพาณิชย์/ตึกแถว">อาคารพาณิชย์/ตึกแถว</SelectItem>
-                                                                        <SelectItem value="บ้านพักสวัสดิการ">บ้านพักสวัสดิการ</SelectItem>
-                                                                        <SelectItem value="เพิง">เพิง</SelectItem>
-                                                                        <SelectItem value="อื่น ๆ">อื่น ๆ (โปรดระบุ)</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                                {occ.residenceHousingType === "อื่น ๆ" && (
-                                                                    <Input
-                                                                        className="mt-2 h-12 bg-white"
-                                                                        placeholder="โปรดระบุลักษณะที่อยู่อาศัย"
-                                                                        value={occ.residenceHousingTypeOther || ""}
-                                                                        onChange={(e) => handleOccupationChange(occ.id, "residenceHousingTypeOther", e.target.value)}
-                                                                    />
-                                                                )}
-                                                            </div>
-
-                                                            <div className="space-y-2">
-                                                                <Label>สถานะที่อยู่อาศัย <span className="text-red-500">*</span></Label>
-                                                                <Select
-                                                                    value={occ.residenceHousingStatus || ""}
-                                                                    onValueChange={(val) => handleOccupationChange(occ.id, "residenceHousingStatus", val)}
-                                                                >
-                                                                    <SelectTrigger className="h-12 bg-white">
-                                                                        <SelectValue placeholder="ระบุสถานะที่อยู่อาศัย" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="เป็นของตนเอง (เป็นเจ้าบ้าน)">เป็นของตนเอง (เป็นเจ้าบ้าน)</SelectItem>
-                                                                        <SelectItem value="เป็นผู้อาศัย">เป็นผู้อาศัย</SelectItem>
-                                                                        <SelectItem value="เช่า">เช่า</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-
-                                                            <div className="space-y-2">
-                                                                <Label>ระยะเวลาที่พักอาศัย <span className="text-red-500">*</span></Label>
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex-1 flex items-center gap-2">
-                                                                        <Input
-                                                                            type="text"
-                                                                            className="h-12 bg-white text-center"
-                                                                            placeholder="0"
-                                                                            value={occ.residenceDurationYears || ""}
-                                                                            onChange={(e) => handleOccupationChange(occ.id, "residenceDurationYears", e.target.value.replace(/\D/g, ''))}
-                                                                        />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
-                                                                    </div>
-                                                                    <div className="flex-1 flex items-center gap-2">
-                                                                        <Input
-                                                                            type="text"
-                                                                            className="h-12 bg-white text-center"
-                                                                            placeholder="0"
-                                                                            value={occ.residenceDurationMonths || ""}
-                                                                            onChange={(e) => handleOccupationChange(occ.id, "residenceDurationMonths", e.target.value.replace(/\D/g, ''))}
-                                                                        />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="space-y-4">
-                                                                <div className="space-y-2">
-                                                                    <Label>อาศัยอยู่กับใคร <span className="text-red-500">*</span></Label>
-                                                                    <Select
-                                                                        value={occ.residenceLivingWith || ""}
-                                                                        onValueChange={(val) => {
-                                                                            handleOccupationChange(occ.id, {
-                                                                                residenceLivingWith: val,
-                                                                                ...(val === "อยู่คนเดียว" ? { residenceLivingWithRelationships: [] } : {})
-                                                                            });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-12 bg-white">
-                                                                            <SelectValue placeholder="ระบุผู้ที่พักอาศัยอยู่ด้วยกัน" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="อยู่คนเดียว">อยู่คนเดียว</SelectItem>
-                                                                            <SelectItem value="อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์">อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </div>
-
-                                                                {occ.residenceLivingWith === "อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์" && (
-                                                                    <div className="space-y-3 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
-                                                                        <Label className="text-xs text-muted-foreground">โปรดระบุความสัมพันธ์ (เลือกได้มากกว่า 1)</Label>
-                                                                        <div className="flex flex-wrap gap-2">
-                                                                            {["พ่อ", "แม่", "ลูก", "สามี/ภรรยา/แฟน", "ญาติ", "เพื่อน"].map((relation) => {
-                                                                                const isSelected = (occ.residenceLivingWithRelationships || []).includes(relation);
-                                                                                return (
-                                                                                    <Button
-                                                                                        key={relation}
-                                                                                        type="button"
-                                                                                        variant={isSelected ? "default" : "outline"}
-                                                                                        className={cn(
-                                                                                            "h-9 px-3 rounded-full text-xs font-medium transition-all",
-                                                                                            isSelected ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90" : "bg-white hover:bg-gray-100 border-border-strong text-gray-700"
-                                                                                        )}
-                                                                                        onClick={() => {
-                                                                                            const current = occ.residenceLivingWithRelationships || [];
-                                                                                            const next = isSelected
-                                                                                                ? current.filter((r: string) => r !== relation)
-                                                                                                : [...current, relation];
-                                                                                            handleOccupationChange(occ.id, "residenceLivingWithRelationships", next);
-                                                                                        }}
-                                                                                    >
-                                                                                        {relation}
-                                                                                    </Button>
-                                                                                );
-                                                                            })}
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
 
                                             {/* SA Details Section: Employment Tenure & Income Table */}
                                             {occ.employmentType === 'SA' && (
@@ -1766,11 +1814,11 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             <TrendingUp className="w-5 h-5 text-chaiyo-blue" /> รายละเอียดอายุงานและรายได้
                                                         </h4>
 
-                                                        {/* Tenure Grid */}
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-2">
+                                                        {/* Tenure Fields - Stacked */}
+                                                        <div className="space-y-4 pt-2">
                                                             <div className="space-y-2">
                                                                 <Label className="text-sm font-bold text-gray-700">อายุงานปัจจุบัน <span className="text-red-500">*</span></Label>
-                                                                <div className="flex items-center gap-3">
+                                                                <div className="flex items-center gap-3 max-w-md">
                                                                     <div className="flex-1 flex items-center gap-2">
                                                                         <Input
                                                                             type="text"
@@ -1795,7 +1843,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             </div>
                                                             <div className="space-y-2">
                                                                 <Label className="text-sm font-bold text-gray-700">อายุงานก่อนหน้า <span className="text-red-500">*</span></Label>
-                                                                <div className="flex items-center gap-3">
+                                                                <div className="flex items-center gap-3 max-w-md">
                                                                     <div className="flex-1 flex items-center gap-2">
                                                                         <Input
                                                                             type="text"
@@ -1821,106 +1869,206 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                         </div>
                                                     </div>
 
-                                                    {/* Income Table */}
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <Label className="text-sm font-bold text-gray-700">รายการรายได้</Label>
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() => handleAddSAIncomeRow(occ.id)}
-                                                                className="h-8 text-xs font-medium"
-                                                            >
-                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการรายได้
-                                                            </Button>
-                                                        </div>
+                                                    {/* Income Tables Per Document Source */}
+                                                    <div className="space-y-6">
+                                                        {(() => {
+                                                            const allDocs = occ.incomeDocuments || [];
+                                                            const allIncomes = occ.saIncomes || [];
+                                                            const customDocTypes = occ.customDocTypes || [];
 
-                                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                                            <Table>
-                                                                <TableHeader className="bg-gray-50/50">
-                                                                    <TableRow>
-                                                                        <TableHead className="w-[30%] text-xs">ประเภทรายได้</TableHead>
-                                                                        <TableHead className="w-[40%] text-xs">รายละเอียดรายได้</TableHead>
-                                                                        <TableHead className="w-[20%] text-xs">รายได้ (บาท)</TableHead>
-                                                                        <TableHead className="w-[10%] text-center text-xs">จัดการ</TableHead>
-                                                                    </TableRow>
-                                                                </TableHeader>
-                                                                <TableBody>
-                                                                    {(!occ.saIncomes || occ.saIncomes.length === 0) ? (
-                                                                        <TableRow>
-                                                                            <TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic text-xs">
-                                                                                ยังไม่มีรายการรายได้ กรุณากดเพิ่มรายการ
-                                                                            </TableCell>
-                                                                        </TableRow>
-                                                                    ) : (
-                                                                        occ.saIncomes.map((item: SAIncome, idx: number) => (
-                                                                            <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
-                                                                                <TableCell className="py-3">
-                                                                                    <Select
-                                                                                        value={item.type || ""}
-                                                                                        onValueChange={(val) => handleUpdateSAIncomeRow(occ.id, idx, 'type', val)}
-                                                                                    >
-                                                                                        <SelectTrigger className="h-9 text-sm bg-gray-50/30">
-                                                                                            <SelectValue placeholder="เลือกประเภท" />
-                                                                                        </SelectTrigger>
-                                                                                        <SelectContent>
-                                                                                            {SA_INCOME_TYPES.map(type => (
-                                                                                                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                                                                                            ))}
-                                                                                        </SelectContent>
-                                                                                    </Select>
-                                                                                </TableCell>
-                                                                                <TableCell className="py-3">
-                                                                                    <Input
-                                                                                        value={item.detail || ""}
-                                                                                        onChange={(e) => handleUpdateSAIncomeRow(occ.id, idx, 'detail', e.target.value)}
-                                                                                        placeholder="เช่น ค่าตำแหน่ง, ค่าครองชีพ"
-                                                                                        className="h-9 text-sm bg-gray-50/30"
-                                                                                    />
-                                                                                </TableCell>
-                                                                                <TableCell className="py-3">
-                                                                                    <Input
-                                                                                        type="text"
-                                                                                        value={formatNumberWithCommas(item.amount ?? 0) || ""}
-                                                                                        onChange={(e) => handleUpdateSAIncomeRow(occ.id, idx, 'amount', e.target.value)}
-                                                                                        placeholder="0.00"
-                                                                                        className="h-9 text-sm bg-gray-50/30 text-right font-mono"
-                                                                                    />
-                                                                                </TableCell>
-                                                                                <TableCell className="py-3 text-center">
-                                                                                    <Button
-                                                                                        variant="ghost"
-                                                                                        size="sm"
-                                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                                                        onClick={() => setItemToDelete({
-                                                                                            index: idx,
-                                                                                            occId: occ.id,
-                                                                                            name: item.detail || (SA_INCOME_TYPES.find(t => t.value === item.type)?.label) || `รายการที่ ${idx + 1}`,
-                                                                                            type: 'saIncomeRow'
-                                                                                        })}
-                                                                                    >
-                                                                                        <Trash2 className="w-4 h-4" />
-                                                                                    </Button>
-                                                                                </TableCell>
-                                                                            </TableRow>
-                                                                        ))
+                                                            // 1. Identify all unique doc types that have uploaded files
+                                                            const uploadedDocTypes = Array.from(new Set(allDocs.map((d: IncomeDocument) => d.type))).filter(Boolean) as string[];
+
+                                                            // 2. Separate incomes by source
+                                                            const incomesBySource: Record<string, SAIncome[]> = {};
+                                                            const otherIncomes: SAIncome[] = [];
+
+                                                            allIncomes.forEach((income, index) => {
+                                                                const incomeWithIndex = { ...income, originalIndex: index };
+                                                                if (income.sourceDocType) {
+                                                                    if (!incomesBySource[income.sourceDocType]) {
+                                                                        incomesBySource[income.sourceDocType] = [];
+                                                                    }
+                                                                    incomesBySource[income.sourceDocType].push(incomeWithIndex);
+                                                                } else {
+                                                                    otherIncomes.push(incomeWithIndex);
+                                                                }
+                                                            });
+
+                                                            // 3. Helper to render a table for a set of incomes
+                                                            const renderIncomeTable = (
+                                                                title: string,
+                                                                sourceKey: string | undefined,
+                                                                incomes: (SAIncome & { originalIndex: number })[],
+                                                                showAddButton: boolean = true
+                                                            ) => {
+                                                                const sourceTotal = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+                                                                return (
+                                                                    <div key={sourceKey || 'other'} className="space-y-3">
+                                                                        <div className="flex items-center justify-between pl-1 pr-1">
+                                                                            <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                                                                {sourceKey ? <FileText className="w-4 h-4 text-emerald-600" /> : <TrendingUp className="w-4 h-4 text-gray-600" />}
+                                                                                {title}
+                                                                            </Label>
+                                                                            {showAddButton && (
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                    onClick={() => handleAddSAIncomeRow(occ.id, sourceKey)}
+                                                                                    className="h-8 text-xs font-medium bg-white"
+                                                                                >
+                                                                                    <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการรายได้
+                                                                                </Button>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                                            <Table>
+                                                                                <TableHeader className="bg-gray-50/50">
+                                                                                    <TableRow>
+                                                                                        <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้</TableHead>
+                                                                                        <TableHead className="w-[40%] text-xs py-3">รายละเอียดรายได้</TableHead>
+                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท)</TableHead>
+                                                                                        <TableHead className="w-[10%] text-center text-xs py-3">จัดการ</TableHead>
+                                                                                    </TableRow>
+                                                                                </TableHeader>
+                                                                                <TableBody>
+                                                                                    {incomes.length === 0 ? (
+                                                                                        <TableRow>
+                                                                                            <TableCell colSpan={4} className="h-16 text-center text-muted-foreground italic text-xs">
+                                                                                                ยังไม่มีรายการรายได้ กรุณากดเพิ่มรายการ
+                                                                                            </TableCell>
+                                                                                        </TableRow>
+                                                                                    ) : (
+                                                                                        incomes.map((item) => {
+                                                                                            const originalIdx = item.originalIndex;
+                                                                                            return (
+                                                                                                <TableRow key={originalIdx} className="group transition-colors hover:bg-gray-50/50">
+                                                                                                    <TableCell className="py-2.5">
+                                                                                                        <Select
+                                                                                                            value={item.type || ""}
+                                                                                                            onValueChange={(val) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'type', val)}
+                                                                                                        >
+                                                                                                            <SelectTrigger className="h-9 text-sm bg-gray-50/30">
+                                                                                                                <SelectValue placeholder="เลือกประเภท" />
+                                                                                                            </SelectTrigger>
+                                                                                                            <SelectContent>
+                                                                                                                {SA_INCOME_TYPES.map(type => (
+                                                                                                                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                                                                                                                ))}
+                                                                                                            </SelectContent>
+                                                                                                        </Select>
+                                                                                                    </TableCell>
+                                                                                                    <TableCell className="py-2.5">
+                                                                                                        <Input
+                                                                                                            value={item.detail || ""}
+                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'detail', e.target.value)}
+                                                                                                            placeholder="เช่น ค่าตำแหน่ง, ค่าครองชีพ"
+                                                                                                            className="h-9 text-sm bg-gray-50/30"
+                                                                                                        />
+                                                                                                    </TableCell>
+                                                                                                    <TableCell className="py-2.5">
+                                                                                                        <Input
+                                                                                                            type="text"
+                                                                                                            value={formatNumberWithCommas(item.amount ?? '')}
+                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'amount', e.target.value)}
+                                                                                                            placeholder="0.00"
+                                                                                                            className="h-9 text-sm bg-gray-50/30 text-right font-mono"
+                                                                                                        />
+                                                                                                    </TableCell>
+                                                                                                    <TableCell className="py-2.5 text-center">
+                                                                                                        <Button
+                                                                                                            variant="ghost"
+                                                                                                            size="sm"
+                                                                                                            className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                                                            onClick={() => setItemToDelete({
+                                                                                                                index: originalIdx,
+                                                                                                                occId: occ.id,
+                                                                                                                name: item.detail || (SA_INCOME_TYPES.find(t => t.value === item.type)?.label) || `รายการที่ ${originalIdx + 1}`,
+                                                                                                                type: 'saIncomeRow'
+                                                                                                            })}
+                                                                                                        >
+                                                                                                            <Trash2 className="w-4 h-4" />
+                                                                                                        </Button>
+                                                                                                    </TableCell>
+                                                                                                </TableRow>
+                                                                                            );
+                                                                                        })
+                                                                                    )}
+                                                                                </TableBody>
+                                                                                {incomes.length > 0 && (
+                                                                                    <TableFooter>
+                                                                                        <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
+                                                                                            <TableCell colSpan={2} className="text-right font-medium py-3 text-xs text-muted-foreground">
+                                                                                                รวมยอดจากเอกสารนี้:
+                                                                                            </TableCell>
+                                                                                            <TableCell colSpan={2} className="text-right pr-[4.5rem] py-3">
+                                                                                                <div className="text-sm font-semibold font-mono text-gray-700">
+                                                                                                    ฿{formatNumberWithCommas(sourceTotal)}
+                                                                                                </div>
+                                                                                            </TableCell>
+                                                                                        </TableRow>
+                                                                                    </TableFooter>
+                                                                                )}
+                                                                            </Table>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            };
+
+                                                            // Build dynamic doc types mapping (to resolve readable labels)
+                                                            const bankAccounts = occ.bankAccounts || [];
+                                                            const dynamicDocTypes: { id: string; label: string }[] = [];
+                                                            INCOME_DOC_TYPES.forEach(dt => {
+                                                                if (dt.id === 'statement') {
+                                                                    if (bankAccounts.length > 0) {
+                                                                        bankAccounts.forEach((account: BankAccount, accIdx: number) => {
+                                                                            const bankInfo = THAI_BANKS.find(b => b.value === account.bankName);
+                                                                            const bankLabel = bankInfo?.label || `บัญชีที่ ${accIdx + 1}`;
+                                                                            dynamicDocTypes.push({
+                                                                                id: `statement_${accIdx}`,
+                                                                                label: `รายการเดินบัญชี - ${bankLabel}`
+                                                                            });
+                                                                        });
+                                                                    } else {
+                                                                        dynamicDocTypes.push(dt);
+                                                                    }
+                                                                } else {
+                                                                    dynamicDocTypes.push(dt);
+                                                                }
+                                                            });
+                                                            customDocTypes.forEach(ct => dynamicDocTypes.push(ct));
+
+                                                            return (
+                                                                <>
+                                                                    {uploadedDocTypes.map(docType => {
+                                                                        const label = dynamicDocTypes.find(d => d.id === docType)?.label || docType;
+                                                                        const sourceIncomes = incomesBySource[docType] || [];
+                                                                        return renderIncomeTable(`รายการรายได้จาก: ${label}`, docType, sourceIncomes);
+                                                                    })}
+
+                                                                    {/* Cash Income Table (if selected) */}
+                                                                    {(occ.incomeChannels || []).includes('cash') && (
+                                                                        renderIncomeTable('รายการรายได้รับเป็นเงินสด', 'cash', incomesBySource['cash'] || [])
                                                                     )}
-                                                                </TableBody>
-                                                                <TableFooter>
-                                                                    <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 transition-none">
-                                                                        <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">
-                                                                            รายได้รวมต่อเดือน:
-                                                                        </TableCell>
-                                                                        <TableCell colSpan={2} className="text-right pr-6 py-4">
-                                                                            <div className="text-lg font-bold font-mono">
+
+                                                                    {/* Always show "Other Incomes" table as the fallback/manual entry ground */}
+                                                                    {renderIncomeTable('รายการรายได้อื่นๆ (เพิ่มเติม)', undefined, otherIncomes)}
+
+                                                                    {/* Grand Total Footer */}
+                                                                    <div className="mt-6 border-t border-border-strong pt-4">
+                                                                        <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
+                                                                            <span className="text-sm font-bold">รายได้รวมทุกแหล่ง (ต่อเดือน):</span>
+                                                                            <span className="text-xl font-bold font-mono tracking-tight">
                                                                                 ฿{formatNumberWithCommas(occ.totalIncome || "0")}
-                                                                            </div>
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                </TableFooter>
-                                                            </Table>
-                                                        </div>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
                                             )}
@@ -1969,9 +2117,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             <SelectValue placeholder="เลือก..." />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            <SelectItem value="YES">ใช่</SelectItem>
-                                                                            <SelectItem value="NO">ไม่ใช่</SelectItem>
-                                                                            <SelectItem value="OTHER">อื่นๆ</SelectItem>
+                                                                            <SelectItem value="OWN">กิจการของตนเอง</SelectItem>
+                                                                            <SelectItem value="FAMILY">กิจการของครอบครัว</SelectItem>
+                                                                            <SelectItem value="OTHER">อื่นๆ โปรดระบุ</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                     {occ.familyBusiness === "OTHER" && (
@@ -2032,14 +2180,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             variant="outline"
                                                                             value={((occ.seIncomes?.[0] || {}) as EnterpriseIncome).operatingHours || []}
                                                                             onValueChange={(vals) => handleUpdateSEIncomeRow(occ.id, 0, { operatingHours: vals })}
-                                                                            className="justify-start gap-0 -space-x-px flex-wrap"
+                                                                            className="w-full gap-0 -space-x-px"
                                                                         >
                                                                             {SE_OPERATING_HOURS.map((hour) => (
                                                                                 <ToggleGroupItem
                                                                                     key={hour.value}
                                                                                     value={hour.value}
                                                                                     className={cn(
-                                                                                        "h-11 px-4 text-sm font-medium rounded-none first:rounded-l-xl last:rounded-r-xl transition-all",
+                                                                                        "h-11 flex-1 text-sm font-medium rounded-none first:rounded-l-xl last:rounded-r-xl transition-all",
                                                                                         "data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white data-[state=on]:border-chaiyo-blue data-[state=on]:z-10",
                                                                                         "hover:bg-blue-50 hover:text-chaiyo-blue"
                                                                                     )}
@@ -2332,27 +2480,20 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                             {/* Net Income Summary Box */}
                                                             <div className="mt-6">
-                                                                <div className="bg-chaiyo-blue/5 border border-chaiyo-blue/20 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="bg-white p-2 rounded-lg border border-chaiyo-blue/10 text-chaiyo-blue">
-                                                                            <DollarSign className="w-5 h-5" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <h4 className="text-sm font-bold text-gray-800">รายได้สุทธิต่อเดือน</h4>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="text-right">
+                                                                <div className="border-t border-border-strong pt-4">
+                                                                    <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
+                                                                        <span className="text-sm font-bold">รายได้สุทธิต่อเดือน:</span>
                                                                         {(() => {
                                                                             const totalIncome = (occ.seIncomes || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
                                                                             const totalCost = (occ.seCosts || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0);
                                                                             const netIncome = totalIncome - totalCost;
                                                                             return (
-                                                                                <div className={cn(
-                                                                                    "text-2xl font-bold font-mono",
+                                                                                <span className={cn(
+                                                                                    "text-xl font-bold font-mono tracking-tight",
                                                                                     netIncome < 0 ? "text-red-500" : "text-chaiyo-blue"
                                                                                 )}>
                                                                                     ฿{formatNumberWithCommas(netIncome)}
-                                                                                </div>
+                                                                                </span>
                                                                             );
                                                                         })()}
                                                                     </div>
@@ -2537,7 +2678,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                                 {/* จำนวนรอบที่ปลูกต่อปี */}
                                                                 <div className="space-y-2">
-                                                                    <Label>จำนวนรอบที่ปลูกต่อปี</Label>
+                                                                    <Label>จำนวนรอบที่ปลูกต่อปี <span className="text-red-500">*</span></Label>
                                                                     <Input
                                                                         type="text"
                                                                         value={occ.cyclesPerYear || ""}
@@ -2546,17 +2687,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         className="h-11 bg-gray-50/30"
                                                                     />
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
 
-                                                    {/* อื่นๆ Section */}
-                                                    <div className="space-y-4">
-                                                        <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                            <Info className="w-4 h-4 text-chaiyo-blue" /> อื่นๆ
-                                                        </h5>
-                                                        <div className="bg-white p-5 rounded-xl border border-border-color">
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                                                 {/* เขตชลประทาน */}
                                                                 <div className="space-y-3">
                                                                     <Label>เขตชลประทาน</Label>
@@ -2573,7 +2704,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                                 {/* การถือครอง */}
                                                                 <div className="space-y-3">
-                                                                    <Label>การถือครอง</Label>
+                                                                    <Label>การถือครองที่ดินทำกิน</Label>
                                                                     <Select
                                                                         value={occ.landOwnership || ""}
                                                                         onValueChange={(val) => handleOccupationChange(occ.id, "landOwnership", val)}
@@ -2622,11 +2753,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             </div>
                                                         </div>
                                                     </div>
+
+
                                                     {/* รายได้ต่อเดือน Table */}
                                                     <div className="space-y-4">
                                                         <div className="flex items-center justify-between">
                                                             <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                                <DollarSign className="w-4 h-4 text-chaiyo-blue" /> รายได้ต่อเดือน
+                                                                <BahtSign className="w-4 h-4 text-chaiyo-blue" /> รายได้ต่อเดือน
                                                             </h5>
                                                         </div>
                                                         <div className="flex items-center justify-between p-3 bg-blue-50/30 rounded-xl border border-blue-100/50">
@@ -2638,7 +2771,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
                                                                 />
                                                                 <Label htmlFor={`farm-higher-${occ.id}`} className="text-xs leading-none text-gray-700 cursor-pointer font-bold select-none">
-                                                                    กรณีราคาขายมากกว่าราคากลาง
+                                                                    กรณีราคาขาย / ต้นทุน ไม่เท่ากับราคากลาง
                                                                 </Label>
                                                             </div>
                                                         </div>
@@ -2709,12 +2842,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         </TableCell>
                                                                                     )}
                                                                                 </TableRow>
-                                                                                <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/40 transition-none">
+                                                                                <TableRow className="bg-emerald-50/50 hover:bg-emerald-50/50 transition-none">
                                                                                     <TableCell className="py-4 text-xs font-bold text-emerald-800">รายได้ต่อเดือน (บาท)</TableCell>
-                                                                                    <TableCell className="py-4 text-sm text-right font-bold font-mono text-emerald-600/60">{formatNumberWithCommas(Math.max(0, stdIncome).toFixed(2))}</TableCell>
+                                                                                    <TableCell className="py-4 text-sm text-right font-bold font-mono text-emerald-700">{formatNumberWithCommas(Math.max(0, stdIncome).toFixed(2))}</TableCell>
                                                                                     {occ.farmIsHigherThanStandard && (
-                                                                                        <TableCell className="py-4 text-right pr-6 bg-emerald-100/20">
-                                                                                            <div className="text-sm font-bold font-mono text-emerald-600">
+                                                                                        <TableCell className="py-4 text-right pr-6 bg-emerald-50/80">
+                                                                                            <div className="text-sm font-bold font-mono text-emerald-700">
                                                                                                 {formatNumberWithCommas(Math.max(0, customerIncome).toFixed(2))}
                                                                                             </div>
                                                                                         </TableCell>
@@ -2746,6 +2879,17 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <div className="w-3 h-3 rounded-md border border-gray-300 bg-white"></div>
                                                                     <span>ยังไม่ได้เลือก</span>
                                                                 </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const reset = FARM_STAGES.map(stage => ({ stage, selectedMonths: [] }));
+                                                                        handleOccupationChange(occ.id, "produceSummary", reset);
+                                                                    }}
+                                                                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-red-500 transition-colors ml-1"
+                                                                >
+                                                                    <RotateCcw className="w-3 h-3" />
+                                                                    <span>รีเซ็ต</span>
+                                                                </button>
                                                             </div>
                                                         </div>
 
@@ -2753,7 +2897,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             <Table className="min-w-full lg:min-w-[1000px] border-collapse">
                                                                 <TableHeader className="bg-gray-50/80">
                                                                     <TableRow className="hover:bg-transparent border-b border-border-strong">
-                                                                        <TableHead className="w-[180px] min-w-[180px] text-xs font-bold text-gray-800 border-r border-border-subtle bg-gray-50/50">
+                                                                        <TableHead className="w-[180px] min-w-[180px] text-xs font-bold text-gray-800 border-r border-border-subtle bg-gray-50 sticky left-0 z-10">
                                                                             กิจกรรม/ช่วงการเพาะปลูก
                                                                         </TableHead>
                                                                         {THAI_MONTHS_SHORT.map(m => (
@@ -2790,7 +2934,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                                             return (
                                                                                 <TableRow key={rowIdx} className="hover:bg-gray-50/20 group transition-colors border-b border-border-subtle last:border-b-0">
-                                                                                    <TableCell className="py-4 px-4 font-semibold text-xs text-gray-700 bg-gray-50/40 border-r border-border-subtle">
+                                                                                    <TableCell className="py-4 px-4 font-semibold text-xs text-gray-700 bg-white border-r border-border-subtle sticky left-0 z-10">
                                                                                         {item.stage}
                                                                                     </TableCell>
                                                                                     {THAI_MONTHS_SHORT.map((m, monthIdx) => {
@@ -2883,14 +3027,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         <SelectValue placeholder="เลือกประเภทการเลี้ยง" />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="contract">Contract Farming</SelectItem>
+                                                                        <SelectItem value="contract"> เลี้ยงแบบมีสัญญา (Contract farming)</SelectItem>
                                                                         <SelectItem value="self">เลี้ยงเอง</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
 
                                                             <div className="space-y-2">
-                                                                <Label>จำนวนรอบใน 1 ปี <span className="text-muted-foreground text-[10px] font-normal">(สูงสุด 12 รอบ)</span></Label>
+                                                                <Label>จำนวนรอบใน 1 ปี <span className="text-red-500">*</span> <span className="text-muted-foreground text-[10px] font-normal">(สูงสุด 12 รอบ)</span></Label>
                                                                 <Input
                                                                     type="text"
                                                                     value={occ.livestockCyclesPerYear || ""}
@@ -2925,6 +3069,24 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     className="h-11 bg-white"
                                                                 />
                                                             </div>
+
+                                                            {occ.farmingType === 'self' && (
+                                                                <div className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                                                                    <Label>หน่วย <span className="text-red-500">*</span></Label>
+                                                                    <Select
+                                                                        value={occ.livestockUnit || ""}
+                                                                        onValueChange={(val) => handleOccupationChange(occ.id, "livestockUnit", val)}
+                                                                    >
+                                                                        <SelectTrigger className="h-11 bg-white">
+                                                                            <SelectValue placeholder="เลือกหน่วย" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="head">ตัว</SelectItem>
+                                                                            <SelectItem value="cycle">รอบ</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
 
@@ -2949,9 +3111,17 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         const newRow = { ...cycle, ...updates };
 
                                                                         if (occ.farmingType === 'self') {
-                                                                            const finalIsHigher = updates.isHigherThanStandard !== undefined ? updates.isHigherThanStandard : cycle.isHigherThanStandard;
-                                                                            const finalPrice = finalIsHigher ? (Number(updates.customerPrice !== undefined ? updates.customerPrice : cycle.customerPrice) || std.sales) : std.sales;
-                                                                            const finalCost = finalIsHigher ? (Number(updates.customerCost !== undefined ? updates.customerCost : cycle.customerCost) || std.cost) : std.cost;
+                                                                            const isAquatic = AQUATIC_TYPES.includes(occ.livestockType || '');
+                                                                            let finalPrice: number, finalCost: number;
+
+                                                                            if (isAquatic) {
+                                                                                finalPrice = Number(updates.customerPrice !== undefined ? updates.customerPrice : cycle.customerPrice) || 0;
+                                                                                finalCost = Number(updates.customerCost !== undefined ? updates.customerCost : cycle.customerCost) || 0;
+                                                                            } else {
+                                                                                const finalIsHigher = updates.isHigherThanStandard !== undefined ? updates.isHigherThanStandard : cycle.isHigherThanStandard;
+                                                                                finalPrice = finalIsHigher ? (Number(updates.customerPrice !== undefined ? updates.customerPrice : cycle.customerPrice) || std.sales) : std.sales;
+                                                                                finalCost = finalIsHigher ? (Number(updates.customerCost !== undefined ? updates.customerCost : cycle.customerCost) || std.cost) : std.cost;
+                                                                            }
                                                                             const finalQ = Number(updates.quantity !== undefined ? updates.quantity : cycle.quantity) || 0;
                                                                             newRow.netIncome = String((finalPrice - finalCost) * finalQ);
                                                                         } else {
@@ -2974,22 +3144,24 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         <div key={idx} className="bg-white border rounded-2xl overflow-hidden">
                                                                             <div className="bg-gray-50/80 border-b border-border-subtle p-4 flex items-center justify-between">
                                                                                 <div className="flex items-center gap-3">
-                                                                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-chaiyo-blue text-white font-bold text-sm shadow-sm">
-                                                                                        {cycle.cycleNo}
+                                                                                    <div className="flex h-8 items-center justify-center rounded-lg bg-chaiyo-blue text-white font-bold text-sm shadow-sm px-3 gap-1">
+                                                                                        <span className="text-[10px] font-medium text-white/70">รอบที่</span> {cycle.cycleNo}
                                                                                     </div>
-                                                                                    <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-border-subtle">
-                                                                                        <Label className="text-[11px] font-bold text-gray-700">จำนวนตัว</Label>
-                                                                                        <div className="relative w-28">
-                                                                                            <Input
-                                                                                                type="text"
-                                                                                                value={formatNumberWithCommas(cycle.quantity || "")}
-                                                                                                onChange={(e) => updateCycle({ quantity: e.target.value.replace(/,/g, '') })}
-                                                                                                className="h-8 text-right font-mono text-xs pr-7 bg-white"
-                                                                                                placeholder="0"
-                                                                                            />
-                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold">ตัว</span>
+                                                                                    {occ.farmingType !== 'contract' && (
+                                                                                        <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-border-subtle">
+                                                                                            <Label className="text-[11px] font-bold text-gray-700">{occ.livestockUnit === 'cycle' ? 'จำนวนรอบ' : 'จำนวนตัว'}</Label>
+                                                                                            <div className="relative w-28">
+                                                                                                <Input
+                                                                                                    type="text"
+                                                                                                    value={formatNumberWithCommas(cycle.quantity || "")}
+                                                                                                    onChange={(e) => updateCycle({ quantity: e.target.value.replace(/,/g, '') })}
+                                                                                                    className="h-8 text-right font-mono text-xs pr-7 bg-white"
+                                                                                                    placeholder="0"
+                                                                                                />
+                                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold">{occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'}</span>
+                                                                                            </div>
                                                                                         </div>
-                                                                                    </div>
+                                                                                    )}
                                                                                 </div>
                                                                                 {occ.farmingType === 'self' && (
                                                                                     <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-blue-100">
@@ -3000,7 +3172,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                             className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
                                                                                         />
                                                                                         <Label htmlFor={`higher-${occ.id}-${idx}`} className="text-[11px] leading-none text-gray-700 cursor-pointer font-bold select-none">
-                                                                                            กรณีราคาขายมากกว่าราคากลาง
+                                                                                            กรณีราคาขาย / ต้นทุน ไม่เท่ากับราคากลาง
                                                                                         </Label>
                                                                                     </div>
                                                                                 )}
@@ -3010,66 +3182,130 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 {occ.farmingType === 'self' ? (
                                                                                     <>
 
-                                                                                        <div className="rounded-xl border border-border-subtle overflow-hidden">
-                                                                                            <Table>
-                                                                                                <TableHeader className="bg-gray-50/50">
-                                                                                                    <TableRow className="hover:bg-transparent h-10">
-                                                                                                        <TableHead className="text-[10px] font-bold py-0 h-10 w-[35%]">รายการ</TableHead>
-                                                                                                        <TableHead className="text-[10px] font-bold text-right py-0 h-10 w-[30%] text-gray-500">ราคากลาง</TableHead>
-                                                                                                        {cycle.isHigherThanStandard && (
-                                                                                                            <TableHead className="text-[10px] font-bold text-right py-0 h-10 w-[35%] text-chaiyo-blue pr-4 bg-blue-50/50">ราคาลูกค้า</TableHead>
-                                                                                                        )}
-                                                                                                    </TableRow>
-                                                                                                </TableHeader>
-                                                                                                <TableBody>
-                                                                                                    <TableRow className="hover:bg-transparent border-border-subtle">
-                                                                                                        <TableCell className="text-xs py-3 font-medium text-gray-700">ราคาขาย/ตัว (บาท)</TableCell>
-                                                                                                        <TableCell className="text-xs py-3 text-right font-mono text-gray-400">
-                                                                                                            {formatNumberWithCommas(std.sales)}
-                                                                                                        </TableCell>
-                                                                                                        {cycle.isHigherThanStandard && (
-                                                                                                            <TableCell className="text-xs py-2 text-right pr-4 bg-blue-50/10">
+                                                                                        {AQUATIC_TYPES.includes(occ.livestockType || '') ? (
+                                                                                            /* Aquatic types: user inputs sales, cost auto-prefilled with 15% margin */
+                                                                                            <div className="rounded-xl border border-border-subtle overflow-hidden">
+                                                                                                <Table>
+                                                                                                    <TableHeader className="bg-gray-50/50">
+                                                                                                        <TableRow className="hover:bg-transparent h-10">
+                                                                                                            <TableHead className="text-[10px] font-bold py-0 h-10 w-[50%]">รายการ</TableHead>
+                                                                                                            <TableHead className="text-[10px] font-bold text-right py-0 h-10 w-[50%] pr-4">จำนวนเงิน (บาท)</TableHead>
+                                                                                                        </TableRow>
+                                                                                                    </TableHeader>
+                                                                                                    <TableBody>
+                                                                                                        <TableRow className="hover:bg-transparent border-border-subtle">
+                                                                                                            <TableCell className="text-xs py-3 font-medium text-gray-700">{`ราคาขาย/${occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'} (บาท)`}</TableCell>
+                                                                                                            <TableCell className="text-xs py-2 text-right pr-4">
                                                                                                                 <Input
                                                                                                                     type="text"
                                                                                                                     value={formatNumberWithCommas(cycle.customerPrice || "")}
-                                                                                                                    onChange={(e) => updateCycle({ customerPrice: e.target.value.replace(/,/g, '') })}
-                                                                                                                    className="h-8 w-full text-right text-xs font-mono border-chaiyo-blue/20"
+                                                                                                                    onChange={(e) => {
+                                                                                                                        const cleaned = e.target.value.replace(/,/g, '');
+                                                                                                                        if (/^\d*\.?\d*$/.test(cleaned)) {
+                                                                                                                            const salesVal = Number(cleaned) || 0;
+                                                                                                                            const autoCost = String(Math.round(salesVal * 0.85 * 100) / 100);
+                                                                                                                            updateCycle({ customerPrice: cleaned, customerCost: autoCost });
+                                                                                                                        }
+                                                                                                                    }}
+                                                                                                                    className="h-8 w-32 text-right ml-auto text-xs font-mono border-gray-200"
                                                                                                                     placeholder="0.00"
                                                                                                                 />
                                                                                                             </TableCell>
-                                                                                                        )}
-                                                                                                    </TableRow>
-                                                                                                    <TableRow className="hover:bg-transparent border-border-subtle">
-                                                                                                        <TableCell className="text-xs py-3 font-medium text-gray-700">ราคาต้นทุน/ตัว (บาท)</TableCell>
-                                                                                                        <TableCell className="text-xs py-3 text-right font-mono text-gray-400">
-                                                                                                            {formatNumberWithCommas(std.cost)}
-                                                                                                        </TableCell>
-                                                                                                        {cycle.isHigherThanStandard && (
-                                                                                                            <TableCell className="text-xs py-2 text-right pr-4 bg-blue-50/10">
+                                                                                                        </TableRow>
+                                                                                                        <TableRow className="hover:bg-transparent border-border-subtle">
+                                                                                                            <TableCell className="text-xs py-3 font-medium text-gray-700">
+                                                                                                                <div className="flex items-center gap-1.5">
+                                                                                                                    {`ต้นทุน/${occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'} (บาท)`}
+                                                                                                                    <span className="text-[9px] text-muted-foreground italic">(ราคาขาย × 85%)</span>
+                                                                                                                </div>
+                                                                                                            </TableCell>
+                                                                                                            <TableCell className="text-xs py-2 text-right pr-4">
                                                                                                                 <Input
                                                                                                                     type="text"
                                                                                                                     value={formatNumberWithCommas(cycle.customerCost || "")}
-                                                                                                                    onChange={(e) => updateCycle({ customerCost: e.target.value.replace(/,/g, '') })}
-                                                                                                                    className="h-8 w-full text-right text-xs font-mono border-chaiyo-blue/20"
+                                                                                                                    onChange={(e) => {
+                                                                                                                        const cleaned = e.target.value.replace(/,/g, '');
+                                                                                                                        if (/^\d*\.?\d*$/.test(cleaned)) {
+                                                                                                                            updateCycle({ customerCost: cleaned });
+                                                                                                                        }
+                                                                                                                    }}
+                                                                                                                    className="h-8 w-32 text-right ml-auto text-xs font-mono border-gray-200"
                                                                                                                     placeholder="0.00"
                                                                                                                 />
                                                                                                             </TableCell>
-                                                                                                        )}
-                                                                                                    </TableRow>
-                                                                                                    <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
-                                                                                                        <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิ</TableCell>
-                                                                                                        <TableCell className="text-xs py-4 text-right font-mono text-emerald-600/60 font-medium">
-                                                                                                            {formatNumberWithCommas(stdNet.toFixed(2))}
-                                                                                                        </TableCell>
-                                                                                                        {cycle.isHigherThanStandard && (
-                                                                                                            <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600 bg-emerald-100/20">
-                                                                                                                {formatNumberWithCommas(custNet.toFixed(2))}
+                                                                                                        </TableRow>
+                                                                                                        <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
+                                                                                                            <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิ</TableCell>
+                                                                                                            <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600">
+                                                                                                                {formatNumberWithCommas(((Number(cycle.customerPrice) || 0) - (Number(cycle.customerCost) || 0)) * (Number(cycle.quantity) || 0))}
                                                                                                             </TableCell>
-                                                                                                        )}
-                                                                                                    </TableRow>
-                                                                                                </TableBody>
-                                                                                            </Table>
-                                                                                        </div>
+                                                                                                        </TableRow>
+                                                                                                    </TableBody>
+                                                                                                </Table>
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            /* Non-aquatic types: standard/customer price table */
+                                                                                            <div className="rounded-xl border border-border-subtle overflow-hidden">
+                                                                                                <Table>
+                                                                                                    <TableHeader className="bg-gray-50/50">
+                                                                                                        <TableRow className="hover:bg-transparent h-10">
+                                                                                                            <TableHead className="text-[10px] font-bold py-0 h-10 w-[35%]">รายการ</TableHead>
+                                                                                                            <TableHead className="text-[10px] font-bold text-right py-0 h-10 w-[30%] text-gray-500">ราคากลาง</TableHead>
+                                                                                                            {cycle.isHigherThanStandard && (
+                                                                                                                <TableHead className="text-[10px] font-bold text-right py-0 h-10 w-[35%] text-chaiyo-blue pr-4 bg-blue-50/50">ราคาลูกค้า</TableHead>
+                                                                                                            )}
+                                                                                                        </TableRow>
+                                                                                                    </TableHeader>
+                                                                                                    <TableBody>
+                                                                                                        <TableRow className="hover:bg-transparent border-border-subtle">
+                                                                                                            <TableCell className="text-xs py-3 font-medium text-gray-700">{`ราคาขาย/${occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'} (บาท)`}</TableCell>
+                                                                                                            <TableCell className="text-xs py-3 text-right font-mono text-gray-400">
+                                                                                                                {formatNumberWithCommas(std.sales)}
+                                                                                                            </TableCell>
+                                                                                                            {cycle.isHigherThanStandard && (
+                                                                                                                <TableCell className="text-xs py-2 text-right pr-4 bg-blue-50/10">
+                                                                                                                    <Input
+                                                                                                                        type="text"
+                                                                                                                        value={formatNumberWithCommas(cycle.customerPrice || "")}
+                                                                                                                        onChange={(e) => updateCycle({ customerPrice: e.target.value.replace(/,/g, '') })}
+                                                                                                                        className="h-8 w-full text-right text-xs font-mono border-chaiyo-blue/20"
+                                                                                                                        placeholder="0.00"
+                                                                                                                    />
+                                                                                                                </TableCell>
+                                                                                                            )}
+                                                                                                        </TableRow>
+                                                                                                        <TableRow className="hover:bg-transparent border-border-subtle">
+                                                                                                            <TableCell className="text-xs py-3 font-medium text-gray-700">{`ราคาต้นทุน/${occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'} (บาท)`}</TableCell>
+                                                                                                            <TableCell className="text-xs py-3 text-right font-mono text-gray-400">
+                                                                                                                {formatNumberWithCommas(std.cost)}
+                                                                                                            </TableCell>
+                                                                                                            {cycle.isHigherThanStandard && (
+                                                                                                                <TableCell className="text-xs py-2 text-right pr-4 bg-blue-50/10">
+                                                                                                                    <Input
+                                                                                                                        type="text"
+                                                                                                                        value={formatNumberWithCommas(cycle.customerCost || "")}
+                                                                                                                        onChange={(e) => updateCycle({ customerCost: e.target.value.replace(/,/g, '') })}
+                                                                                                                        className="h-8 w-full text-right text-xs font-mono border-chaiyo-blue/20"
+                                                                                                                        placeholder="0.00"
+                                                                                                                    />
+                                                                                                                </TableCell>
+                                                                                                            )}
+                                                                                                        </TableRow>
+                                                                                                        <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
+                                                                                                            <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิ</TableCell>
+                                                                                                            <TableCell className="text-xs py-4 text-right font-mono text-emerald-600/60 font-medium">
+                                                                                                                {formatNumberWithCommas(stdNet.toFixed(2))}
+                                                                                                            </TableCell>
+                                                                                                            {cycle.isHigherThanStandard && (
+                                                                                                                <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600 bg-emerald-100/20">
+                                                                                                                    {formatNumberWithCommas(custNet.toFixed(2))}
+                                                                                                                </TableCell>
+                                                                                                            )}
+                                                                                                        </TableRow>
+                                                                                                    </TableBody>
+                                                                                                </Table>
+                                                                                            </div>
+                                                                                        )}
                                                                                     </>
                                                                                 ) : (
                                                                                     <div className="rounded-xl border border-border-subtle overflow-hidden">
@@ -3135,30 +3371,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                             {/* Monthly Income Summary Block */}
                                                             <div className="pb-8 mt-4 border-b border-border-subtle/50">
-                                                                <div className="relative group w-full bg-chaiyo-blue rounded-2xl p-6 border border-white/10 overflow-hidden">
-                                                                    {/* Background Decor */}
-                                                                    <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 blur-3xl group-hover:bg-white/10 transition-colors duration-500"></div>
-
-                                                                    <div className="flex items-center justify-between gap-8 relative z-10">
-                                                                        <div className="space-y-1.5 flex-1">
-                                                                            <h6 className="text-[10px] font-black uppercase tracking-widest text-chaiyo-gold flex items-center gap-1.5">
-                                                                                SUMMARY <div className="h-1 w-1 rounded-full bg-chaiyo-gold/40"></div>
-                                                                            </h6>
-                                                                            <p className="text-xs font-bold text-white leading-tight">รายได้ต่อเดือนปศุสัตว์ (บาท)</p>
-                                                                            <p className="text-[9px] text-white/40 italic font-medium mt-1 uppercase tracking-tighter">
-                                                                                {occ.farmingType === 'contract'
-                                                                                    ? `(รายได้สุทธิต่อรอบ × ${occ.livestockCyclesPerYear || (occ.livestockCycles || []).length}) / 12`
-                                                                                    : `((ราคาขาย - ต้นทุน) × จำนวนตัว × ${occ.livestockCyclesPerYear || (occ.livestockCycles || []).length}) / 12`
-                                                                                }
-                                                                            </p>
-                                                                        </div>
-                                                                        <div className="text-right space-y-0.5">
-                                                                            <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest leading-none">Monthly Net</p>
-                                                                            <p className="text-2xl font-black text-white font-mono tracking-tight flex items-baseline justify-end gap-1 leading-none">
-                                                                                {formatNumberWithCommas((((occ.livestockCycles || []).reduce((acc, c) => acc + (Number(c.netIncome) || 0), 0)) / 12).toFixed(2))}
-                                                                                <span className="text-[10px] text-chaiyo-gold opacity-80">THB</span>
-                                                                            </p>
-                                                                        </div>
+                                                                <div className="pt-2">
+                                                                    <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
+                                                                        <span className="text-sm font-bold">รายได้ต่อเดือนปศุสัตว์:</span>
+                                                                        <span className="text-xl font-bold font-mono tracking-tight">
+                                                                            ฿{formatNumberWithCommas((((occ.livestockCycles || []).reduce((acc, c) => acc + (Number(c.netIncome) || 0), 0)) / 12).toFixed(2))}
+                                                                        </span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -3180,6 +3398,18 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <div className="w-3 h-3 rounded-md border border-gray-300 bg-white"></div>
                                                                     <span>ยังไม่ได้เลือก</span>
                                                                 </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const LIVESTOCK_STAGES = ["เพาะเลี้ยง", "ขาย"];
+                                                                        const reset = LIVESTOCK_STAGES.map(stage => ({ stage, selectedMonths: [] }));
+                                                                        handleOccupationChange(occ.id, "livestockSchedule", reset);
+                                                                    }}
+                                                                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-red-500 transition-colors ml-1"
+                                                                >
+                                                                    <RotateCcw className="w-3 h-3" />
+                                                                    <span>รีเซ็ต</span>
+                                                                </button>
                                                             </div>
                                                         </div>
 
@@ -3187,7 +3417,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             <Table className="min-w-full lg:min-w-[1000px] border-collapse">
                                                                 <TableHeader className="bg-gray-50/80">
                                                                     <TableRow className="hover:bg-transparent border-b border-border-strong">
-                                                                        <TableHead className="w-[180px] min-w-[180px] text-xs font-bold text-gray-800 border-r border-border-subtle bg-gray-50/50">
+                                                                        <TableHead className="w-[180px] min-w-[180px] text-xs font-bold text-gray-800 border-r border-border-subtle bg-gray-50 sticky left-0 z-10">
                                                                             กิจกรรม/ช่วงการเลี้ยง
                                                                         </TableHead>
                                                                         {THAI_MONTHS_SHORT.map(m => (
@@ -3221,7 +3451,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                                             return (
                                                                                 <TableRow key={rowIdx} className="hover:bg-gray-50/20 group transition-colors border-b border-border-subtle last:border-b-0">
-                                                                                    <TableCell className="py-4 px-4 font-semibold text-xs text-gray-700 bg-gray-50/40 border-r border-border-subtle">
+                                                                                    <TableCell className="py-4 px-4 font-semibold text-xs text-gray-700 bg-white border-r border-border-subtle sticky left-0 z-10">
                                                                                         {item.stage}
                                                                                     </TableCell>
                                                                                     {THAI_MONTHS_SHORT.map((m, monthIdx) => {
@@ -3266,148 +3496,151 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                             )}
                                         </>
                                     )}
-                                    {/* อัพโหลดรูปประกอบกิจการ */}
-                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
-                                        <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
-                                            <ImagePlus className="w-5 h-5 text-chaiyo-blue" /> อัพโหลดรูปประกอบกิจการ
-                                        </h4>
+                                    {/* อัพโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
+                                    {occ.occupationCode !== 'UNEMPLOYED' && occ.businessStatus !== 'closed' && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                                <ImagePlus className="w-5 h-5 text-chaiyo-blue" /> อัพโหลดรูปประกอบกิจการ
+                                            </h4>
 
 
 
-                                        <div className="grid grid-cols-2 gap-x-6 gap-y-8">
-                                            {PHOTO_GUIDES.map((guide) => {
-                                                const raw = formData.incomePhotos?.[guide.id];
-                                                const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
-                                                const hasPhotos = photos.length > 0;
-                                                return (
-                                                    <div key={guide.id} className="space-y-3">
-                                                        {/* 1. Label and Info Icon for Guidelines */}
-                                                        <div className="flex items-center justify-between group">
-                                                            <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
-                                                                {guide.title}
-                                                                {guide.required && <span className="text-red-500 ml-0.5">*</span>}
-                                                                {hasPhotos && (
-                                                                    <span className="ml-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
-                                                                        {photos.length}
-                                                                    </span>
-                                                                )}
-                                                            </Label>
-                                                            <Dialog>
-                                                                <DialogTrigger asChild>
-                                                                    <button
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                        className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
-                                                                        title="ดูคำแนะนำการถ่ายภาพ"
-                                                                    >
-                                                                        <Info className="w-4 h-4" />
-                                                                    </button>
-                                                                </DialogTrigger>
-                                                                <DialogContent className="max-w-md">
-                                                                    <DialogHeader>
-                                                                        <DialogTitle className="flex items-center gap-2">
-                                                                            <div className="w-8 h-8 rounded-lg bg-chaiyo-blue/10 text-chaiyo-blue flex items-center justify-center">
-                                                                                <guide.icon className="w-4 h-4" />
-                                                                            </div>
-                                                                            {guide.title}
-                                                                        </DialogTitle>
-                                                                        <DialogDescription className="text-sm pt-2">
-                                                                            {guide.description}
-                                                                        </DialogDescription>
-                                                                    </DialogHeader>
-                                                                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 mt-4 relative">
-                                                                        <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
-                                                                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
-                                                                    </div>
-                                                                </DialogContent>
-                                                            </Dialog>
-                                                        </div>
-
-                                                        {/* 2. Photo Upload Area */}
-                                                        {hasPhotos ? (
-                                                            <div className="space-y-2">
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    {photos.map((photoUrl: string, pIdx: number) => (
-                                                                        <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
-                                                                            <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
-                                                                            <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
-                                                                                <CheckCircle2 className="w-3 h-3" />
-                                                                            </div>
-                                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        // Flatten all photos for lightbox
-                                                                                        const allPhotos = Object.values(formData.incomePhotos || {}).flat();
-                                                                                        const flatIdx = allPhotos.indexOf(photoUrl);
-                                                                                        if (flatIdx !== -1) setLightboxIndex(flatIdx);
-                                                                                    }}
-                                                                                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all transform hover:scale-110 active:scale-95 shadow-xl"
-                                                                                >
-                                                                                    <Eye className="w-4 h-4" />
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        setItemToDelete({
-                                                                                            categoryId: guide.id,
-                                                                                            photoIndex: pIdx,
-                                                                                            name: `${guide.title} (รูปที่ ${pIdx + 1})`,
-                                                                                            type: 'categorizedPhoto'
-                                                                                        });
-                                                                                    }}
-                                                                                    className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all transform hover:scale-110 active:scale-95 shadow-xl"
-                                                                                >
-                                                                                    <Trash2 className="w-4 h-4" />
-                                                                                </button>
-                                                                            </div>
+                                            <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+                                                {PHOTO_GUIDES.map((guide) => {
+                                                    const raw = formData.incomePhotos?.[guide.id];
+                                                    const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+                                                    const hasPhotos = photos.length > 0;
+                                                    return (
+                                                        <div key={guide.id} className="space-y-3">
+                                                            {/* 1. Label and Info Icon for Guidelines */}
+                                                            <div className="flex items-center justify-between group">
+                                                                <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
+                                                                    {guide.title}
+                                                                    {guide.required && <span className="text-red-500 ml-0.5">*</span>}
+                                                                    {hasPhotos && (
+                                                                        <span className="ml-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                                                                            {photos.length}
+                                                                        </span>
+                                                                    )}
+                                                                </Label>
+                                                                <Dialog>
+                                                                    <DialogTrigger asChild>
+                                                                        <button
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
+                                                                            title="ดูคำแนะนำการถ่ายภาพ"
+                                                                        >
+                                                                            <Info className="w-4 h-4" />
+                                                                        </button>
+                                                                    </DialogTrigger>
+                                                                    <DialogContent className="max-w-md">
+                                                                        <DialogHeader>
+                                                                            <DialogTitle className="flex items-center gap-2">
+                                                                                <div className="w-8 h-8 rounded-lg bg-chaiyo-blue/10 text-chaiyo-blue flex items-center justify-center">
+                                                                                    <guide.icon className="w-4 h-4" />
+                                                                                </div>
+                                                                                {guide.title}
+                                                                            </DialogTitle>
+                                                                            <DialogDescription className="text-sm pt-2">
+                                                                                {guide.description}
+                                                                            </DialogDescription>
+                                                                        </DialogHeader>
+                                                                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 mt-4 relative">
+                                                                            <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
                                                                         </div>
-                                                                    ))}
-                                                                    {/* Add more photos button */}
-                                                                    <div
-                                                                        className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
-                                                                        onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                                    >
-                                                                        <Plus className="w-6 h-6 text-gray-400" />
-                                                                        <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
+                                                                    </DialogContent>
+                                                                </Dialog>
+                                                            </div>
+
+                                                            {/* 2. Photo Upload Area */}
+                                                            {hasPhotos ? (
+                                                                <div className="space-y-2">
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        {photos.map((photoUrl: string, pIdx: number) => (
+                                                                            <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
+                                                                                <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
+                                                                                <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
+                                                                                    <CheckCircle2 className="w-3 h-3" />
+                                                                                </div>
+                                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            // Flatten all photos for lightbox
+                                                                                            const allPhotos = Object.values(formData.incomePhotos || {}).flat();
+                                                                                            const flatIdx = allPhotos.indexOf(photoUrl);
+                                                                                            if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                        }}
+                                                                                        className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+                                                                                    >
+                                                                                        <Eye className="w-4 h-4" />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setItemToDelete({
+                                                                                                categoryId: guide.id,
+                                                                                                photoIndex: pIdx,
+                                                                                                name: `${guide.title} (รูปที่ ${pIdx + 1})`,
+                                                                                                type: 'categorizedPhoto'
+                                                                                            });
+                                                                                        }}
+                                                                                        className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+                                                                                    >
+                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                        {/* Add more photos button */}
+                                                                        <div
+                                                                            className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
+                                                                            onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                                        >
+                                                                            <Plus className="w-6 h-6 text-gray-400" />
+                                                                            <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div
-                                                                className={cn(
-                                                                    "relative aspect-[4/3] rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden",
-                                                                    guide.required
-                                                                        ? "border-dashed border-amber-200 bg-amber-50/5 hover:bg-amber-50/30 hover:border-amber-400"
-                                                                        : "border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400"
-                                                                )}
-                                                                onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                            >
-                                                                <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
-                                                                    <div className={cn(
-                                                                        "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110",
-                                                                        guide.required ? "bg-amber-100 text-amber-600 border border-amber-200" : "bg-gray-100 text-gray-400 border border-gray-200"
-                                                                    )}>
-                                                                        <guide.icon className="w-7 h-7" />
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        <p className={cn(
-                                                                            "text-xs font-bold leading-tight",
-                                                                            guide.required ? "text-amber-700" : "text-gray-600"
+                                                            ) : (
+                                                                <div
+                                                                    className={cn(
+                                                                        "relative aspect-[4/3] rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden",
+                                                                        guide.required
+                                                                            ? "border-dashed border-amber-200 bg-amber-50/5 hover:bg-amber-50/30 hover:border-amber-400"
+                                                                            : "border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400"
+                                                                    )}
+                                                                    onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                                >
+                                                                    <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
+                                                                        <div className={cn(
+                                                                            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110",
+                                                                            guide.required ? "bg-amber-100 text-amber-600 border border-amber-200" : "bg-gray-100 text-gray-400 border border-gray-200"
                                                                         )}>
-                                                                            แตะเพื่ออัพโหลด
-                                                                        </p>
-                                                                        <p className="text-[10px] text-muted-foreground">
-                                                                            รองรับไฟล์ภาพ JPEG, PNG (เลือกได้หลายรูป)
-                                                                        </p>
+                                                                            <guide.icon className="w-7 h-7" />
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <p className={cn(
+                                                                                "text-xs font-bold leading-tight",
+                                                                                guide.required ? "text-amber-700" : "text-gray-600"
+                                                                            )}>
+                                                                                แตะเพื่ออัพโหลด
+                                                                            </p>
+                                                                            <p className="text-[10px] text-muted-foreground">
+                                                                                รองรับไฟล์ภาพ JPEG, PNG (เลือกได้หลายรูป)
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
+
+                                    )}
 
                                     {/* หมายเหตุ per occupation */}
                                     <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
@@ -3437,7 +3670,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-base flex items-center gap-2 text-chaiyo-blue">
                             <PieChart className="w-5 h-5 text-chaiyo-blue" />
-                            สรุปรายได้และภาระหนี้
+                            สรุปรายได้
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -3517,74 +3750,259 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
             </AlertDialog>
 
             {/* Photo Lightbox */}
-            {(() => {
-                const allPhotos: string[] = Object.values(formData.incomePhotos || {}).flat() as string[];
-                return lightboxIndex !== null && allPhotos.length > 0 && (
-                    <div
-                        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
-                        onClick={() => setLightboxIndex(null)}
-                    >
-                        <button
-                            onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
-                            className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all border border-white/20"
+            {
+                (() => {
+                    const allPhotos: string[] = Object.values(formData.incomePhotos || {}).flat() as string[];
+                    return lightboxIndex !== null && allPhotos.length > 0 && (
+                        <div
+                            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+                            onClick={() => setLightboxIndex(null)}
                         >
-                            <X className="w-8 h-8" />
-                        </button>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+                                className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all border border-white/20"
+                            >
+                                <X className="w-8 h-8" />
+                            </button>
 
-                        {/* Navigation */}
-                        {allPhotos.length > 1 && (
-                            <>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setLightboxIndex(prev => prev !== null ? (prev - 1 + allPhotos.length) % allPhotos.length : 0);
-                                    }}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m15 18-6-6 6-6" /></svg>
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setLightboxIndex(prev => prev !== null ? (prev + 1) % allPhotos.length : 0);
-                                    }}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m9 18 6-6-6-6" /></svg>
-                                </button>
-                            </>
-                        )}
+                            {/* Navigation */}
+                            {allPhotos.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setLightboxIndex(prev => prev !== null ? (prev - 1 + allPhotos.length) % allPhotos.length : 0);
+                                        }}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m15 18-6-6 6-6" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setLightboxIndex(prev => prev !== null ? (prev + 1) % allPhotos.length : 0);
+                                        }}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m9 18 6-6-6-6" /></svg>
+                                    </button>
+                                </>
+                            )}
 
-                        {/* Main Image */}
-                        <img
-                            src={allPhotos[lightboxIndex ?? 0]}
-                            alt={`Business Photo ${(lightboxIndex ?? 0) + 1}`}
-                            className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
-                            onClick={(e) => e.stopPropagation()}
-                        />
+                            {/* Main Image */}
+                            <img
+                                src={allPhotos[lightboxIndex ?? 0]}
+                                alt={`Business Photo ${(lightboxIndex ?? 0) + 1}`}
+                                className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
+                                onClick={(e) => e.stopPropagation()}
+                            />
 
-                        {/* Thumbnail Strip */}
-                        <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto pb-2" onClick={(e) => e.stopPropagation()}>
-                            {allPhotos.map((url, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setLightboxIndex(idx)}
-                                    className={cn(
-                                        "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0",
-                                        idx === lightboxIndex ? "border-white scale-110 ring-2 ring-white/20" : "border-transparent opacity-50 hover:opacity-100"
-                                    )}
-                                >
-                                    <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                                </button>
-                            ))}
+                            {/* Thumbnail Strip */}
+                            <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto pb-2" onClick={(e) => e.stopPropagation()}>
+                                {allPhotos.map((url, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setLightboxIndex(idx)}
+                                        className={cn(
+                                            "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0",
+                                            idx === lightboxIndex ? "border-white scale-110 ring-2 ring-white/20" : "border-transparent opacity-50 hover:opacity-100"
+                                        )}
+                                    >
+                                        <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="absolute top-4 left-4 text-white/80 font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                                {(lightboxIndex ?? 0) + 1} / {allPhotos.length}
+                            </div>
                         </div>
+                    );
+                })()
+            }
 
-                        <div className="absolute top-4 left-4 text-white/80 font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
-                            {(lightboxIndex ?? 0) + 1} / {allPhotos.length}
-                        </div>
+            {/* Method Selection & Uploaded Files Dialog */}
+            <Dialog open={isUploadDialogOpen} onOpenChange={(open) => {
+                // Don't allow closing while scanner is active
+                if (isScannerOpen) return;
+                setIsUploadDialogOpen(open);
+                if (!open) setCurrentDocContext(null);
+            }}>
+                <DialogContent
+                    className="max-w-3xl p-0 overflow-hidden rounded-2xl border-none bg-white"
+                    onInteractOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
+                    onPointerDownOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
+                >
+                    <div className="bg-white p-5 border-b border-border-subtle flex items-center justify-between">
+                        <DialogHeader>
+                            <DialogTitle className="text-xl font-bold text-gray-800">
+                                เพิ่ม{currentDocContext?.label}
+                            </DialogTitle>
+
+                        </DialogHeader>
+                        <Button variant="ghost" size="sm" onClick={() => setIsUploadDialogOpen(false)} className="h-8 w-8 p-0 rounded-full">
+                            <X className="w-5 h-5 text-gray-500" />
+                        </Button>
                     </div>
-                );
-            })()}
-        </div>
+
+                    <div className="p-5 overflow-y-auto max-h-[80vh] space-y-6">
+                        {/* Upper: Methods */}
+                        <div className="bg-white">
+                            <h4 className="text-sm font-bold text-gray-700 mb-4">ช่องทางการเพิ่มไฟล์</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button
+                                    onClick={() => handleUploadMethodSelect('file')}
+                                    className="flex items-center p-4 gap-4 border border-border-strong rounded-xl hover:border-chaiyo-blue hover:bg-blue-50/50 transition-all group"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-blue-100/50 flex items-center justify-center group-hover:bg-blue-200/50 transition-colors shrink-0">
+                                        <UploadCloud className="w-5 h-5 text-chaiyo-blue" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="font-bold text-gray-800 text-sm leading-tight">อัพโหลดไฟล์</p>
+                                        <p className="text-[11px] text-muted-foreground mt-0.5">เลือกไฟล์จากเครื่อง (PDF, JPG, PNG) ไม่เกิน 20MB</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => handleUploadMethodSelect('camera')}
+                                    className="flex items-center p-4 gap-4 border border-border-strong rounded-xl hover:border-chaiyo-blue hover:bg-blue-50/50 transition-all group"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-blue-100/50 flex items-center justify-center group-hover:bg-blue-200/50 transition-colors shrink-0">
+                                        <Camera className="w-5 h-5 text-chaiyo-blue" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="font-bold text-gray-800 text-sm leading-tight">ถ่ายรูป</p>
+                                        <p className="text-[11px] text-muted-foreground mt-0.5">ใช้กล้องถ่ายเอกสารตัวจริง</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Lower: Attached Files List */}
+                        {(() => {
+                            if (!currentDocContext) return null;
+                            const occ = occupations.find((o: IncomeOccupation) => o.id === currentDocContext.occId);
+                            if (!occ) return null;
+                            const currentFileList = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === currentDocContext.docType);
+
+                            if (currentFileList.length === 0) return null;
+
+                            return (
+                                <div>
+                                    <div className="text-sm font-bold text-gray-700 mb-4">
+                                        ไฟล์ที่อัพโหลด ({currentFileList.length})
+
+                                    </div>
+                                    <div className="bg-white rounded-xl border overflow-hidden animate-in fade-in slide-in-from-bottom-2">
+
+                                        <div className="overflow-x-auto border-t border-border-subtle">
+                                            <Table>
+                                                <TableHeader className="bg-gray-50/50">
+                                                    <TableRow>
+                                                        <TableHead className="w-[45%] text-xs">ชื่อไฟล์</TableHead>
+                                                        <TableHead className="w-[40%] text-xs">มีรหัสผ่าน</TableHead>
+                                                        <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {currentFileList.map((doc: IncomeDocument) => (
+                                                        <TableRow key={doc.id} className="hover:bg-transparent">
+                                                            {/* File Name Input */}
+                                                            <TableCell className="py-3">
+                                                                <div className="flex items-center gap-3">
+
+                                                                    <Input
+                                                                        value={doc.name}
+                                                                        onChange={(e) => handleUpdateIncomeDocument(occ.id, doc.id, { name: e.target.value })}
+                                                                        className="h-9 text-xs bg-white"
+                                                                    />
+                                                                </div>
+                                                            </TableCell>
+
+                                                            {/* Lock/Unlock Status */}
+                                                            <TableCell className="py-3">
+                                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Switch
+                                                                            checked={doc.isLocked || false}
+                                                                            onCheckedChange={(checked) => {
+                                                                                handleUpdateIncomeDocument(occ.id, doc.id, {
+                                                                                    isLocked: checked,
+                                                                                    ...(checked ? {} : { password: '' }) // Clear password if unlocked
+                                                                                });
+                                                                            }}
+                                                                            className="data-[state=checked]:bg-chaiyo-blue shrink-0"
+                                                                        />
+                                                                    </div>
+                                                                    {doc.isLocked && (
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={doc.password || ''}
+                                                                            onChange={(e) => handleUpdateIncomeDocument(occ.id, doc.id, { password: e.target.value })}
+                                                                            placeholder="ระบุรหัสผ่าน"
+                                                                            className="h-9 text-xs w-full sm:w-[140px] bg-white"
+                                                                        />
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+
+                                                            {/* Actions */}
+                                                            <TableCell className="text-right py-3">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => window.open(doc.url, "_blank")}
+                                                                        className="h-8 w-8 p-0 rounded-full text-chaiyo-blue hover:text-chaiyo-blue hover:bg-blue-50"
+                                                                        title="ดูไฟล์"
+                                                                    >
+                                                                        <Eye className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleRemoveIncomeDocument(occ.id, doc.id)}
+                                                                        className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                        title="ลบ"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
+
+                    <div className="p-4 border-t border-border-subtle bg-white flex justify-end">
+                        <Button
+                            onClick={() => {
+                                setIsUploadDialogOpen(false);
+                                setCurrentDocContext(null);
+                            }}
+                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90"
+                        >
+                            ยืนยันและปิด
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Document Scanner Flow Overlay */}
+            <DocumentScanner
+                open={isScannerOpen}
+                onClose={() => {
+                    setIsScannerOpen(false);
+                    setIsUploadDialogOpen(true); // Re-open dialog when scanner is cancelled
+                }}
+                onSave={handleScanComplete}
+            />
+        </div >
     );
 }
