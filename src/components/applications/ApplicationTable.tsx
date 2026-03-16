@@ -12,6 +12,7 @@ interface ApplicationTableProps {
     sortKey?: SortKey | null;
     sortDirection?: SortDirection | null;
     onSort?: (key: SortKey) => void;
+    source?: 'my' | 'all';
 }
 
 const getStatusColor = (status: ApplicationStatus) => {
@@ -51,21 +52,28 @@ const getStatusLabel = (status: ApplicationStatus) => {
     }
 };
 
-export function ApplicationTable({ data, sortKey, sortDirection, onSort }: ApplicationTableProps) {
+export function ApplicationTable({ data, sortKey, sortDirection, onSort, source = 'my' }: ApplicationTableProps) {
     const router = useRouter();
 
     const handleRowClick = (app: Application) => {
+        // Route mock cases to the real [id] detail page with mockCase param
+        if (app.id?.startsWith('mock-')) {
+            const caseNum = app.id.replace('mock-', '');
+            router.push(`/dashboard/applications/${app.id}?from=${source}&mockCase=${caseNum}`);
+            return;
+        }
+
         if (app.status === 'Draft') {
             router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=draft`);
         } else {
-            router.push(`/dashboard/applications/${app.id}`);
+            router.push(`/dashboard/applications/${app.id}?from=${source}`);
         }
     };
 
     const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
         if (!onSort) return null;
         if (sortKey !== columnKey || !sortDirection) {
-            return <ArrowUpDown className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-50 transition-opacity" />;
+            return <ArrowUpDown className="ml-2 h-4 w-4 opacity-40" />;
         }
         return sortDirection === 'asc' ? (
             <ArrowUp className="ml-2 h-4 w-4 text-chaiyo-blue" />
@@ -76,7 +84,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
 
     const SortableHead = ({ label, columnKey, className = "" }: { label: string, columnKey: SortKey, className?: string }) => (
         <TableHead
-            className={`group cursor-pointer hover:bg-gray-100/50 transition-colors ${className}`}
+            className={`group cursor-pointer hover:bg-gray-100/50 transition-colors whitespace-nowrap ${className}`}
             onClick={() => onSort && onSort(columnKey)}
         >
             <div className={`flex items-center ${className.includes('text-center') ? 'justify-center' : ''}`}>
@@ -89,10 +97,10 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
     return (
         <div className="rounded-xl border border-border-subtle overflow-hidden">
             <Table>
-                <TableHeader className="bg-gray-50/50 border-b border-border-subtle">
+                <TableHeader className="bg-gray-50 border-b border-border-subtle">
                     <TableRow className="hover:bg-transparent">
-                        <SortableHead label="เลขที่ใบสมัคร" columnKey="applicationNo" className="w-[170px]" />
-                        <SortableHead label="ชื่อ-นามสกุลผู้กู้" columnKey="applicantName" />
+                        <SortableHead label="เลขที่ใบสมัคร" columnKey="applicationNo" className="min-w-[170px] max-w-[170px] sticky left-0 z-20 bg-gray-50" />
+                        <SortableHead label="ชื่อ-นามสกุลผู้กู้" columnKey="applicantName" className="sticky left-[170px] z-20 bg-gray-50 before:absolute before:inset-y-0 before:-right-px before:w-px before:bg-border-subtle" />
                         <SortableHead label="ประเภทสินเชื่อ" columnKey="productType" />
                         <SortableHead label="สถานะใบสมัคร" columnKey="status" className="text-center" />
                         <SortableHead label="วันที่สร้างใบสมัคร" columnKey="submissionDate" />
@@ -112,24 +120,24 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort }: Appli
                         data.map((app) => (
                             <TableRow
                                 key={app.id}
-                                className="group cursor-pointer hover:bg-gray-50/50 transition-colors"
+                                className="group cursor-pointer hover:bg-gray-50 transition-colors"
                                 onClick={() => handleRowClick(app)}
                             >
-                                <TableCell className="font-medium text-foreground">{app.applicationNo}</TableCell>
-                                <TableCell>
+                                <TableCell className="font-medium text-foreground whitespace-nowrap sticky left-0 z-10 bg-white group-hover:bg-gray-50 transition-colors min-w-[170px] max-w-[170px] overflow-hidden text-ellipsis">{app.applicationNo}</TableCell>
+                                <TableCell className="whitespace-nowrap sticky left-[170px] z-10 bg-white group-hover:bg-gray-50 transition-colors before:absolute before:inset-y-0 before:-right-px before:w-px before:bg-border-subtle before:z-10">
                                     <span className="font-semibold text-foreground text-[13px]">{app.applicantName}</span>
                                 </TableCell>
-                                <TableCell className="text-muted">{app.productType}</TableCell>
+                                <TableCell className="text-muted whitespace-nowrap">{app.productType}</TableCell>
 
-                                <TableCell className="text-center">
+                                <TableCell className="text-center whitespace-nowrap">
                                     <Badge variant={getStatusColor(app.status)}>
                                         {getStatusLabel(app.status)}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-muted">{app.submissionDate}</TableCell>
-                                <TableCell className="text-muted text-[13px]">{app.lastActionTime || '-'}</TableCell>
-                                <TableCell className="text-muted text-[13px]">{app.previousProcessorName || '-'}</TableCell>
-                                <TableCell className="text-muted text-[13px]">{app.makerName}</TableCell>
+                                <TableCell className="text-muted whitespace-nowrap">{app.submissionDate}</TableCell>
+                                <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.lastActionTime || '-'}</TableCell>
+                                <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.previousProcessorName || '-'}</TableCell>
+                                <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.makerName}</TableCell>
                             </TableRow>
                         ))
                     )}

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { ApplicationTable, SortKey, SortDirection } from "@/components/applications/ApplicationTable";
 import { Application, ApplicationStatus } from "@/components/applications/types";
-import { useSidebar } from "@/components/layout/SidebarContext";
+import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
 import { Label } from "@/components/ui/Label";
@@ -19,127 +19,127 @@ import { motion } from "framer-motion";
 const MOCK_DATA: Application[] = [
     {
         id: "b1",
-        applicationNo: "app-256700001",
+        applicationNo: "25690101ULCRL0001",
         applicantName: "สมชาย ใจดี",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "01/10/2566 08:15",
+        submissionDate: "01/10/2569 08:15",
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
         previousProcessorName: "มาลี ศรีเมือง",
-        lastActionTime: "01/10/2566 10:30"
+        lastActionTime: "01/10/2569 10:30"
     },
     {
         id: "b2",
-        applicationNo: "app-256700005",
+        applicationNo: "25690105ULCRL0005",
         applicantName: "เอกชัย มั่นคง",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "05/10/2566 10:30",
+        submissionDate: "05/10/2569 10:30",
         requestedAmount: 45000,
         status: "Rejected",
         productType: "สินเชื่อส่วนบุคคล",
         previousProcessorName: "ทรงพล รวยทรัพย์",
-        lastActionTime: "05/10/2566 16:45"
+        lastActionTime: "05/10/2569 16:45"
     },
     {
         id: "b3",
-        applicationNo: "app-256700010",
+        applicationNo: "25690110ULCRL0010",
         applicantName: "จันทร์ แสงงาม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "10/10/2566 09:45",
+        submissionDate: "10/10/2569 09:45",
         requestedAmount: 320000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
         previousProcessorName: "สมชาย ยิ่งเจริญ",
-        lastActionTime: "10/10/2566 09:15"
+        lastActionTime: "10/10/2569 09:15"
     },
     {
         id: "b4",
-        applicationNo: "app-256700012",
+        applicationNo: "25690112TLTDL0012",
         applicantName: "พิมพ์ใจ รักสวย",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "12/10/2566 14:00",
+        submissionDate: "12/10/2569 14:00",
         requestedAmount: 150000,
         status: "Cancelled",
         productType: "สินเชื่อโฉนดที่ดิน",
-        lastActionTime: "12/10/2566 11:20"
+        lastActionTime: "12/10/2569 11:20"
     },
     {
         id: "b5",
-        applicationNo: "app-256700015",
+        applicationNo: "25690115TLTKL0015",
         applicantName: "วิทยา เก่งกล้า",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "15/10/2566 11:20",
+        submissionDate: "15/10/2569 11:20",
         requestedAmount: 780000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
-        lastActionTime: "15/10/2566 13:05"
+        lastActionTime: "15/10/2569 13:05"
     },
     {
         id: "b6",
-        applicationNo: "app-256700018",
+        applicationNo: "25690118ULCRL0018",
         applicantName: "อรุณ ศรีสวัสดิ์",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "18/10/2566 13:30",
+        submissionDate: "18/10/2569 13:30",
         requestedAmount: 60000,
         status: "Rejected",
         productType: "สินเชื่อนาโนไฟแนนซ์",
-        lastActionTime: "18/10/2566 14:50"
+        lastActionTime: "18/10/2569 14:50"
     },
     {
         id: "b7",
-        applicationNo: "app-256700020",
+        applicationNo: "25690120ULCRL0020",
         applicantName: "ธนพล เจริญผล",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "20/10/2566 07:50",
+        submissionDate: "20/10/2569 07:50",
         requestedAmount: 420000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        lastActionTime: "20/10/2566 08:30"
+        lastActionTime: "20/10/2569 08:30"
     },
     {
         id: "b8",
-        applicationNo: "app-256700022",
+        applicationNo: "25690122ULCRL0022",
         applicantName: "นิตยา อ่อนน้อม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "22/10/2566 15:45",
+        submissionDate: "22/10/2569 15:45",
         requestedAmount: 90000,
         status: "Cancelled",
         productType: "สินเชื่อส่วนบุคคล",
-        lastActionTime: "22/10/2566 15:10"
+        lastActionTime: "22/10/2569 15:10"
     },
     {
         id: "b9",
-        applicationNo: "app-256700025",
+        applicationNo: "25690125TLTDL0025",
         applicantName: "ปราโมทย์ ใจเย็น",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "25/10/2566 09:00",
+        submissionDate: "25/10/2569 09:00",
         requestedAmount: 250000,
         status: "Rejected",
         productType: "สินเชื่อโฉนดที่ดิน",
-        lastActionTime: "25/10/2566 10:00"
+        lastActionTime: "25/10/2569 10:00"
     },
     {
         id: "b10",
-        applicationNo: "app-256700028",
+        applicationNo: "25690128ULCRL0028",
         applicantName: "สุดา แก้วมณี",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "28/10/2566 16:15",
+        submissionDate: "28/10/2569 16:15",
         requestedAmount: 650000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        lastActionTime: "28/10/2566 17:30"
+        lastActionTime: "28/10/2569 17:30"
     },
     {
         id: "b11",
-        applicationNo: "app-256700030",
+        applicationNo: "25690130ULCRL0030",
         applicantName: "วิชัย อดทน",
         makerName: "สมหญิง จริงใจ",
-        submissionDate: "30/10/2566 10:00",
+        submissionDate: "30/10/2569 10:00",
         requestedAmount: 400000,
         status: "In Review",
         productType: "สินเชื่อส่วนบุคคล",
-        lastActionTime: "30/10/2566 11:20"
+        lastActionTime: "30/10/2569 11:20"
     },
 ];
 
@@ -148,6 +148,13 @@ export default function AllApplicationsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    const { devRole } = useSidebar();
+
+    // Reset tab when role changes
+    useEffect(() => {
+        setCurrentTab("all");
+        setCurrentPage(1);
+    }, [devRole]);
 
     // Sort State
     const [sortKey, setSortKey] = useState<SortKey | null>('submissionDate');
@@ -195,13 +202,21 @@ export default function AllApplicationsPage() {
     const makerNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.makerName))).map(name => ({ label: name, value: name }));
     const previousProcessorOptions = Array.from(new Set(MOCK_DATA.map(app => app.previousProcessorName).filter(Boolean))).map(name => ({ label: name!, value: name! }));
 
-    const tabs = [
-        { label: "ทั้งหมด", value: "all" },
-        { label: "รอพิจารณา", value: "In Review" },
-        { label: "อนุมัติ", value: "Approved" },
-        { label: "ถูกปฎิเสธ", value: "Rejected" },
-        { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
-    ];
+    // Role-based tabs
+    const tabs = devRole === 'branch-staff'
+        ? [
+            { label: "ทั้งหมด", value: "all" },
+            { label: "รอพิจารณา", value: "In Review" },
+            { label: "อนุมัติ", value: "Approved" },
+            { label: "ถูกปฎิเสธ", value: "Rejected" },
+            { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
+        ]
+        : [
+            { label: "ทั้งหมด", value: "all" },
+            { label: "อนุมัติ", value: "Approved" },
+            { label: "ถูกปฎิเสธ", value: "Rejected" },
+            { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
+        ];
 
     const filteredData = MOCK_DATA.filter((app) => {
         // Tab Filter
@@ -335,11 +350,11 @@ export default function AllApplicationsPage() {
                                     )}
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[450px]">
-                                <DialogHeader>
+                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto flex flex-col">
+                                <DialogHeader className="flex-shrink-0">
                                     <DialogTitle>ตัวกรอง</DialogTitle>
                                 </DialogHeader>
-                                <div className="grid gap-5 py-4">
+                                <div className="grid gap-5 py-4 flex-1 overflow-y-auto pr-2">
                                     <div className="space-y-2">
                                         <Label>ชื่อ-นามสกุล ผู้กู้</Label>
                                         <Combobox
@@ -440,7 +455,7 @@ export default function AllApplicationsPage() {
                                         />
                                     </div>
                                 </div>
-                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full">
+                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0 pt-4 border-t">
                                     <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
                                         ล้างตัวกรอง
                                     </Button>
@@ -461,6 +476,7 @@ export default function AllApplicationsPage() {
                     sortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
+                    source="all"
                 />
 
                 <div className="flex items-center justify-between px-2">

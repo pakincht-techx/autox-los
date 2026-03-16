@@ -25,12 +25,12 @@ export default function IdentityCheckerPage() {
 
         if (isExisting) {
             setExistingProfile(profile);
-            setAppId("app-256700001");
+            setAppId("25690316ULCRL0001");
             // Navigate directly to customer-info step (skip overview)
-            router.push(`/dashboard/new-application/app-256700001/customer-info`);
+            router.push(`/dashboard/new-application/25690316ULCRL0001/customer-info`);
         } else {
             // New customer → Start application flow
-            setAppId("app-256700002");
+            setAppId("25690316ULCRL0002");
             router.push("/dashboard/new-application/salesheet");
         }
     };

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import { ApplicationTable, SortKey, SortDirection } from "@/components/applications/ApplicationTable";
 import { Application, ApplicationStatus } from "@/components/applications/types";
-import { useSidebar } from "@/components/layout/SidebarContext";
+import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
@@ -20,95 +20,128 @@ import { DatePickerBE } from "@/components/ui/DatePickerBE";
 // Mock Data
 const MOCK_DATA: Application[] = [
     {
-        id: "1",
-        applicationNo: "app-256700001",
+        id: "mock-1",
+        applicationNo: "25680313ULCPL0001",
         applicantName: "สมชาย ใจดี",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "01/10/2566 09:00",
+        submissionDate: "13/03/2569 09:00",
+        requestedAmount: 20000,
+        status: "Draft",
+        productType: "จำนำรถมอเตอร์ไซต์ผ่อนรายเดือน",
+        lastActionTime: "14/03/2569 10:30"
+    },
+    {
+        id: "mock-2",
+        applicationNo: "25680313ULCPL0002",
+        applicantName: "สมชาย ใจดี",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "13/03/2569 09:00",
+        requestedAmount: 20000,
+        status: "In Review",
+        productType: "จำนำรถมอเตอร์ไซต์ผ่อนรายเดือน",
+        lastActionTime: "14/03/2569 10:30"
+    },
+    {
+        id: "mock-3",
+        applicationNo: "25680313ULCPL0003",
+        applicantName: "สมชาย ใจดี",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "13/03/2569 09:00",
+        requestedAmount: 20000,
+        status: "Draft",
+        productType: "จำนำรถมอเตอร์ไซต์ผ่อนรายเดือน",
+        lastActionTime: "14/03/2569 10:30"
+    },
+    {
+        id: "1",
+        applicationNo: "25690101ULCRL0001",
+        applicantName: "สมชาย ใจดี",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "01/10/2569 09:00",
         requestedAmount: 500000,
         status: "Approved",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
         previousProcessorName: "มาลี ศรีเมือง",
-        lastActionTime: "01/10/2566 10:30"
+        lastActionTime: "01/10/2569 10:30"
     },
     {
         id: "2",
-        applicationNo: "app-256700002",
+        applicationNo: "25690102TLTDL0002",
         applicantName: "วิภาวดี รักษ์ไทย",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "02/10/2566 08:30",
+        submissionDate: "02/10/2569 08:30",
         requestedAmount: 120000,
         status: "In Review",
         productType: "สินเชื่อโฉนดที่ดิน",
         previousProcessorName: "ทรงพล รวยทรัพย์",
-        lastActionTime: "02/10/2566 11:15"
+        lastActionTime: "02/10/2569 11:15"
     },
     {
         id: "3",
-        applicationNo: "app-256700003",
+        applicationNo: "25690103ULCRL0003",
         applicantName: "กมล คนขยัน",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "03/10/2566 10:15",
+        submissionDate: "03/10/2569 10:15",
         requestedAmount: 35000,
         status: "In Review",
         productType: "สินเชื่อนาโนไฟแนนซ์",
         previousProcessorName: "สมชาย ยิ่งเจริญ",
-        lastActionTime: "03/10/2566 14:20"
+        lastActionTime: "03/10/2569 14:20"
     },
     {
         id: "4",
-        applicationNo: "app-256700004",
+        applicationNo: "25690104TLTKL0004",
         applicantName: "ดาริน สวยงาม",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "04/10/2566 13:45",
+        submissionDate: "04/10/2569 13:45",
         requestedAmount: 850000,
         status: "Draft",
         productType: "สินเชื่อจำนำทะเบียนรถบรรทุก",
-        lastActionTime: "04/10/2566 09:45"
+        lastActionTime: "04/10/2569 09:45"
     },
     {
         id: "5",
-        applicationNo: "app-256700005",
+        applicationNo: "25690105ULCRL0005",
         applicantName: "เอกชัย มั่นคง",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "05/10/2566 11:00",
+        submissionDate: "05/10/2569 11:00",
         requestedAmount: 45000,
         status: "Rejected",
         productType: "สินเชื่อส่วนบุคคล",
-        lastActionTime: "05/10/2566 16:10"
+        lastActionTime: "05/10/2569 16:10"
     },
     {
         id: "6",
-        applicationNo: "app-256700006",
+        applicationNo: "25690106ULCRL0006",
         applicantName: "มานะ อดทน",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "06/10/2566 14:20",
+        submissionDate: "06/10/2569 14:20",
         requestedAmount: 200000,
         status: "In Review",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        lastActionTime: "06/10/2566 13:30"
+        lastActionTime: "06/10/2569 13:30"
     },
     {
         id: "7",
-        applicationNo: "app-256700007",
+        applicationNo: "25690107ULCRL0007",
         applicantName: "ประภาส เจริญดี",
         makerName: "สมหญิง ใจดี",
-        submissionDate: "07/10/2566 09:30",
+        submissionDate: "07/10/2569 09:30",
         requestedAmount: 350000,
         status: "Sent Back",
         productType: "สินเชื่อจำนำทะเบียนรถยนต์",
-        lastActionTime: "07/10/2566 08:50"
+        lastActionTime: "07/10/2569 08:50"
     },
     {
         id: "8",
-        applicationNo: "app-256700008",
+        applicationNo: "25690108TLTDL0008",
         applicantName: "สุนีย์ แสงทอง",
         makerName: "กานต์ สว่างใจ",
-        submissionDate: "08/10/2566 16:00",
+        submissionDate: "08/10/2569 16:00",
         requestedAmount: 180000,
         status: "Sent Back",
         productType: "สินเชื่อโฉนดที่ดิน",
-        lastActionTime: "08/10/2566 15:25"
+        lastActionTime: "08/10/2569 15:25"
     },
 ];
 
@@ -119,6 +152,13 @@ export default function ApplicationsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    const { devRole } = useSidebar();
+
+    // Reset tab when role changes
+    useEffect(() => {
+        setCurrentTab("all");
+        setCurrentPage(1);
+    }, [devRole]);
 
     // Sort state
     const [sortKey, setSortKey] = useState<SortKey | null>('submissionDate');
@@ -166,13 +206,21 @@ export default function ApplicationsPage() {
     const makerNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.makerName))).map(name => ({ label: name, value: name }));
     const previousProcessorOptions = Array.from(new Set(MOCK_DATA.map(app => app.previousProcessorName).filter(Boolean))).map(name => ({ label: name!, value: name! }));
 
-    const tabs = [
-        { label: "ทั้งหมด", value: "all" },
-        { label: "แบบร่าง", value: "Draft" },
-        { label: "ส่งกลับ", value: "Sent Back" },
-    ];
+    // Role-based tabs and status filtering
+    const tabs = devRole === 'branch-staff'
+        ? [
+            { label: "ทั้งหมด", value: "all" },
+            { label: "แบบร่าง", value: "Draft" },
+            { label: "ส่งกลับ", value: "Sent Back" },
+        ]
+        : [
+            { label: "ทั้งหมด", value: "all" },
+            { label: "รอพิจารณา", value: "In Review" },
+        ];
 
-    const excludedStatuses: ApplicationStatus[] = ['Approved', 'Rejected', 'Cancelled', 'In Review'];
+    const excludedStatuses: ApplicationStatus[] = devRole === 'branch-staff'
+        ? ['Approved', 'Rejected', 'Cancelled', 'In Review']
+        : ['Approved', 'Rejected', 'Cancelled', 'Draft', 'Sent Back'];
 
     const filteredData = MOCK_DATA.filter((app) => {
         if (excludedStatuses.includes(app.status)) return false;
@@ -310,11 +358,11 @@ export default function ApplicationsPage() {
                                     )}
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[450px]">
-                                <DialogHeader>
+                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto flex flex-col">
+                                <DialogHeader className="flex-shrink-0">
                                     <DialogTitle>ตัวกรอง</DialogTitle>
                                 </DialogHeader>
-                                <div className="grid gap-5 py-4">
+                                <div className="grid gap-5 py-4 flex-1 overflow-y-auto pr-2">
                                     <div className="space-y-2">
                                         <Label>ชื่อ-นามสกุล ผู้กู้</Label>
                                         <Combobox
@@ -415,7 +463,7 @@ export default function ApplicationsPage() {
                                         />
                                     </div>
                                 </div>
-                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full">
+                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0 pt-4 border-t">
                                     <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
                                         ล้างตัวกรอง
                                     </Button>
@@ -436,6 +484,7 @@ export default function ApplicationsPage() {
                     sortKey={sortKey}
                     sortDirection={sortDirection}
                     onSort={handleSort}
+                    source="my"
                 />
 
                 <div className="flex items-center justify-between px-2">

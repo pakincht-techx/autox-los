@@ -1,10 +1,8 @@
 "use client";
 
-// Sync: Move sidebar button
 import React from 'react';
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useSidebar } from "@/components/layout/SidebarContext";
 import { cn } from "@/lib/utils";
 
 export interface BreadcrumbItem {
@@ -23,8 +21,8 @@ export interface DashboardPageHeaderProps {
 export function DashboardPageHeader({ breadcrumbs, rightContent, className }: DashboardPageHeaderProps) {
     return (
         <div className={cn("w-full border-b border-gray-100 bg-white relative h-12 shrink-0 z-10", className)}>
-            <div className="flex items-center justify-between w-full h-full px-6 lg:px-8">
-                {/* LEFT: Toggle + Breadcrumb */}
+            <div className="flex items-center justify-between w-full h-full pr-6">
+                {/* LEFT: Breadcrumb */}
                 <div className="flex-1 flex items-center justify-start text-sm text-gray-500 gap-1">
                     <div className="flex items-center gap-1">
                         {breadcrumbs.map((bc, index) => {
@@ -55,7 +53,7 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className }: Da
                 </div>
 
                 {/* RIGHT: Depend Container */}
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-end gap-3">
                     {rightContent}
                 </div>
             </div>

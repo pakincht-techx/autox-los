@@ -300,7 +300,7 @@ export interface CustomerFormData {
     occupation?: string;
     occupations?: IncomeOccupation[];
     specialIncomes?: SpecialIncome[];
-    incomePhotos?: Record<string, string>;
+    incomePhotos?: Record<string, string[]>;
     totalIncome?: number;
     totalDebt?: number;
     totalPersonalDebt?: number;
@@ -318,6 +318,11 @@ export interface CustomerFormData {
     chaiyoInsuranceInstallment?: number;
     referencePersons?: ReferencePerson[];
     incomeRemarks?: string;
+
+    // Reference Codes
+    ampApplicationId?: string;
+    referrerCode?: string;
+    promotionCode?: string;
 
     // Workplace Assessor (ผู้ประเมินสถานที่ทำงาน)
     workplaceAssessorId?: string;

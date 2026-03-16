@@ -163,6 +163,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         name?: string,
         categoryId?: string,
         photoIndex?: number,
+        hasDocuments?: boolean,
+        documentCount?: number,
         type: 'special' | 'reference' | 'photo' | 'bankAccount' | 'incomeDocument' | 'saIncomeRow' | 'seIncomeRow' | 'seCostRow' | 'debtRow' | 'categorizedPhoto' | 'occupation'
     } | null>(null);
 
@@ -463,7 +465,21 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         if (!occ) return;
         const currentAccounts = [...(occ.bankAccounts || [])];
         currentAccounts.splice(index, 1);
+        // Also remove associated statement documents for this bank account
+        const statementType = `statement_${index}`;
+        const currentDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type !== statementType);
+        // Re-index statement documents for accounts after the removed one
+        const reindexedDocs = currentDocs.map((d: IncomeDocument) => {
+            if (d.type?.startsWith('statement_')) {
+                const docIdx = parseInt(d.type!.split('_')[1]);
+                if (docIdx > index) {
+                    return { ...d, type: `statement_${docIdx - 1}` };
+                }
+            }
+            return d;
+        });
         handleOccupationChange(occId, 'bankAccounts', currentAccounts);
+        handleOccupationChange(occId, 'incomeDocuments', reindexedDocs);
         setItemToDelete(null);
     };
 
@@ -1043,10 +1059,10 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                     </CardHeader>
                     <CardContent className="px-6 pb-6 pt-0">
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <div className="relative flex items-center sticky top-[60px] z-20 bg-white -mx-6 pr-6 shadow-[0_4px_6px_-4px_rgba(0,0,0,0.05)]">
+                            <div className="relative flex items-stretch sticky top-0 z-20 bg-white border-b border-border-subtle -mx-6 pr-6 shadow-[0_4px_6px_-4px_rgba(0,0,0,0.05)]">
                                 {/* Scrollable Tab List */}
                                 <div className="flex-1 overflow-x-auto no-scrollbar pr-4 min-w-0">
-                                    <TabsList className="bg-transparent h-auto p-0 flex gap-0 w-max">
+                                    <TabsList className="bg-transparent h-auto p-0 flex items-stretch gap-0 w-max">
                                         {occupations.map((occ: IncomeOccupation, index: number) => {
                                             const occName = occ.occupationCode
                                                 ? OCCUPATIONS.find(o => (o.value || o.label) === occ.occupationCode)?.label
@@ -1133,7 +1149,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                 </div>
 
                                 {/* Fixed Add Button */}
-                                <div className="flex-shrink-0 pl-4 border-l border-gray-100 py-3 ml-2">
+                                <div className="flex-shrink-0 flex items-center pl-4 border-l border-gray-100 py-1 ml-2">
                                     <Button
                                         type="button"
                                         variant="ghost"
@@ -1149,7 +1165,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                             </div>
 
                             {/* Separator below sticky tabs */}
-                            <div className="border-b border-border-subtle -mx-6 mb-6"></div>
+                            <div className="h-6"></div>
 
                             {occupations.map((occ: IncomeOccupation) => (
                                 <TabsContent key={occ.id} value={occ.id} className="space-y-8 animate-in fade-in duration-300">
@@ -1573,12 +1589,17 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                             variant="ghost"
                                                                                             size="sm"
                                                                                             className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                                                            onClick={() => setItemToDelete({
-                                                                                                index: idx,
-                                                                                                occId: occ.id,
-                                                                                                name: account.bankName ? `บัญชี ${THAI_BANKS.find(b => b.value === account.bankName)?.label}` : 'บัญชีธนาคาร',
-                                                                                                type: 'bankAccount'
-                                                                                            })}
+                                                                                            onClick={() => {
+                                                                                                const statementDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === `statement_${idx}`);
+                                                                                                setItemToDelete({
+                                                                                                    index: idx,
+                                                                                                    occId: occ.id,
+                                                                                                    name: account.bankName ? `บัญชี ${THAI_BANKS.find(b => b.value === account.bankName)?.label}` : 'บัญชีธนาคาร',
+                                                                                                    type: 'bankAccount',
+                                                                                                    hasDocuments: statementDocs.length > 0,
+                                                                                                    documentCount: statementDocs.length,
+                                                                                                });
+                                                                                            }}
                                                                                         >
                                                                                             <Trash2 className="w-4 h-4" />
                                                                                         </Button>
@@ -1880,8 +1901,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             const uploadedDocTypes = Array.from(new Set(allDocs.map((d: IncomeDocument) => d.type))).filter(Boolean) as string[];
 
                                                             // 2. Separate incomes by source
-                                                            const incomesBySource: Record<string, SAIncome[]> = {};
-                                                            const otherIncomes: SAIncome[] = [];
+                                                            const incomesBySource: Record<string, (SAIncome & { originalIndex: number })[]> = {};
+                                                            const otherIncomes: (SAIncome & { originalIndex: number })[] = [];
 
                                                             allIncomes.forEach((income, index) => {
                                                                 const incomeWithIndex = { ...income, originalIndex: index };
@@ -3728,6 +3749,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                 <>
                                     คุณต้องการลบ <span className="font-medium text-gray-700">&quot;{itemToDelete?.name}&quot;</span> ใช่หรือไม่?{' '}
                                     ข้อมูลรายได้และรายละเอียดทั้งหมดของอาชีพนี้จะถูกลบอย่างถาวร
+                                </>
+                            ) : itemToDelete?.type === 'bankAccount' ? (
+                                <>
+                                    คุณต้องการลบข้อมูล &quot;{itemToDelete?.name}&quot; ใช่หรือไม่?
+                                    การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                    {itemToDelete?.hasDocuments && (
+                                        <span className="block mt-2 text-amber-600 font-medium">
+                                            ⚠️ เอกสารรายการเดินบัญชี (Statement) จำนวน {itemToDelete.documentCount} ไฟล์ที่แนบมากับบัญชีนี้จะถูกลบไปด้วย
+                                        </span>
+                                    )}
                                 </>
                             ) : (
                                 <>

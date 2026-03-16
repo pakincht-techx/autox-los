@@ -9,6 +9,8 @@ export interface BreadcrumbItem {
     onClick?: () => void;
 }
 
+export type DevRole = 'branch-staff' | 'legal-team';
+
 interface SidebarContextType {
     isCollapsed: boolean;
     setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,6 +19,8 @@ interface SidebarContextType {
     setBreadcrumbs: (bc: BreadcrumbItem[]) => void;
     rightContent: React.ReactNode;
     setRightContent: (content: React.ReactNode) => void;
+    devRole: DevRole;
+    setDevRole: (role: DevRole) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType>({
@@ -27,12 +31,15 @@ const SidebarContext = createContext<SidebarContextType>({
     setBreadcrumbs: () => { },
     rightContent: null,
     setRightContent: () => { },
+    devRole: 'branch-staff',
+    setDevRole: () => { },
 });
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
     const [rightContent, setRightContent] = useState<React.ReactNode>(null);
+    const [devRole, setDevRole] = useState<DevRole>('branch-staff');
 
     const toggleCollapsed = () => setIsCollapsed(prev => !prev);
 
@@ -44,7 +51,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
             breadcrumbs,
             setBreadcrumbs,
             rightContent,
-            setRightContent
+            setRightContent,
+            devRole,
+            setDevRole
         }}>
             {children}
         </SidebarContext.Provider>

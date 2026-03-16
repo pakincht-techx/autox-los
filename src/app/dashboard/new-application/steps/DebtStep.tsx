@@ -154,7 +154,7 @@ const MOCK_STAFF_LIST = [
     { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
-export function DebtStep({ formData, setFormData, isExistingCustomer = false }: IncomeAndDebtStepProps) {
+export function DebtStep({ formData, setFormData, isExistingCustomer = false }: DebtStepProps) {
     const handleChange = <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };

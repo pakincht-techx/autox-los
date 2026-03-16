@@ -1231,7 +1231,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         {/* Address 4: Contact Address */}
                         <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
                             <AddressForm
-                                title="ที่อยู่ที่สามารถติดต่อได้"
+                                title="ที่อยู่ที่สามารถติดต่อได้สะดวก"
                                 prefix="contact"
                                 formData={formData}
                                 onChange={handleChange}
@@ -1239,7 +1239,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label className="text-sm">เลือกที่อยู่ที่สามารถติดต่อได้</Label>
+                                            <Label className="text-sm">ที่อยู่ที่สามารถติดต่อได้สะดวก</Label>
                                             <Select
                                                 value={formData.contactAddressSource || "id"}
                                                 onValueChange={(val) => {
@@ -2053,6 +2053,47 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     </TableBody>
                                 </Table>
                             </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* REFERENCE CODES SECTION */}
+            <Card className="border-border-strong">
+                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                        <ClipboardList className="w-5 h-5" />
+                        รหัสอ้างอิง
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                            <Label>AMP Application ID</Label>
+                            <Input
+                                value={formData.ampApplicationId || ""}
+                                onChange={(e) => handleChange("ampApplicationId", e.target.value)}
+                                placeholder="ระบุ AMP Application ID"
+                                className="h-12 bg-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>รหัสผู้แนะนำลูกค้า</Label>
+                            <Input
+                                value={formData.referrerCode || ""}
+                                onChange={(e) => handleChange("referrerCode", e.target.value)}
+                                placeholder="ระบุรหัสผู้แนะนำลูกค้า"
+                                className="h-12 bg-white"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>รหัสโปรโมชั่น</Label>
+                            <Input
+                                value={formData.promotionCode || ""}
+                                onChange={(e) => handleChange("promotionCode", e.target.value)}
+                                placeholder="ระบุรหัสโปรโมชั่น"
+                                className="h-12 bg-white"
+                            />
                         </div>
                     </div>
                 </CardContent>

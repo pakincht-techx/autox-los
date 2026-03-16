@@ -22,11 +22,13 @@ import {
     ChevronsUpDown,
     Search,
     Megaphone,
-    Info
+    Info,
+    ArrowLeftRight,
+    Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { useSidebar } from "@/components/layout/SidebarContext";
+import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -80,7 +82,7 @@ const navigationGroups = [
 export function Sidebar() {
     // Main sidebar component
     const pathname = usePathname();
-    const { isCollapsed } = useSidebar();
+    const { isCollapsed, devRole, setDevRole } = useSidebar();
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const [isBranchInfoOpen, setIsBranchInfoOpen] = useState(false);
     const [showAnnouncement, setShowAnnouncement] = useState(false);
@@ -143,9 +145,9 @@ export function Sidebar() {
                         <div className="overflow-hidden">
                             <h1 className="font-semibold text-base leading-none truncate text-white/90 tracking-wide">เงินไชโย</h1>
                             <div
-                                className="flex items-center gap-1.5 cursor-pointer group mt-1"
+                                className="flex items-center gap-1.5 group mt-1"
                             >
-                                <div className="text-[11px] font-medium text-white/60 group-hover:text-white/90 transition-colors truncate">
+                                <div className="text-[11px] font-medium text-white/60 truncate">
                                     {branchInfo.name} ({branchInfo.code})
                                 </div>
                             </div>
@@ -169,7 +171,7 @@ export function Sidebar() {
                                 <>
                                     <div className="flex-1 overflow-hidden text-left">
                                         <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
-                                        <p className="text-[10px] text-white/60 truncate">{mockUser.position}</p>
+                                        <p className="text-[10px] text-white/60 truncate">{devRole === 'branch-staff' ? 'พนักงานสาขา' : 'ทีม Legal'}</p>
                                     </div>
                                     <ChevronsUpDown className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
                                 </>
@@ -183,6 +185,28 @@ export function Sidebar() {
                             <UserCircle className="mr-2 h-4 w-4" />
                             <span>ข้อมูลผู้ใช้</span>
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                            <ArrowLeftRight className="w-3 h-3" />
+                            สลับบทบาท (Dev)
+                        </DropdownMenuLabel>
+                        <DropdownMenuItem
+                            onClick={() => setDevRole('branch-staff')}
+                            className={cn(devRole === 'branch-staff' && 'bg-blue-50 text-blue-700 font-medium')}
+                        >
+                            <UserCircle className="mr-2 h-4 w-4" />
+                            <span>พนักงานสาขา</span>
+                            {devRole === 'branch-staff' && <span className="ml-auto text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">Active</span>}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => setDevRole('legal-team')}
+                            className={cn(devRole === 'legal-team' && 'bg-purple-50 text-purple-700 font-medium')}
+                        >
+                            <Shield className="mr-2 h-4 w-4" />
+                            <span>ทีม Legal</span>
+                            {devRole === 'legal-team' && <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">Active</span>}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => console.log("Logout")}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>ออกจากระบบ</span>

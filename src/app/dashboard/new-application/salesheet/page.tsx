@@ -70,7 +70,8 @@ export default function SalesheetPage() {
                     htmlFor="salesheet-read"
                     className="font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-gray-800"
                 >
-                    ข้าพเจ้าได้อธิบายรายละเอียด Salesheet ให้ลูกค้าทราบ และลูกค้าได้อ่านทำความเข้าใจแล้ว
+
+                    ข้าพเจ้าได้อ่าน และรับทราบรายละเอียดของ Salesheet
                 </label>
             </div>
 
@@ -94,7 +95,7 @@ export default function SalesheetPage() {
                     </Button>
                     <Button
                         size="xl"
-                        onClick={() => router.push(`/dashboard/new-application/${appId || "app-256700001"}/customer-info`)}
+                        onClick={() => router.push(`/dashboard/new-application/${appId || "25690316ULCRL0001"}/customer-info`)}
                         disabled={!formData.isSalesheetRead}
                         className="px-8 font-bold"
                     >

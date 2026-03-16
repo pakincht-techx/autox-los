@@ -652,61 +652,61 @@ function PreQuestionPageContent() {
     // Local state for "Sales Talk"
     const [formData, setFormData] = useState<any>({
         collateralType: 'car',
-        appraisalPrice: 550000,
-        income: 40000,
+        appraisalPrice: 0,
+        income: 0,
         // New Preliminary Fields
-        loanPurpose: 'personal',
-        requestedAmount: '350000',
-        collateralStatus: 'clear',
-        occupationGroup: 'employee',
-        jobTitle: 'พนักงานบริษัท',
-        salary: '35000',
-        otherIncome: '5000',
-        monthlyDebt: '8000',
-        specialProject: 'none',
-        borrowerAge: '35',
-        collateralCondition: 'no',
-        brand: 'HONDA',
-        model: 'CIVIC',
-        subModel: '1.8 i-VTEC EL',
-        year: '2018',
-        aiPrice: 520000,
-        redbookPrice: 550000,
+        loanPurpose: '',
+        requestedAmount: '',
+        collateralStatus: '',
+        occupationGroup: '',
+        jobTitle: '',
+        salary: '',
+        otherIncome: '',
+        monthlyDebt: '',
+        specialProject: '',
+        borrowerAge: '',
+        collateralCondition: '',
+        brand: '',
+        model: '',
+        subModel: '',
+        year: '',
+        aiPrice: 0,
+        redbookPrice: 0,
         aiDetectedData: null,
 
-        nationality: 'thai',
-        customerGroup: 'thai',
-        applicationOwner: "สมหญิง จริงใจ",
-        branchRegion: 'other', // Default matched to "สมหญิง จริงใจ"
+        nationality: '',
+        customerGroup: '',
+        applicationOwner: '',
+        branchRegion: '',
         // Defaults for CalculatorStep
-        requestedDuration: 60,
+        requestedDuration: '',
 
         // Collateral Questions
-        collateralQuestions: { car_q1: 'no', car_q2: 'no', car_q3: 'no', car_q4: 'no', car_q5: 'no', car_q6: 'no', car_q7: 'no' },
-        isSalesheetRead: true,
+        collateralQuestions: {},
+        isSalesheetRead: false,
         landProvince: '',
-        landCollateralPurpose: 'clear',
+        landCollateralPurpose: '',
 
         // Land Appraisals
         landAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
         buildingAppraisals: [{ source: 'treasury_department', label: 'กรมธนารักษ์', price: '', hidden: false }],
         condoUnitAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
         condoBalconyAppraisals: [{ source: 'land_office', label: 'สำนักงานที่ดิน', price: '', hidden: false }],
-        appraisalSource: 'department_of_lands',
+        appraisalSource: '',
         appraisedLandPrice: '',
         appraisedBuildingPrice: '',
         incomeBreakdown: [
-            { label: 'รายได้หลัก', price: '35000', source: 'main' },
-            { label: 'รายได้เสริม (ถ้ามี)', price: '5000', source: 'extra' },
-            { label: 'รายได้รวม', price: '40000', source: 'total' },
+            { label: 'รายได้หลัก', price: '', source: 'main' },
+            { label: 'รายได้เสริม (ถ้ามี)', price: '', source: 'extra' },
+            { label: 'รายได้รวม', price: '', source: 'total' },
         ],
         debtBreakdown: [
-            { label: 'ผ่อนบ้าน/ค่าเช่าบ้าน', price: '0', source: 'housing' },
-            { label: 'ผ่อนรถ', price: '0', source: 'car' },
-            { label: 'ผ่อนบัตรเครดิต/บัตรกดเงินสด', price: '3000', source: 'card' },
-            { label: 'ผ่อนสินเชื่ออื่นๆ (ไม่รวมสินเชื่อเงินไชโย)', price: '5000', source: 'other_loan' },
-            { label: 'ผ่อนเงินกู้สหกรณ์', price: '0', source: 'coop' },
-            { label: 'ผ่อนเงินกู้นอกระบบ', price: '0', source: 'informal' },
+            { label: 'ผ่อนบ้าน/ค่าเช่าบ้าน', price: '', source: 'housing' },
+            { label: 'ผ่อนรถ', price: '', source: 'car' },
+            { label: 'ผ่อนบัตรเครดิต/บัตรกดเงินสด', price: '', source: 'card' },
+            { label: 'ผ่อนสินเชื่ออื่นๆ (ไม่รวมสินเชื่อเงินไชโย)', price: '', source: 'other_loan' },
+            { label: 'ผ่อนเงินกู้สหกรณ์', price: '', source: 'coop' },
+            { label: 'ผ่อนเงินกู้นอกระบบ', price: '', source: 'informal' },
         ],
     });
 
@@ -1703,8 +1703,8 @@ function PreQuestionPageContent() {
                                                                     setFormData({ ...formData, subModel: val });
                                                                     setAiDetectedFields((prev: any[]) => prev.filter(f => f !== 'subModel'));
                                                                 }}
-                                                                placeholder="เลือกรุ่นย่อย..."
-                                                                searchPlaceholder="ค้นหารุ่นย่อย..."
+                                                                placeholder="เลือกรุ่นย่อย"
+                                                                searchPlaceholder="ค้นหารุ่นย่อย"
                                                                 emptyText="ไม่พบรุ่นที่ค้นหา"
                                                                 className={!formData.model ? "opacity-50 pointer-events-none" : ""}
                                                             />

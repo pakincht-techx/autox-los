@@ -17,6 +17,7 @@ export const ALL_FLOW_STEPS = [
     { slug: 'collateral-info', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/collateral-info`, phase: 'application' as const },
     { slug: 'income', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/income`, phase: 'application' as const },
     { slug: 'debt', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/debt`, phase: 'application' as const },
+    { slug: 'guarantors', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/guarantors`, phase: 'application' as const },
     { slug: 'loan-calculator', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/loan-calculator`, phase: 'application' as const },
     { slug: 'documents', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/documents`, phase: 'application' as const },
     { slug: 'review', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/review`, phase: 'application' as const },
@@ -145,6 +146,8 @@ interface ApplicationContextType {
     // Override hooks for per-page customization
     setNextOverride: (fn: (() => void) | null) => void;
     setPrevOverride: (fn: (() => void) | null) => void;
+    setSaveOverride: (fn: (() => void) | null) => void;
+    saveOverrideRef: React.RefObject<(() => void) | null>;
     setHideLayoutNav: (hide: boolean) => void;
     hideLayoutNav: boolean;
 }
@@ -185,6 +188,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
     // ── Per-page navigation overrides ───────────────────────────────────────
     const nextOverrideRef = useRef<(() => void) | null>(null);
     const prevOverrideRef = useRef<(() => void) | null>(null);
+    const saveOverrideRef = useRef<(() => void) | null>(null);
     const [hideLayoutNav, setHideLayoutNav] = useState(false);
 
     const setNextOverride = useCallback((fn: (() => void) | null) => {
@@ -195,7 +199,12 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
         prevOverrideRef.current = fn;
     }, []);
 
+    const setSaveOverride = useCallback((fn: (() => void) | null) => {
+        saveOverrideRef.current = fn;
+    }, []);
+
     // Reset per-page overrides on route change
+    // Note: saveOverrideRef is NOT reset here — child pages handle their own cleanup
     useEffect(() => {
         nextOverrideRef.current = null;
         prevOverrideRef.current = null;
@@ -217,7 +226,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
     // ── Load prefilled data from pre-question ────────────────────────────────
     useEffect(() => {
         const state = searchParams.get('state');
-        if (state === 'draft') {
+        if (state === 'draft' || state === 'readonly') {
             setIsApplicationStarted(true);
             const id = searchParams.get('id');
             if (id) setAppId(id);
@@ -252,7 +261,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
                 const accepted = localStorage.getItem('isConsentAccepted');
                 if (accepted === 'true') {
                     setIsApplicationStarted(true);
-                    setAppId("app-256700001");
+                    setAppId("25690316ULCRL0001");
                     localStorage.removeItem('isConsentAccepted');
                 }
             } catch (e) {
@@ -262,13 +271,15 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
         }
     }, [searchParams]);
 
-    // ── Load Mock Data for 'existing-user' ───────────────────────────────────
+    // ── Load Mock Data for 'existing-user' & Mock Apps ───────────────────────
     useEffect(() => {
-        if (appId === 'existing-user') {
-            setIsExistingCustomer(true);
+        if (appId === 'existing-user' || (appId && /^\d{8}[A-Z]{4}L\d{4}$/.test(appId))) {
+            if (appId === 'existing-user') {
+                setIsExistingCustomer(true);
+            }
             setFormData((prev: any) => {
                 // Only override if not already populated with mock data (basic check)
-                if (prev.firstName === "สมชาย") return prev;
+                if (prev.firstName) return prev;
 
                 return {
                     ...prev,
@@ -365,6 +376,8 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
         applicationStepIndex,
         setNextOverride,
         setPrevOverride,
+        setSaveOverride,
+        saveOverrideRef,
         setHideLayoutNav,
         hideLayoutNav,
     };
