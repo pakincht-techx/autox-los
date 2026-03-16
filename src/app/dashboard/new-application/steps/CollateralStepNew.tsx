@@ -1554,7 +1554,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 {(q.id === 'car_q8' || q.id === 'car_q17') && (
                                                     <div className="border-t border-gray-300 mb-3 mt-3" />
                                                 )}
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
                                                     <span className="text-sm text-gray-700 font-bold">{q.text}</span>
                                                     <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
                                                         <button
@@ -1590,7 +1590,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     </div>
                                                 </div>
                                                 {q.id === 'car_q17' && (
-                                                    <div className="flex gap-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl mt-2">
+                                                    <div className="flex gap-3 py-4 mt-2">
                                                         <Checkbox
                                                             id="vehicleVerified"
                                                             checked={formData.vehicleVerified || false}
@@ -1614,7 +1614,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         {formData.collateralType === 'land' && (
                                             <>
                                                 <div className="border-t border-gray-300 my-3" />
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
                                                     <span className="text-sm text-gray-700 font-bold">ที่ดินทำกินมีคนช่วยทำงานหรือไม่</span>
                                                     <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
                                                         <button
