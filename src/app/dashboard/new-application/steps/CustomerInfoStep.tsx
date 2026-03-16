@@ -1006,7 +1006,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label className="text-sm">เลือกที่อยู่ปัจจุบัน</Label>
+                                            <Label className="text-sm">เลือกที่อยู่ปัจจุบัน <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={formData.currentAddressSource || (formData.isCurrentSameAsId ? "id" : "new")}
                                                 onValueChange={(val) => {
@@ -1195,7 +1195,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label className="text-sm">เลือกที่อยู่จัดส่งเอกสาร</Label>
+                                            <Label className="text-sm">เลือกที่อยู่จัดส่งเอกสาร <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={formData.shippingAddressSource || (formData.isShippingSameAsCurrent ? "current" : "new")}
                                                 onValueChange={(val) => {
@@ -1239,7 +1239,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 headerChildren={
                                     <div className="space-y-4 mb-4 mt-2">
                                         <div className="space-y-2">
-                                            <Label className="text-sm">ที่อยู่ที่สามารถติดต่อได้สะดวก</Label>
+                                            <Label className="text-sm">ที่อยู่ที่สามารถติดต่อได้สะดวก <span className="text-red-500">*</span></Label>
                                             <Select
                                                 value={formData.contactAddressSource || "id"}
                                                 onValueChange={(val) => {

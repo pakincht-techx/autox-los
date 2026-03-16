@@ -4,9 +4,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
     Car, Bike, Truck, Tractor, Map, Sparkles, Upload, FileText,
-    Loader2, Camera, Book, X, Plus,
+    Loader2, Camera, Book, Trash2, X, Plus,
     ChevronLeft, ChevronRight, Eye, UserCheck, Calculator, ShieldCheck,
-    CheckCircle2, AlertTriangle, FilePlus
+    CheckCircle2, AlertTriangle, FilePlus, Info
 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -16,8 +16,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Combobox } from "@/components/ui/combobox";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/Dialog";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/Table";
 import {
     CAR_BRANDS,
     MOTO_BRANDS,
@@ -396,10 +412,12 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const [aiDetectedFields, setAiDetectedFields] = useState<string[]>([]);
     const [uploadedDocs, setUploadedDocs] = useState<string[]>([]); // For old compatibility if needed, but we'll use below
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    const [photoGuideDialogOpen, setPhotoGuideDialogOpen] = useState(false);
+    const [paperGuideDialogOpen, setPaperGuideDialogOpen] = useState(false);
 
     // New upload states
-    const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
-    const [uploadedPaperDocs, setUploadedPaperDocs] = useState<string[]>([]);
+    const [uploadedPhotos, setUploadedPhotos] = useState<{ url: string, label: string }[]>([]);
+    const [uploadedPaperDocs, setUploadedPaperDocs] = useState<{ url: string, label: string }[]>([]);
     const [analyzedPhotoCount, setAnalyzedPhotoCount] = useState(0);
     const [analyzedPaperCount, setAnalyzedPaperCount] = useState(0);
 
@@ -477,14 +495,16 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        const newPhotos: string[] = [];
+        const availableDocs = getPhotoDocs(formData.collateralType);
+        const newPhotos: { url: string, label: string }[] = [];
         for (let i = 0; i < files.length; i++) {
             const url = URL.createObjectURL(files[i]);
-            newPhotos.push(url);
+            const defaultLabel = availableDocs[uploadedPhotos.length + i]?.label || "อื่นๆ";
+            newPhotos.push({ url, label: defaultLabel });
         }
 
         const currentPhotoCount = uploadedPhotos.length;
-        setUploadedPhotos((prev: string[]) => [...prev, ...newPhotos]);
+        setUploadedPhotos((prev: { url: string, label: string }[]) => [...prev, ...newPhotos]);
         setIsAnalyzing(true);
         toast.info("กำลังวิเคราะห์รูปถ่ายหลักประกัน...", { duration: 1500 });
 
@@ -507,13 +527,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        const newDocs: string[] = [];
+        const availableDocs = getPaperDocs(formData.collateralType, formData);
+        const newDocs: { url: string, label: string }[] = [];
         for (let i = 0; i < files.length; i++) {
             const url = URL.createObjectURL(files[i]);
-            newDocs.push(url);
+            const defaultLabel = availableDocs[uploadedPaperDocs.length + i]?.label || "อื่นๆ";
+            newDocs.push({ url, label: defaultLabel });
         }
 
-        setUploadedPaperDocs((prev: string[]) => [...prev, ...newDocs]);
+        setUploadedPaperDocs((prev: { url: string, label: string }[]) => [...prev, ...newDocs]);
         setIsAnalyzing(true);
         toast.info("กำลังตรวจสอบเอกสารหลักประกัน...", { duration: 1500 });
 
@@ -527,16 +549,18 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     };
 
     const handleRemovePhoto = (idx: number) => {
-        const urlToRemove = uploadedPhotos[idx];
+        const photo = uploadedPhotos[idx] as any;
+        const urlToRemove = typeof photo === 'string' ? photo : photo?.url;
         if (urlToRemove) URL.revokeObjectURL(urlToRemove);
-        setUploadedPhotos((prev: string[]) => prev.filter((_, i) => i !== idx));
+        setUploadedPhotos((prev: { url: string, label: string }[]) => prev.filter((_, i) => i !== idx));
         setAnalyzedPhotoCount(prev => Math.max(0, prev - 1));
     };
 
     const handleRemovePaper = (idx: number) => {
-        const urlToRemove = uploadedPaperDocs[idx];
+        const doc = uploadedPaperDocs[idx] as any;
+        const urlToRemove = typeof doc === 'string' ? doc : doc?.url;
         if (urlToRemove) URL.revokeObjectURL(urlToRemove);
-        setUploadedPaperDocs((prev: string[]) => prev.filter((_, i) => i !== idx));
+        setUploadedPaperDocs((prev: { url: string, label: string }[]) => prev.filter((_, i) => i !== idx));
         setAnalyzedPaperCount(prev => Math.max(0, prev - 1));
     };
 
@@ -570,7 +594,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     };
 
     return (
-        <div className="max-w-4xl mx-auto animate-in slide-in-from-right-8 duration-300 pb-20 pt-4">
+        <div className="w-full animate-in slide-in-from-right-8 duration-300 pb-20">
             <div className="space-y-6">
                 {/* SECTION: อัพโหลดเอกสารหลักประกัน */}
                 <Card className="border-border-strong overflow-hidden mb-6">
@@ -630,91 +654,83 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             </div>
 
                             {/* PHOTO UPLOAD SECTION */}
-                            <div className="p-6 space-y-6">
-                                <div className="flex flex-col md:flex-row gap-6">
-                                    {/* Checklist Column */}
-                                    <div className="w-full md:w-80 shrink-0 space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                                <Camera className="w-4 h-4 text-chaiyo-blue" />
-                                                1.1 รายการรูปถ่ายที่ต้องใช้
-                                            </h4>
-                                            <Badge variant="outline" className="text-[10px] bg-blue-50 text-chaiyo-blue border-blue-100">
-                                                {analyzedPhotoCount} / {getPhotoDocs(formData.collateralType).length} รูป
-                                            </Badge>
-                                        </div>
-                                        <div className="bg-gray-50 rounded-xl border border-border-subtle p-3 space-y-2.5">
-                                            {getPhotoDocs(formData.collateralType).map((doc, idx) => {
-                                                const isCompleted = idx < analyzedPhotoCount;
-                                                return (
-                                                    <div key={idx} className={cn(
-                                                        "flex items-start gap-2.5 text-[11px] font-medium leading-tight p-2 rounded-lg transition-colors",
-                                                        isCompleted ? "bg-emerald-50 text-emerald-700" : "bg-white text-gray-500 border border-transparent shadow-sm"
-                                                    )}>
-                                                        {isCompleted ? (
-                                                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500 mt-0.5" />
-                                                        ) : (
-                                                            <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-200 shrink-0 mt-0.5" />
-                                                        )}
-                                                        <span>{doc.label} {doc.required && <span className="text-red-500">*</span>}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                            <div className="p-6 space-y-4">
+                                {/* Header and Upload Row */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                            <Camera className="w-4 h-4 text-chaiyo-blue" />
+                                            รูปถ่ายหลักประกัน
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoGuideDialogOpen(true)}
+                                                className="text-gray-400 hover:text-chaiyo-blue transition-colors"
+                                            >
+                                                <Info className="w-4 h-4" />
+                                            </button>
+                                        </h4>
+                                        <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                                            {analyzedPhotoCount} / {getPhotoDocs(formData.collateralType).length} รูป
+                                        </span>
                                     </div>
 
-                                    {/* Upload Area Column */}
-                                    <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="file"
-                                                ref={photoInputRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                multiple
-                                                onChange={handlePhotoUpload}
-                                            />
-                                            <input
-                                                type="file"
-                                                ref={photoCameraRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                capture="environment"
-                                                onChange={handlePhotoUpload}
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => photoInputRef.current?.click()}
-                                                className="flex-1 md:flex-none h-11 rounded-xl border-dashed border-2 hover:border-chaiyo-blue hover:bg-blue-50/50 transition-all font-bold group"
-                                                disabled={isAnalyzing}
-                                            >
-                                                <Upload className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                                                เลือกรูปภาพ
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => photoCameraRef.current?.click()}
-                                                className="flex-1 md:flex-none h-11 rounded-xl border-dashed border-2 hover:border-chaiyo-blue hover:bg-blue-50/50 transition-all font-bold group"
-                                                disabled={isAnalyzing}
-                                            >
-                                                <Camera className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                                                เปิดกล้อง
-                                            </Button>
-                                        </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <input
+                                            type="file"
+                                            ref={photoInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handlePhotoUpload}
+                                        />
+                                        <input
+                                            type="file"
+                                            ref={photoCameraRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            capture="environment"
+                                            onChange={handlePhotoUpload}
+                                        />
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => photoInputRef.current?.click()}
+                                            className="flex-1 sm:flex-none"
+                                            disabled={isAnalyzing}
+                                        >
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            อัปโหลดเอกสาร
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => photoCameraRef.current?.click()}
+                                            className="flex-1 sm:flex-none"
+                                            disabled={isAnalyzing}
+                                        >
+                                            <Camera className="w-4 h-4 mr-2" />
+                                            เปิดกล้อง
+                                        </Button>
+                                    </div>
+                                </div>
 
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200 min-h-[160px]">
-                                            {uploadedPhotos.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60">
-                                                    <FilePlus className="w-8 h-8" />
-                                                    <p className="text-xs font-medium italic">ยังไม่มีการอัพโหลดรูปถ่าย</p>
-                                                </div>
-                                            ) : (
-                                                uploadedPhotos.map((doc, idx) => (
-                                                    <div key={idx} className="relative aspect-[3/4] rounded-lg overflow-hidden border border-border-strong group shadow-sm bg-white">
-                                                        <img src={doc} alt={`photo-${idx}`} className="w-full h-full object-cover" />
+                                {/* Photo Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-1 bg-gray-50/50 p-1 rounded-xl border border-dashed border-gray-200 min-h-[160px]">
+                                    {uploadedPhotos.length === 0 ? (
+                                        <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60">
+                                            <FilePlus className="w-8 h-8" />
+                                            <p className="text-xs font-medium italic">ยังไม่มีการอัพโหลดรูปถ่าย</p>
+                                        </div>
+                                    ) : (
+                                        uploadedPhotos.map((photoObj: any, idx) => {
+                                            const url = typeof photoObj === 'string' ? photoObj : photoObj.url;
+                                            const label = typeof photoObj === 'string' ? "อื่นๆ" : (photoObj.label || "อื่นๆ");
+
+                                            return (
+                                                <div key={idx} className="flex flex-col gap-1 relative bg-white p-1 border border-border-strong rounded-lg shadow-sm group">
+                                                    <div className="relative aspect-[3/4] rounded-[4px] overflow-hidden bg-gray-50 border border-border-subtle">
+                                                        <img src={url} alt={`photo-${idx}`} className="w-full h-full object-cover" />
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                                             <button
-                                                                onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPhotos); }}
+                                                                onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPhotos.map((p: any) => typeof p === 'string' ? p : p.url)); }}
                                                                 className="p-1.5 bg-white/20 hover:bg-white/40 rounded-full border border-white/30 backdrop-blur-sm text-white"
                                                             >
                                                                 <Eye className="w-4 h-4" />
@@ -732,106 +748,122 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                             </div>
                                                         )}
                                                     </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
+                                                    <Select
+                                                        value={label}
+                                                        onValueChange={(val) => {
+                                                            const newPhotos: any[] = [...uploadedPhotos];
+                                                            if (typeof newPhotos[idx] === 'string') {
+                                                                newPhotos[idx] = { url: newPhotos[idx], label: val };
+                                                            } else {
+                                                                newPhotos[idx] = { ...newPhotos[idx], label: val };
+                                                            }
+                                                            setUploadedPhotos(newPhotos);
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="h-9 text-[11px] bg-white border-gray-200">
+                                                            <div className="truncate text-left pr-2"><SelectValue /></div>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {getPhotoDocs(formData.collateralType).map((doc, dIdx) => (
+                                                                <SelectItem key={dIdx} value={doc.label} className="text-[11px]">
+                                                                    {doc.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                            <SelectItem value="อื่นๆ" className="text-[11px]">อื่นๆ</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )
+                                        })
+                                    )}
                                 </div>
                             </div>
 
                             {/* PAPER DOCS UPLOAD SECTION */}
-                            <div className="p-6 space-y-6">
-                                <div className="flex flex-col md:flex-row gap-6">
-                                    {/* Checklist Column */}
-                                    <div className="w-full md:w-80 shrink-0 space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                                <Book className="w-4 h-4 text-emerald-600" />
-                                                1.2 รายการเอกสารที่ต้องใช้
-                                            </h4>
-                                            <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-100">
-                                                {analyzedPaperCount} / {getPaperDocs(formData.collateralType, formData).length} ชุด
-                                            </Badge>
-                                        </div>
-                                        <div className="bg-gray-50 rounded-xl border border-border-subtle p-3 space-y-2.5">
-                                            {getPaperDocs(formData.collateralType, formData).map((doc, idx) => {
-                                                const isCompleted = idx < analyzedPaperCount;
-                                                return (
-                                                    <div key={idx} className={cn(
-                                                        "flex items-start gap-2.5 text-[11px] font-medium leading-tight p-2 rounded-lg transition-colors",
-                                                        isCompleted ? "bg-emerald-50 text-emerald-700" : "bg-white text-gray-500 border border-transparent shadow-sm"
-                                                    )}>
-                                                        {isCompleted ? (
-                                                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500 mt-0.5" />
-                                                        ) : (
-                                                            <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-200 shrink-0 mt-0.5" />
-                                                        )}
-                                                        <span>{doc.label} {doc.required && <span className="text-red-500">*</span>}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                            <div className="p-6 space-y-4">
+                                {/* Header and Upload Row */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                            <Book className="w-4 h-4 text-emerald-600" />
+                                            รายการเอกสารที่ต้องใช้
+                                            <button
+                                                type="button"
+                                                onClick={() => setPaperGuideDialogOpen(true)}
+                                                className="text-gray-400 hover:text-emerald-600 transition-colors"
+                                            >
+                                                <Info className="w-4 h-4" />
+                                            </button>
+                                        </h4>
+                                        <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                                            {analyzedPaperCount} / {getPaperDocs(formData.collateralType, formData).length} ชุด
+                                        </span>
                                     </div>
 
-                                    {/* Upload Area Column */}
-                                    <div className="flex-1 space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="file"
-                                                ref={paperInputRef}
-                                                className="hidden"
-                                                accept="image/*,application/pdf"
-                                                multiple
-                                                onChange={handlePaperUpload}
-                                            />
-                                            <input
-                                                type="file"
-                                                ref={paperCameraRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                capture="environment"
-                                                onChange={handlePaperUpload}
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => paperInputRef.current?.click()}
-                                                className="flex-1 md:flex-none h-11 rounded-xl border-dashed border-2 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all font-bold group"
-                                                disabled={isAnalyzing}
-                                            >
-                                                <Upload className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                                                อัพโหลดเอกสาร
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => paperCameraRef.current?.click()}
-                                                className="flex-1 md:flex-none h-11 rounded-xl border-dashed border-2 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all font-bold group"
-                                                disabled={isAnalyzing}
-                                            >
-                                                <Camera className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                                                เปิดกล้อง
-                                            </Button>
-                                        </div>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <input
+                                            type="file"
+                                            ref={paperInputRef}
+                                            className="hidden"
+                                            accept="image/*,application/pdf"
+                                            multiple
+                                            onChange={handlePaperUpload}
+                                        />
+                                        <input
+                                            type="file"
+                                            ref={paperCameraRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            capture="environment"
+                                            onChange={handlePaperUpload}
+                                        />
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => paperInputRef.current?.click()}
+                                            className="flex-1 sm:flex-none"
+                                            disabled={isAnalyzing}
+                                        >
+                                            <Upload className="w-4 h-4 mr-2" />
+                                            อัปโหลดเอกสาร
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => paperCameraRef.current?.click()}
+                                            className="flex-1 sm:flex-none"
+                                            disabled={isAnalyzing}
+                                        >
+                                            <Camera className="w-4 h-4 mr-2" />
+                                            เปิดกล้อง
+                                        </Button>
+                                    </div>
+                                </div>
 
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 bg-gray-50/50 p-4 rounded-xl border border-dashed border-gray-200 min-h-[160px]">
-                                            {uploadedPaperDocs.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60">
-                                                    <FilePlus className="w-8 h-8" />
-                                                    <p className="text-xs font-medium italic">ยังไม่มีการอัพโหลดเอกสาร</p>
-                                                </div>
-                                            ) : (
-                                                uploadedPaperDocs.map((doc, idx) => (
-                                                    <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-border-strong group shadow-sm bg-white">
-                                                        {doc.endsWith('.pdf') ? (
+                                {/* Upload Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-1 bg-gray-50/50 p-1 rounded-xl border border-dashed border-gray-200 min-h-[160px]">
+                                    {uploadedPaperDocs.length === 0 ? (
+                                        <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60">
+                                            <FilePlus className="w-8 h-8" />
+                                            <p className="text-xs font-medium italic">ยังไม่มีการอัพโหลดเอกสาร</p>
+                                        </div>
+                                    ) : (
+                                        uploadedPaperDocs.map((docObj: any, idx) => {
+                                            const url = typeof docObj === 'string' ? docObj : docObj.url;
+                                            const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+
+                                            return (
+                                                <div key={idx} className="flex flex-col gap-1 relative bg-white p-1 border border-border-strong rounded-lg shadow-sm group">
+                                                    <div className="relative aspect-[3/4] rounded-[4px] overflow-hidden border border-border-subtle bg-gray-50 group">
+                                                        {url.endsWith('.pdf') ? (
                                                             <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 text-red-600 gap-1.5 p-2">
                                                                 <FileText className="w-8 h-8" />
                                                                 <span className="text-[8px] font-bold truncate w-full text-center">PDF Document</span>
                                                             </div>
                                                         ) : (
-                                                            <img src={doc} alt={`paper-${idx}`} className="w-full h-full object-cover" />
+                                                            <img src={url} alt={`paper-${idx}`} className="w-full h-full object-cover" />
                                                         )}
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                                             <button
-                                                                onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPaperDocs); }}
+                                                                onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPaperDocs.map((p: any) => typeof p === 'string' ? p : p.url)); }}
                                                                 className="p-1.5 bg-white/20 hover:bg-white/40 rounded-full border border-white/30 backdrop-blur-sm text-white"
                                                             >
                                                                 <Eye className="w-4 h-4" />
@@ -849,10 +881,34 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                             </div>
                                                         )}
                                                     </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    </div>
+                                                    <Select
+                                                        value={label}
+                                                        onValueChange={(val) => {
+                                                            const newDocs: any[] = [...uploadedPaperDocs];
+                                                            if (typeof newDocs[idx] === 'string') {
+                                                                newDocs[idx] = { url: newDocs[idx], label: val };
+                                                            } else {
+                                                                newDocs[idx] = { ...newDocs[idx], label: val };
+                                                            }
+                                                            setUploadedPaperDocs(newDocs);
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="h-9 text-[11px] bg-white border-gray-200">
+                                                            <div className="truncate text-left pr-2"><SelectValue /></div>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {getPaperDocs(formData.collateralType, formData).map((doc, dIdx) => (
+                                                                <SelectItem key={dIdx} value={doc.label} className="text-[11px]">
+                                                                    {doc.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                            <SelectItem value="อื่นๆ" className="text-[11px]">อื่นๆ</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            );
+                                        })
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -888,12 +944,11 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 />
                                             </div>
                                             <div className="flex items-center gap-2 p-2 bg-blue-50/30 rounded-lg">
-                                                <input
-                                                    type="checkbox"
+                                                <Checkbox
                                                     id="landLocationNotFound"
                                                     checked={formData.landLocationNotFound === "yes" || false}
-                                                    onChange={(e) => setFormData({ ...formData, landLocationNotFound: e.target.checked ? "yes" : "" })}
-                                                    className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
+                                                    onCheckedChange={(checked) => setFormData({ ...formData, landLocationNotFound: checked ? "yes" : "" })}
+                                                    className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
                                                 />
                                                 <label htmlFor="landLocationNotFound" className="text-sm font-medium text-gray-700 cursor-pointer">
                                                     ไม่พบที่ตั้งที่ดินตามโฉนด
@@ -1536,12 +1591,11 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 </div>
                                                 {q.id === 'car_q17' && (
                                                     <div className="flex gap-3 p-4 bg-blue-50/50 border border-blue-100 rounded-xl mt-2">
-                                                        <input
-                                                            type="checkbox"
+                                                        <Checkbox
                                                             id="vehicleVerified"
                                                             checked={formData.vehicleVerified || false}
-                                                            onChange={(e) => setFormData({ ...formData, vehicleVerified: e.target.checked })}
-                                                            className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer mt-0.5 shrink-0"
+                                                            onCheckedChange={(checked) => setFormData({ ...formData, vehicleVerified: Boolean(checked) })}
+                                                            className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer mt-0.5 shrink-0"
                                                         />
                                                         <div className="flex flex-col gap-1 flex-1">
                                                             <label htmlFor="vehicleVerified" className="text-sm font-medium text-gray-700 cursor-pointer">
@@ -1695,119 +1749,136 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         )}
                                     </div>
 
-                                    {(formData.landOwners || []).map((owner: any, oIdx: number) => (
-                                        <div key={owner.id || oIdx} className="border border-gray-200 rounded-lg p-3 space-y-3 bg-white">
-                                            <div className="flex items-center justify-between">
-                                                <label className="flex items-center gap-1 cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={owner.isBorrower || false}
-                                                        onChange={(e) => {
-                                                            const newOwners = [...(formData.landOwners || [])];
-                                                            newOwners[oIdx] = { ...newOwners[oIdx], isBorrower: e.target.checked };
-                                                            setFormData({ ...formData, landOwners: newOwners });
-                                                        }}
-                                                        className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700">เป็นผู้กู้</span>
-                                                </label>
-                                                {(formData.landOwners || []).length > 1 && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            const newOwners = (formData.landOwners || []).filter((_: any, i: number) => i !== oIdx);
-                                                            setFormData({ ...formData, landOwners: newOwners });
-                                                        }}
-                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2"
-                                                    >
-                                                        <X className="w-3 h-3" /> ลบ
-                                                    </Button>
+                                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/80">
+                                                <TableRow>
+                                                    <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
+                                                    <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
+                                                    <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
+                                                    <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
+                                                    <TableHead className="w-[180px] text-xs">ความสัมพันธ์ <span className="text-red-500">*</span></TableHead>
+                                                    <TableHead className="w-[50px]"></TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {(formData.landOwners || []).length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6} className="text-center py-6 text-gray-400 text-sm">
+                                                            คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลผู้ถือครอง
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    (formData.landOwners || []).map((owner: any, oIdx: number) => (
+                                                        <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
+                                                            <TableCell className="text-center align-middle">
+                                                                <Checkbox
+                                                                    checked={owner.isBorrower || false}
+                                                                    onCheckedChange={(checked) => {
+                                                                        const newOwners = [...(formData.landOwners || [])];
+                                                                        if (checked) {
+                                                                            newOwners.forEach(o => o.isBorrower = false);
+                                                                        }
+                                                                        newOwners[oIdx] = { ...newOwners[oIdx], isBorrower: Boolean(checked) };
+                                                                        setFormData({ ...formData, landOwners: newOwners });
+                                                                    }}
+                                                                    className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={owner.title || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newOwners = [...(formData.landOwners || [])];
+                                                                        newOwners[oIdx] = { ...newOwners[oIdx], title: value };
+                                                                        setFormData({ ...formData, landOwners: newOwners });
+                                                                    }}
+                                                                    disabled={owner.isBorrower}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="นาย">นาย (Mr.)</SelectItem>
+                                                                        <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
+                                                                        <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
+                                                                        <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
+                                                                        <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
+                                                                        <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
+                                                                        <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
+                                                                        <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
+                                                                        <SelectItem value="อ.">อ. (Khun)</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Input
+                                                                    value={owner.name || ""}
+                                                                    onChange={(e) => {
+                                                                        const newOwners = [...(formData.landOwners || [])];
+                                                                        newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
+                                                                        setFormData({ ...formData, landOwners: newOwners });
+                                                                    }}
+                                                                    placeholder="ชื่อ"
+                                                                    className="h-9 rounded-lg text-sm"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Input
+                                                                    value={owner.lastName || ""}
+                                                                    onChange={(e) => {
+                                                                        const newOwners = [...(formData.landOwners || [])];
+                                                                        newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
+                                                                        setFormData({ ...formData, landOwners: newOwners });
+                                                                    }}
+                                                                    placeholder="นามสกุล"
+                                                                    className="h-9 rounded-lg text-sm"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={owner.relationship || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newOwners = [...(formData.landOwners || [])];
+                                                                        newOwners[oIdx] = { ...newOwners[oIdx], relationship: value };
+                                                                        setFormData({ ...formData, landOwners: newOwners });
+                                                                    }}
+                                                                    disabled={owner.isBorrower}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {OWNER_RELATIONSHIPS.map(rel => (
+                                                                            <SelectItem key={rel.value} value={rel.value}>
+                                                                                {rel.label}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="text-right align-middle">
+                                                                {(formData.landOwners || []).length > 1 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => {
+                                                                            const newOwners = (formData.landOwners || []).filter((_: any, i: number) => i !== oIdx);
+                                                                            setFormData({ ...formData, landOwners: newOwners });
+                                                                        }}
+                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
                                                 )}
-                                            </div>
-
-                                            <div className="grid grid-cols-3 gap-2">
-                                                <div className="space-y-1">
-                                                    <Label className="text-[12px] text-gray-600 ml-1">คำนำหน้า</Label>
-                                                    <Select
-                                                        value={owner.title || ""}
-                                                        onValueChange={(value) => {
-                                                            const newOwners = [...(formData.landOwners || [])];
-                                                            newOwners[oIdx] = { ...newOwners[oIdx], title: value };
-                                                            setFormData({ ...formData, landOwners: newOwners });
-                                                        }}
-                                                        disabled={owner.isBorrower}
-                                                    >
-                                                        <SelectTrigger className="h-9 rounded-lg text-sm">
-                                                            <SelectValue placeholder="เลือกคำนำหน้า" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="นาย">นาย (Mr.)</SelectItem>
-                                                            <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
-                                                            <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
-                                                            <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
-                                                            <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
-                                                            <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
-                                                            <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
-                                                            <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
-                                                            <SelectItem value="อ.">อ. (Khun)</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-[12px] text-gray-600 ml-1">ชื่อ <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={owner.name || ""}
-                                                        onChange={(e) => {
-                                                            const newOwners = [...(formData.landOwners || [])];
-                                                            newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
-                                                            setFormData({ ...formData, landOwners: newOwners });
-                                                        }}
-                                                        placeholder="ชื่อ"
-                                                        className="h-9 rounded-lg text-sm"
-                                                    />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-[12px] text-gray-600 ml-1">นามสกุล <span className="text-red-500">*</span></Label>
-                                                    <Input
-                                                        value={owner.lastName || ""}
-                                                        onChange={(e) => {
-                                                            const newOwners = [...(formData.landOwners || [])];
-                                                            newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
-                                                            setFormData({ ...formData, landOwners: newOwners });
-                                                        }}
-                                                        placeholder="นามสกุล"
-                                                        className="h-9 rounded-lg text-sm"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <Label className="text-[12px] text-gray-600 ml-1">ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
-                                                <Select
-                                                    value={owner.relationship || ""}
-                                                    onValueChange={(value) => {
-                                                        const newOwners = [...(formData.landOwners || [])];
-                                                        newOwners[oIdx] = { ...newOwners[oIdx], relationship: value };
-                                                        setFormData({ ...formData, landOwners: newOwners });
-                                                    }}
-                                                    disabled={owner.isBorrower}
-                                                >
-                                                    <SelectTrigger className="h-9 rounded-lg text-sm">
-                                                        <SelectValue placeholder="เลือกความสัมพันธ์" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {OWNER_RELATIONSHIPS.map(rel => (
-                                                            <SelectItem key={rel.value} value={rel.value}>
-                                                                {rel.label}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 </div>
 
                                 {/* Building Owner Sections - Show when buildingCount is set */}
@@ -1837,153 +1908,164 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 )}
                                             </div>
 
-                                            {((formData.buildingOwners?.[bIdx] || []).length > 0 ? formData.buildingOwners[bIdx] : [createDefaultOwner()]).map((owner: any, oIdx: number) => {
-                                                const isDefaultAndEmpty = (formData.buildingOwners?.[bIdx] || []).length === 0;
-                                                return (
-                                                    <div key={owner.id || oIdx} className="border border-gray-200 rounded-lg p-3 space-y-3 bg-white">
-                                                        <div className="flex items-center justify-between">
-                                                            <label className="flex items-center gap-1 cursor-pointer">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={owner.isBorrower || false}
-                                                                    onChange={(e) => {
-                                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                        if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                            newBuildingOwners[bIdx] = [{ ...owner, isBorrower: e.target.checked }];
-                                                                        } else {
-                                                                            const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                            newOwners[oIdx] = { ...newOwners[oIdx], isBorrower: e.target.checked };
-                                                                            newBuildingOwners[bIdx] = newOwners;
-                                                                        }
-                                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                    }}
-                                                                    className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue cursor-pointer"
-                                                                />
-                                                                <span className="text-sm font-medium text-gray-700">เป็นผู้กู้</span>
-                                                            </label>
-                                                            {!isDefaultAndEmpty && (formData.buildingOwners?.[bIdx] || []).length > 1 && (
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => {
-                                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                        newBuildingOwners[bIdx] = (newBuildingOwners[bIdx] || []).filter((_: any, i: number) => i !== oIdx);
-                                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                    }}
-                                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2"
-                                                                >
-                                                                    <X className="w-3 h-3" /> ลบ
-                                                                </Button>
-                                                            )}
-                                                        </div>
+                                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                                <Table>
+                                                    <TableHeader className="bg-gray-50/80">
+                                                        <TableRow>
+                                                            <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
+                                                            <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
+                                                            <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
+                                                            <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
+                                                            <TableHead className="w-[180px] text-xs">ความสัมพันธ์ <span className="text-red-500">*</span></TableHead>
+                                                            <TableHead className="w-[50px]"></TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {((formData.buildingOwners?.[bIdx] || []).length > 0 ? formData.buildingOwners[bIdx] : [createDefaultOwner()]).map((owner: any, oIdx: number) => {
+                                                            const isDefaultAndEmpty = (formData.buildingOwners?.[bIdx] || []).length === 0;
+                                                            return (
+                                                                <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
+                                                                    <TableCell className="text-center align-middle">
+                                                                        <Checkbox
+                                                                            checked={owner.isBorrower || false}
+                                                                            onCheckedChange={(checked) => {
+                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                let currentBuildingOwners = newBuildingOwners[bIdx] || [];
+                                                                                if (currentBuildingOwners.length === 0) {
+                                                                                    currentBuildingOwners = [{ ...owner }];
+                                                                                } else {
+                                                                                    currentBuildingOwners = [...currentBuildingOwners];
+                                                                                }
 
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            <div className="space-y-1">
-                                                                <Label className="text-[12px] text-gray-600 ml-1">คำนำหน้า</Label>
-                                                                <Select
-                                                                    value={owner.title || ""}
-                                                                    onValueChange={(value) => {
-                                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                        if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                            newBuildingOwners[bIdx] = [{ ...owner, title: value }];
-                                                                        } else {
-                                                                            const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                            newOwners[oIdx] = { ...newOwners[oIdx], title: value };
-                                                                            newBuildingOwners[bIdx] = newOwners;
-                                                                        }
-                                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                    }}
-                                                                    disabled={owner.isBorrower}
-                                                                >
-                                                                    <SelectTrigger className="h-9 rounded-lg text-sm">
-                                                                        <SelectValue placeholder="เลือกคำนำหน้า" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="นาย">นาย (Mr.)</SelectItem>
-                                                                        <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
-                                                                        <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
-                                                                        <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
-                                                                        <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
-                                                                        <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
-                                                                        <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
-                                                                        <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
-                                                                        <SelectItem value="อ.">อ. (Khun)</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-[12px] text-gray-600 ml-1">ชื่อ <span className="text-red-500">*</span></Label>
-                                                                <Input
-                                                                    value={owner.name || ""}
-                                                                    onChange={(e) => {
-                                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                        if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                            newBuildingOwners[bIdx] = [{ ...owner, name: e.target.value }];
-                                                                        } else {
-                                                                            const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                            newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
-                                                                            newBuildingOwners[bIdx] = newOwners;
-                                                                        }
-                                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                    }}
-                                                                    placeholder="ชื่อ"
-                                                                    className="h-9 rounded-lg text-sm"
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label className="text-[12px] text-gray-600 ml-1">นามสกุล <span className="text-red-500">*</span></Label>
-                                                                <Input
-                                                                    value={owner.lastName || ""}
-                                                                    onChange={(e) => {
-                                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                        if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                            newBuildingOwners[bIdx] = [{ ...owner, lastName: e.target.value }];
-                                                                        } else {
-                                                                            const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                            newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
-                                                                            newBuildingOwners[bIdx] = newOwners;
-                                                                        }
-                                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                    }}
-                                                                    placeholder="นามสกุล"
-                                                                    className="h-9 rounded-lg text-sm"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label className="text-[12px] text-gray-600 ml-1">ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
-                                                            <Select
-                                                                value={owner.relationship || ""}
-                                                                onValueChange={(value) => {
-                                                                    const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                    if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                        newBuildingOwners[bIdx] = [{ ...owner, relationship: value }];
-                                                                    } else {
-                                                                        const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                        newOwners[oIdx] = { ...newOwners[oIdx], relationship: value };
-                                                                        newBuildingOwners[bIdx] = newOwners;
-                                                                    }
-                                                                    setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                }}
-                                                                disabled={owner.isBorrower}
-                                                            >
-                                                                <SelectTrigger className="h-9 rounded-lg text-sm">
-                                                                    <SelectValue placeholder="เลือกความสัมพันธ์" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {OWNER_RELATIONSHIPS.map(rel => (
-                                                                        <SelectItem key={rel.value} value={rel.value}>
-                                                                            {rel.label}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                                                if (checked) {
+                                                                                    currentBuildingOwners.forEach((o: any) => o.isBorrower = false);
+                                                                                }
+                                                                                currentBuildingOwners[oIdx] = { ...currentBuildingOwners[oIdx], isBorrower: Boolean(checked) };
+                                                                                newBuildingOwners[bIdx] = currentBuildingOwners;
+                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                            }}
+                                                                            className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top">
+                                                                        <Select
+                                                                            value={owner.title || ""}
+                                                                            onValueChange={(value) => {
+                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                    newBuildingOwners[bIdx] = [{ ...owner, title: value }];
+                                                                                } else {
+                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], title: value };
+                                                                                    newBuildingOwners[bIdx] = newOwners;
+                                                                                }
+                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                            }}
+                                                                            disabled={owner.isBorrower}
+                                                                        >
+                                                                            <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                                <SelectValue placeholder="เลือก" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="นาย">นาย (Mr.)</SelectItem>
+                                                                                <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
+                                                                                <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
+                                                                                <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
+                                                                                <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
+                                                                                <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
+                                                                                <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
+                                                                                <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
+                                                                                <SelectItem value="อ.">อ. (Khun)</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top">
+                                                                        <Input
+                                                                            value={owner.name || ""}
+                                                                            onChange={(e) => {
+                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                    newBuildingOwners[bIdx] = [{ ...owner, name: e.target.value }];
+                                                                                } else {
+                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
+                                                                                    newBuildingOwners[bIdx] = newOwners;
+                                                                                }
+                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                            }}
+                                                                            placeholder="ชื่อ"
+                                                                            className="h-9 rounded-lg text-sm"
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top">
+                                                                        <Input
+                                                                            value={owner.lastName || ""}
+                                                                            onChange={(e) => {
+                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                    newBuildingOwners[bIdx] = [{ ...owner, lastName: e.target.value }];
+                                                                                } else {
+                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
+                                                                                    newBuildingOwners[bIdx] = newOwners;
+                                                                                }
+                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                            }}
+                                                                            placeholder="นามสกุล"
+                                                                            className="h-9 rounded-lg text-sm"
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell className="align-top">
+                                                                        <Select
+                                                                            value={owner.relationship || ""}
+                                                                            onValueChange={(value) => {
+                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                    newBuildingOwners[bIdx] = [{ ...owner, relationship: value }];
+                                                                                } else {
+                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], relationship: value };
+                                                                                    newBuildingOwners[bIdx] = newOwners;
+                                                                                }
+                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                            }}
+                                                                            disabled={owner.isBorrower}
+                                                                        >
+                                                                            <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                                <SelectValue placeholder="เลือก" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                {OWNER_RELATIONSHIPS.map(rel => (
+                                                                                    <SelectItem key={rel.value} value={rel.value}>
+                                                                                        {rel.label}
+                                                                                    </SelectItem>
+                                                                                ))}
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    </TableCell>
+                                                                    <TableCell className="text-right align-middle">
+                                                                        {!isDefaultAndEmpty && (formData.buildingOwners?.[bIdx] || []).length > 1 && (
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => {
+                                                                                    const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                                    newBuildingOwners[bIdx] = (newBuildingOwners[bIdx] || []).filter((_: any, i: number) => i !== oIdx);
+                                                                                    setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                                }}
+                                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </Button>
+                                                                        )}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
                                         </div>
                                     ))
                                 )}
@@ -2014,14 +2096,13 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     key={m.value}
                                                     className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                                                 >
-                                                    <input
-                                                        type="checkbox"
+                                                    <Checkbox
                                                         checked={selected}
-                                                        onChange={(e) => {
+                                                        onCheckedChange={(checked) => {
                                                             const current: string[] = formData.selectedAppraisalMethods || [];
                                                             let updated: string[];
                                                             const newData = { ...(formData.appraisalMethodsData || {}) };
-                                                            if (e.target.checked) {
+                                                            if (checked) {
                                                                 if (current.length >= 3) return; // max 3
                                                                 updated = [...current, m.value];
                                                                 if (!newData[m.value]) {
@@ -2152,380 +2233,378 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                             {/* สิ่งปลูกสร้าง section (max 5 per method, min 1 floor, min 1 block per floor) */}
                                             {formData.buildingCount > 0 && (
-                                            <div className="mt-6 space-y-4 pb-8">
-                                                <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                                    <Plus className="w-4 h-4 text-emerald-500" />
-                                                    สิ่งปลูกสร้าง​ (ถ้ามี) - จำนวน: {(methodData.buildings || []).length}
-                                                </h5>
+                                                <div className="mt-6 space-y-4 pb-8">
+                                                    <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                        <Plus className="w-4 h-4 text-emerald-500" />
+                                                        สิ่งปลูกสร้าง​ (ถ้ามี) - จำนวน: {(methodData.buildings || []).length}
+                                                    </h5>
 
-                                                {(methodData.buildings || []).map((building: any, bIdx: number) => {
-                                                    const updateBuilding = (field: string, value: any) => {
-                                                        const newBuildings = [...(methodData.buildings || [])];
-                                                        newBuildings[bIdx] = { ...newBuildings[bIdx], [field]: value };
-                                                        updateBuildings(newBuildings);
-                                                    };
-                                                    const updateFloors = (floors: any[]) => {
-                                                        const newBuildings = [...(methodData.buildings || [])];
-                                                        newBuildings[bIdx] = { ...newBuildings[bIdx], floors };
-                                                        updateBuildings(newBuildings);
-                                                    };
+                                                    {(methodData.buildings || []).map((building: any, bIdx: number) => {
+                                                        const updateBuilding = (field: string, value: any) => {
+                                                            const newBuildings = [...(methodData.buildings || [])];
+                                                            newBuildings[bIdx] = { ...newBuildings[bIdx], [field]: value };
+                                                            updateBuildings(newBuildings);
+                                                        };
+                                                        const updateFloors = (floors: any[]) => {
+                                                            const newBuildings = [...(methodData.buildings || [])];
+                                                            newBuildings[bIdx] = { ...newBuildings[bIdx], floors };
+                                                            updateBuildings(newBuildings);
+                                                        };
 
-                                                    return (
-                                                        <div key={building.id || bIdx} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="text-sm font-semibold text-gray-700">สิ่งปลูกสร้างที่ {bIdx + 1}</span>
-                                                                {(methodData.buildings || []).length > 1 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => {
-                                                                            const newBuildings = (methodData.buildings || []).filter((_: any, i: number) => i !== bIdx);
-                                                                            updateBuildings(newBuildings);
-                                                                        }}
-                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2"
-                                                                    >
-                                                                        <X className="w-3 h-3 mr-1" /> ลบ
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Additional fields for land collateral (except อ.ช. 2) */}
-                                                            {formData.collateralType === 'land' && formData.landDeedType !== "อ.ช. 2" && (
-                                                            <div className="p-3 bg-white border border-gray-200 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-3">
-                                                                {/* Col 1, Row 1: ประเภทสิ่งปลูกสร้าง */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">ประเภท <span className="text-red-500">*</span></Label>
-                                                                    <select
-                                                                        value={building.buildingType || ""}
-                                                                        onChange={(e) => updateBuilding('buildingType', e.target.value)}
-                                                                        className="h-9 rounded-lg bg-white border border-gray-200 px-2 text-xs focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                    >
-                                                                        <option value="">เลือกประเภท...</option>
-                                                                        <option value="บ้านเดี่ยว">บ้านเดี่ยว</option>
-                                                                        <option value="อาคารพาณิชย์">อาคารพาณิชย์</option>
-                                                                        <option value="โรงงาน">โรงงาน</option>
-                                                                        <option value="เกษตรกรรม">เกษตรกรรม</option>
-                                                                        <option value="อื่นๆ">อื่นๆ</option>
-                                                                    </select>
-                                                                </div>
-
-                                                                {/* Col 2, Row 1: เลขที่สิ่งปลูกสร้าง */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">เลขที่</Label>
-                                                                    <Input
-                                                                        placeholder="123/456"
-                                                                        value={building.buildingNumber || ""}
-                                                                        onChange={(e) => updateBuilding('buildingNumber', e.target.value)}
-                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                    />
-                                                                </div>
-
-                                                                {/* Col 3, Row 1: อายุสิ่งปลูกสร้าง */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">อายุ (ปี)</Label>
-                                                                    <Input
-                                                                        type="number"
-                                                                        min="0"
-                                                                        placeholder="0"
-                                                                        value={building.buildingAge || ""}
-                                                                        onChange={(e) => updateBuilding('buildingAge', e.target.value)}
-                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                    />
-                                                                </div>
-
-                                                                {/* Col 1, Row 2: รวมราคาประเมิน (ก่อนหักค่าเสื่อม) */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">ราคาประเมิน (ก่อน) <span className="text-red-500">*</span></Label>
-                                                                    <div className="relative">
-                                                                        <Input
-                                                                            value={building.totalAppraisalBeforeDepreciation ? Number(building.totalAppraisalBeforeDepreciation).toLocaleString() : ""}
-                                                                            onChange={(e) => {
-                                                                                const val = e.target.value.replace(/,/g, '');
-                                                                                if (/^\d*$/.test(val)) updateBuilding('totalAppraisalBeforeDepreciation', val);
-                                                                            }}
-                                                                            className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                        />
-                                                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Col 2, Row 2: หักค่าเสื่อมราคา */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">หักค่าเสื่อม</Label>
-                                                                    <div className="relative">
-                                                                        <Input
-                                                                            value={building.depreciationAmount ? Number(building.depreciationAmount).toLocaleString() : ""}
-                                                                            onChange={(e) => {
-                                                                                const val = e.target.value.replace(/,/g, '');
-                                                                                if (/^\d*$/.test(val)) updateBuilding('depreciationAmount', val);
-                                                                            }}
-                                                                            placeholder="0"
-                                                                            className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                        />
-                                                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Col 3, Row 2: ราคาประเมินสิ่งปลูกสร้างหลังหักค่าเสื่อม */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">ราคา (หลัง)</Label>
-                                                                    <div className="relative">
-                                                                        <Input
-                                                                            readOnly
-                                                                            value={(() => {
-                                                                                const before = Number(building.totalAppraisalBeforeDepreciation || 0);
-                                                                                const depreciation = Number(building.depreciationAmount || 0);
-                                                                                const after = before - depreciation;
-                                                                                return after > 0 ? after.toLocaleString() : "";
-                                                                            })()}
-                                                                            className="h-9 rounded-lg bg-gray-100 border-gray-200 text-xs text-right px-2 pr-8 text-gray-600"
-                                                                        />
-                                                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Col 1, Row 3: การรีโนเวท */}
-                                                                <div className="space-y-1">
-                                                                    <Label className="text-[12px] text-gray-600">รีโนเวท</Label>
-                                                                    <div className="flex gap-2 items-center h-9">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => updateBuilding('hasRenovation', 'yes')}
-                                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                                                                                building.hasRenovation === 'yes'
-                                                                                    ? 'bg-emerald-500 text-white'
-                                                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                                            }`}
-                                                                        >
-                                                                            มี
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => updateBuilding('hasRenovation', 'no')}
-                                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                                                                                building.hasRenovation === 'no'
-                                                                                    ? 'bg-gray-500 text-white'
-                                                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                                            }`}
-                                                                        >
-                                                                            ไม่มี
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Col 2, Row 3: ปีที่รีโนเวทล่าสุด (conditional) */}
-                                                                {building.hasRenovation === 'yes' && (
-                                                                    <div className="space-y-1">
-                                                                        <Label className="text-[12px] text-gray-600">ปีรีโนเวท <span className="text-red-500">*</span></Label>
-                                                                        <Input
-                                                                            type="number"
-                                                                            min="1900"
-                                                                            max={new Date().getFullYear()}
-                                                                            placeholder="2023"
-                                                                            value={building.renovationYear || ""}
-                                                                            onChange={(e) => updateBuilding('renovationYear', e.target.value)}
-                                                                            className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            )}
-
-                                                            <div className="space-y-1 max-w-md">
-                                                                <Label className="text-[13px] text-gray-600 ml-1">ราคาประเมินสิ่งปลูกสร้างต่อ ตร.ม. <span className="text-red-500">*</span></Label>
-                                                                <div className="relative">
-                                                                    <Input
-                                                                        value={building.appraisalPrice ? Number(building.appraisalPrice).toLocaleString() : ""}
-                                                                        onChange={(e) => {
-                                                                            const val = e.target.value.replace(/,/g, '');
-                                                                            if (/^\d*$/.test(val)) updateBuilding('appraisalPrice', val);
-                                                                        }}
-                                                                        className="h-10 rounded-xl bg-white border-gray-200 pr-10 text-right focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                    />
-                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">บาท</span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Floors section */}
-                                                            <div className="space-y-3 mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50/50">
+                                                        return (
+                                                            <div key={building.id || bIdx} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
                                                                 <div className="flex items-center justify-between">
-                                                                    <span className="text-sm font-semibold text-gray-900">ชั้น - จำนวน: {(building.floors || []).length}</span>
-                                                                    {(building.floors || []).length < 10 && (
+                                                                    <span className="text-sm font-semibold text-gray-700">สิ่งปลูกสร้างที่ {bIdx + 1}</span>
+                                                                    {(methodData.buildings || []).length > 1 && (
                                                                         <Button
                                                                             type="button"
-                                                                            variant="outline"
+                                                                            variant="ghost"
                                                                             size="sm"
-                                                                            onClick={() => updateFloors([...(building.floors || []), createDefaultFloor()])}
-                                                                            className="text-xs gap-1 h-7"
+                                                                            onClick={() => {
+                                                                                const newBuildings = (methodData.buildings || []).filter((_: any, i: number) => i !== bIdx);
+                                                                                updateBuildings(newBuildings);
+                                                                            }}
+                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-7 px-2"
                                                                         >
-                                                                            <Plus className="w-3 h-3" /> เพิ่มชั้น ({(building.floors || []).length}/10)
+                                                                            <Trash2 className="w-3 h-3 mr-1" /> ลบ
                                                                         </Button>
                                                                     )}
                                                                 </div>
 
-                                                                {(building.floors || []).map((floor: any, fIdx: number) => {
-                                                                    const updateBlocks = (blocks: any[]) => {
-                                                                        const newFloors = [...(building.floors || [])];
-                                                                        newFloors[fIdx] = { ...newFloors[fIdx], blocks };
-                                                                        updateFloors(newFloors);
-                                                                    };
-                                                                    const updateFloor = (field: string, value: any) => {
-                                                                        const newFloors = [...(building.floors || [])];
-                                                                        newFloors[fIdx] = { ...newFloors[fIdx], [field]: value };
-                                                                        updateFloors(newFloors);
-                                                                    };
+                                                                {/* Additional fields for land collateral (except อ.ช. 2) */}
+                                                                {formData.collateralType === 'land' && formData.landDeedType !== "อ.ช. 2" && (
+                                                                    <div className="p-3 bg-white border border-gray-200 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                                        {/* Col 1, Row 1: ประเภทสิ่งปลูกสร้าง */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">ประเภท <span className="text-red-500">*</span></Label>
+                                                                            <select
+                                                                                value={building.buildingType || ""}
+                                                                                onChange={(e) => updateBuilding('buildingType', e.target.value)}
+                                                                                className="h-9 rounded-lg bg-white border border-gray-200 px-2 text-xs focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                            >
+                                                                                <option value="">เลือกประเภท...</option>
+                                                                                <option value="บ้านเดี่ยว">บ้านเดี่ยว</option>
+                                                                                <option value="อาคารพาณิชย์">อาคารพาณิชย์</option>
+                                                                                <option value="โรงงาน">โรงงาน</option>
+                                                                                <option value="เกษตรกรรม">เกษตรกรรม</option>
+                                                                                <option value="อื่นๆ">อื่นๆ</option>
+                                                                            </select>
+                                                                        </div>
 
-                                                                    return (
-                                                                        <div key={floor.id || fIdx} className="border border-gray-200 rounded-lg p-4 bg-white space-y-3">
-                                                                            <div className="flex items-center justify-between">
-                                                                                <span className="text-sm font-semibold text-gray-900">ชั้นที่ {fIdx + 1}</span>
-                                                                                {(building.floors || []).length > 1 && (
-                                                                                    <Button
-                                                                                        type="button"
-                                                                                        variant="ghost"
-                                                                                        size="sm"
-                                                                                        onClick={() => {
-                                                                                            const newFloors = (building.floors || []).filter((_: any, i: number) => i !== fIdx);
-                                                                                            updateFloors(newFloors);
-                                                                                        }}
-                                                                                        className="text-red-400 hover:text-red-600 hover:bg-red-50 h-6 px-1.5 text-xs"
-                                                                                    >
-                                                                                        <X className="w-3 h-3" />
-                                                                                    </Button>
-                                                                                )}
-                                                                            </div>
+                                                                        {/* Col 2, Row 1: เลขที่สิ่งปลูกสร้าง */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">เลขที่</Label>
+                                                                            <Input
+                                                                                placeholder="123/456"
+                                                                                value={building.buildingNumber || ""}
+                                                                                onChange={(e) => updateBuilding('buildingNumber', e.target.value)}
+                                                                                className="h-9 rounded-lg bg-white border-gray-200 text-xs px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                            />
+                                                                        </div>
 
-                                                                            {/* Blocks section */}
-                                                                            <div className="space-y-2">
-                                                                                {(floor.blocks || []).map((_block: any, blkIdx: number) => {
-                                                                                    const updateBlock = (field: string, value: any) => {
-                                                                                        const newBlocks = [...(floor.blocks || [])];
-                                                                                        newBlocks[blkIdx] = { ...newBlocks[blkIdx], [field]: value };
-                                                                                        if (field === 'width' || field === 'length') {
-                                                                                            const width = field === 'width' ? Number(value) : Number(_block.width || 0);
-                                                                                            const length = field === 'length' ? Number(value) : Number(_block.length || 0);
-                                                                                            newBlocks[blkIdx].area = (width * length).toString();
-                                                                                        }
-                                                                                        const floorTotal = newBlocks.reduce((sum: number, b: any) => sum + (Number(b.area) || 0), 0);
-                                                                                        const newFloors = [...(building.floors || [])];
-                                                                                        newFloors[fIdx] = { ...newFloors[fIdx], blocks: newBlocks, totalArea: floorTotal.toString() };
-                                                                                        updateFloors(newFloors);
-                                                                                    };
+                                                                        {/* Col 3, Row 1: อายุสิ่งปลูกสร้าง */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">อายุ (ปี)</Label>
+                                                                            <Input
+                                                                                type="number"
+                                                                                min="0"
+                                                                                placeholder="0"
+                                                                                value={building.buildingAge || ""}
+                                                                                onChange={(e) => updateBuilding('buildingAge', e.target.value)}
+                                                                                className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                            />
+                                                                        </div>
 
-                                                                                    return (
-                                                                                        <div key={_block.id || blkIdx} className="border border-gray-100 rounded-lg p-3 bg-gray-50 space-y-3">
-                                                                                            <div className="flex items-center justify-between">
-                                                                                                <span className="text-xs font-semibold text-gray-700">บล็อก {blkIdx + 1}</span>
-                                                                                                {(floor.blocks || []).length > 1 && (
-                                                                                                    <Button
-                                                                                                        type="button"
-                                                                                                        variant="ghost"
-                                                                                                        size="sm"
-                                                                                                        onClick={() => {
-                                                                                                            const newBlocks = (floor.blocks || []).filter((_: any, i: number) => i !== blkIdx);
-                                                                                                            const floorTotal = newBlocks.reduce((sum: number, b: any) => sum + (Number(b.area) || 0), 0);
-                                                                                                            const newFloors = [...(building.floors || [])];
-                                                                                                            newFloors[fIdx] = { ...newFloors[fIdx], blocks: newBlocks, totalArea: floorTotal.toString() };
-                                                                                                            updateFloors(newFloors);
-                                                                                                        }}
-                                                                                                        className="text-red-400 hover:text-red-600 hover:bg-red-50 h-6 px-1.5 text-xs"
-                                                                                                    >
-                                                                                                        <X className="w-3 h-3" />
-                                                                                                    </Button>
-                                                                                                )}
-                                                                                            </div>
-                                                                                            <div className="grid grid-cols-3 gap-3">
-                                                                                                <div className="space-y-1">
-                                                                                                    <label className="text-xs font-medium text-gray-600">Width (ม.)</label>
-                                                                                                    <Input value={_block.width || ""} onChange={(e) => updateBlock('width', e.target.value)} className="h-8 text-xs bg-white" type="number" placeholder="0" />
-                                                                                                </div>
-                                                                                                <div className="space-y-1">
-                                                                                                    <label className="text-xs font-medium text-gray-600">Length (ม.)</label>
-                                                                                                    <Input value={_block.length || ""} onChange={(e) => updateBlock('length', e.target.value)} className="h-8 text-xs bg-white" type="number" placeholder="0" />
-                                                                                                </div>
-                                                                                                <div className="space-y-1">
-                                                                                                    <label className="text-xs font-medium text-gray-600">Area (ตร.ม.)</label>
-                                                                                                    <Input disabled value={_block.area || "0"} className="h-8 text-xs bg-gray-50 text-right font-medium" />
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                                <div className="flex items-center gap-2">
-                                                                                    {(floor.blocks || []).length < 10 && (
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="outline"
-                                                                                            size="sm"
-                                                                                            onClick={() => updateBlocks([...(floor.blocks || []), createDefaultBlock()])}
-                                                                                            className="text-xs gap-1 h-7 flex-1"
-                                                                                        >
-                                                                                            <Plus className="w-3 h-3" /> เพิ่มบล็อก ({(floor.blocks || []).length}/10)
-                                                                                        </Button>
-                                                                                    )}
-                                                                                    {(floor.blocks || []).length > 0 && (
-                                                                                        <div className="text-xs font-semibold text-chaiyo-blue bg-blue-50 px-2 py-1 rounded-lg">
-                                                                                            รวม: {floor.totalArea || "0"} ตร.ม.
-                                                                                        </div>
-                                                                                    )}
-                                                                                </div>
+                                                                        {/* Col 1, Row 2: รวมราคาประเมิน (ก่อนหักค่าเสื่อม) */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">ราคาประเมิน (ก่อน) <span className="text-red-500">*</span></Label>
+                                                                            <div className="relative">
+                                                                                <Input
+                                                                                    value={building.totalAppraisalBeforeDepreciation ? Number(building.totalAppraisalBeforeDepreciation).toLocaleString() : ""}
+                                                                                    onChange={(e) => {
+                                                                                        const val = e.target.value.replace(/,/g, '');
+                                                                                        if (/^\d*$/.test(val)) updateBuilding('totalAppraisalBeforeDepreciation', val);
+                                                                                    }}
+                                                                                    className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                />
+                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
                                                                             </div>
                                                                         </div>
-                                                                    );
-                                                                })}
-                                                            </div>
 
-                                                            {/* Building totals */}
-                                                            <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
-                                                                <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-                                                                    <span className="text-sm font-semibold text-emerald-900">รวมพื้นที่สิ่งปลูกสร้าง</span>
-                                                                    <span className="text-sm font-bold text-emerald-700">
-                                                                        {(() => {
-                                                                            const totalArea = (building.floors || []).reduce((sum: number, f: any) => {
-                                                                                const floorArea = (f.blocks || []).reduce((blockSum: number, b: any) => blockSum + (Number(b.area) || 0), 0);
-                                                                                return sum + floorArea;
-                                                                            }, 0);
-                                                                            return totalArea.toLocaleString('en-US', { maximumFractionDigits: 2 });
-                                                                        })()} ตร.ม.
-                                                                    </span>
+                                                                        {/* Col 2, Row 2: หักค่าเสื่อมราคา */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">หักค่าเสื่อม</Label>
+                                                                            <div className="relative">
+                                                                                <Input
+                                                                                    value={building.depreciationAmount ? Number(building.depreciationAmount).toLocaleString() : ""}
+                                                                                    onChange={(e) => {
+                                                                                        const val = e.target.value.replace(/,/g, '');
+                                                                                        if (/^\d*$/.test(val)) updateBuilding('depreciationAmount', val);
+                                                                                    }}
+                                                                                    placeholder="0"
+                                                                                    className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                />
+                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Col 3, Row 2: ราคาประเมินสิ่งปลูกสร้างหลังหักค่าเสื่อม */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">ราคา (หลัง)</Label>
+                                                                            <div className="relative">
+                                                                                <Input
+                                                                                    readOnly
+                                                                                    value={(() => {
+                                                                                        const before = Number(building.totalAppraisalBeforeDepreciation || 0);
+                                                                                        const depreciation = Number(building.depreciationAmount || 0);
+                                                                                        const after = before - depreciation;
+                                                                                        return after > 0 ? after.toLocaleString() : "";
+                                                                                    })()}
+                                                                                    className="h-9 rounded-lg bg-gray-100 border-gray-200 text-xs text-right px-2 pr-8 text-gray-600"
+                                                                                />
+                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Col 1, Row 3: การรีโนเวท */}
+                                                                        <div className="space-y-1">
+                                                                            <Label className="text-[12px] text-gray-600">รีโนเวท</Label>
+                                                                            <div className="flex gap-2 items-center h-9">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => updateBuilding('hasRenovation', 'yes')}
+                                                                                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${building.hasRenovation === 'yes'
+                                                                                        ? 'bg-emerald-500 text-white'
+                                                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                                                        }`}
+                                                                                >
+                                                                                    มี
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => updateBuilding('hasRenovation', 'no')}
+                                                                                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${building.hasRenovation === 'no'
+                                                                                        ? 'bg-gray-500 text-white'
+                                                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                                                        }`}
+                                                                                >
+                                                                                    ไม่มี
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Col 2, Row 3: ปีที่รีโนเวทล่าสุด (conditional) */}
+                                                                        {building.hasRenovation === 'yes' && (
+                                                                            <div className="space-y-1">
+                                                                                <Label className="text-[12px] text-gray-600">ปีรีโนเวท <span className="text-red-500">*</span></Label>
+                                                                                <Input
+                                                                                    type="number"
+                                                                                    min="1900"
+                                                                                    max={new Date().getFullYear()}
+                                                                                    placeholder="2023"
+                                                                                    value={building.renovationYear || ""}
+                                                                                    onChange={(e) => updateBuilding('renovationYear', e.target.value)}
+                                                                                    className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+
+                                                                <div className="space-y-1 max-w-md">
+                                                                    <Label className="text-[13px] text-gray-600 ml-1">ราคาประเมินสิ่งปลูกสร้างต่อ ตร.ม. <span className="text-red-500">*</span></Label>
+                                                                    <div className="relative">
+                                                                        <Input
+                                                                            value={building.appraisalPrice ? Number(building.appraisalPrice).toLocaleString() : ""}
+                                                                            onChange={(e) => {
+                                                                                const val = e.target.value.replace(/,/g, '');
+                                                                                if (/^\d*$/.test(val)) updateBuilding('appraisalPrice', val);
+                                                                            }}
+                                                                            className="h-10 rounded-xl bg-white border-gray-200 pr-10 text-right focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                        />
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">บาท</span>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                                                                    <span className="text-sm font-semibold text-blue-900">รวมราคาประเมินสิ่งปลูกสร้าง</span>
-                                                                    <span className="text-sm font-bold text-blue-700">
-                                                                        {(() => {
-                                                                            const totalArea = (building.floors || []).reduce((sum: number, f: any) => sum + (Number(f.totalArea) || 0), 0);
-                                                                            const pricePerSqm = Number(building.appraisalPrice || 0);
-                                                                            const totalPrice = totalArea * pricePerSqm;
-                                                                            return totalPrice.toLocaleString();
-                                                                        })()} บาท
-                                                                    </span>
+
+                                                                {/* Floors section */}
+                                                                <div className="space-y-3 mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50/50">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-sm font-semibold text-gray-900">ชั้น - จำนวน: {(building.floors || []).length}</span>
+                                                                        {(building.floors || []).length < 10 && (
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => updateFloors([...(building.floors || []), createDefaultFloor()])}
+                                                                                className="text-xs gap-1 h-7"
+                                                                            >
+                                                                                <Plus className="w-3 h-3" /> เพิ่มชั้น ({(building.floors || []).length}/10)
+                                                                            </Button>
+                                                                        )}
+                                                                    </div>
+
+                                                                    {(building.floors || []).map((floor: any, fIdx: number) => {
+                                                                        const updateBlocks = (blocks: any[]) => {
+                                                                            const newFloors = [...(building.floors || [])];
+                                                                            newFloors[fIdx] = { ...newFloors[fIdx], blocks };
+                                                                            updateFloors(newFloors);
+                                                                        };
+                                                                        const updateFloor = (field: string, value: any) => {
+                                                                            const newFloors = [...(building.floors || [])];
+                                                                            newFloors[fIdx] = { ...newFloors[fIdx], [field]: value };
+                                                                            updateFloors(newFloors);
+                                                                        };
+
+                                                                        return (
+                                                                            <div key={floor.id || fIdx} className="border border-gray-200 rounded-lg p-4 bg-white space-y-3">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <span className="text-sm font-semibold text-gray-900">ชั้นที่ {fIdx + 1}</span>
+                                                                                    {(building.floors || []).length > 1 && (
+                                                                                        <Button
+                                                                                            type="button"
+                                                                                            variant="ghost"
+                                                                                            size="sm"
+                                                                                            onClick={() => {
+                                                                                                const newFloors = (building.floors || []).filter((_: any, i: number) => i !== fIdx);
+                                                                                                updateFloors(newFloors);
+                                                                                            }}
+                                                                                            className="text-red-400 hover:text-red-600 hover:bg-red-50 h-6 px-1.5 text-xs"
+                                                                                        >
+                                                                                            <Trash2 className="w-3 h-3" />
+                                                                                        </Button>
+                                                                                    )}
+                                                                                </div>
+
+                                                                                {/* Blocks section */}
+                                                                                <div className="space-y-2">
+                                                                                    {(floor.blocks || []).map((_block: any, blkIdx: number) => {
+                                                                                        const updateBlock = (field: string, value: any) => {
+                                                                                            const newBlocks = [...(floor.blocks || [])];
+                                                                                            newBlocks[blkIdx] = { ...newBlocks[blkIdx], [field]: value };
+                                                                                            if (field === 'width' || field === 'length') {
+                                                                                                const width = field === 'width' ? Number(value) : Number(_block.width || 0);
+                                                                                                const length = field === 'length' ? Number(value) : Number(_block.length || 0);
+                                                                                                newBlocks[blkIdx].area = (width * length).toString();
+                                                                                            }
+                                                                                            const floorTotal = newBlocks.reduce((sum: number, b: any) => sum + (Number(b.area) || 0), 0);
+                                                                                            const newFloors = [...(building.floors || [])];
+                                                                                            newFloors[fIdx] = { ...newFloors[fIdx], blocks: newBlocks, totalArea: floorTotal.toString() };
+                                                                                            updateFloors(newFloors);
+                                                                                        };
+
+                                                                                        return (
+                                                                                            <div key={_block.id || blkIdx} className="border border-gray-100 rounded-lg p-3 bg-gray-50 space-y-3">
+                                                                                                <div className="flex items-center justify-between">
+                                                                                                    <span className="text-xs font-semibold text-gray-700">บล็อก {blkIdx + 1}</span>
+                                                                                                    {(floor.blocks || []).length > 1 && (
+                                                                                                        <Button
+                                                                                                            type="button"
+                                                                                                            variant="ghost"
+                                                                                                            size="sm"
+                                                                                                            onClick={() => {
+                                                                                                                const newBlocks = (floor.blocks || []).filter((_: any, i: number) => i !== blkIdx);
+                                                                                                                const floorTotal = newBlocks.reduce((sum: number, b: any) => sum + (Number(b.area) || 0), 0);
+                                                                                                                const newFloors = [...(building.floors || [])];
+                                                                                                                newFloors[fIdx] = { ...newFloors[fIdx], blocks: newBlocks, totalArea: floorTotal.toString() };
+                                                                                                                updateFloors(newFloors);
+                                                                                                            }}
+                                                                                                            className="text-red-400 hover:text-red-600 hover:bg-red-50 h-6 px-1.5 text-xs"
+                                                                                                        >
+                                                                                                            <Trash2 className="w-3 h-3" />
+                                                                                                        </Button>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                                <div className="grid grid-cols-3 gap-3">
+                                                                                                    <div className="space-y-1">
+                                                                                                        <label className="text-xs font-medium text-gray-600">Width (ม.)</label>
+                                                                                                        <Input value={_block.width || ""} onChange={(e) => updateBlock('width', e.target.value)} className="h-8 text-xs bg-white" type="number" placeholder="0" />
+                                                                                                    </div>
+                                                                                                    <div className="space-y-1">
+                                                                                                        <label className="text-xs font-medium text-gray-600">Length (ม.)</label>
+                                                                                                        <Input value={_block.length || ""} onChange={(e) => updateBlock('length', e.target.value)} className="h-8 text-xs bg-white" type="number" placeholder="0" />
+                                                                                                    </div>
+                                                                                                    <div className="space-y-1">
+                                                                                                        <label className="text-xs font-medium text-gray-600">Area (ตร.ม.)</label>
+                                                                                                        <Input disabled value={_block.area || "0"} className="h-8 text-xs bg-gray-50 text-right font-medium" />
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        {(floor.blocks || []).length < 10 && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="outline"
+                                                                                                size="sm"
+                                                                                                onClick={() => updateBlocks([...(floor.blocks || []), createDefaultBlock()])}
+                                                                                                className="text-xs gap-1 h-7 flex-1"
+                                                                                            >
+                                                                                                <Plus className="w-3 h-3" /> เพิ่มบล็อก ({(floor.blocks || []).length}/10)
+                                                                                            </Button>
+                                                                                        )}
+                                                                                        {(floor.blocks || []).length > 0 && (
+                                                                                            <div className="text-xs font-semibold text-chaiyo-blue bg-blue-50 px-2 py-1 rounded-lg">
+                                                                                                รวม: {floor.totalArea || "0"} ตร.ม.
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+
+                                                                {/* Building totals */}
+                                                                <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
+                                                                    <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                                                                        <span className="text-sm font-semibold text-emerald-900">รวมพื้นที่สิ่งปลูกสร้าง</span>
+                                                                        <span className="text-sm font-bold text-emerald-700">
+                                                                            {(() => {
+                                                                                const totalArea = (building.floors || []).reduce((sum: number, f: any) => {
+                                                                                    const floorArea = (f.blocks || []).reduce((blockSum: number, b: any) => blockSum + (Number(b.area) || 0), 0);
+                                                                                    return sum + floorArea;
+                                                                                }, 0);
+                                                                                return totalArea.toLocaleString('en-US', { maximumFractionDigits: 2 });
+                                                                            })()} ตร.ม.
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                                                                        <span className="text-sm font-semibold text-blue-900">รวมราคาประเมินสิ่งปลูกสร้าง</span>
+                                                                        <span className="text-sm font-bold text-blue-700">
+                                                                            {(() => {
+                                                                                const totalArea = (building.floors || []).reduce((sum: number, f: any) => sum + (Number(f.totalArea) || 0), 0);
+                                                                                const pricePerSqm = Number(building.appraisalPrice || 0);
+                                                                                const totalPrice = totalArea * pricePerSqm;
+                                                                                return totalPrice.toLocaleString();
+                                                                            })()} บาท
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    );
-                                                })}
+                                                        );
+                                                    })}
 
-                                                {(methodData.buildings || []).length < 5 && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            const newBuildings = [...(methodData.buildings || [])];
-                                                            newBuildings.push({
-                                                                id: crypto.randomUUID(),
-                                                                appraisalPrice: "",
-                                                                floors: [createDefaultFloor()]
-                                                            });
-                                                            updateBuildings(newBuildings);
-                                                        }}
-                                                        className="w-full gap-2 text-sm"
-                                                    >
-                                                        <Plus className="w-4 h-4" /> เพิ่มสิ่งปลูกสร้าง ({(methodData.buildings || []).length}/5)
-                                                    </Button>
-                                                )}
-                                            </div>
+                                                    {(methodData.buildings || []).length < 5 && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                const newBuildings = [...(methodData.buildings || [])];
+                                                                newBuildings.push({
+                                                                    id: crypto.randomUUID(),
+                                                                    appraisalPrice: "",
+                                                                    floors: [createDefaultFloor()]
+                                                                });
+                                                                updateBuildings(newBuildings);
+                                                            }}
+                                                            className="w-full gap-2 text-sm"
+                                                        >
+                                                            <Plus className="w-4 h-4" /> เพิ่มสิ่งปลูกสร้าง ({(methodData.buildings || []).length}/5)
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             )}
 
                                             {/* ราคาประเมินสินทรัพย์ Summary */}
@@ -2718,6 +2797,72 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 )}
 
             </div>
+
+            {/* Photo Guideline Dialog */}
+            <Dialog open={photoGuideDialogOpen} onOpenChange={setPhotoGuideDialogOpen}>
+                <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Camera className="w-5 h-5 text-chaiyo-blue" />
+                            รายการรูปถ่ายที่ต้องใช้
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-gray-500">
+                            กรุณาถ่ายรูปตามรายการด้านล่างให้ครบถ้วน
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 pt-2">
+                        {getPhotoDocs(formData.collateralType).map((doc, idx) => {
+                            const isCompleted = idx < analyzedPhotoCount;
+                            return (
+                                <div key={idx} className={cn(
+                                    "flex items-start gap-2.5 text-[12px] font-medium leading-tight p-2.5 rounded-lg transition-colors",
+                                    isCompleted ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-600"
+                                )}>
+                                    {isCompleted ? (
+                                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+                                    ) : (
+                                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 shrink-0 mt-0.5" />
+                                    )}
+                                    <span>{doc.label} {doc.required && <span className="text-red-500">*</span>}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Paper Guideline Dialog */}
+            <Dialog open={paperGuideDialogOpen} onOpenChange={setPaperGuideDialogOpen}>
+                <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Book className="w-5 h-5 text-emerald-600" />
+                            รายการเอกสารที่ต้องใช้
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-gray-500">
+                            กรุณาถ่ายรูปหรือสแกนเอกสารตามรายการด้านล่างให้ครบถ้วน
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 pt-2">
+                        {getPaperDocs(formData.collateralType, formData).map((doc, idx) => {
+                            const isCompleted = idx < analyzedPaperCount;
+                            return (
+                                <div key={idx} className={cn(
+                                    "flex items-start gap-2.5 text-[12px] font-medium leading-tight p-2.5 rounded-lg transition-colors",
+                                    isCompleted ? "bg-emerald-50 text-emerald-700" : "bg-gray-50 text-gray-600"
+                                )}>
+                                    {isCompleted ? (
+                                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+                                    ) : (
+                                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 shrink-0 mt-0.5" />
+                                    )}
+                                    <span>{doc.label} {doc.required && <span className="text-red-500">*</span>}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Lightbox */}
             {

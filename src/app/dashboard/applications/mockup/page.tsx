@@ -119,8 +119,9 @@ const getStatusLabel = (status: ApplicationStatus) => {
 };
 
 // ─── Page Component ──────────────────────────────────────────────────────────
+import { Suspense } from "react";
 
-export default function MockupDetailPage() {
+function MockupContent() {
     const searchParams = useSearchParams();
     const caseParam = parseInt(searchParams.get("case") || "1") as MockCase;
     const [activeCase, setActiveCase] = useState<MockCase>(caseParam);
@@ -439,6 +440,14 @@ export default function MockupDetailPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function MockupDetailPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-gray-500">กำลังโหลดข้อมูลจำลอง...</div>}>
+            <MockupContent />
+        </Suspense>
     );
 }
 

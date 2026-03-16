@@ -896,7 +896,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
     const generateMockOCRIncomeRows = (docType: string): SAIncome[] => {
         const sourceDocType = docType;
-        if (docType === 'payslip') {
+        if (docType.startsWith('payslip')) {
             return [
                 { type: 'salary', detail: 'เงินเดือน', amount: '25000', sourceDocType },
                 { type: 'other_income', detail: 'ค่าล่วงเวลา', amount: '3500', sourceDocType },
@@ -938,29 +938,56 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
 
-        const newDocs: IncomeDocument[] = files.map(file => ({
-            id: generateId('doc'),
-            type: docType,
-            name: file.name,
-            url: URL.createObjectURL(file), // used for preview
-            status: 'success',
-            uploadedAt: new Date().toISOString()
-        }));
-
-        // Allow multiple files per type: keep existing, just append new ones
         const currentDocs = occ.incomeDocuments || [];
+        let currentIncomes = occ.saIncomes || [];
 
-        // Mock OCR Integration: Add simulated income rows based on uploaded document type
-        const newMockOCRRows = generateMockOCRIncomeRows(docType);
-        const currentIncomes = occ.saIncomes || [];
-        const updatedIncomes = [...currentIncomes, ...newMockOCRRows];
-        const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+        // For payslip, each file gets its own unique indexed key
+        if (docType === 'payslip') {
+            const existingPayslipCount = currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('payslip_')).length;
+            const newDocs: IncomeDocument[] = [];
+            let allNewOCRRows: SAIncome[] = [];
 
-        handleOccupationChange(occId, {
-            incomeDocuments: [...currentDocs, ...newDocs],
-            saIncomes: updatedIncomes,
-            totalIncome: totalIncome
-        });
+            files.forEach((file, fileIdx) => {
+                const payslipKey = `payslip_${existingPayslipCount + fileIdx}`;
+                newDocs.push({
+                    id: generateId('doc'),
+                    type: payslipKey,
+                    name: file.name,
+                    url: URL.createObjectURL(file),
+                    status: 'success',
+                    uploadedAt: new Date().toISOString()
+                });
+                allNewOCRRows = [...allNewOCRRows, ...generateMockOCRIncomeRows(payslipKey)];
+            });
+
+            const updatedIncomes = [...currentIncomes, ...allNewOCRRows];
+            const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+
+            handleOccupationChange(occId, {
+                incomeDocuments: [...currentDocs, ...newDocs],
+                saIncomes: updatedIncomes,
+                totalIncome: totalIncome
+            });
+        } else {
+            const newDocs: IncomeDocument[] = files.map(file => ({
+                id: generateId('doc'),
+                type: docType,
+                name: file.name,
+                url: URL.createObjectURL(file),
+                status: 'success',
+                uploadedAt: new Date().toISOString()
+            }));
+
+            const newMockOCRRows = generateMockOCRIncomeRows(docType);
+            const updatedIncomes = [...currentIncomes, ...newMockOCRRows];
+            const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+
+            handleOccupationChange(occId, {
+                incomeDocuments: [...currentDocs, ...newDocs],
+                saIncomes: updatedIncomes,
+                totalIncome: totalIncome
+            });
+        }
 
         // Reset file input only, DO NOT close dialog or clear context
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -977,22 +1004,24 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         // Ensure upload dialog stays open after scan
         setIsUploadDialogOpen(true);
 
-        // Save multiple pages as a single entry just by taking the first page for the preview URL
-        // In a real app, pages would be compiled to a PDF or uploaded individually.
+        const currentDocs = occ.incomeDocuments || [];
+        const currentIncomes = occ.saIncomes || [];
+
+        // For payslip, assign unique indexed key
+        const actualDocType = docType === 'payslip'
+            ? `payslip_${currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('payslip_')).length}`
+            : docType;
+
         const newDoc: IncomeDocument = {
             id: generateId('doc'),
-            type: docType,
+            type: actualDocType,
             name: `สแกน_${new Date().getTime()}.pdf`,
-            url: pages[0], // Use first page as main preview
+            url: pages[0],
             status: 'success',
             uploadedAt: new Date().toISOString()
         };
 
-        const currentDocs = occ.incomeDocuments || [];
-
-        // Mock OCR Integration: Add simulated income rows based on scanned document type
-        const newMockOCRRows = generateMockOCRIncomeRows(docType);
-        const currentIncomes = occ.saIncomes || [];
+        const newMockOCRRows = generateMockOCRIncomeRows(actualDocType);
         const updatedIncomes = [...currentIncomes, ...newMockOCRRows];
         const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
 
@@ -1672,7 +1701,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         });
 
                                                                         return dynamicDocTypes.map((docType) => {
-                                                                            const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
+                                                                            const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) =>
+                                                                                docType.id === 'payslip' ? d.type?.startsWith('payslip_') : d.type === docType.id
+                                                                            );
 
                                                                             return (
                                                                                 <TableRow key={docType.id} className="hover:bg-transparent">
@@ -2022,7 +2053,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 {incomes.length > 0 && (
                                                                                     <TableFooter>
                                                                                         <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
-                                                                                            <TableCell colSpan={2} className="text-right font-medium py-3 text-xs text-muted-foreground">
+                                                                                            <TableCell colSpan={2} className="text-right font-bold py-3 text-xs text-gray-700">
                                                                                                 รวมยอดจากเอกสารนี้:
                                                                                             </TableCell>
                                                                                             <TableCell colSpan={2} className="text-right pr-[4.5rem] py-3">
@@ -2042,8 +2073,18 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             // Build dynamic doc types mapping (to resolve readable labels)
                                                             const bankAccounts = occ.bankAccounts || [];
                                                             const dynamicDocTypes: { id: string; label: string }[] = [];
+                                                            // Collect all payslip_N doc types from uploaded documents
+                                                            const payslipDocTypes = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
                                                             INCOME_DOC_TYPES.forEach(dt => {
-                                                                if (dt.id === 'statement') {
+                                                                if (dt.id === 'payslip') {
+                                                                    // Expand payslip into individual payslip_N entries
+                                                                    payslipDocTypes.forEach((pdt, idx) => {
+                                                                        dynamicDocTypes.push({
+                                                                            id: pdt,
+                                                                            label: `สลิปเงินเดือน (Payslip) - เดือนที่ ${idx + 1}`
+                                                                        });
+                                                                    });
+                                                                } else if (dt.id === 'statement') {
                                                                     if (bankAccounts.length > 0) {
                                                                         bankAccounts.forEach((account: BankAccount, accIdx: number) => {
                                                                             const bankInfo = THAI_BANKS.find(b => b.value === account.bankName);
@@ -2533,9 +2574,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     </h4>
 
                                                     {/* ผลผลิต Section */}
-                                                    <div className="space-y-4">
+                                                    <div className="space-y-2">
                                                         <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                            <PieChart className="w-4 h-4 text-emerald-600" /> ผลผลิต
+                                                            ผลผลิต
                                                         </h5>
                                                         <div className="bg-white p-5 rounded-xl border border-border-color">
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -2712,15 +2753,20 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 {/* เขตชลประทาน */}
                                                                 <div className="space-y-3">
                                                                     <Label>เขตชลประทาน</Label>
-                                                                    <ToggleGroup
-                                                                        type="single"
+                                                                    <RadioGroup
                                                                         value={occ.irrigationZone || ""}
-                                                                        onValueChange={(val) => { if (val) handleOccupationChange(occ.id, "irrigationZone", val) }}
-                                                                        className="justify-start gap-2"
+                                                                        onValueChange={(val) => handleOccupationChange(occ.id, "irrigationZone", val)}
+                                                                        className="flex items-center gap-6"
                                                                     >
-                                                                        <ToggleGroupItem value="outside" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">นอกเขต</ToggleGroupItem>
-                                                                        <ToggleGroupItem value="inside" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">ในเขต</ToggleGroupItem>
-                                                                    </ToggleGroup>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <RadioGroupItem value="outside" id={`irrigation-outside-${occ.id}`} />
+                                                                            <Label htmlFor={`irrigation-outside-${occ.id}`} className="cursor-pointer font-normal">นอกเขต</Label>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <RadioGroupItem value="inside" id={`irrigation-inside-${occ.id}`} />
+                                                                            <Label htmlFor={`irrigation-inside-${occ.id}`} className="cursor-pointer font-normal">ในเขต</Label>
+                                                                        </div>
+                                                                    </RadioGroup>
                                                                 </div>
 
                                                                 {/* การถือครอง */}
@@ -2744,15 +2790,20 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 {/* ทำเอง/จ้างทำ */}
                                                                 <div className="space-y-3">
                                                                     <Label>ทำเอง/จ้างทำ</Label>
-                                                                    <ToggleGroup
-                                                                        type="single"
+                                                                    <RadioGroup
                                                                         value={occ.laborType || ""}
-                                                                        onValueChange={(val) => { if (val) handleOccupationChange(occ.id, "laborType", val) }}
-                                                                        className="justify-start gap-2"
+                                                                        onValueChange={(val) => handleOccupationChange(occ.id, "laborType", val)}
+                                                                        className="flex items-center gap-6"
                                                                     >
-                                                                        <ToggleGroupItem value="self" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">ทำเอง</ToggleGroupItem>
-                                                                        <ToggleGroupItem value="hire" className="h-11 px-6 rounded-xl border border-gray-200 data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white">จ้างทำ</ToggleGroupItem>
-                                                                    </ToggleGroup>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <RadioGroupItem value="self" id={`labor-self-${occ.id}`} />
+                                                                            <Label htmlFor={`labor-self-${occ.id}`} className="cursor-pointer font-normal">ทำเอง</Label>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <RadioGroupItem value="hire" id={`labor-hire-${occ.id}`} />
+                                                                            <Label htmlFor={`labor-hire-${occ.id}`} className="cursor-pointer font-normal">จ้างทำ</Label>
+                                                                        </div>
+                                                                    </RadioGroup>
                                                                 </div>
 
                                                                 {/* ทำกี่คน (Display only if จ้างทำ is selected) */}
@@ -2777,14 +2828,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
 
                                                     {/* รายได้ต่อเดือน Table */}
-                                                    <div className="space-y-4">
+                                                    <div className="space-y-2">
                                                         <div className="flex items-center justify-between">
                                                             <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                                <BahtSign className="w-4 h-4 text-chaiyo-blue" /> รายได้ต่อเดือน
+                                                                รายได้ต่อเดือน
                                                             </h5>
-                                                        </div>
-                                                        <div className="flex items-center justify-between p-3 bg-blue-50/30 rounded-xl border border-blue-100/50">
-                                                            <div className="flex items-center gap-3">
+                                                            <div className="flex items-center gap-2 px-3 py-1.5">
                                                                 <Checkbox
                                                                     id={`farm-higher-${occ.id}`}
                                                                     checked={occ.farmIsHigherThanStandard || false}
@@ -2886,10 +2935,10 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     </div>
 
                                                     {/* ตารางสรุปช่วงเวลาและผลผลิต */}
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between mb-1">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between">
                                                             <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                                <TrendingUp className="w-4 h-4 text-chaiyo-blue" /> ตารางสรุปช่วงเวลาและผลผลิต
+                                                                ตารางสรุปช่วงเวลาและผลผลิต
                                                             </h5>
                                                             <div className="flex items-center gap-3">
                                                                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -2900,7 +2949,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <div className="w-3 h-3 rounded-md border border-gray-300 bg-white"></div>
                                                                     <span>ยังไม่ได้เลือก</span>
                                                                 </div>
-                                                                <button
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
                                                                     type="button"
                                                                     onClick={() => {
                                                                         const reset = FARM_STAGES.map(stage => ({ stage, selectedMonths: [] }));
@@ -2910,7 +2961,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 >
                                                                     <RotateCcw className="w-3 h-3" />
                                                                     <span>รีเซ็ต</span>
-                                                                </button>
+                                                                </Button>
                                                             </div>
                                                         </div>
 
@@ -3185,7 +3236,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                     )}
                                                                                 </div>
                                                                                 {occ.farmingType === 'self' && (
-                                                                                    <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-blue-100">
+                                                                                    <div className="flex items-center gap-2 px-3 py-1.5">
                                                                                         <Checkbox
                                                                                             id={`higher-${occ.id}-${idx}`}
                                                                                             checked={cycle.isHigherThanStandard}
@@ -3539,7 +3590,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     {guide.title}
                                                                     {guide.required && <span className="text-red-500 ml-0.5">*</span>}
                                                                     {hasPhotos && (
-                                                                        <span className="ml-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                                                                        <span className="ml-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
                                                                             {photos.length}
                                                                         </span>
                                                                     )}
@@ -3626,26 +3677,15 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 </div>
                                                             ) : (
                                                                 <div
-                                                                    className={cn(
-                                                                        "relative aspect-[4/3] rounded-2xl border-2 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden",
-                                                                        guide.required
-                                                                            ? "border-dashed border-amber-200 bg-amber-50/5 hover:bg-amber-50/30 hover:border-amber-400"
-                                                                            : "border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400"
-                                                                    )}
+                                                                    className="relative aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden"
                                                                     onClick={() => handleTriggerPhotoUpload(guide.id)}
                                                                 >
                                                                     <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
-                                                                        <div className={cn(
-                                                                            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110",
-                                                                            guide.required ? "bg-amber-100 text-amber-600 border border-amber-200" : "bg-gray-100 text-gray-400 border border-gray-200"
-                                                                        )}>
+                                                                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110 bg-gray-100 text-gray-400 border border-gray-200">
                                                                             <guide.icon className="w-7 h-7" />
                                                                         </div>
                                                                         <div className="space-y-1">
-                                                                            <p className={cn(
-                                                                                "text-xs font-bold leading-tight",
-                                                                                guide.required ? "text-amber-700" : "text-gray-600"
-                                                                            )}>
+                                                                            <p className="text-xs font-bold leading-tight text-gray-600">
                                                                                 แตะเพื่ออัพโหลด
                                                                             </p>
                                                                             <p className="text-[10px] text-muted-foreground">
