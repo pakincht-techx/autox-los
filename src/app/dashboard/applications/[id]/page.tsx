@@ -352,7 +352,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 )}
                             </div>
 
-                            {/* ── Card 1: Loan Info & Add-ons ── */}
+                            {/* ── Card 1: Loan Info + Insurance (merged) ── */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
                                 {/* Product Tag */}
                                 <div className="mb-2">
@@ -360,98 +360,82 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                         {app.loanProductLabel}
                                     </span>
                                 </div>
-                                <h3 className="text-xl font-bold text-foreground mb-4 leading-tight">{app.loanProductName}</h3>
+                                <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{app.loanProductName}</h3>
+
+                                {/* Freebie Badges */}
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium border border-amber-100">
+                                        <Gift className="w-3 h-3" /> บัตรกดเงินไชโย
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100">
+                                        <ShieldCheck className="w-3 h-3" /> ประกันคุ้มครองวงเงินกู้
+                                    </span>
+                                </div>
 
                                 <div className="w-full h-px bg-gray-100 mb-4"></div>
 
-                                {/* Loan Stats Table */}
-                                <div className="space-y-3 mb-6">
+                                {/* Loan Stats */}
+                                <div className="space-y-2.5">
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">วงเงิน:</span>
+                                        <span className="text-gray-500">วงเงิน</span>
                                         <span className="font-bold text-foreground">{app.loanAmount.toLocaleString()} บาท</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">อัตราดอกเบี้ย:</span>
+                                        <span className="text-gray-500">อัตราดอกเบี้ย</span>
                                         <span className="font-bold text-foreground">{app.interestRate}%</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">ระยะเวลาผ่อน:</span>
+                                        <span className="text-gray-500">ระยะเวลาผ่อน</span>
                                         <span className="font-bold text-foreground">{app.term} เดือน</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">ค่างวด:</span>
+                                        <span className="text-gray-500">ค่างวดสินเชื่อ</span>
                                         <span className="font-bold text-foreground">{app.installment.toLocaleString()} บาท/เดือน</span>
                                     </div>
                                 </div>
 
-                                {/* Freebies (e.g. Chaiyo Card) */}
-                                <div className="rounded-xl border border-gray-100 p-4 flex gap-4 mt-2">
-                                    <div className="w-12 h-12 bg-[#0d005f] rounded-lg shrink-0 overflow-hidden relative border border-gray-100">
-                                        {/* Simplified Mock Card Graphic */}
-                                        <div className="absolute inset-0 flex flex-col">
-                                            <div className="h-1/2 bg-[#0d005f]"></div>
-                                            <div className="h-1/2 bg-[#ffd700] relative">
-                                              <div className="absolute left-3 top-0 bottom-0 w-2 flex">
-                                                 <div className="w-1/2 bg-red-600 h-full"></div>
-                                                 <div className="w-1/2 bg-[#0d005f] h-full"></div>
-                                              </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-sm text-foreground">ฟรี! บัตรกดเงินไชโย</p>
-                                        <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-                                            วงเงินหมุนเวียนพร้อมใช้<br/>จ่ายเงินต้นไปแล้วเท่าไรกดใช้เพิ่มได้เท่านั้น
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                                {/* Insurance divider */}
+                                <div className="w-full h-px bg-gray-100 my-4"></div>
 
-                            {/* ── Card 2: Insurance ── */}
-                            <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                <div className="flex items-center gap-3 mb-5">
+                                {/* Insurance Info */}
+                                <div className="flex items-center gap-2.5 mb-3">
                                     {app.insurance.logo ? (
-                                        <img src={app.insurance.logo} alt={app.insurance.company} className="w-10 h-10 object-contain rounded-full bg-white border border-gray-50" />
+                                        <img src={app.insurance.logo} alt={app.insurance.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
                                     ) : (
-                                        <div className="w-10 h-10 rounded-full bg-[#0d005f] flex items-center justify-center p-2 text-white">
-                                            <ShieldCheck className="w-5 h-5" strokeWidth={2} />
+                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
+                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
                                         </div>
                                     )}
                                     <div>
-                                        <p className="font-bold text-foreground">{app.insurance.company}</p>
-                                        <p className="text-sm text-gray-400">{app.insurance.tier}</p>
+                                        <p className="font-bold text-foreground text-sm">{app.insurance.company}</p>
+                                        <p className="text-xs text-gray-400">{app.insurance.tier} · ซ่อม{app.insurance.repairType}</p>
                                     </div>
                                 </div>
-
-                                <div className="space-y-3">
+                                <div className="space-y-2.5">
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">ทุนประกัน:</span>
-                                        <span className="font-bold text-foreground">300,000 บาท</span>
+                                        <span className="text-gray-500">ทุนประกัน</span>
+                                        <span className="font-bold text-foreground">{app.insurance.coverage.toLocaleString()} บาท</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">ค่าเบี้ยประกัน:</span>
+                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
                                         <span className="font-bold text-foreground">{app.insurance.premium.toLocaleString()} บาท</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">ค่างวด:</span>
-                                        <span className="font-bold text-foreground">500 บาท/เดือน</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* ── Card 3: Summary Totals ── */}
+                            {/* ── Card 2: Summary ── */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">วงเงินทั้งหมด:</span>
-                                        <span className="font-bold text-foreground text-sm">{(app.loanAmount + app.insurance.premium).toLocaleString()} บาท</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex flex-col">
-                                            <span className="text-gray-600 text-sm">ค่าผ่อนต่อเดือน:</span>
-                                            <span className="text-xs text-gray-400 mt-0.5">*รวมสินเชื่อและประกัน</span>
+                                <div className="flex justify-between items-center text-sm mb-3">
+                                    <span className="text-gray-500">ยอดจัดสินเชื่อสุทธิ</span>
+                                    <span className="font-bold text-foreground">{(app.loanAmount + app.insurance.premium).toLocaleString()} บาท</span>
+                                </div>
+                                <div className="border-t border-gray-100 pt-3">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <p className="font-semibold text-foreground text-sm">ค่าผ่อนต่อเดือน</p>
+                                            <p className="text-[11px] text-gray-400 mt-0.5">*รวมสินเชื่อและประกัน</p>
                                         </div>
-                                        <span className="font-bold text-foreground text-sm self-start">{(app.installment + 500).toLocaleString()} บาท</span>
+                                        <span className="font-black text-chaiyo-blue text-xl">{(app.installment + 500).toLocaleString()} <span className="text-xs font-bold text-chaiyo-blue/60">บาท</span></span>
                                     </div>
                                 </div>
                             </div>

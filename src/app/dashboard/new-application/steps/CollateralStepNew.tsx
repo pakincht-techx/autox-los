@@ -35,6 +35,16 @@ import {
     TableRow,
 } from "@/components/ui/Table";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     CAR_BRANDS,
     MOTO_BRANDS,
     TRUCK_BRANDS,
@@ -420,6 +430,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const [uploadedPaperDocs, setUploadedPaperDocs] = useState<{ url: string, label: string }[]>([]);
     const [analyzedPhotoCount, setAnalyzedPhotoCount] = useState(0);
     const [analyzedPaperCount, setAnalyzedPaperCount] = useState(0);
+    const [deleteOwnerConfirm, setDeleteOwnerConfirm] = useState<{ type: 'land' | 'building'; ownerIdx: number; buildingIdx?: number; name: string } | null>(null);
 
     // Refs
     const photoInputRef = useRef<HTMLInputElement>(null);
@@ -1548,73 +1559,68 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                         เงื่อนไขการประเมินสภาพ{formData.collateralType === 'land' ? 'ทรัพย์สิน' : 'รถ'}
                                     </h4>
-                                    <div className="space-y-2">
-                                        {COLLATERAL_QUESTIONS[formData.collateralType]?.map((q) => (
-                                            <div key={q.id}>
-                                                {(q.id === 'car_q8' || q.id === 'car_q17') && (
-                                                    <div className="border-t border-gray-300 mb-3 mt-3" />
-                                                )}
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
-                                                    <span className="text-sm text-gray-700 font-bold">{q.text}</span>
-                                                    <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setFormData({
-                                                                ...formData,
-                                                                collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' }
-                                                            })}
-                                                            className={cn(
-                                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                                formData.collateralQuestions?.[q.id] === 'yes'
-                                                                    ? "bg-gray-200 text-gray-700 shadow-sm"
-                                                                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                                                            )}
-                                                        >
-                                                            ใช่
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setFormData({
-                                                                ...formData,
-                                                                collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' }
-                                                            })}
-                                                            className={cn(
-                                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                                formData.collateralQuestions?.[q.id] === 'no'
-                                                                    ? "bg-chaiyo-blue text-white shadow-sm"
-                                                                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
-                                                            )}
-                                                        >
-                                                            ไม่ใช่
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {q.id === 'car_q17' && (
-                                                    <div className="flex gap-3 py-4 mt-2">
-                                                        <Checkbox
-                                                            id="vehicleVerified"
-                                                            checked={formData.vehicleVerified || false}
-                                                            onCheckedChange={(checked) => setFormData({ ...formData, vehicleVerified: Boolean(checked) })}
-                                                            className="w-4 h-4 rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer mt-0.5 shrink-0"
-                                                        />
-                                                        <div className="flex flex-col gap-1 flex-1">
-                                                            <label htmlFor="vehicleVerified" className="text-sm font-medium text-gray-700 cursor-pointer">
-                                                                ตรวจสอบหลักประกันรถแล้ว
-                                                            </label>
-                                                            <p className="text-xs text-gray-500">
-                                                                พนักงานได้ตรวจสอบสภาพรถและข้อมูลเบื้องต้นให้ถูกต้องตรงตามเอกสารแล้ว
-                                                            </p>
+                                    <div className="border border-border-strong rounded-xl overflow-hidden">
+                                        <div className="divide-y divide-border-subtle">
+                                            {COLLATERAL_QUESTIONS[formData.collateralType]?.map((q) => (
+                                                <div key={q.id}>
+                                                    <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
+                                                        <span className="text-sm text-gray-700 font-bold">{q.text}</span>
+                                                        <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData({
+                                                                    ...formData,
+                                                                    collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'yes' }
+                                                                })}
+                                                                className={cn(
+                                                                    "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                    formData.collateralQuestions?.[q.id] === 'yes'
+                                                                        ? "bg-chaiyo-blue text-white shadow-sm"
+                                                                        : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                                                                )}
+                                                            >
+                                                                ใช่
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData({
+                                                                    ...formData,
+                                                                    collateralQuestions: { ...formData.collateralQuestions, [q.id]: 'no' }
+                                                                })}
+                                                                className={cn(
+                                                                    "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                    formData.collateralQuestions?.[q.id] === 'no'
+                                                                        ? "bg-chaiyo-blue text-white shadow-sm"
+                                                                        : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                                                                )}
+                                                            >
+                                                                ไม่ใช่
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        ))}
+                                                    {q.id === 'car_q17' && (
+                                                        <div className="flex items-start space-x-3 mx-4 mb-4 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                                            <Checkbox
+                                                                id="vehicleVerified"
+                                                                checked={formData.vehicleVerified || false}
+                                                                onCheckedChange={(checked) => setFormData({ ...formData, vehicleVerified: Boolean(checked) })}
+                                                                className="w-5 h-5 mt-0.5 border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue"
+                                                            />
+                                                            <div className="flex flex-col gap-1">
+                                                                <label htmlFor="vehicleVerified" className="font-bold leading-none cursor-pointer text-gray-800">
+                                                                    ตรวจสอบหลักประกันรถแล้ว
+                                                                </label>
+                                                                <p className="text-xs text-gray-500">พนักงานได้ตรวจสอบสภาพรถและข้อมูลเบื้องต้นให้ถูกต้องตรงตามเอกสารแล้ว</p>
+                                                            </div>
 
-                                        {/* ที่ดินทำกินมีคนช่วยทำงานหรือไม่ - moved after land_q9 */}
-                                        {formData.collateralType === 'land' && (
-                                            <>
-                                                <div className="border-t border-gray-300 my-3" />
-                                                <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+
+                                            {/* ที่ดินทำกินมีคนช่วยทำงานหรือไม่ - moved after land_q9 */}
+                                            {formData.collateralType === 'land' && (
+                                                <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
                                                     <span className="text-sm text-gray-700 font-bold">ที่ดินทำกินมีคนช่วยทำงานหรือไม่</span>
                                                     <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
                                                         <button
@@ -1639,8 +1645,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         </button>
                                                     </div>
                                                 </div>
-                                            </>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -1864,8 +1870,9 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                         variant="ghost"
                                                                         size="icon"
                                                                         onClick={() => {
-                                                                            const newOwners = (formData.landOwners || []).filter((_: any, i: number) => i !== oIdx);
-                                                                            setFormData({ ...formData, landOwners: newOwners });
+                                                                            const owner = (formData.landOwners || [])[oIdx];
+                                                                            const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
+                                                                            setDeleteOwnerConfirm({ type: 'land', ownerIdx: oIdx, name });
                                                                         }}
                                                                         className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                                                                     >
@@ -2050,9 +2057,9 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                 variant="ghost"
                                                                                 size="icon"
                                                                                 onClick={() => {
-                                                                                    const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                                    newBuildingOwners[bIdx] = (newBuildingOwners[bIdx] || []).filter((_: any, i: number) => i !== oIdx);
-                                                                                    setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                                    const owner = (formData.buildingOwners?.[bIdx] || [])[oIdx];
+                                                                                    const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
+                                                                                    setDeleteOwnerConfirm({ type: 'building', ownerIdx: oIdx, buildingIdx: bIdx, name });
                                                                                 }}
                                                                                 className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                                                                             >
@@ -2898,6 +2905,37 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </div>
                 )
             }
+            {/* Delete Owner Confirmation Dialog */}
+            <AlertDialog open={!!deleteOwnerConfirm} onOpenChange={(open) => !open && setDeleteOwnerConfirm(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบข้อมูล</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลผู้ถือครอง &quot;{deleteOwnerConfirm?.name}&quot; ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            onClick={() => {
+                                if (!deleteOwnerConfirm) return;
+                                if (deleteOwnerConfirm.type === 'land') {
+                                    const newOwners = (formData.landOwners || []).filter((_: any, i: number) => i !== deleteOwnerConfirm.ownerIdx);
+                                    setFormData({ ...formData, landOwners: newOwners });
+                                } else if (deleteOwnerConfirm.type === 'building' && deleteOwnerConfirm.buildingIdx !== undefined) {
+                                    const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                    newBuildingOwners[deleteOwnerConfirm.buildingIdx] = (newBuildingOwners[deleteOwnerConfirm.buildingIdx] || []).filter((_: any, i: number) => i !== deleteOwnerConfirm.ownerIdx);
+                                    setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                }
+                                setDeleteOwnerConfirm(null);
+                            }}
+                        >
+                            ลบข้อมูล
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

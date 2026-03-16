@@ -40,6 +40,30 @@ Reference the `@theme` block in `globals.css` for all color tokens:
 
 - Dialog backdrops (overlays) must use **10% opacity black** (`bg-black/10`) with a blur effect (`backdrop-blur-sm`). Do not use the default heavy `bg-black/80`.
 - **Dialogs must not have a top-right close (X) icon.** All dialogs should be closed via explicit buttons in the footer (e.g., "Cancel", "Confirm") or the backdrop. The close button has been removed from the shared `DialogContent` component; do not attempt to re-add it in individual implementations.
+- **Dialog Header Pattern.** Use a plain `<DialogHeader>` without colored backgrounds or borders. Do **not** add `bg-blue-50`, `border-b`, or other custom background styling to `DialogHeader`. Use appropriate title size based on dialog type:
+  - **Exception:** When the dialog body uses a non-white background (e.g., `bg-gray-50/30`), add `bg-white border-b border-gray-100` to the `DialogHeader` to maintain clear visual separation between the header and content area.
+  - **Large/feature dialogs** (e.g., insurance picker, income form): `text-xl`
+  - **Standard dialogs** (e.g., confirmation, simple forms): `text-lg`
+  - **Small alerts**: default size (no size class)
+  
+  Standard pattern:
+  ```tsx
+  <DialogHeader>
+      <DialogTitle className="text-lg text-chaiyo-blue flex items-center gap-2">
+          <IconComponent className="w-5 h-5" />
+          Dialog Title Text
+      </DialogTitle>
+  </DialogHeader>
+  ```
+- **Dialog Footer Pattern.** Use `<DialogFooter>` with a cancel button (`variant="outline"`) and a primary action button (`bg-chaiyo-blue`). Example:
+  ```tsx
+  <DialogFooter>
+      <Button variant="outline" onClick={() => onOpenChange(false)}>ยกเลิก</Button>
+      <Button onClick={handleSave} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold">
+          บันทึก
+      </Button>
+  </DialogFooter>
+  ```
 
 ## Layering & Z-Index
 

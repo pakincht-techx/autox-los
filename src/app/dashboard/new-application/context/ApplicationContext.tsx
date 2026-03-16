@@ -29,7 +29,7 @@ export const APPLICATION_STEPS = [
     { id: 2, slug: 'collateral-info', title: 'หลักประกัน', description: 'Collateral', icon: Car },
     { id: 3, slug: 'income', title: 'อาชีพและรายได้', description: 'Income', icon: BahtSign },
     { id: 4, slug: 'debt', title: 'ภาระหนี้สิน', description: 'Debt', icon: FileText },
-    { id: 5, slug: 'loan-calculator', title: 'คำนวณวงเงิน', description: 'Calculator', icon: Calculator },
+    { id: 5, slug: 'loan-calculator', title: 'รายละเอียดสินเชื่อ', description: 'Calculator', icon: Calculator },
     { id: 6, slug: 'documents', title: 'เอกสาร', description: 'Documents', icon: FileText },
     { id: 7, slug: 'review', title: 'ตรวจสอบ', description: 'Review', icon: Check },
 ];
