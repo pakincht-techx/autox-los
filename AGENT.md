@@ -190,6 +190,7 @@ Full design rules: `.agent/workflows/design-rules.md` — run `/design-rules` to
 - Headers: `bg-gray-50/50`, muted text.
 - Row hover: `hover:bg-gray-50/50` + `transition-colors`.
 - Separators: `border-border-subtle`.
+- **Row Deletion**: If a row can be deleted, use the `Trash2` icon (from `lucide-react`) in red color.
 
 ## Shadows & Depth
 
