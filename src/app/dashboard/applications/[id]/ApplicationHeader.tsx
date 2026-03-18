@@ -448,7 +448,7 @@ export function ApplicationActivitySidebar({
                                             </div>
 
                                             <Button
-                                                className="w-full bg-gray-900 text-white h-10 font-bold text-xs disabled:opacity-50"
+                                                className="w-full bg-gray-900 text-white h-10 text-xs disabled:opacity-50"
                                                 onClick={handleSubmitFeedback}
                                                 disabled={!selectedAction}
                                             >
@@ -484,7 +484,7 @@ export function ApplicationActivitySidebar({
                             placeholder="ระบุรายละเอียดการแก้ไขหรือหมายเหตุ..."
                         />
                         <Button
-                            className="w-full bg-gray-900 text-white h-10 font-bold text-xs"
+                            className="w-full bg-gray-900 text-white h-10 text-xs"
                             onClick={handleMakerResubmit}
                         >
                             <Send className="w-3.5 h-3.5 mr-1.5" />

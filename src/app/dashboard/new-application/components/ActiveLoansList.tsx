@@ -101,16 +101,16 @@ export function ActiveLoansList({ assets, className }: ActiveLoansListProps) {
                                         {!isUnsecured && availableTopup > 0 ? (
                                             <>
                                                 <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">ยอดหนี้รวม</p>
-                                                <p className="text-base font-black text-chaiyo-blue">฿{totalBalance.toLocaleString()}</p>
+                                                <p className="text-base font-black text-chaiyo-blue">{totalBalance.toLocaleString()}</p>
                                                 <p className="text-[10px] text-emerald-600 font-bold mt-1 inline-flex items-center gap-1">
                                                     <span className="w-1 h-1 rounded-full bg-emerald-400" />
-                                                    กู้เพิ่มได้ ฿{availableTopup.toLocaleString()}
+                                                    กู้เพิ่มได้ {availableTopup.toLocaleString()}
                                                 </p>
                                             </>
                                         ) : (
                                             <>
                                                 <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-0.5">ยอดหนี้รวม</p>
-                                                <p className="text-base font-black text-chaiyo-blue">฿{totalBalance.toLocaleString()}</p>
+                                                <p className="text-base font-black text-chaiyo-blue">{totalBalance.toLocaleString()}</p>
                                             </>
                                         )}
                                     </div>
@@ -149,9 +149,9 @@ export function ActiveLoansList({ assets, className }: ActiveLoansListProps) {
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-base font-black text-chaiyo-blue leading-none mb-1">฿{loan.balance.toLocaleString()}</p>
+                                                            <p className="text-base font-black text-chaiyo-blue leading-none mb-1">{loan.balance.toLocaleString()}</p>
                                                             <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-muted">
-                                                                <span className="text-foreground font-bold">฿{loan.installment.toLocaleString()}/ด</span>
+                                                                <span className="text-foreground font-bold">{loan.installment.toLocaleString()}/ด</span>
                                                             </div>
                                                         </div>
                                                     </div>

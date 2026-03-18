@@ -46,7 +46,7 @@ export function MandatoryFieldWarningDialog({
                     </Button>
                     <Button
                         onClick={onSaveAndExit}
-                        className="min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold text-white"
+                        className="min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                     >
                         บันทึกและออก
                     </Button>

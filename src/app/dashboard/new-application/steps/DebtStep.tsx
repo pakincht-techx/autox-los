@@ -1192,7 +1192,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                                 </TableCell>
                                                 <TableCell colSpan={2} className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
-                                                        ฿{formatNumberWithCommas(formData.totalPersonalDebt || 0)}
+                                                        {formatNumberWithCommas(formData.totalPersonalDebt || 0)}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -1237,7 +1237,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                                 <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">ภาระหนี้ที่ลูกค้ามีกับเงินไชโยรวมรายเดือน:</TableCell>
                                                 <TableCell className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
-                                                        ฿{formatNumberWithCommas(formData.totalChaiyoDebt || 0)}
+                                                        {formatNumberWithCommas(formData.totalChaiyoDebt || 0)}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -1294,7 +1294,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                                 </TableCell>
                                                 <TableCell className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
-                                                        ฿{formatNumberWithCommas(formData.chaiyoTotalLimit || 0)}
+                                                        {formatNumberWithCommas(formData.chaiyoTotalLimit || 0)}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -1518,7 +1518,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                     </div>
                                     <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
                                         <span>รวมรายได้</span>
-                                        <span className="font-mono text-emerald-600">฿{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
+                                        <span className="font-mono text-emerald-600">{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1540,7 +1540,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                     </div>
                                     <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
                                         <span>รวมภาระหนี้</span>
-                                        <span className="font-mono text-orange-600">฿{formatNumberWithCommas(roundDown2(Number(formData.totalDebt || 0)).toFixed(2))}</span>
+                                        <span className="font-mono text-orange-600">{formatNumberWithCommas(roundDown2(Number(formData.totalDebt || 0)).toFixed(2))}</span>
                                     </div>
                                 </div>
                             </div>
@@ -1550,7 +1550,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                         <div className="bg-blue-50/50 p-4 border-t border-blue-100 space-y-1 text-right">
                             <Label className="text-chaiyo-blue text-sm block">รายได้คงเหลือรายเดือน</Label>
                             <div className={Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0 ? "text-2xl font-black text-red-600 font-mono" : "text-2xl font-black text-blue-700 font-mono"}>
-                                ฿{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0)).toFixed(2))}
+                                {formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0)).toFixed(2))}
                             </div>
                         </div>
 

@@ -80,7 +80,7 @@ export default function SalesheetPage() {
                     variant="outline"
                     size="xl"
                     onClick={() => window.open(pdfPath, '_blank')}
-                    className="px-6 font-bold border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                    className="px-6 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
                 >
                     <Printer className="w-4 h-4 mr-2" /> พิมพ์ Salesheet
                 </Button>
@@ -88,7 +88,7 @@ export default function SalesheetPage() {
                     size="xl"
                     onClick={() => router.push(`/dashboard/new-application/${appId || "25690316ULCRL0001"}/customer-info`)}
                     disabled={!formData.isSalesheetRead}
-                    className="px-8 font-bold"
+                    className="px-8"
                 >
                     ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>

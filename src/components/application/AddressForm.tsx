@@ -333,7 +333,7 @@ export const AddressForm = ({
                                 ) : (
                                     <Button
                                         onClick={() => setShowMapDialog(true)}
-                                        className="w-full bg-chaiyo-blue text-white h-9 rounded-xl text-xs font-bold"
+                                        className="w-full bg-chaiyo-blue text-white h-9 rounded-xl text-xs"
                                     >
                                         <MapPin className="w-3.5 h-3.5 mr-2" /> ระบุตำแหน่ง
                                     </Button>

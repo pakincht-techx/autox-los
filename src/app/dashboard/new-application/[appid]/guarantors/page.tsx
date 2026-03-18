@@ -21,46 +21,36 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/Dialog";
-import { Plus, Pencil, Trash2, Users, ShieldCheck, AlertTriangle, ShieldAlert, Clock, ChevronLeft } from "lucide-react";
+import { Plus, Users, CircleCheck, AlertTriangle, ChevronLeft, Circle } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
 import { Guarantor } from "@/types/application";
 import { toast } from "sonner";
 import { MandatoryFieldWarningDialog } from "../../components/MandatoryFieldWarningDialog";
 
-// ─── Status Helpers ──────────────────────────────────────────────────────────
+// ─── Completion Status Helper ────────────────────────────────────────────────
 
-type GuarantorStatus = 'PASSED' | 'WATCHLIST' | 'NOT_PASSED' | 'PENDING';
+const REQUIRED_FIELDS: (keyof Guarantor)[] = ['firstName', 'lastName', 'phone', 'birthDate', 'relationship'];
 
-const getGuarantorStatusConfig = (status?: string): {
+const getCompletionStatus = (g: Guarantor): {
+    isComplete: boolean;
     label: string;
     icon: React.ReactNode;
-    className: string;
+    variant: 'success' | 'neutral';
 } => {
-    switch (status) {
-        case 'PASSED':
-            return {
-                label: 'ผ่านการตรวจสอบ',
-                icon: <ShieldCheck className="w-3.5 h-3.5" />,
-                className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            };
-        case 'WATCHLIST':
-            return {
-                label: 'รอตรวจสอบเพิ่มเติม',
-                icon: <AlertTriangle className="w-3.5 h-3.5" />,
-                className: 'bg-amber-50 text-amber-700 border-amber-200',
-            };
-        case 'NOT_PASSED':
-            return {
-                label: 'ไม่ผ่านการตรวจสอบ',
-                icon: <ShieldAlert className="w-3.5 h-3.5" />,
-                className: 'bg-red-50 text-red-600 border-red-200',
-            };
-        default:
-            return {
-                label: 'รอตรวจสอบ',
-                icon: <Clock className="w-3.5 h-3.5" />,
-                className: 'bg-gray-50 text-gray-500 border-gray-200',
-            };
-    }
+    const isComplete = REQUIRED_FIELDS.every(field => !!g[field]);
+    return isComplete
+        ? {
+            isComplete: true,
+            label: 'ข้อมูลครบถ้วน',
+            icon: <CircleCheck className="w-3.5 h-3.5" />,
+            variant: 'success',
+        }
+        : {
+            isComplete: false,
+            label: 'ข้อมูลไม่ครบ',
+            icon: <Circle className="w-3.5 h-3.5" />,
+            variant: 'neutral',
+        };
 };
 
 // ─── Mock Guarantors ─────────────────────────────────────────────────────────
@@ -94,7 +84,7 @@ const MOCK_GUARANTORS: Guarantor[] = [
         lastName: "ใจดี",
         prefix: "นาย",
         birthDate: "03/02/2500",
-        phone: "086-555-1234",
+        phone: undefined,
         verificationStatus: "WATCHLIST",
         watchlistReasons: ["02"],
     },
@@ -178,15 +168,14 @@ export default function GuarantorsPage() {
                                     <TableHead className="w-[60px] text-center">ลำดับ</TableHead>
                                     <TableHead>ชื่อ-นามสกุล</TableHead>
                                     <TableHead>ความสัมพันธ์</TableHead>
-                                    <TableHead>สถานะ</TableHead>
-                                    <TableHead className="w-[100px] text-center">จัดการ</TableHead>
+                                    <TableHead>สถานะข้อมูล</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {guarantors.map((g, index) => {
-                                    const statusConfig = getGuarantorStatusConfig(g.verificationStatus);
+                                    const completionStatus = getCompletionStatus(g);
                                     return (
-                                        <TableRow key={index} className="hover:bg-gray-50/50 transition-colors">
+                                        <TableRow key={index} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/new-application/${appId}/guarantors/${index + 1}`)}>
                                             <TableCell className="text-center text-sm text-gray-500 font-medium">
                                                 {index + 1}
                                             </TableCell>
@@ -207,30 +196,10 @@ export default function GuarantorsPage() {
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${statusConfig.className}`}>
-                                                    {statusConfig.icon}
-                                                    {statusConfig.label}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-center">
-                                                <div className="flex items-center justify-center gap-1">
-                                                    <button
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-colors"
-                                                        onClick={() => {
-                                                            // TODO: Edit guarantor
-                                                        }}
-                                                    >
-                                                        <Pencil className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                                        onClick={() => {
-                                                            // TODO: Delete guarantor
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
+                                                <Badge variant={completionStatus.variant} className="gap-1.5">
+                                                    {completionStatus.icon}
+                                                    {completionStatus.label}
+                                                </Badge>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -309,7 +278,7 @@ export default function GuarantorsPage() {
                         <Button
                             variant="outline"
                             onClick={() => setSoftBlockDialogOpen(false)}
-                            className="min-w-[104px] font-bold"
+                            className="min-w-[104px]"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1.5" />
                             กลับไปแก้ไข
@@ -325,7 +294,7 @@ export default function GuarantorsPage() {
                                     router.push(`/dashboard/applications/${appId || 'draft'}`);
                                 }, 500);
                             }}
-                            className="flex-[2] font-bold bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200 text-white"
+                            className="flex-[2] bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200 text-white"
                         >
                             รับทราบและบันทึก
                         </Button>

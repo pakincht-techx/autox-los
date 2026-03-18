@@ -34,12 +34,12 @@ const kpiData = [
 ];
 
 const recentApps = [
-    { id: "APP-001", name: "สมชาย ใจดี", amount: "฿250,000", status: "อนุมัติ", time: "10:30", type: "รถกระบะ", createdAt: minutesAgo(45) },
-    { id: "APP-002", name: "มานะ รักชาติ", amount: "฿120,000", status: "รอพิจารณา", time: "11:15", type: "รถเก๋ง", createdAt: minutesAgo(12) }, // 12m elapsed (Safe)
-    { id: "APP-003", name: "สุดา มีสุข", amount: "฿50,000", status: "ถูกปฎิเสธ", time: "09:45", type: "มอเตอร์ไซค์", createdAt: minutesAgo(60) },
+    { id: "APP-001", name: "สมชาย ใจดี", amount: "250,000", status: "อนุมัติ", time: "10:30", type: "รถกระบะ", createdAt: minutesAgo(45) },
+    { id: "APP-002", name: "มานะ รักชาติ", amount: "120,000", status: "รอพิจารณา", time: "11:15", type: "รถเก๋ง", createdAt: minutesAgo(12) }, // 12m elapsed (Safe)
+    { id: "APP-003", name: "สุดา มีสุข", amount: "50,000", status: "ถูกปฎิเสธ", time: "09:45", type: "มอเตอร์ไซค์", createdAt: minutesAgo(60) },
     { id: "APP-004", name: "ปิติ พอเพียง", amount: "-", status: "แบบร่าง", time: "09:00", type: "รถกระบะ", createdAt: minutesAgo(120) },
-    { id: "APP-005", name: "วีระ ยิ่งยง", amount: "฿300,000", status: "รอพิจารณา", time: "11:20", type: "รถบรรทุก", createdAt: minutesAgo(25) }, // 25m elapsed (Breached)
-    { id: "APP-006", name: "อารี มีนา", amount: "฿150,000", status: "รอพิจารณา (HQ)", time: "09:00", type: "รถเก๋ง", createdAt: minutesAgo(150) }, // 150m elapsed (HQ - Info only)
+    { id: "APP-005", name: "วีระ ยิ่งยง", amount: "300,000", status: "รอพิจารณา", time: "11:20", type: "รถบรรทุก", createdAt: minutesAgo(25) }, // 25m elapsed (Breached)
+    { id: "APP-006", name: "อารี มีนา", amount: "150,000", status: "รอพิจารณา (HQ)", time: "09:00", type: "รถเก๋ง", createdAt: minutesAgo(150) }, // 150m elapsed (HQ - Info only)
 ];
 
 export default function DashboardPage() {

@@ -17,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { PolicyChecklist } from "@/components/calculator/PolicyChecklist";
 
 const THAI_BANKS = [
     { label: "ธนาคารกสิกรไทย", value: "KBANK", logo: "/bank-logo/Type=KBank.svg" },
@@ -356,6 +357,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto w-full">
                 {/* Left Column - Input Sections */}
                 <div className="flex-1 space-y-6 min-w-0">
+                    {/* Policy Checklist - First Section */}
+                    <PolicyChecklist />
+
                     {/* Product Selection */}
                     {!(readOnlyProduct || (formData && formData.collateralType)) && (
                         <div className="space-y-4 animate-in fade-in duration-500">
@@ -425,18 +429,18 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                         <p className="font-bold text-xs mb-2">ที่มาของวงเงินสูงสุด</p>
                                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                                                             <span className="text-muted-foreground">ราคาประเมินกลาง:</span>
-                                                            <span className="text-right font-medium">฿{(Number(formData?.appraisalPrice) || 0).toLocaleString()}</span>
+                                                            <span className="text-right font-medium">{(Number(formData?.appraisalPrice) || 0).toLocaleString()}</span>
 
                                                             <span className="text-muted-foreground">LTV (อัตราส่วน):</span>
                                                             <span className="text-right font-medium">{(selectedProduct === 'land' ? 0.70 : 0.90) * 100}%</span>
 
                                                             <span className="text-muted-foreground">หัก ภาระหนี้เดิม:</span>
-                                                            <span className="text-right text-red-500 font-medium">-฿{(Number(formData?.existingDebt) || 0).toLocaleString()}</span>
+                                                            <span className="text-right text-red-500 font-medium">-{(Number(formData?.existingDebt) || 0).toLocaleString()}</span>
 
                                                             <div className="col-span-2 h-px bg-blue-100 my-1"></div>
 
                                                             <span className="font-bold text-blue-700">วงเงินสูงสุดสุทธิ:</span>
-                                                            <span className="text-right font-bold text-blue-700">฿{maxLoanAmount.toLocaleString()}</span>
+                                                            <span className="text-right font-bold text-blue-700">{maxLoanAmount.toLocaleString()}</span>
                                                         </div>
                                                     </div>
                                                 </PopoverContent>
@@ -515,7 +519,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 {/* 2. Optional Insurance Selection */}
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <Label className="text-md font-bold text-chaiyo-blue">เลือกประกันเพิ่มเติม (สมัครใจ)</Label>
+                                        <Label className="text-md font-bold">เลือกประกันเพิ่มเติม (สมัครใจ)</Label>
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -547,7 +551,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                 <span className="text-xs text-gray-500">{option.label}</span>
                                                             </div>
                                                         </div>
-                                                        <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{option.price.toLocaleString()} ฿</span>
+                                                        <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{option.price.toLocaleString()}</span>
                                                     </div>
                                                 );
                                             })}
@@ -567,7 +571,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 {true && (
                                     <div className="space-y-4 pt-2">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-md font-bold text-chaiyo-blue">ประกัน PA (ประกันอุบัติเหตุส่วนบุคคล)</Label>
+                                            <Label className="text-md font-bold">ประกัน PA (ประกันอุบัติเหตุส่วนบุคคล)</Label>
                                             <Switch
                                                 checked={paInsuranceEnabled}
                                                 onCheckedChange={setPaInsuranceEnabled}
@@ -575,9 +579,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         </div>
 
                                         {paInsuranceEnabled && (
-                                            <div className="rounded-xl border border-blue-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                                                {/* Company Header — matches ประกันรถยนต์ card */}
-                                                <div className="flex justify-between items-center p-3 rounded-xl border border-blue-100 bg-blue-50/30">
+                                            <div className="rounded-xl border border-blue-100 bg-blue-50/30 overflow-hidden">
+                                                {/* Company Header */}
+                                                <div className="flex justify-between items-center p-3">
                                                     <div className="flex items-center gap-3">
                                                         <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                                         <div className="flex flex-col">
@@ -585,55 +589,47 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             <span className="text-xs text-gray-500">ประกันอุบัติเหตุส่วนบุคคล (PA)</span>
                                                         </div>
                                                     </div>
-                                                    <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()} ฿</span>
+                                                    <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()}</span>
                                                 </div>
 
                                                 {/* Detail Rows */}
-                                                <div className="divide-y divide-gray-100">
-                                                    <div className="flex items-center justify-between px-4 py-3">
-                                                        <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
-                                                        <span className="text-sm font-semibold text-gray-800 font-mono">{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                <div className="divide-y divide-blue-100/60 border-t border-blue-100/60">
+                                                    <div className="flex items-center justify-between px-4 py-2.5">
                                                         <span className="text-xs text-gray-500">ทุนประกัน</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-semibold text-chaiyo-blue font-mono">{amount.toLocaleString()} บาท</span>
-                                                            <span className="text-[10px] text-blue-400 bg-blue-50 px-1.5 py-0.5 rounded font-medium">= วงเงินสินเชื่อ</span>
-                                                        </div>
+                                                        <span className="text-sm font-semibold">{amount.toLocaleString()} บาท</span>
                                                     </div>
-                                                    <div className="flex items-center justify-between px-4 py-3">
-                                                        <span className="text-xs text-gray-500">ระยะเวลาคุ้มครอง</span>
-                                                        <span className="text-sm font-semibold text-gray-800 font-mono">{paInsuranceCoverageMonths} เดือน</span>
+
+                                                    <div className="flex items-center justify-between px-4 py-2.5">
+                                                        <span className="text-xs text-gray-500">วันที่เริ่ม-สิ้นสุดความคุ้มครอง</span>
+                                                        <span className="text-sm font-semibold text-gray-700">{paStartDate} - {paEndDate} ({paInsuranceCoverageMonths} เดือน)</span>
                                                     </div>
-                                                    <div className="flex items-center justify-between px-4 py-3">
-                                                        <span className="text-xs text-gray-500">วันที่เริ่มความคุ้มครอง</span>
-                                                        <span className="text-sm font-medium text-gray-700">{paStartDate}</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between px-4 py-3">
-                                                        <span className="text-xs text-gray-500">วันที่สิ้นสุดคุ้มครอง</span>
-                                                        <span className="text-sm font-medium text-gray-700">{paEndDate}</span>
-                                                    </div>
+
                                                 </div>
 
                                                 {/* ผู้รับผลประโยชน์ Section */}
-                                                <div className="border-t border-blue-100 p-4 bg-gray-50/50">
+                                                <div className=" px-3 py-3">
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <Users className="w-4 h-4 text-chaiyo-blue" />
                                                         <span className="text-xs font-bold text-gray-600">ผู้รับผลประโยชน์</span>
                                                     </div>
-                                                    <div className="space-y-2">
-                                                        <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
-                                                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue text-white flex items-center justify-center text-[9px] font-bold shrink-0">1</div>
-                                                            <div>
-                                                                <p className="text-xs font-semibold text-gray-800">บริษัท ออโต้ เอกซ์ จำกัด</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
-                                                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue text-white flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
-                                                            <div>
-                                                                <p className="text-xs font-semibold text-gray-800">ทายาททางกฎหมาย</p>
-                                                            </div>
-                                                        </div>
+                                                    <div className="rounded-lg border border-gray-200 overflow-hidden">
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow className="bg-gray-50 border-b border-gray-200 hover:bg-gray-50">
+                                                                    <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 w-16 text-xs">อันดับ</TableHead>
+                                                                    <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 text-xs">ชื่อผู้รับผลประโยชน์</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                <TableRow className="hover:bg-transparent">
+                                                                    <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">1</TableCell>
+                                                                    <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">บริษัท ออโต้ เอกซ์ จำกัด</TableCell>
+                                                                </TableRow>
+                                                                <TableRow className="hover:bg-transparent">
+                                                                    <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">2</TableCell>
+                                                                    <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">ทายาททางกฎหมาย</TableCell>
+                                                                </TableRow>
+                                                            </TableBody>
+                                                        </Table>
                                                     </div>
                                                 </div>
                                             </div>
@@ -850,7 +846,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             <DialogFooter className="px-6 py-3 bg-white border-t border-gray-100 flex flex-row justify-between items-center sm:justify-between shrink-0 z-10">
                                 <div className="text-sm font-medium text-gray-600 flex items-center gap-2 leading-tight">
                                     <span className="text-gray-400 text-xs">ค่าเบี้ยประกัน</span>
-                                    <span className="text-lg font-black text-chaiyo-blue">฿{draftInsurances.reduce((total, id) => {
+                                    <span className="text-lg font-black text-chaiyo-blue">{draftInsurances.reduce((total, id) => {
                                         const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
                                         return total + (option ? option.price : 0);
                                     }, 0).toLocaleString()}</span>
@@ -1105,9 +1101,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     {hasPaInsurance && (
                                                         <div>
                                                             <div className="flex items-center gap-2.5 mb-3">
-                                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                                    <ShieldCheck className="w-4 h-4 text-chaiyo-blue" strokeWidth={2} />
-                                                                </div>
+                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                                                 <div>
                                                                     <p className="font-bold text-foreground text-sm">ประกัน PA</p>
                                                                     <p className="text-xs text-gray-400">เทเวศประกันภัย · {paInsuranceCoverageMonths} เดือน</p>

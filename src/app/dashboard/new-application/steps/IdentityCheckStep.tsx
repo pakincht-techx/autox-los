@@ -1225,13 +1225,13 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     <AlertDialogFooter>
                         <AlertDialogAction
                             onClick={() => window.location.href = '/dashboard'}
-                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-1 sm:order-2"
+                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-1 sm:order-2"
                         >
                             <Save className="w-4 h-4" /> บันทึกและกลับสู่หน้าหลัก
                         </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => setShowNotContinueDialog(false)}
-                            className="border-gray-200 text-gray-500 hover:bg-gray-50 font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-2 sm:order-1"
+                            className="border-gray-200 text-gray-500 hover:bg-gray-50 h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-2 sm:order-1"
                         >
                             ปิด
                         </AlertDialogCancel>

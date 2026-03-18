@@ -52,13 +52,13 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <SummaryCard
                                 title="ยอดหนี้คงเหลือ"
-                                value="฿ 12,450.00"
-                                subtext="จากวงเงินทั้งหมด ฿ 50,000"
+                                value="12,450.00"
+                                subtext="จากวงเงินทั้งหมด 50,000"
                                 icon={<Wallet className="h-5 w-5 text-chaiyo-blue" />}
                             />
                             <SummaryCard
                                 title="ค่างวดที่ต้องชำระ"
-                                value="฿ 2,500.00"
+                                value="2,500.00"
                                 subtext="กำหนดชำระ: 25 ก.พ. 2024"
                                 icon={<Clock className="h-5 w-5 text-orange-500" />}
                                 highlight
@@ -160,14 +160,14 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                                             <TableCell>15 ต.ค. 2023</TableCell>
                                             <TableCell className="font-medium text-chaiyo-blue group-hover:underline">LN-2023-8899</TableCell>
                                             <TableCell>สินเชื่อส่วนบุคคล</TableCell>
-                                            <TableCell>฿ 50,000</TableCell>
+                                            <TableCell>50,000</TableCell>
                                             <TableCell><Badge variant="success">อนุมัติ</Badge></TableCell>
                                         </TableRow>
                                         <TableRow className="cursor-pointer hover:bg-gray-50/50 group" onClick={() => setActiveLoanId("LN-2022-1022")}>
                                             <TableCell>10 ส.ค. 2022</TableCell>
                                             <TableCell className="font-medium text-chaiyo-blue group-hover:underline">LN-2022-1022</TableCell>
                                             <TableCell>นาโนไฟแนนซ์</TableCell>
-                                            <TableCell>฿ 20,000</TableCell>
+                                            <TableCell>20,000</TableCell>
                                             <TableCell><Badge variant="neutral">ปิดบัญชีแล้ว</Badge></TableCell>
                                         </TableRow>
                                     </TableBody>

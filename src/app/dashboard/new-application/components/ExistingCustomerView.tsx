@@ -58,14 +58,14 @@ export function ExistingCustomerView({ profile, assetsWithLoans, onProceed, onSk
                     <Button
                         variant="ghost"
                         size="default"
-                        className="h-11 px-4 text-muted hover:text-chaiyo-blue hover:bg-chaiyo-blue/5 rounded-xl font-bold"
+                        className="h-11 px-4 text-muted hover:text-chaiyo-blue hover:bg-chaiyo-blue/5 rounded-xl"
                         onClick={() => router.push(`/dashboard/customers/${profile?.customerId || 'CUST-001'}`)}
                     >
                         <History className="w-4 h-4 mr-2" /> ดูข้อมูลลูกค้า
                     </Button>
                     <Button
                         size="default"
-                        className="h-11 px-6 bg-chaiyo-blue text-white shadow-lg hover:bg-chaiyo-blue/90 rounded-xl font-bold"
+                        className="h-11 px-6 bg-chaiyo-blue text-white shadow-lg hover:bg-chaiyo-blue/90 rounded-xl"
                         onClick={onProceed}
                     >
                         ขอสินเชื่อใหม่ <ArrowRight className="w-4 h-4 ml-2" />
@@ -101,11 +101,11 @@ export function ExistingCustomerView({ profile, assetsWithLoans, onProceed, onSk
                                 <p className="text-[10px] font-bold text-muted uppercase tracking-widest">ข้อมูลรายได้</p>
                                 <div className="flex justify-between items-center pb-2 border-b border-dashed border-gray-100">
                                     <span className="text-sm text-muted">รายเดือน (ฐาน + อื่นๆ)</span>
-                                    <span className="font-bold">฿{(incomeInfo.salary + incomeInfo.otherIncome).toLocaleString()}</span>
+                                    <span className="font-bold">{(incomeInfo.salary + incomeInfo.otherIncome).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm font-bold text-foreground">รายได้รวมสุทธิ</span>
-                                    <span className="font-bold text-base text-emerald-600">฿{incomeInfo.totalIncome.toLocaleString()}</span>
+                                    <span className="font-bold text-base text-emerald-600">{incomeInfo.totalIncome.toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -117,7 +117,7 @@ export function ExistingCustomerView({ profile, assetsWithLoans, onProceed, onSk
                                         <Wallet className="w-4 h-4 text-chaiyo-blue" />
                                         <span className="text-sm text-muted">ยอดหนี้สะสม</span>
                                     </div>
-                                    <span className="font-bold text-chaiyo-blue">฿{totalBalance.toLocaleString()}</span>
+                                    <span className="font-bold text-chaiyo-blue">{totalBalance.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-2 pt-1">
@@ -125,7 +125,7 @@ export function ExistingCustomerView({ profile, assetsWithLoans, onProceed, onSk
                                         <span className="text-sm text-muted">ผ่อนชำระต่อเดือน</span>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-bold text-purple-600">฿{totalInstallment.toLocaleString()}</p>
+                                        <p className="font-bold text-purple-600">{totalInstallment.toLocaleString()}</p>
                                         <div className="mt-1">
                                             <Badge variant="outline" className={cn(
                                                 "text-[10px] font-bold border py-0 h-4 px-1.5",

@@ -2530,7 +2530,7 @@ function PreQuestionPageContent() {
                                                 <div className="flex items-end">
                                                     <Button
                                                         onClick={() => setShowProducts(true)}
-                                                        className="h-12 w-full bg-chaiyo-blue text-white font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
+                                                        className="h-12 w-full bg-chaiyo-blue text-white rounded-xl shadow-sm transition-all flex items-center justify-center gap-2"
                                                     >
                                                         ค้นหาผลิตภัณฑ์
                                                     </Button>
@@ -2902,7 +2902,6 @@ function PreQuestionPageContent() {
                                                 <Label className="text-base font-bold text-gray-700">สินเชื่อที่ต้องการ <span className="text-red-500">*</span></Label>
                                             </div>
                                             <div className="relative">
-                                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">฿</div>
                                                 <Input
                                                     type="text"
                                                     placeholder="ระบุวงเงินที่ต้องการ"
@@ -3318,7 +3317,7 @@ function PreQuestionPageContent() {
                                         variant="outline"
                                         size="xl"
                                         onClick={prevStep}
-                                        className="w-full md:w-auto px-8 font-bold rounded-xl border"
+                                        className="w-full md:w-auto px-8 rounded-xl border"
                                     >
                                         <ChevronLeft className="w-4 h-4 mr-2" />
                                         ย้อนกลับ
@@ -3438,7 +3437,7 @@ function PreQuestionPageContent() {
                         <AlertDialogFooter className="sm:justify-center">
                             <AlertDialogAction
                                 onClick={() => setIsConditionDialogOpen(false)}
-                                className="bg-chaiyo-blue hover:bg-blue-800 text-white font-bold px-8 py-2 rounded-xl h-11 min-w-[104px]"
+                                className="bg-chaiyo-blue hover:bg-blue-800 text-white px-8 py-2 rounded-xl h-11 min-w-[104px]"
                             >
                                 รับทราบ
                             </AlertDialogAction>

@@ -121,12 +121,12 @@ export function FinancialInfoSection({ formData, setFormData }: FinancialInfoSec
                         <div className="space-y-6">
                             <div className="flex justify-between items-end pb-4 border-b border-gray-200">
                                 <span className="text-sm text-gray-500">รายได้รวมต่อเดือน</span>
-                                <span className="text-2xl font-bold text-chaiyo-blue">฿ {totalIncome.toLocaleString()}</span>
+                                <span className="text-2xl font-bold text-chaiyo-blue">{totalIncome.toLocaleString()}</span>
                             </div>
 
                             <div className="flex justify-between items-end pb-4 border-b border-gray-200">
                                 <span className="text-sm text-gray-500">รายได้สุทธิ (Net)</span>
-                                <span className="text-xl font-bold text-gray-800">฿ {netIncome.toLocaleString()}</span>
+                                <span className="text-xl font-bold text-gray-800">{netIncome.toLocaleString()}</span>
                             </div>
 
                             <div className="pt-2">

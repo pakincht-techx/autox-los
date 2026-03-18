@@ -338,17 +338,6 @@ export default function AddGuarantorPage() {
                 <div className="space-y-8 pb-20">
                     {(stage === 'INIT' || (stage === 'READING_CARD' && (verificationMethod === 'DIPCHIP' || idBackPhoto))) && (
                         <div className="space-y-8 relative">
-                            {stage === 'INIT' && (
-                                <div className="absolute -top-12 right-0 flex items-center gap-2 bg-gray-100/50 px-3 py-1.5 rounded-full border border-gray-200/50 scale-90 origin-right transition-colors">
-                                    <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none"
-                                        style={{ backgroundColor: isSimulatingError ? '#10069F' : '#e5e7eb' }}
-                                        onClick={() => setIsSimulatingError(!isSimulatingError)}
-                                    >
-                                        <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", isSimulatingError ? "translate-x-4" : "translate-x-1")} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">จำลองข้อผิดพลาด</span>
-                                </div>
-                            )}
 
                             <Card className={cn("border-2 transition-all duration-300 shadow-none overflow-hidden", dipchipError ? "" : "border-chaiyo-blue/10 bg-blue-50/20 hover:bg-blue-50/40 cursor-pointer")} onClick={!dipchipError ? handleReadCard : undefined}>
                                 <CardContent className="flex flex-col items-center justify-center py-10 text-center relative px-8">
@@ -487,15 +476,7 @@ export default function AddGuarantorPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 bg-white/50 px-2.5 py-1 rounded-full border border-chaiyo-blue/10 scale-90 origin-right">
-                                        <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full"
-                                            style={{ backgroundColor: simulateLivenessFail ? '#10069F' : '#e5e7eb' }}
-                                            onClick={() => setSimulateLivenessFail(!simulateLivenessFail)}
-                                        >
-                                            <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", simulateLivenessFail ? "translate-x-4" : "translate-x-1")} />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-chaiyo-blue uppercase tracking-wider">จำลองข้อผิดพลาด</span>
-                                    </div>
+
                                     <Button variant="ghost" onClick={() => setShowNotContinueDialog(true)} className="text-red-500 hover:bg-red-50">
                                         <XCircle className="w-5 h-5 mr-1" /> ยกเลิก
                                     </Button>

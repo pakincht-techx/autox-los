@@ -154,7 +154,7 @@ export function CustomerNeedsStep({ formData, setFormData, isExistingCustomer, e
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-[10px] font-bold text-emerald-600 uppercase">กู้เพิ่มได้</p>
-                                                    <p className="text-sm font-black text-emerald-700">฿{availableTopup.toLocaleString()}</p>
+                                                    <p className="text-sm font-black text-emerald-700">{availableTopup.toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         );

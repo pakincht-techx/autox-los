@@ -17,14 +17,14 @@ export function LoanAccordionCard({ loanId, onViewHistory }: LoanAccordionCardPr
 
     // Mock Data
     const loanData = {
-        amount: "฿ 50,000.00",
+        amount: "50,000.00",
         date: "15 ต.ค. 2023",
         paid: "25%",
-        remaining: "฿ 37,550",
+        remaining: "37,550",
         interestRate: "1.25% ต่อเดือน",
         startDate: "15 ต.ค. 2023",
         endDate: "15 ต.ค. 2026",
-        installment: "฿ 2,500 / งวด",
+        installment: "2,500 / งวด",
         collateral: {
             brand: "Toyota Hilux Revo",
             plate: "1กข 1234 กทม.",

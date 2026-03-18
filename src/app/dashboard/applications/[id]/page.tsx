@@ -5,7 +5,11 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/Checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -237,6 +241,10 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const router = useRouter();
     const { setBreadcrumbs, setRightContent, devRole } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+    const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+    const [consentCompleted, setConsentCompleted] = useState(false);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const searchParams = useSearchParams();
     const from = searchParams.get('from');
     const statusParam = searchParams.get('status');
@@ -268,6 +276,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const [reviewAttachments, setReviewAttachments] = useState<{ file: File; url: string }[]>([]);
     const [historyLog, setHistoryLog] = useState(app.historyLog);
     const [customerStatusOverride, setCustomerStatusOverride] = useState<string | null>(null);
+    const [softblockDetailOpen, setSoftblockDetailOpen] = useState(false);
 
     // ── Set breadcrumbs + right content ──────────────────────────────────
     useEffect(() => {
@@ -289,13 +298,21 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         ]);
 
         if (canEdit) {
-            setRightContent(null);
+            setRightContent(
+                <Button
+                    variant="default"
+                    className="font-bold"
+                    onClick={() => setIsSubmitDialogOpen(true)}
+                >
+                    <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
+                </Button>
+            );
         } else if (viewMode === 'approver' && currentStatus !== 'Sent Back') {
             // Approver (legal team): single review submission button — only when still In Review
             setRightContent(
                 <div className="flex items-center gap-2">
                     <Button
-                        className="font-bold bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                        className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                         onClick={() => setReviewDialogOpen(true)}
                     >
                         <MessageSquare className="w-4 h-4 mr-1.5" /> ให้ความเห็น
@@ -348,12 +365,42 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                         </div>
                         <div className="w-px h-4 bg-gray-200"></div>
                         <div className="flex items-center gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5 text-[#00B900]" />
-                            <span className="text-xs text-gray-400">LINE</span>
+                            <MessageCircle className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-xs text-gray-400">LINEID</span>
                             <span className="text-sm text-gray-700 font-semibold">-</span>
                         </div>
                     </div>
                 </div>
+
+                {/* ═══════════════════════════════════════════════════════════
+                    SOFTBLOCK ALERT BANNER (Legal Team / Approver)
+                ═══════════════════════════════════════════════════════════ */}
+                {viewMode === 'approver' && MOCK_BLOCK_ITEMS.some(b => b.type === 'softblock') && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                                <AlertTriangle className="w-4.5 h-4.5 text-amber-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-amber-900">
+                                    ใบสมัครนี้มีรายการ Softblock ที่ต้องพิจารณา
+                                </p>
+                                <p className="text-xs text-amber-700 mt-0.5">
+                                    พบ {MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock').length} รายการที่ต้องตรวจสอบจากทีม Legal / Compliance / Fraud
+                                </p>
+                            </div>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSoftblockDetailOpen(true)}
+                            className="shrink-0 border-amber-300 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+                        >
+                            <Eye className="w-4 h-4 mr-1.5" />
+                            ดูรายละเอียด
+                        </Button>
+                    </div>
+                )}
 
                 {/* ═══════════════════════════════════════════════════════════
                     SECTION 2: APP DETAIL
@@ -448,15 +495,16 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=draft`) : undefined}
                                 onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=readonly`) : undefined}
                             />
-                            <SummaryCard
-                                title="T&C Consent"
-                                value={`${app.acceptedConsentCount} รายการ`}
-                                isEmpty={app.acceptedConsentCount === 0}
-                                icon={<ClipboardCheck className="w-24 h-24" />}
-                                completionStatus={app.moduleStatus.consent ? 'completed' : 'incomplete'}
-                                onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=draft`) : undefined}
-                                onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`) : undefined}
-                            />
+                            {(consentCompleted || (app.acceptedConsentCount > 0 && mockCase !== '3')) && (
+                                <SummaryCard
+                                    title="T&C Consent"
+                                    value={consentCompleted ? '3 รายการ' : `${app.acceptedConsentCount} รายการ`}
+                                    isEmpty={false}
+                                    icon={<ClipboardCheck className="w-24 h-24" />}
+                                    completionStatus={'completed'}
+                                    onView={() => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`)}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -574,6 +622,107 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                     </DialogContent>
                 </Dialog>
 
+                {/* Submit Application Dialog (Maker) — with block warnings */}
+                <SubmitApplicationDialog
+                    open={isSubmitDialogOpen}
+                    onOpenChange={setIsSubmitDialogOpen}
+                    isSubmitting={isSubmitting}
+                    allPassed={mockCase === '3'}
+                    onSubmit={() => {
+                        setIsSubmitting(true);
+                        setTimeout(() => {
+                            setIsSubmitting(false);
+                            setIsSubmitDialogOpen(false);
+                            setCurrentStatus('In Review');
+                            if (mockCase === '3') {
+                                setConsentCompleted(true);
+                            }
+
+                            // Stamp "ตรวจสอบใบสมัคร" in history log
+                            const today = new Date();
+                            const dateStr = today.toLocaleString('th-TH', {
+                                day: '2-digit', month: 'short', year: 'numeric',
+                            });
+                            const timeStr = today.toLocaleString('th-TH', {
+                                hour: '2-digit', minute: '2-digit'
+                            }) + ' น.';
+                            const submitLog = {
+                                date: dateStr,
+                                time: timeStr,
+                                title: 'ตรวจสอบใบสมัคร',
+                                team: 'พนักงานสาขา',
+                                result: '',
+                                comment: undefined as string | undefined,
+                                attachments: undefined as { name: string; url: string }[] | undefined,
+                            };
+                            setHistoryLog(prev => [submitLog, ...prev]);
+
+                            toast.success("ส่งใบสมัครสำเร็จ", {
+                                description: "ใบสมัครของคุณถูกส่งเข้าสู่ระบบการพิจารณาแล้ว",
+                            });
+                        }, 1500);
+                    }}
+                />
+
+                {/* Softblock Detail Dialog (Legal Team) */}
+                <Dialog open={softblockDetailOpen} onOpenChange={setSoftblockDetailOpen}>
+                    <DialogContent size="lg">
+                        <DialogHeader>
+                            <DialogTitle>รายการ Softblock</DialogTitle>
+                            <DialogDescription>
+                                รายการทั้งหมดที่ต้องพิจารณาจากทีม Legal / Compliance / Fraud
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogBody>
+                            <div className="border border-gray-200 rounded-xl overflow-hidden">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[120px]"></th>
+                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600">รายละเอียด</th>
+                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[80px]">รหัส</th>
+                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[200px]">ประเภท</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock').map((item, i) => (
+                                            <tr key={i} className="bg-white hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-4 py-2.5">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                                                        {item.module}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-2.5">
+                                                    {item.personName && (
+                                                        <p className="text-xs font-semibold text-gray-900">{item.personName}</p>
+                                                    )}
+                                                    <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>
+                                                </td>
+                                                <td className="px-4 py-2.5">
+                                                    {item.code && (
+                                                        <Badge variant="warning">{item.code}</Badge>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2.5 text-xs text-gray-600 font-medium">
+                                                    {item.code && BLOCK_CODE_MAP[item.code] ? BLOCK_CODE_MAP[item.code] : '-'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </DialogBody>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setSoftblockDetailOpen(false)} className="min-w-[104px]">
+                                ปิด
+                            </Button>
+                            <Button onClick={() => { setSoftblockDetailOpen(false); setReviewDialogOpen(true); }} className="min-w-[104px]">
+                                ให้ความเห็น
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
                 {/* Review Result Dialog (Legal Team / Approver) */}
                 <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
                     <DialogContent>
@@ -581,118 +730,103 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             <DialogTitle>
                                 ให้ความเห็นสถานะลูกค้า
                             </DialogTitle>
-                            <DialogDescription className="flex flex-col space-y-1">
-                                <span>ผู้กู้: <strong className="text-gray-800">{app.applicantName}</strong></span>
-                                <span>เลขที่ใบสมัคร: <strong className="text-gray-800">{app.applicationNo}</strong></span>
-                            </DialogDescription>
                         </DialogHeader>
                         <DialogBody>
-                            <p className="text-sm font-semibold text-gray-700 mb-2">ผลการตรวจสอบ</p>
-                            <label
-                                className={cn(
-                                    "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
-                                    reviewResult === 'discretion'
-                                        ? "border-emerald-400 bg-emerald-50/50"
-                                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                )}
-                            >
-                                <input
-                                    type="radio"
-                                    name="reviewResult"
-                                    value="discretion"
-                                    checked={reviewResult === 'discretion'}
-                                    onChange={() => setReviewResult('discretion')}
-                                    className="w-4 h-4 text-emerald-600 accent-emerald-600"
-                                />
-                                <div>
-                                    <p className="text-sm font-bold text-gray-800">พิจารณาตามดุลยพินิจ</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">ผ่านการตรวจสอบ สามารถดำเนินการต่อได้</p>
-                                </div>
-                            </label>
-                            <label
-                                className={cn(
-                                    "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
-                                    reviewResult === 'not_pass'
-                                        ? "border-red-400 bg-red-50/50"
-                                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                )}
-                            >
-                                <input
-                                    type="radio"
-                                    name="reviewResult"
-                                    value="not_pass"
-                                    checked={reviewResult === 'not_pass'}
-                                    onChange={() => setReviewResult('not_pass')}
-                                    className="w-4 h-4 text-red-600 accent-red-600"
-                                />
-                                <div>
-                                    <p className="text-sm font-bold text-gray-800">ไม่ผ่านเกณฑ์การพิจารณา</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">ไม่ผ่านการตรวจสอบ ใบสมัครจะถูกปฏิเสธ</p>
-                                </div>
-                            </label>
-
-                        {/* Additional Comments and Attachments */}
-                        <div className="space-y-3 pt-2">
-                            <p className="text-sm font-semibold text-gray-700">ความคิดเห็นเพิ่มเติมและการแนบเอกสาร (เฉพาะผู้ให้ความเห็น)</p>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs text-gray-500 mb-1 block">ความคิดเห็นเพิ่มเติม</label>
-                                    <textarea
-                                        value={reviewComment}
-                                        onChange={(e) => setReviewComment(e.target.value)}
-                                        className="w-full min-h-[80px] p-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20 transition-all resize-none"
-                                        placeholder="ระบุความคิดเห็นหรือเหตุผลเพิ่มเติม..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs text-gray-500 mb-1 block">เอกสารประกอบการพิจารณา</label>
-                                    <label className="border border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 hover:border-chaiyo-blue transition-all cursor-pointer">
-                                        <input
-                                            type="file"
-                                            multiple
-                                            accept=".pdf,.jpg,.jpeg,.png"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                const files = Array.from(e.target.files || []);
-                                                const entries = files.map(f => ({ file: f, url: URL.createObjectURL(f) }));
-                                                setReviewAttachments(prev => [...prev, ...entries]);
-                                                e.target.value = ''; // allow re-selecting same file
-                                            }}
-                                        />
-                                        <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <Paperclip className="w-4 h-4 text-chaiyo-blue" />
-                                        </div>
-                                        <div className="text-center">
-                                            <p className="text-sm font-medium text-chaiyo-blue">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่</p>
-                                            <p className="text-xs text-gray-400 mt-0.5">รองรับ PDF, JPG, PNG ขนาดไม่เกิน 5MB</p>
+                            <div className="space-y-2 mb-4">
+                                <RadioGroup value={reviewResult} onValueChange={setReviewResult} className="flex gap-2">
+                                    <label
+                                        className={cn(
+                                            "flex-1 flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                                            reviewResult === 'discretion'
+                                                ? "border-gray-300 bg-gray-50/80"
+                                                : "border-gray-200 hover:bg-gray-50"
+                                        )}
+                                    >
+                                        <RadioGroupItem value="discretion" />
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-800">พิจารณาตามดุลยพินิจ</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">ผ่านการตรวจสอบ สามารถดำเนินการต่อได้</p>
                                         </div>
                                     </label>
-                                    {reviewAttachments.length > 0 && (
-                                        <div className="mt-2 flex flex-wrap gap-1.5">
-                                            {reviewAttachments.map((entry, i) => (
-                                                <div key={i} className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-100 rounded-md px-2 py-1">
-                                                    <Paperclip className="w-3 h-3 shrink-0" />
-                                                    <a
-                                                        href={entry.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="max-w-[160px] truncate hover:underline cursor-pointer"
-                                                    >{entry.file.name}</a>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            URL.revokeObjectURL(entry.url);
-                                                            setReviewAttachments(prev => prev.filter((_, idx) => idx !== i));
-                                                        }}
-                                                        className="ml-0.5 text-blue-400 hover:text-red-500 transition-colors"
-                                                    >✕</button>
-                                                </div>
-                                            ))}
+                                    <label
+                                        className={cn(
+                                            "flex-1 flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                                            reviewResult === 'not_pass'
+                                                ? "border-gray-300 bg-gray-50/80"
+                                                : "border-gray-200 hover:bg-gray-50"
+                                        )}
+                                    >
+                                        <RadioGroupItem value="not_pass" />
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-800">ไม่ผ่านเกณฑ์การพิจารณา</p>
+                                            <p className="text-xs text-gray-400 mt-0.5">ไม่ผ่านการตรวจสอบ ใบสมัครจะถูกปฏิเสธ</p>
                                         </div>
-                                    )}
+                                    </label>
+                                </RadioGroup>
+                            </div>
+
+                            {/* Additional Comments and Attachments */}
+                            <div className="space-y-3 pt-2">
+                                <p className="text-sm font-semibold text-gray-700">ความคิดเห็นเพิ่มเติมและการแนบเอกสาร (เฉพาะผู้ให้ความเห็น)</p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-xs text-gray-500 mb-1 block">ความคิดเห็นเพิ่มเติม</label>
+                                        <textarea
+                                            value={reviewComment}
+                                            onChange={(e) => setReviewComment(e.target.value)}
+                                            className="w-full min-h-[80px] p-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20 transition-all resize-none"
+                                            placeholder="ระบุความคิดเห็นหรือเหตุผลเพิ่มเติม..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500 mb-1 block">เอกสารประกอบการพิจารณา</label>
+                                        <label className="border border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 hover:border-chaiyo-blue transition-all cursor-pointer">
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    const files = Array.from(e.target.files || []);
+                                                    const entries = files.map(f => ({ file: f, url: URL.createObjectURL(f) }));
+                                                    setReviewAttachments(prev => [...prev, ...entries]);
+                                                    e.target.value = ''; // allow re-selecting same file
+                                                }}
+                                            />
+                                            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <Paperclip className="w-4 h-4 text-chaiyo-blue" />
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-chaiyo-blue">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่</p>
+                                                <p className="text-xs text-gray-400 mt-0.5">รองรับ PDF, JPG, PNG ขนาดไม่เกิน 5MB</p>
+                                            </div>
+                                        </label>
+                                        {reviewAttachments.length > 0 && (
+                                            <div className="mt-2 flex flex-wrap gap-1.5">
+                                                {reviewAttachments.map((entry, i) => (
+                                                    <div key={i} className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-100 rounded-md px-2 py-1">
+                                                        <Paperclip className="w-3 h-3 shrink-0" />
+                                                        <a
+                                                            href={entry.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="max-w-[160px] truncate hover:underline cursor-pointer"
+                                                        >{entry.file.name}</a>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                URL.revokeObjectURL(entry.url);
+                                                                setReviewAttachments(prev => prev.filter((_, idx) => idx !== i));
+                                                            }}
+                                                            className="ml-0.5 text-blue-400 hover:text-red-500 transition-colors"
+                                                        >✕</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         </DialogBody>
 
                         <DialogFooter>
@@ -799,7 +933,7 @@ function SummaryCard({
                     <p className={cn("text-base font-semibold", isEmpty ? "text-gray-400" : "text-gray-700")}>{title}</p>
                     {completionStatus && (
                         completionStatus === 'completed' ? (
-                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue flex items-center justify-center shrink-0">
+                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
                                 <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             </div>
                         ) : (
@@ -850,5 +984,399 @@ function LoanDetailRow({ label, value }: { label: string; value: string }) {
             <span className="text-sm text-gray-600">{label}</span>
             <span className="text-sm font-bold text-foreground">{value}</span>
         </div>
+    );
+}
+
+// ─── Softblock / Hardblock Code Descriptions ────────────────────────────────
+
+const BLOCK_CODE_MAP: Record<string, string> = {
+    '01': 'ล้มละลาย (Bankrupt)',
+    '02': 'ข้อมูลไม่สมบูรณ์ (Incomplete)',
+    '06': 'รายชื่อเฝ้าระวังทุจริต (Fraud List)',
+    '11': 'รายชื่อ OFAC (OFAC Sanctions)',
+};
+
+interface BlockItem {
+    module: string;
+    type: 'softblock' | 'hardblock';
+    code?: string;
+    description: string;
+    personName?: string;
+}
+
+// Mock block data across 3 modules
+const MOCK_BLOCK_ITEMS: BlockItem[] = [
+    // Customer Info — softblocks
+    {
+        module: 'ข้อมูลผู้กู้',
+        type: 'softblock',
+        code: '06',
+        description: 'ผู้กู้ สมชาย ใจดี ถูกพบในรายชื่อเฝ้าระวังทุจริต',
+        personName: 'สมชาย ใจดี',
+    },
+    // Collateral — hardblock
+    {
+        module: 'หลักประกัน',
+        type: 'hardblock',
+        code: '01',
+        description: 'หลักประกันมีสถานะติดจำนอง ไม่สามารถใช้เป็นหลักประกันได้',
+    },
+    // Guarantors — softblocks
+    {
+        module: 'ผู้ค้ำประกัน',
+        type: 'softblock',
+        code: '02',
+        description: 'ผู้ค้ำ สมบูรณ์ ใจดี ข้อมูลไม่สมบูรณ์',
+        personName: 'สมบูรณ์ ใจดี',
+    },
+    {
+        module: 'ผู้ค้ำประกัน',
+        type: 'softblock',
+        code: '11',
+        description: 'ผู้ค้ำ สมศักดิ์ มั่งมี ถูกพบในรายชื่อ OFAC',
+        personName: 'สมศักดิ์ มั่งมี',
+    },
+    // Guarantors — hardblock
+    {
+        module: 'ผู้ค้ำประกัน',
+        type: 'hardblock',
+        code: '01',
+        description: 'ผู้ค้ำ สมศักดิ์ มั่งมี อยู่ใน Blacklist ไม่สามารถเป็นผู้ค้ำประกันได้',
+        personName: 'สมศักดิ์ มั่งมี',
+    },
+];
+
+const PASSED_MODULES = [
+    { module: 'ข้อมูลผู้กู้', description: 'ตรวจสอบข้อมูลลูกค้าผ่านเรียบร้อย' },
+    { module: 'หลักประกัน', description: 'ข้อมูลหลักประกันผ่านเกณฑ์' },
+    { module: 'ผู้ค้ำประกัน', description: 'ผู้ค้ำประกันผ่านการตรวจสอบ' },
+];
+
+const CONSENT_STEPS = [
+    {
+        title: 'ข้อกำหนดและเงื่อนไข (Terms & Conditions)',
+        description: 'กรุณาอ่านและยอมรับข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ',
+        content: `ข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ\n\nผู้กู้ตกลงและยินยอมผูกพันตามข้อกำหนดและเงื่อนไขที่ระบุไว้ในสัญญาสินเชื่อฉบับนี้ทุกประการ โดยมีสาระสำคัญดังนี้\n\n1. อัตราดอกเบี้ย: อัตราดอกเบี้ยเป็นไปตามที่บริษัทกำหนด และอาจมีการเปลี่ยนแปลงตามประกาศของบริษัท\n2. ระยะเวลาผ่อนชำระ: ผู้กู้ต้องชำระค่างวดตามกำหนดเวลาที่ระบุในสัญญา\n3. ค่าธรรมเนียม: ผู้กู้รับทราบและยินยอมชำระค่าธรรมเนียมต่างๆ ที่เกี่ยวข้อง\n4. การผิดนัดชำระ: หากผู้กู้ผิดนัดชำระ บริษัทมีสิทธิ์คิดดอกเบี้ยผิดนัดตามอัตราที่กฎหมายกำหนด\n5. หลักประกัน: หลักประกันที่ใช้ในการค้ำประกันสินเชื่อจะอยู่ภายใต้เงื่อนไขตามที่ระบุในสัญญา\n6. การบอกเลิกสัญญา: บริษัทมีสิทธิ์บอกเลิกสัญญาได้ทันทีหากผู้กู้ผิดเงื่อนไขข้อใดข้อหนึ่ง`,
+        checkboxLabel: 'ข้าพเจ้าได้อ่านและยอมรับข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ',
+    },
+    {
+        title: 'ความยินยอมทางการตลาด (Marketing Consent)',
+        description: 'ข้อมูลของท่านอาจถูกใช้เพื่อวัตถุประสงค์ทางการตลาด',
+        content: `ความยินยอมในการใช้ข้อมูลเพื่อวัตถุประสงค์ทางการตลาด\n\nบริษัท ออโต้ เอกซ์ จำกัด ขอความยินยอมจากท่านในการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่าน เพื่อวัตถุประสงค์ดังต่อไปนี้:\n\n1. การนำเสนอผลิตภัณฑ์และบริการที่เหมาะสม\n2. การส่งข่าวสาร โปรโมชั่น และสิทธิพิเศษ\n3. การวิเคราะห์พฤติกรรมเพื่อปรับปรุงบริการ\n4. การติดต่อสื่อสารผ่านช่องทางต่างๆ เช่น โทรศัพท์ อีเมล SMS หรือ LINE\n\nท่านสามารถถอนความยินยอมได้ทุกเมื่อโดยแจ้งความประสงค์ผ่านช่องทางที่บริษัทกำหนด`,
+        checkboxLabel: 'ข้าพเจ้ายินยอมให้ใช้ข้อมูลเพื่อวัตถุประสงค์ทางการตลาด',
+    },
+    {
+        title: 'ความยินยอมการประกันภัย (Insurance Consent)',
+        description: 'กรุณารับทราบเงื่อนไขการประกันภัยที่เกี่ยวข้องกับสินเชื่อ',
+        content: `เงื่อนไขการประกันภัยสำหรับสินเชื่อ\n\nผู้กู้รับทราบและยินยอมเงื่อนไขการประกันภัยดังนี้:\n\n1. ประกันภัยหลักประกัน: หลักประกันที่ใช้ในการค้ำประกันสินเชื่อต้องมีการทำประกันภัยตลอดระยะเวลาสัญญา\n2. ผู้รับผลประโยชน์: บริษัทจะเป็นผู้รับผลประโยชน์ตามกรมธรรม์ประกันภัย\n3. ค่าเบี้ยประกันภัย: ผู้กู้เป็นผู้รับผิดชอบค่าเบี้ยประกันภัยทั้งหมด\n4. การต่ออายุ: ผู้กู้ต้องต่ออายุกรมธรรม์ก่อนวันหมดอายุ\n5. ประกันชีวิตกลุ่ม (PA): ผู้กู้ได้รับการคุ้มครองประกันอุบัติเหตุส่วนบุคคลตามเงื่อนไขที่บริษัทกำหนด`,
+        checkboxLabel: 'ข้าพเจ้ารับทราบและยินยอมเงื่อนไขการประกันภัยที่เกี่ยวข้อง',
+    },
+];
+
+function SubmitApplicationDialog({
+    open,
+    onOpenChange,
+    isSubmitting,
+    allPassed = false,
+    onSubmit,
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    isSubmitting: boolean;
+    allPassed?: boolean;
+    onSubmit: () => void;
+}) {
+    const [dialogStep, setDialogStep] = useState(1);
+    const [consentChecked, setConsentChecked] = useState([false, false, false]);
+
+    // Reset state when dialog opens/closes
+    useEffect(() => {
+        if (open) {
+            setDialogStep(1);
+            setConsentChecked([false, false, false]);
+        }
+    }, [open]);
+
+    const softblocks = MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock');
+    const hasSoftblocks = softblocks.length > 0;
+    const hasBlocks = MOCK_BLOCK_ITEMS.length > 0;
+
+    const handleConsentChange = (index: number, checked: boolean) => {
+        setConsentChecked(prev => {
+            const next = [...prev];
+            next[index] = checked;
+            return next;
+        });
+    };
+
+    // For all-passed flow: consent step index (0, 1, 2) maps to dialogStep 2, 3, 4
+    const consentIndex = dialogStep - 2;
+    const currentConsent = CONSENT_STEPS[consentIndex];
+    const isConsentStep = allPassed && dialogStep >= 2 && dialogStep <= 4;
+    const isFinalStep = allPassed && dialogStep === 4;
+
+    // Step titles for header
+    const getStepTitle = () => {
+        if (!allPassed || dialogStep === 1) return 'ส่งใบสมัครสินเชื่อ';
+        return currentConsent?.title || 'ส่งใบสมัครสินเชื่อ';
+    };
+
+    const getStepDescription = () => {
+        if (dialogStep === 1) {
+            if (allPassed) return 'ข้อมูลทั้งหมดผ่านการตรวจสอบเรียบร้อย กรุณาดำเนินการขั้นตอนถัดไป';
+            if (hasBlocks) return 'ตรวจพบรายการที่ต้องตรวจสอบเพิ่มเติมจากระบบ กรุณาตรวจสอบรายละเอียดก่อนส่งใบสมัคร';
+            return 'ใบสมัครจะถูกส่งเข้าสู่ระบบเพื่อพิจารณาอนุมัติ';
+        }
+        return currentConsent?.description || '';
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent size="lg">
+                <DialogHeader>
+                    <div className="flex items-center justify-between">
+                        <DialogTitle>{getStepTitle()}</DialogTitle>
+                        {/* Step indicator for all-passed flow */}
+                        {allPassed && dialogStep >= 2 && (
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                {CONSENT_STEPS.map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={cn(
+                                            "h-1.5 rounded-full transition-all",
+                                            i === consentIndex ? "w-8 bg-chaiyo-blue" : i < consentIndex ? "w-4 bg-emerald-400" : "w-4 bg-gray-200"
+                                        )}
+                                    />
+                                ))}
+                                <span className="text-[10px] text-gray-400 ml-1.5">ขั้นตอน {consentIndex + 1} / {CONSENT_STEPS.length}</span>
+                            </div>
+                        )}
+                    </div>
+                    <DialogDescription>{getStepDescription()}</DialogDescription>
+                </DialogHeader>
+
+                <DialogBody>
+                    {/* Step 1: Status check */}
+                    {dialogStep === 1 && (
+                        <div className="space-y-5">
+                            {/* Block flow (existing) */}
+                            {!allPassed && hasBlocks && (
+                                <>
+                                    {hasSoftblocks && (
+                                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                                            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                                                <Send className="w-3 h-3 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-blue-800">
+                                                    ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
+                                                </p>
+                                                <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
+                                                    เนื่องจากมีรายการ Softblock ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
+                                                    หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                                        <table className="w-full text-sm">
+                                            <thead>
+                                                <tr className="bg-gray-50 border-b border-gray-200">
+                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[120px]"></th>
+                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600">รายละเอียด</th>
+                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[80px]">รหัส</th>
+                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[200px]">ประเภท</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {MOCK_BLOCK_ITEMS.map((item, i) => {
+                                                    const isHardblock = item.type === 'hardblock';
+                                                    return (
+                                                        <tr key={i} className="bg-white hover:bg-gray-50/50 transition-colors">
+                                                            <td className="px-4 py-2.5">
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                                                                    {item.module}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-2.5">
+                                                                {item.personName && (
+                                                                    <p className="text-xs font-semibold text-gray-900">{item.personName}</p>
+                                                                )}
+                                                                <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>
+                                                            </td>
+                                                            <td className="px-4 py-2.5">
+                                                                {item.code && (
+                                                                    <span className={cn(
+                                                                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
+                                                                        isHardblock
+                                                                            ? "bg-red-100 text-red-700 border-red-200"
+                                                                            : "bg-amber-100 text-amber-700 border-amber-200"
+                                                                    )}>
+                                                                        {item.code}
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-2.5 text-xs text-gray-600 font-medium">
+                                                                {item.code && BLOCK_CODE_MAP[item.code] ? BLOCK_CODE_MAP[item.code] : '-'}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* All-passed flow */}
+                            {allPassed && (
+                                <div className="space-y-3">
+                                    {PASSED_MODULES.map((mod, i) => (
+                                        <div
+                                            key={i}
+                                            className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl"
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                                                <CircleCheck className="w-4.5 h-4.5 text-emerald-500" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900">{mod.module}</p>
+                                            </div>
+                                            <Badge variant="success" className="gap-1 shrink-0">
+                                                <CircleCheck className="w-3.5 h-3.5" />
+                                                ผ่าน
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Steps 2-4: Consent steps */}
+                    {isConsentStep && currentConsent && (
+                        <div className="space-y-4">
+                            <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
+                                <div className="p-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-chaiyo-blue" />
+                                    <span className="text-sm font-semibold text-gray-700">
+                                        กรุณาอ่านและทำความเข้าใจรายละเอียดก่อนดำเนินการต่อ
+                                    </span>
+                                </div>
+                                <div className="h-[280px] overflow-y-auto p-5 text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                    {currentConsent.content}
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-100 flex items-start gap-3">
+                                <Checkbox
+                                    id={`consent-${consentIndex}`}
+                                    className="mt-0.5"
+                                    checked={consentChecked[consentIndex]}
+                                    onCheckedChange={(checked) => handleConsentChange(consentIndex, checked as boolean)}
+                                />
+                                <label
+                                    htmlFor={`consent-${consentIndex}`}
+                                    className="cursor-pointer select-none text-sm text-gray-700 font-semibold leading-snug"
+                                >
+                                    {currentConsent.checkboxLabel}
+                                </label>
+                            </div>
+                        </div>
+                    )}
+                </DialogBody>
+
+                <DialogFooter>
+                    {/* Back button for consent steps */}
+                    {isConsentStep && (
+                        <Button
+                            variant="outline"
+                            onClick={() => setDialogStep(prev => prev - 1)}
+                            className="min-w-[104px] mr-auto"
+                        >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            ย้อนกลับ
+                        </Button>
+                    )}
+
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        className="min-w-[104px]"
+                    >
+                        ยกเลิก
+                    </Button>
+
+                    {/* Step 1 all-passed: ดำเนินการต่อ */}
+                    {dialogStep === 1 && allPassed && (
+                        <Button
+                            onClick={() => setDialogStep(2)}
+                            variant="default"
+                            className="min-w-[104px]"
+                        >
+                            ดำเนินการต่อ
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                        </Button>
+                    )}
+
+                    {/* Step 1 with blocks: ส่งใบสมัคร (to legal) */}
+                    {dialogStep === 1 && !allPassed && (
+                        <Button
+                            onClick={onSubmit}
+                            variant="default"
+                            className="min-w-[104px]"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    กำลังส่ง...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4 mr-1.5" />
+                                    ส่งใบสมัคร
+                                </>
+                            )}
+                        </Button>
+                    )}
+
+                    {/* Consent steps 2-3: ถัดไป */}
+                    {isConsentStep && !isFinalStep && (
+                        <Button
+                            onClick={() => setDialogStep(prev => prev + 1)}
+                            variant="default"
+                            className="min-w-[104px]"
+                            disabled={!consentChecked[consentIndex]}
+                        >
+                            ถัดไป
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                        </Button>
+                    )}
+
+                    {/* Final consent step 4: ส่งใบสมัคร */}
+                    {isFinalStep && (
+                        <Button
+                            onClick={onSubmit}
+                            variant="default"
+                            className="min-w-[104px]"
+                            disabled={isSubmitting || !consentChecked[consentIndex]}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    กำลังส่ง...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4 mr-1.5" />
+                                    ส่งใบสมัคร
+                                </>
+                            )}
+                        </Button>
+                    )}
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

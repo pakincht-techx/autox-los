@@ -18,8 +18,10 @@ export const ALL_FLOW_STEPS = [
     { slug: 'income', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/income`, phase: 'application' as const },
     { slug: 'debt', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/debt`, phase: 'application' as const },
     { slug: 'guarantors', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/guarantors`, phase: 'application' as const },
+    { slug: 'refinance', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/refinance`, phase: 'application' as const },
     { slug: 'loan-calculator', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/loan-calculator`, phase: 'application' as const },
     { slug: 'documents', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/documents`, phase: 'application' as const },
+    { slug: 'consent', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/consent`, phase: 'application' as const },
     { slug: 'review', getPath: (id: string) => `/dashboard/new-application/${id || 'draft'}/review`, phase: 'application' as const },
 ];
 

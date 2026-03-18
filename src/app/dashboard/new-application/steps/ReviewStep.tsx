@@ -380,21 +380,21 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted">รายได้หลัก</span>
-                                    <span className="font-medium text-right">฿{Number(formData.baseSalary || formData.income || 0).toLocaleString()}</span>
+                                    <span className="font-medium text-right">{Number(formData.baseSalary || formData.income || 0).toLocaleString()}</span>
                                 </div>
                                 {Number(formData.otherIncome ?? 0) > 0 && (
                                     <div className="flex justify-between">
                                         <span className="text-muted">รายได้อื่นๆ</span>
-                                        <span className="font-medium text-right">฿{Number(formData.otherIncome ?? 0).toLocaleString()}</span>
+                                        <span className="font-medium text-right">{Number(formData.otherIncome ?? 0).toLocaleString()}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between">
                                     <span className="text-muted">ภาระหนี้สิน</span>
-                                    <span className="font-medium text-right text-red-500">- ฿{Number(formData.expenses ?? 0).toLocaleString()}</span>
+                                    <span className="font-medium text-right text-red-500">- {Number(formData.expenses ?? 0).toLocaleString()}</span>
                                 </div>
                                 <div className="border-t border-dashed border-gray-200 my-2 pt-4 flex justify-between">
                                     <span className="text-muted font-bold">รายได้สุทธิ (Net Income)</span>
-                                    <span className="font-bold text-right text-emerald-600">฿{(Number(formData.income ?? 0) - Number(formData.expenses ?? 0)).toLocaleString()}</span>
+                                    <span className="font-bold text-right text-emerald-600">{(Number(formData.income ?? 0) - Number(formData.expenses ?? 0)).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl mt-2">
                                     <span className="text-muted text-xs">อัตราส่วนหนี้สิน (DSR)</span>
@@ -539,7 +539,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             {['pawned', 'pledge', 'mortgaged', 'mortgage_refinance'].includes(formData.legalStatus ?? "") ? 'ยอดหนี้คงเหลือ' : 'ยอดปิดบัญชี (Payoff)'}
                                         </span>
                                         <span className="font-medium text-right">
-                                            ฿{Number(
+                                            {Number(
                                                 formData.pawnedRemainingDebt ||
                                                 formData.existingDebt ||
                                                 formData.leasePayoffBalance ||
@@ -709,7 +709,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                         return opt ? (
                                             <div key={id} className="flex justify-between text-xs">
                                                 <span className="text-muted-foreground">{opt.label}</span>
-                                                <span className="font-medium">฿{opt.price.toLocaleString()}</span>
+                                                <span className="font-medium">{opt.price.toLocaleString()}</span>
                                             </div>
                                         ) : null;
                                     })}
@@ -717,7 +717,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <div className="flex justify-between text-xs">
                                         <span className="text-muted-foreground">รวมค่าเบี้ยประกัน</span>
                                         <span className="font-bold text-chaiyo-blue">
-                                            ฿{(() => {
+                                            {(() => {
                                                 const INSURANCE_OPTIONS = [
                                                     { id: 'car_tier1', label: 'ประกันรถยนต์ ชั้น 1', price: 20000 },
                                                     { id: 'car_tier2', label: 'ประกันรถยนต์ ชั้น 2+', price: 15000 },
@@ -748,7 +748,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
                         <div className="flex justify-between">
                             <span className="text-muted">วงเงินขอสินเชื่อ (Net)</span>
-                            <span className="font-medium text-right">฿{formData.requestedAmount?.toLocaleString()}</span>
+                            <span className="font-medium text-right">{formData.requestedAmount?.toLocaleString()}</span>
                         </div>
 
                         {(formData.includeInsuranceInLoan && (formData.selectedInsurances?.length ?? 0) > 0) && (
@@ -756,7 +756,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 <span className="text-muted">ค่าประกัน (รวมในยอดจัด)</span>
                                 <span className="font-medium text-right text-chaiyo-blue flex items-center justify-end gap-1">
                                     <ShieldCheck className="w-3 h-3" />
-                                    +฿{(() => {
+                                    +{(() => {
                                         const INSURANCE_OPTIONS = [
                                             { id: 'car_tier1', label: 'ประกันรถยนต์ ชั้น 1', price: 20000 },
                                             { id: 'car_tier2', label: 'ประกันรถยนต์ ชั้น 2+', price: 15000 },
@@ -775,7 +775,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                         <div className="flex justify-between pt-2 border-t border-dashed border-gray-200">
                             <span className="text-foreground font-bold">ยอดจัดสินเชื่อสุทธิ</span>
                             <span className="font-bold text-chaiyo-blue text-lg text-right">
-                                ฿{(() => {
+                                {(() => {
                                     const INSURANCE_OPTIONS = [
                                         { id: 'car_tier1', label: 'ประกันรถยนต์ ชั้น 1', price: 20000 },
                                         { id: 'car_tier2', label: 'ประกันรถยนต์ ชั้น 2+', price: 15000 },
@@ -795,7 +795,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
                         <div className="flex justify-between mt-2">
                             <span className="text-muted">ดอกเบี้ย ({((formData.interestRate || 0.08) * 100).toFixed(0)}% ต่อปี)</span>
-                            <span className="font-bold text-right">฿{Math.ceil(formData.totalInterest || 0).toLocaleString()}</span>
+                            <span className="font-bold text-right">{Math.ceil(formData.totalInterest || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted">ระยะเวลาผ่อน</span>
@@ -805,7 +805,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                         <div className="border-t border-dashed border-border-subtle my-2 pt-2 flex justify-between">
                             <span className="text-muted font-bold">รวมยอดหนี้ทั้งสิ้น ({formData.paymentMethod === 'bullet' ? 'Bullet' : 'Installment'})</span>
                             <span className="font-bold text-right">
-                                ฿{(() => {
+                                {(() => {
                                     const INSURANCE_OPTIONS = [
                                         { id: 'insurance_tier1', label: 'ประกันรถยนต์ ชั้น 1', price: 20000 },
                                         { id: 'insurance_tier2_plus', label: 'ประกันรถยนต์ ชั้น 2+', price: 15000 },
@@ -827,7 +827,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                 {formData.paymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่างวดโดยประมาณ'}
                             </span>
                             <span className="font-bold text-right text-emerald-600 text-lg">
-                                ฿{Math.ceil(formData.estimatedMonthlyPayment || 0).toLocaleString()}
+                                {Math.ceil(formData.estimatedMonthlyPayment || 0).toLocaleString()}
                                 {formData.paymentMethod === 'bullet' ? '' : ' / เดือน'}
                             </span>
                         </div>
@@ -866,7 +866,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-indigo-900/40 mt-1 italic">
-                                    * รวมภาระหนี้เดิม ฿{(formData.expenses ?? 0).toLocaleString()} และงวดปัจจุบัน
+                                    * รวมภาระหนี้เดิม {(formData.expenses ?? 0).toLocaleString()} และงวดปัจจุบัน
                                 </p>
                             </div>
                         </div>
@@ -957,7 +957,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
             <div className="pt-4 pb-8 flex justify-center">
                 <Button
                     size="lg"
-                    className="w-full max-w-sm h-14 text-lg font-bold bg-chaiyo-gold hover:bg-chaiyo-gold/90 text-chaiyo-blue shadow-xl"
+                    className="w-full max-w-sm h-14 text-lg bg-chaiyo-gold hover:bg-chaiyo-gold/90 text-chaiyo-blue shadow-xl"
                     disabled={!acceptedTerms}
                     onClick={handleConfirmSubmission}
                 >
@@ -1088,7 +1088,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                             <span className="text-sm text-muted font-medium">วงเงินที่ได้รับอนุมัติ</span>
-                                            <span className="text-2xl font-black text-chaiyo-blue">฿{(approvalResult?.approvedAmount || 0).toLocaleString()}</span>
+                                            <span className="text-2xl font-black text-chaiyo-blue">{(approvalResult?.approvedAmount || 0).toLocaleString()}</span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
@@ -1097,7 +1097,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             </div>
                                             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                                                 <span className="text-xs text-muted block mb-1">ค่างวด/เดือน</span>
-                                                <span className="text-lg font-bold text-foreground">฿{(approvalResult?.monthlyPayment || 0).toLocaleString()}</span>
+                                                <span className="text-lg font-bold text-foreground">{(approvalResult?.monthlyPayment || 0).toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>

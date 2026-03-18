@@ -1148,7 +1148,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             )}
                                                             {occIncome > 0 && (
                                                                 <span className="text-[11px] font-semibold text-chaiyo-blue/60 group-data-[state=active]/tab:text-chaiyo-blue font-mono">
-                                                                    ฿{formatNumberWithCommas(occIncome)}
+                                                                    {formatNumberWithCommas(occIncome)}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -2058,7 +2058,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                             </TableCell>
                                                                                             <TableCell colSpan={2} className="text-right pr-[4.5rem] py-3">
                                                                                                 <div className="text-sm font-semibold font-mono text-gray-700">
-                                                                                                    ฿{formatNumberWithCommas(sourceTotal)}
+                                                                                                    {formatNumberWithCommas(sourceTotal)}
                                                                                                 </div>
                                                                                             </TableCell>
                                                                                         </TableRow>
@@ -2124,7 +2124,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
                                                                             <span className="text-sm font-bold">รายได้รวมทุกแหล่ง (ต่อเดือน):</span>
                                                                             <span className="text-xl font-bold font-mono tracking-tight">
-                                                                                ฿{formatNumberWithCommas(occ.totalIncome || "0")}
+                                                                                {formatNumberWithCommas(occ.totalIncome || "0")}
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -2356,7 +2356,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 </TableCell>
                                                                                 <TableCell className="text-right pr-6 py-4">
                                                                                     <div className="text-lg font-bold font-mono">
-                                                                                        ฿{formatNumberWithCommas(
+                                                                                        {formatNumberWithCommas(
                                                                                             (occ.seIncomes || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0)
                                                                                         )}
                                                                                     </div>
@@ -2529,7 +2529,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 </TableCell>
                                                                                 <TableCell colSpan={2} className="text-right pr-4 py-4">
                                                                                     <div className="text-lg font-bold font-mono text-gray-900">
-                                                                                        ฿{formatNumberWithCommas(
+                                                                                        {formatNumberWithCommas(
                                                                                             (occ.seCosts || []).reduce((acc: number, curr: EnterpriseIncome) => acc + (Number(curr.calculatedMonthly) || 0), 0)
                                                                                         )}
                                                                                     </div>
@@ -2554,7 +2554,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                     "text-xl font-bold font-mono tracking-tight",
                                                                                     netIncome < 0 ? "text-red-500" : "text-chaiyo-blue"
                                                                                 )}>
-                                                                                    ฿{formatNumberWithCommas(netIncome)}
+                                                                                    {formatNumberWithCommas(netIncome)}
                                                                                 </span>
                                                                             );
                                                                         })()}
@@ -2912,12 +2912,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         </TableCell>
                                                                                     )}
                                                                                 </TableRow>
-                                                                                <TableRow className="bg-emerald-50/50 hover:bg-emerald-50/50 transition-none">
-                                                                                    <TableCell className="py-4 text-xs font-bold text-emerald-800">รายได้ต่อเดือน (บาท)</TableCell>
-                                                                                    <TableCell className="py-4 text-sm text-right font-bold font-mono text-emerald-700">{formatNumberWithCommas(Math.max(0, stdIncome).toFixed(2))}</TableCell>
+                                                                                <TableRow className="bg-blue-50/50 hover:bg-blue-50/50 transition-none">
+                                                                                    <TableCell className="py-4 text-xs font-bold text-chaiyo-blue">รายได้ต่อเดือน (บาท)</TableCell>
+                                                                                    <TableCell className="py-4 text-sm text-right font-bold font-mono text-chaiyo-blue">{formatNumberWithCommas(Math.max(0, stdIncome).toFixed(2))}</TableCell>
                                                                                     {occ.farmIsHigherThanStandard && (
-                                                                                        <TableCell className="py-4 text-right pr-6 bg-emerald-50/80">
-                                                                                            <div className="text-sm font-bold font-mono text-emerald-700">
+                                                                                        <TableCell className="py-4 text-right pr-6 bg-blue-50/80">
+                                                                                            <div className="text-sm font-bold font-mono text-chaiyo-blue">
                                                                                                 {formatNumberWithCommas(Math.max(0, customerIncome).toFixed(2))}
                                                                                             </div>
                                                                                         </TableCell>
@@ -3174,7 +3174,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 </p>
                                                             </div>
 
-                                                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                                            <div className="grid grid-cols-1 gap-4">
                                                                 {(occ.livestockCycles || []).map((cycle, idx) => {
                                                                     const std = LIVESTOCK_STANDARD_PRICES[occ.livestockType || "others"] || { sales: 0, cost: 0 };
 
@@ -3306,9 +3306,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                                                 />
                                                                                                             </TableCell>
                                                                                                         </TableRow>
-                                                                                                        <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
-                                                                                                            <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิ</TableCell>
-                                                                                                            <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600">
+                                                                                                        <TableRow className="bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                                                                                                            <TableCell className="text-xs py-4 font-bold text-chaiyo-blue">รายได้สุทธิ</TableCell>
+                                                                                                            <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-chaiyo-blue">
                                                                                                                 {formatNumberWithCommas(((Number(cycle.customerPrice) || 0) - (Number(cycle.customerCost) || 0)) * (Number(cycle.quantity) || 0))}
                                                                                                             </TableCell>
                                                                                                         </TableRow>
@@ -3363,13 +3363,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                                                 </TableCell>
                                                                                                             )}
                                                                                                         </TableRow>
-                                                                                                        <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
-                                                                                                            <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิ</TableCell>
-                                                                                                            <TableCell className="text-xs py-4 text-right font-mono text-emerald-600/60 font-medium">
+                                                                                                        <TableRow className="bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                                                                                                            <TableCell className="text-xs py-4 font-bold text-chaiyo-blue">รายได้สุทธิ</TableCell>
+                                                                                                            <TableCell className="text-xs py-4 text-right font-mono text-chaiyo-blue/60 font-medium">
                                                                                                                 {formatNumberWithCommas(stdNet.toFixed(2))}
                                                                                                             </TableCell>
                                                                                                             {cycle.isHigherThanStandard && (
-                                                                                                                <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600 bg-emerald-100/20">
+                                                                                                                <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-chaiyo-blue bg-blue-100/20">
                                                                                                                     {formatNumberWithCommas(custNet.toFixed(2))}
                                                                                                                 </TableCell>
                                                                                                             )}
@@ -3425,9 +3425,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                                         />
                                                                                                     </TableCell>
                                                                                                 </TableRow>
-                                                                                                <TableRow className="bg-emerald-50/30 hover:bg-emerald-50/50 transition-colors">
-                                                                                                    <TableCell className="text-xs py-4 font-bold text-emerald-800">รายได้สุทธิต่อรอบ</TableCell>
-                                                                                                    <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-emerald-600">
+                                                                                                <TableRow className="bg-blue-50/30 hover:bg-blue-50/50 transition-colors">
+                                                                                                    <TableCell className="text-xs py-4 font-bold text-chaiyo-blue">รายได้สุทธิต่อรอบ</TableCell>
+                                                                                                    <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-chaiyo-blue">
                                                                                                         {formatNumberWithCommas(cycle.netIncome || "0.00")}
                                                                                                     </TableCell>
                                                                                                 </TableRow>
@@ -3447,7 +3447,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
                                                                         <span className="text-sm font-bold">รายได้ต่อเดือนปศุสัตว์:</span>
                                                                         <span className="text-xl font-bold font-mono tracking-tight">
-                                                                            ฿{formatNumberWithCommas((((occ.livestockCycles || []).reduce((acc, c) => acc + (Number(c.netIncome) || 0), 0)) / 12).toFixed(2))}
+                                                                            {formatNumberWithCommas((((occ.livestockCycles || []).reduce((acc, c) => acc + (Number(c.netIncome) || 0), 0)) / 12).toFixed(2))}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -3742,7 +3742,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                         <div className="p-4 space-y-4">
                             {/* Income Breakdown */}
                             <div className="space-y-2">
-                                <h4 className="text-sm font-bold text-emerald-700 flex items-center gap-2">
+                                <h4 className="text-sm font-bold text-chaiyo-blue flex items-center gap-2">
                                     รายได้รับ   <TrendingUp className="w-4 h-4" />
                                 </h4>
                                 <div className="space-y-1.5 text-sm">
@@ -3756,7 +3756,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                     </div>
                                     <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
                                         <span>รวมรายได้</span>
-                                        <span className="font-mono text-emerald-600">฿{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
+                                        <span className="font-mono text-chaiyo-blue">{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
                                     </div>
                                 </div>
                             </div>
@@ -3904,25 +3904,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                 if (!open) setCurrentDocContext(null);
             }}>
                 <DialogContent
-                    className="max-w-3xl p-0 overflow-hidden rounded-2xl border-none bg-white"
+                    className="max-w-3xl"
                     onInteractOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
                     onPointerDownOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
                 >
-                    <div className="bg-white p-5 border-b border-border-subtle flex items-center justify-between">
-                        <DialogHeader>
-                            <DialogTitle>
-                                เพิ่ม{currentDocContext?.label}
-                            </DialogTitle>
+                    <DialogHeader>
+                        <DialogTitle>
+                            เพิ่ม{currentDocContext?.label}
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        </DialogHeader>
-                        <Button variant="ghost" size="sm" onClick={() => setIsUploadDialogOpen(false)} className="h-8 w-8 p-0 rounded-full">
-                            <X className="w-5 h-5 text-gray-500" />
-                        </Button>
-                    </div>
-
-                    <div className="p-5 overflow-y-auto max-h-[80vh] space-y-6">
+                    <DialogBody className="space-y-6">
                         {/* Upper: Methods */}
-                        <div className="bg-white">
+                        <div>
                             <h4 className="text-sm font-bold text-gray-700 mb-4">ช่องทางการเพิ่มไฟล์</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <button
@@ -3966,10 +3960,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                 <div>
                                     <div className="text-sm font-bold text-gray-700 mb-4">
                                         ไฟล์ที่อัพโหลด ({currentFileList.length})
-
                                     </div>
                                     <div className="bg-white rounded-xl border overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-
                                         <div className="overflow-x-auto border-t border-border-subtle">
                                             <Table>
                                                 <TableHeader className="bg-gray-50/50">
@@ -3985,7 +3977,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             {/* File Name Input */}
                                                             <TableCell className="py-3">
                                                                 <div className="flex items-center gap-3">
-
                                                                     <Input
                                                                         value={doc.name}
                                                                         onChange={(e) => handleUpdateIncomeDocument(occ.id, doc.id, { name: e.target.value })}
@@ -4053,19 +4044,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                 </div>
                             );
                         })()}
-                    </div>
+                    </DialogBody>
 
-                    <div className="p-4 border-t border-border-subtle bg-white flex justify-end">
+                    <DialogFooter>
                         <Button
                             onClick={() => {
                                 setIsUploadDialogOpen(false);
                                 setCurrentDocContext(null);
                             }}
-                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90"
+                            className="min-w-[120px] font-bold bg-chaiyo-blue hover:bg-chaiyo-blue/90"
                         >
                             ยืนยันและปิด
                         </Button>
-                    </div>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

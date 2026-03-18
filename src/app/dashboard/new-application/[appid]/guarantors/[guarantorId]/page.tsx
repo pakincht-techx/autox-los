@@ -2,32 +2,27 @@
 
 import { useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { User, Coins, FileText, Pencil, Plus, Check, Circle } from "lucide-react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
-import { Card, CardContent } from "@/components/ui/Card";
-import { ArrowLeft, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { cn } from "@/lib/utils";
 
 export default function GuarantorDetailPage() {
     const router = useRouter();
     const params = useParams();
     const appId = params.appid as string;
-    
-    // In a real app we'd fetch the guarantor details by guarantorId
-    // For now, we'll extract the name from query params or a mock standard name
+    const guarantorId = params.guarantorId as string;
+
     const { setBreadcrumbs, setRightContent } = useSidebar();
     const { formData: applicationFormData } = useApplication();
     const searchParams = useSearchParams();
     const isReadonly = searchParams.get('state') === 'readonly';
 
-    // Breadcrumbs management
     useEffect(() => {
         const borrowerFirstName = applicationFormData?.firstName;
         const displayAppId = appId.length > 8 ? `...${appId.slice(-6)}` : appId;
         const appLabel = borrowerFirstName ? `${displayAppId} (${borrowerFirstName})` : displayAppId;
-
-        // Mock getting guarantor name
         const displayName = "ดีใจ";
 
         setBreadcrumbs([
@@ -36,65 +31,145 @@ export default function GuarantorDetailPage() {
             { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: displayName, isActive: true }
         ]);
-        
-        // Clear right content if any
-        if (!isReadonly) {
-            setRightContent(null);
-        }
-        
+
+        setRightContent(null);
     }, [appId, setBreadcrumbs, applicationFormData?.firstName, router, isReadonly, setRightContent]);
+
+    const basePath = `/dashboard/new-application/${appId}/guarantors/${guarantorId}`;
+
+    // Calculate age from BE birthDate (DD/MM/YYYY BE)
+    const birthDateBE = "15/06/2523";
+    const [, , yearBE] = birthDateBE.split("/").map(Number);
+    const currentYearBE = new Date().getFullYear() + 543;
+    const guarantorAge = currentYearBE - yearBE;
+
+    const modules = [
+        {
+            title: "ข้อมูลผู้ค้ำ",
+            value: `${guarantorAge} ปี`,
+            icon: <User className="w-24 h-24" />,
+            isEmpty: false,
+            completionStatus: 'incomplete' as const,
+            href: `${basePath}/info`,
+        },
+        {
+            title: "อาชีพและรายได้",
+            value: "-",
+            unit: "บาท/เดือน",
+            icon: <Coins className="w-24 h-24" />,
+            isEmpty: true,
+            completionStatus: 'incomplete' as const,
+            href: `${basePath}/income`,
+        },
+        {
+            title: "ภาระหนี้สิน",
+            value: "-",
+            unit: "บาท/เดือน",
+            icon: <FileText className="w-24 h-24" />,
+            isEmpty: true,
+            completionStatus: 'incomplete' as const,
+            href: `${basePath}/debt`,
+        },
+    ];
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" className="p-2" onClick={() => router.push(`/dashboard/new-application/${appId}/guarantors`)}>
-                    <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <div>
-                    <h2 className="text-2xl font-bold">ดีใจ ไชโย</h2>
-                </div>
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold">ดีใจ ไชโย</h2>
             </div>
 
-            <Tabs defaultValue="info" className="w-full">
-                <TabsList className="flex w-full max-w-[400px] mb-8 bg-gray-100/50 p-1 rounded-2xl gap-1">
-                    <TabsTrigger value="info" className="flex-1 rounded-xl data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm font-bold h-10">ข้อมูลผู้ค้ำ</TabsTrigger>
-                    <TabsTrigger value="income" className="flex-1 rounded-xl data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm font-bold h-10">รายได้</TabsTrigger>
-                    <TabsTrigger value="debt" className="flex-1 rounded-xl data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm font-bold h-10">ภาระหนี้สิน</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="info" className="mt-0">
-                    <Card className="border-border-subtle shadow-sm rounded-2xl bg-white">
-                        <CardContent className="p-6 min-h-[400px] flex items-center justify-center">
-                            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500">
-                                <p className="text-lg font-bold mb-2">ข้อมูลผู้ค้ำประกัน</p>
-                                <p className="text-sm">จะพัฒนาในเฟสถัดไป</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {modules.map((mod) => (
+                    <SummaryCard
+                        key={mod.title}
+                        title={mod.title}
+                        value={mod.value}
+                        unit={mod.unit}
+                        icon={mod.icon}
+                        isEmpty={mod.isEmpty}
+                        completionStatus={mod.completionStatus}
+                        onEdit={() => router.push(mod.href)}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function SummaryCard({
+    title,
+    value,
+    unit,
+    icon,
+    isEmpty = false,
+    completionStatus,
+    onEdit,
+}: {
+    title: string;
+    value: React.ReactNode;
+    unit?: string;
+    icon?: React.ReactNode;
+    isEmpty?: boolean;
+    completionStatus?: 'completed' | 'incomplete';
+    onEdit?: () => void;
+}) {
+    return (
+        <div className={cn(
+            "rounded-2xl p-5 flex flex-col justify-between min-h-[140px] group relative overflow-hidden transition-all duration-300 cursor-pointer",
+            isEmpty
+                ? (onEdit ? "bg-white border-2 border-dashed border-gray-300 hover:border-chaiyo-blue/50" : "bg-gray-50/50 border border-border-subtle")
+                : completionStatus === 'completed'
+                    ? "bg-blue-50/40 border border-blue-100/60 hover:border-blue-200"
+                    : "bg-gray-50/80 border border-gray-200 hover:border-gray-300"
+        )}
+        onClick={onEdit}
+        >
+            {icon && (
+                <div className={cn(
+                    "absolute -bottom-4 -right-4 transition-colors duration-300 pointer-events-none",
+                    isEmpty ? "text-gray-100/60 group-hover:text-gray-200/80" : "text-gray-200/50 group-hover:text-gray-200"
+                )}>
+                    {icon}
+                </div>
+            )}
+
+            <div className="relative z-10">
+                <div className="flex items-center justify-between mb-2">
+                    <p className={cn("text-base font-semibold", isEmpty ? "text-gray-400" : "text-gray-700")}>{title}</p>
+                    {completionStatus && (
+                        completionStatus === 'completed' ? (
+                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                                <Check className="w-3 h-3 text-white" strokeWidth={3} />
                             </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                
-                <TabsContent value="income" className="mt-0">
-                    <Card className="border-border-subtle shadow-sm rounded-2xl bg-white">
-                        <CardContent className="p-6 min-h-[400px] flex items-center justify-center">
-                            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500">
-                                <p className="text-lg font-bold mb-2">ข้อมูลรายได้</p>
-                                <p className="text-sm">จะพัฒนาในเฟสถัดไป</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                
-                <TabsContent value="debt" className="mt-0">
-                    <Card className="border-border-subtle shadow-sm rounded-2xl bg-white">
-                        <CardContent className="p-6 min-h-[400px] flex items-center justify-center">
-                            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-500">
-                                <p className="text-lg font-bold mb-2">ข้อมูลภาระหนี้สิน</p>
-                                <p className="text-sm">จะพัฒนาในเฟสถัดไป</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                        ) : (
+                            <Circle className="w-4.5 h-4.5 text-gray-300 shrink-0" strokeWidth={2} />
+                        )
+                    )}
+                </div>
+                {isEmpty ? (
+                    <p className="text-sm font-normal text-gray-300 mt-1">-</p>
+                ) : (
+                    <div className="text-sm font-medium text-foreground tracking-tight">
+                        {value}
+                        {unit && <span className="text-sm text-foreground ml-1">{unit}</span>}
+                    </div>
+                )}
+            </div>
+            {onEdit && (
+                <Button
+                    variant={isEmpty ? "default" : "outline"}
+                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                    className={cn(
+                        "relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5",
+                        isEmpty
+                            ? "bg-chaiyo-blue text-white"
+                            : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-chaiyo-blue"
+                    )}
+                >
+                    {isEmpty ? <Plus className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+                    {isEmpty ? "เพิ่มข้อมูล" : "แก้ไข"}
+                </Button>
+            )}
         </div>
     );
 }

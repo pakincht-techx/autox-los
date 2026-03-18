@@ -108,7 +108,7 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                                 <div>
                                     <p className="text-xs text-gray-500 uppercase font-semibold">ราคาประเมินเบื้องต้น</p>
                                     <div className="">
-                                        <p className="text-xl font-bold text-gray-900">฿{data.estimatedValue.toLocaleString()}</p>
+                                        <p className="text-xl font-bold text-gray-900">{data.estimatedValue.toLocaleString()}</p>
                                         <p className="text-[10px] text-gray-400 font-light">*ราคาอาจเปลี่ยนแปลงหลังตรวจสภาพจริง</p>
                                     </div>
                                 </div>
@@ -134,16 +134,16 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-500">รายได้รวมต่อเดือน</span>
-                                    <span className="font-medium">฿{(data.income || 0).toLocaleString()}</span>
+                                    <span className="font-medium">{(data.income || 0).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-sm text-gray-500">ภาระหนี้เดิม</span>
-                                    <span className="font-medium text-red-600">-฿{(data.monthlyDebt || 0).toLocaleString()}</span>
+                                    <span className="font-medium text-red-600">-{(data.monthlyDebt || 0).toLocaleString()}</span>
                                 </div>
                                 <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
                                     <span className="text-sm font-bold text-gray-800">รายได้สุทธิ</span>
                                     <span className={cn("font-bold text-lg", netIncome < 0 ? "text-red-600" : "text-emerald-600")}>
-                                        ฿{netIncome.toLocaleString()}
+                                        {netIncome.toLocaleString()}
                                     </span>
                                 </div>
                                 {/* DSR Calculation */}
@@ -185,7 +185,7 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                         <div className="p-4 grid grid-cols-4 gap-4 divide-x divide-gray-100">
                             <div className="px-2">
                                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">วงเงินสินเชื่อ</p>
-                                <p className="text-2xl font-black text-chaiyo-blue">฿{data.loanAmount.toLocaleString()}</p>
+                                <p className="text-2xl font-black text-chaiyo-blue">{data.loanAmount.toLocaleString()}</p>
                             </div>
                             <div className="px-2 pl-4">
                                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">ระยะเวลา</p>
@@ -193,7 +193,7 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                             </div>
                             <div className="px-2 pl-4">
                                 <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">ดอกเบี้ยรวม</p>
-                                <p className="text-2xl font-bold text-gray-800">฿{Math.ceil(data.totalInterest || 0).toLocaleString()}</p>
+                                <p className="text-2xl font-bold text-gray-800">{Math.ceil(data.totalInterest || 0).toLocaleString()}</p>
                                 <p className="text-[10px] text-gray-400">({((data.interestRate || 0.24) * 100).toFixed(2)}% ต่อปี)</p>
                             </div>
                             <div className="px-2 pl-4">
@@ -202,8 +202,8 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                                 </p>
                                 <p className="text-3xl font-black text-emerald-600">
                                     {data.paymentMethod === 'bullet'
-                                        ? `฿${Math.ceil(data.loanAmount + (data.totalInterest || 0)).toLocaleString()}`
-                                        : `฿${Math.ceil(data.monthlyPayment).toLocaleString()}`
+                                        ? `${Math.ceil(data.loanAmount + (data.totalInterest || 0)).toLocaleString()}`
+                                        : `${Math.ceil(data.monthlyPayment).toLocaleString()}`
                                     }
                                 </p>
                                 {data.paymentMethod === 'bullet' && (
@@ -214,11 +214,11 @@ export function QuotationPrint({ data }: QuotationPrintProps) {
                         {/* Add-on fees section */}
                         <div className="bg-gray-50/50 p-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
                             <div className="flex gap-4">
-                                <span>ค่าอากรแสตมป์ (ประมาณการ): ฿{(Math.ceil(data.loanAmount * 0.0005)).toLocaleString()}</span>
-                                <span>ค่าประเมินหลักทรัพย์: ฿{data.collateralType === 'land' ? '3,000' : '500'}</span>
+                                <span>ค่าอากรแสตมป์ (ประมาณการ): {(Math.ceil(data.loanAmount * 0.0005)).toLocaleString()}</span>
+                                <span>ค่าประเมินหลักทรัพย์: {data.collateralType === 'land' ? '3,000' : '500'}</span>
                             </div>
                             <div className="font-bold text-gray-700">
-                                ยอดได้รับสุทธิ (โดยประมาณ): <span className="text-emerald-600 text-sm">฿{(data.loanAmount - (data.loanAmount * 0.0005) - (data.collateralType === 'land' ? 3000 : 500)).toLocaleString()}</span>
+                                ยอดได้รับสุทธิ (โดยประมาณ): <span className="text-emerald-600 text-sm">{(data.loanAmount - (data.loanAmount * 0.0005) - (data.collateralType === 'land' ? 3000 : 500)).toLocaleString()}</span>
                             </div>
                         </div>
                     </div>

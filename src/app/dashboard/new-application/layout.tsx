@@ -88,6 +88,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         // Fallback titles for slugs not in APPLICATION_STEPS
         const EXTRA_BREADCRUMB_TITLES: Record<string, string> = {
             'guarantors': 'ผู้ค้ำ',
+            'refinance': 'รีไฟแนนซ์',
+            'consent': 'ข้อกำหนดและเงื่อนไข',
         };
         const pathSlug = pathname.split('/').pop() || '';
         const currentStepTitle = applicationStepIndex >= 0
@@ -127,7 +129,9 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         }
 
         const isSalesheetPage = pathname.includes('/salesheet');
-        if (isApplicationStarted && !isReadonly && !isSalesheetPage) {
+        const isGuarantorDetailPage = pathname.includes('/guarantors/') && !pathname.endsWith('/guarantors');
+        const isGuarantorsPage = pathname.endsWith('/guarantors');
+        if (isApplicationStarted && !isReadonly && !isSalesheetPage && !isGuarantorDetailPage && !isGuarantorsPage) {
             setRightContent(
                 <Button
                     variant="default"

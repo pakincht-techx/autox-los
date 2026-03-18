@@ -35,6 +35,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
+    DialogBody,
     DialogFooter,
 } from "@/components/ui/Dialog";
 import {
@@ -54,6 +55,7 @@ import { SocialMedia, Child, FamilyMember, CoBorrower, Guarantor, CustomerFormDa
 interface CustomerInfoStepProps {
     formData: CustomerFormData;
     setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
+    variant?: 'borrower' | 'guarantor';
 }
 
 // AddressForm is now imported from @/components/application/AddressForm
@@ -193,7 +195,9 @@ export const formatPhoneNumber = (value: string) => {
     return `${truncated.slice(0, 3)}-${truncated.slice(3, 6)}-${truncated.slice(6)}`;
 };
 
-export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProps) {
+export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }: CustomerInfoStepProps) {
+
+    const isGuarantor = variant === 'guarantor';
 
 
 
@@ -652,7 +656,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <User className="w-5 h-5" />
-                        ข้อมูลส่วนตัว (ผู้กู้หลัก)
+                        {isGuarantor ? 'ข้อมูลส่วนตัว (ผู้ค้ำประกัน)' : 'ข้อมูลส่วนตัว (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -762,7 +766,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         />
                                     </div>
 
-
+                                    {!isGuarantor && (
                                     <div className="space-y-2">
                                         <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
                                         <Select
@@ -779,6 +783,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                    )}
 
 
                                 </div>
@@ -978,7 +983,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <MapPin className="w-5 h-5" />
-                        ที่อยู่ (ผู้กู้หลัก)
+                        {isGuarantor ? 'ที่อยู่ (ผู้ค้ำประกัน)' : 'ที่อยู่ (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -1031,7 +1036,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         )}
                                     </div>
                                 }
-                                footerChildren={
+                                footerChildren={!isGuarantor ? (
                                     <div className="mt-6 space-y-6 pt-6 border-t border-gray-100">
                                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
                                             ลักษณะที่อยู่อาศัย
@@ -1087,26 +1092,26 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             <div className="space-y-2">
                                                 <Label>ระยะเวลาที่พักอาศัย <span className="text-red-500">*</span></Label>
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex-1 flex items-center gap-2">
+                                                    <div className="flex-1 relative">
                                                         <Input
                                                             type="number"
-                                                            className="h-12 bg-white text-center"
+                                                            className="h-12 bg-white pr-12"
                                                             placeholder="0"
                                                             value={formData.housingDurationYears || ""}
                                                             onChange={(e) => handleChange("housingDurationYears", e.target.value)}
                                                         />
-                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">ปี</span>
                                                     </div>
-                                                    <div className="flex-1 flex items-center gap-2">
+                                                    <div className="flex-1 relative">
                                                         <Input
                                                             type="number"
-                                                            className="h-12 bg-white text-center"
+                                                            className="h-12 bg-white pr-14"
                                                             placeholder="0"
                                                             max={11}
                                                             value={formData.housingDurationMonths || ""}
                                                             onChange={(e) => handleChange("housingDurationMonths", e.target.value)}
                                                         />
-                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">เดือน</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1180,7 +1185,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </div>
                                         </div>
                                     </div>
-                                }
+                                ) : undefined}
                             />
                         </div>
 
@@ -1273,11 +1278,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             </Card>
 
             {/* MAIN APPLICANT - SECTION 3: Family Info */}
+            {!isGuarantor && (
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <Home className="w-5 h-5" />
-                        ข้อมูลครอบครัว (ผู้กู้หลัก)
+                        {isGuarantor ? 'ข้อมูลครอบครัว (ผู้ค้ำประกัน)' : 'ข้อมูลครอบครัว (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -1299,6 +1305,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             </Select>
                         </div>
 
+                        {!isGuarantor && (
+                        <>
                         <div className="space-y-2">
                             <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
                             <Select
@@ -1346,34 +1354,43 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 </div>
                             </>
                         )}
-
+                        </>
+                        )}
 
                     </div>
 
+                    {!isGuarantor && (
+                    <>
                     <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
                             <Users className="w-4 h-4 text-chaiyo-blue" /> จำนวนสมาชิกในครอบครัว
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ (คน) <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type="number"
-                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"
-                                    placeholder="0"
-                                    value={formData.employedFamilyCount || ""}
-                                    onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
-                                />
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
+                                        placeholder="0"
+                                        value={formData.employedFamilyCount || ""}
+                                        onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
+                                </div>
                             </div>
                             <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ (คน) <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type="number"
-                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20"
-                                    placeholder="0"
-                                    value={formData.unemployedFamilyCount || ""}
-                                    onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
-                                />
+                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                    <Input
+                                        type="number"
+                                        className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
+                                        placeholder="0"
+                                        value={formData.unemployedFamilyCount || ""}
+                                        onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
@@ -1595,9 +1612,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             </Table>
                         </div>
                     </div>
+                    </>
+                    )}
 
                 </CardContent>
             </Card>
+            )}
 
 
             {/* MAIN APPLICANT - SECTION 4: Contact Info */}
@@ -1605,7 +1625,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <Phone className="w-5 h-5" />
-                        ข้อมูลการติดต่อ (ผู้กู้หลัก)
+                        {isGuarantor ? 'ข้อมูลการติดต่อ (ผู้ค้ำประกัน)' : 'ข้อมูลการติดต่อ (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -1622,7 +1642,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             placeholder="08x-xxx-xxxx"
                                             className={cn(
                                                 "pl-9 font-mono h-12",
-                                                isOtpVerified && "border-green-500 bg-green-50 text-green-700"
+                                                isOtpVerified && "border-green-500 bg-green-50 text-green-700 disabled:bg-green-50 disabled:text-green-700 disabled:opacity-100"
                                             )}
                                             onChange={(e) => {
                                                 if (isOtpVerified) setIsOtpVerified(false); // Reset if changed
@@ -1836,7 +1856,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 placeholder="example@email.com"
                                                 className={cn(
                                                     "pl-9 h-12",
-                                                    isEmailOtpVerified && "border-green-500 bg-green-50 text-green-700"
+                                                    isEmailOtpVerified && "border-green-500 bg-green-50 text-green-700 disabled:bg-green-50 disabled:text-green-700 disabled:opacity-100"
                                                 )}
                                                 onChange={(e) => {
                                                     if (isEmailOtpVerified) setIsEmailOtpVerified(false);
@@ -2053,6 +2073,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             </Card>
 
             {/* REFERENCE CODES SECTION */}
+            {!isGuarantor && (
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
@@ -2092,8 +2113,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                     </div>
                 </CardContent>
             </Card>
+            )}
 
             {/* QUESTIONNAIRE SECTION */}
+            {!isGuarantor && (
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
@@ -2106,9 +2129,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         {/* Sub-section 1: Extra Income */}
                         <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-                                    <Wallet className="w-4 h-4 text-chaiyo-blue" />
-                                </div>
+                                <Wallet className="w-4 h-4 text-chaiyo-blue" />
                                 <h3 className="text-sm font-bold text-gray-700">การหารายได้เสริม</h3>
                             </div>
 
@@ -2241,9 +2262,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         {/* Sub-section 2: Financial Behavior */}
                         <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <div className="w-8 h-8 rounded-lg bg-gold-100 flex items-center justify-center" style={{ backgroundColor: 'rgba(255, 209, 0, 0.1)' }}>
-                                    <TrendingUp className="w-4 h-4 text-[#FFD100]" />
-                                </div>
+                                <TrendingUp className="w-4 h-4 text-[#FFD100]" />
                                 <h3 className="text-sm font-bold text-gray-700">พฤติกรรมทางการเงิน</h3>
                             </div>
 
@@ -2280,9 +2299,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         {/* Sub-section 3: Debt Repayment */}
                         <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                                    <CreditCard className="w-4 h-4 text-emerald-600" />
-                                </div>
+                                <CreditCard className="w-4 h-4 text-emerald-600" />
                                 <h3 className="text-sm font-bold text-gray-700">การชำระหนี้</h3>
                             </div>
 
@@ -2308,9 +2325,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         {/* Sub-section 4: Delinquency */}
                         <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
                             <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                                    <AlertCircle className="w-4 h-4 text-red-500" />
-                                </div>
+                                <AlertCircle className="w-4 h-4 text-red-500" />
                                 <h3 className="text-sm font-bold text-gray-700">หากจำเป็นต้องค้างชำระเงินกู้ สาเหตุของปัญหาคือด้านใด</h3>
                             </div>
                             <div className="">
@@ -2407,6 +2422,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                     </div>
                 </CardContent>
             </Card>
+            )}
 
             {
                 false && (
@@ -3075,18 +3091,17 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                         </DialogTitle>
                     </DialogHeader>
 
-                    <div className="py-6 space-y-4">
+                    <DialogBody className="space-y-4">
                         {isPhoneOwnershipVerifying ? (
                             <div className="space-y-4 text-center">
                                 <p className="text-gray-600">
                                     กำลังตรวจสอบความถูกต้องของหมายเลขโทรศัพท์กับเลขบัตรประชาชนผ่านระบบผู้ให้บริการเครือข่าย...
                                 </p>
-
                             </div>
                         ) : phoneOwnershipStatus === 'success' ? (
                             <div className="space-y-4">
                                 <div className="bg-green-50 border border-green-100 p-4 rounded-xl text-center">
-                                    <div className="mx-auto w-fit space-y-2 mt-4 text-left">
+                                    <div className="mx-auto w-fit space-y-2 text-left">
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-green-500" />
                                             <p className="text-green-700 text-sm font-mono tracking-tight">
@@ -3100,15 +3115,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </p>
                                         </div>
                                     </div>
-
                                 </div>
-
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
                                     <p className="text-red-700 text-sm">
-                                        หมายเลขโทรศัพท์ {(() => { const d = formData.phone?.replace(/\D/g, '') || ''; return d.length >= 5 ? d.slice(0, 3) + '-XXX-XX' + d.slice(-2) : formData.phone; })()} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber?.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5")}
+                                        หมายเลขโทรศัพท์ {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
                                     </p>
                                 </div>
                                 <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-xs leading-relaxed border border-gray-100">
@@ -3123,25 +3136,12 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </DialogBody>
 
                     {!isPhoneOwnershipVerifying && (
-                        <div className="flex gap-3 pt-2">
-                            {phoneOwnershipStatus === 'error' && (
-                                <Button
-                                    variant="outline"
-                                    className="flex-1 h-12 rounded-xl"
-                                    onClick={handleVerifyPhoneOwnership}
-                                >
-                                    ถ่ายรูปหน้าจออีกครั้ง
-                                </Button>
-                            )}
+                        <DialogFooter>
                             <Button
-
-                                className={cn(
-                                    "h-12 rounded-xl px-8",
-                                    phoneOwnershipStatus === 'error' ? "flex-1 bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90" : "w-full bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
-                                )}
+                                className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
                                 onClick={() => {
                                     if (phoneOwnershipStatus === 'error') {
                                         handleChange("phoneOwnershipProof", null);
@@ -3152,8 +3152,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                             >
                                 ปิด
                             </Button>
-
-                        </div>
+                        </DialogFooter>
                     )}
                 </DialogContent>
             </Dialog>

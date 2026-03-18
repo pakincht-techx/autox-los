@@ -78,7 +78,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 <div className="mt-2 pt-2 border-t border-white/10">
                                     <div className="flex justify-between items-baseline">
                                         <h3 className="text-4xl font-black text-chaiyo-gold tracking-tighter">
-                                            ฿0
+                                            0
                                         </h3>
                                     </div>
                                 </div>

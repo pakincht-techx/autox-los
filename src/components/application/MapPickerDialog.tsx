@@ -116,7 +116,7 @@ export function MapPickerDialog({
                         <Button
                             type="submit"
                             disabled={isSearching}
-                            className="h-10 px-4 bg-chaiyo-blue font-bold text-white rounded-lg hover:bg-chaiyo-blue/90"
+                            className="h-10 px-4 bg-chaiyo-blue text-white rounded-lg hover:bg-chaiyo-blue/90"
                         >
                             {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
                         </Button>
@@ -171,14 +171,14 @@ export function MapPickerDialog({
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            className="bg-white h-11 font-bold min-w-[104px] rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
+                            className="bg-white h-11 min-w-[104px] rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
                         >
                             ยกเลิก
                         </Button>
                         <Button
                             onClick={handleConfirm}
                             disabled={!position}
-                            className="bg-chaiyo-blue font-bold  text-white hover:bg-chaiyo-blue/90 h-11 min-w-[104px] rounded-xl flex-1 sm:flex-none"
+                            className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 h-11 min-w-[104px] rounded-xl flex-1 sm:flex-none"
                         >
                             บันทึกตำแหน่ง
                         </Button>

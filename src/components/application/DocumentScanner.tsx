@@ -127,7 +127,7 @@ export function DocumentScanner({ open, onClose, onSave }: DocumentScannerProps)
                 <Button
                     type="button"
                     size="sm"
-                    className="bg-white text-gray-900 hover:bg-gray-100 rounded-full px-5 font-bold h-10 disabled:opacity-30 disabled:bg-white/50"
+                    className="bg-white text-gray-900 hover:bg-gray-100 rounded-full px-5 h-10 disabled:opacity-30 disabled:bg-white/50"
                     disabled={pages.length === 0}
                     onClick={handleSave}
                 >

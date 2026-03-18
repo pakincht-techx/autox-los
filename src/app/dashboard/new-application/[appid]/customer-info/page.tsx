@@ -14,7 +14,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/Dialog";
-import { Loader2, CheckCircle, AlertCircle, ChevronLeft, ChevronRight, Info, XCircle, ShieldAlert } from "lucide-react";
+import { Loader2, CheckCircle, ChevronRight, XCircle, ShieldAlert } from "lucide-react";
 
 export default function CustomerInfoPage() {
     const router = useRouter();
@@ -24,11 +24,10 @@ export default function CustomerInfoPage() {
     // Detect if this is edit mode (coming back from detail page)
     const isEditMode = searchParams.get('state') === 'draft';
 
-    // Status Check State: HARD_BLOCK = cannot proceed, SOFT_BLOCK = can proceed with review
+    // Status Check State: HARD_BLOCK = cannot proceed
     const [isCheckingStatus, setIsCheckingStatus] = useState(false);
-    const [statusCheckResult, setStatusCheckResult] = useState<"NORMAL" | "HARD_BLOCK" | "SOFT_BLOCK" | null>(null);
+    const [statusCheckResult, setStatusCheckResult] = useState<"NORMAL" | "HARD_BLOCK" | null>(null);
     const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-    const [softBlockReasons, setSoftBlockReasons] = useState<string[]>([]);
 
     // In new-app mode: hide layout footer, show own button
     // In edit mode: show layout footer, hide own button
@@ -63,27 +62,13 @@ export default function CustomerInfoPage() {
         setStatusCheckResult(null);
 
         setTimeout(() => {
-            let result: "NORMAL" | "HARD_BLOCK" | "SOFT_BLOCK" = "NORMAL";
+            let result: "NORMAL" | "HARD_BLOCK" = "NORMAL";
             const idToTest = formData.idNumber || "";
 
-            // Mock logic: 888 = Hard Block, 777 = Soft Block
+            // Mock logic: 888 = Hard Block, otherwise normal
             if (idToTest.endsWith('888')) {
                 result = "HARD_BLOCK";
-            } else if (idToTest.endsWith('777')) {
-                result = "SOFT_BLOCK";
             }
-
-            // Assign mock reason codes for soft block
-            const reasons: string[] = [];
-            if (result === "SOFT_BLOCK") {
-                // Mock: randomly assign 1-3 reason codes from [01, 02, 06]
-                const allReasons = ['01', '02', '06'];
-                const count = Math.floor(Math.random() * 3) + 1;
-                const shuffled = [...allReasons].sort(() => 0.5 - Math.random());
-                reasons.push(...shuffled.slice(0, count));
-                reasons.sort();
-            }
-            setSoftBlockReasons(reasons);
 
             setStatusCheckResult(result);
             setIsCheckingStatus(false);
@@ -110,7 +95,7 @@ export default function CustomerInfoPage() {
                     <Button
                         size="lg"
                         onClick={handleNext}
-                        className="px-8 font-bold shadow-none"
+                        className="px-8 shadow-none"
                     >
                         ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -120,7 +105,7 @@ export default function CustomerInfoPage() {
             {/* Status Check Dialog */}
             <Dialog open={isStatusDialogOpen} onOpenChange={(open) => {
                 // Hard block dialog cannot be dismissed by clicking outside
-                if (!open && !isCheckingStatus && statusCheckResult !== "HARD_BLOCK") {
+                if (!open && !isCheckingStatus && statusCheckResult === "NORMAL") {
                     setIsStatusDialogOpen(false);
                 }
             }}>
@@ -154,32 +139,32 @@ export default function CustomerInfoPage() {
 
                         /* ── HARD BLOCK: Cannot proceed ── */
                     ) : statusCheckResult === "HARD_BLOCK" ? (
-                        <div className="space-y-8">
-                            <DialogHeader className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-red-50 shrink-0">
-                                        <XCircle className="h-5 w-5 text-red-500" />
-                                    </div>
+                        <>
+                            <div className="flex flex-col items-center justify-center pt-4">
+                                <div className="h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                                    <XCircle className="h-10 w-10 text-red-500" />
+                                </div>
+                                <DialogHeader className="space-y-2 items-center text-center">
                                     <DialogTitle>
                                         ไม่สามารถดำเนินการต่อได้
                                     </DialogTitle>
-                                </div>
-                                <DialogDescription>
-                                    ผู้สมัครรายนี้ไม่ผ่านเกณฑ์การตรวจสอบ
-                                    ไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
-                                </DialogDescription>
-                            </DialogHeader>
+                                    <DialogDescription>
+                                        ผู้สมัครรายนี้ไม่ผ่านเกณฑ์การตรวจสอบ
+                                        ไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
+                                    </DialogDescription>
+                                </DialogHeader>
+                            </div>
 
                             <DialogBody>
-                            <div className="bg-red-50 p-6 rounded-2xl text-red-800 border border-red-100">
-                                <p className="flex items-start gap-3">
-                                    <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
-                                    <span>
-                                        <strong className="block mb-1">สิ่งที่ต้องดำเนินการ:</strong>
-                                        กรุณายกเลิกใบสมัครนี้ และแจ้งให้ลูกค้าทราบว่าไม่สามารถดำเนินการได้ในขณะนี้
-                                    </span>
-                                </p>
-                            </div>
+                                <div className="bg-red-50 p-4 rounded-xl text-red-800 border border-red-100 text-sm">
+                                    <p className="flex items-start gap-3">
+                                        <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+                                        <span>
+                                            <strong className="block mb-1">สิ่งที่ต้องดำเนินการ:</strong>
+                                            กรุณายกเลิกใบสมัครนี้ และแจ้งให้ลูกค้าทราบว่าไม่สามารถดำเนินการได้ในขณะนี้
+                                        </span>
+                                    </p>
+                                </div>
                             </DialogBody>
 
                             <DialogFooter>
@@ -190,80 +175,15 @@ export default function CustomerInfoPage() {
                                         setIsStatusDialogOpen(false);
                                         router.push(`/dashboard/applications`);
                                     }}
-                                    className="w-full font-bold shadow-none"
+                                    className="w-full shadow-none"
                                 >
                                     <XCircle className="w-4 h-4 mr-2" />
                                     ยกเลิกใบสมัคร
                                 </Button>
                             </DialogFooter>
-                        </div>
+                        </>
 
-                        /* ── SOFT BLOCK: Can proceed with review ── */
-                    ) : (
-                        <div className="space-y-8">
-                            <DialogHeader className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
-                                        <AlertCircle className="h-5 w-5 text-amber-600" />
-                                    </div>
-                                    <DialogTitle>
-                                        ต้องการการตรวจสอบเพิ่มเติม
-                                    </DialogTitle>
-                                </div>
-                                <DialogDescription>
-                                    ผู้สมัครรายนี้จำเป็นต้องได้รับการตรวจสอบจากทีม Legal, Compliance และ Fraud ก่อนอนุมัติ
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <DialogBody className="space-y-4">
-                            {/* Reason Codes */}
-                            {softBlockReasons.length > 0 && (
-                                <div className="flex items-center justify-center gap-2 flex-wrap">
-                                    {softBlockReasons.map((code) => (
-                                        <span key={code} className="text-xs font-bold text-amber-700 bg-amber-100 border border-amber-200 px-3 py-1 rounded-full">
-                                            รหัส {code}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="bg-amber-50 p-6 rounded-2xl text-amber-800 border border-amber-100">
-                                <p className="flex items-start gap-3">
-                                    <Info className="w-5 h-5 shrink-0 mt-0.5" />
-                                    <span>
-                                        <strong className="block mb-1">คำแนะนำในการดำเนินการ:</strong>
-                                        หากดำเนินการต่อ สถานะใบสมัครจะเปลี่ยนเป็น &quot;รอพิจารณา&quot; และจะถูกส่งให้ทีมตรวจสอบพิจารณาก่อนดำเนินการในขั้นตอนถัดไป
-                                    </span>
-                                </p>
-                            </div>
-                            </DialogBody>
-
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    size="lg"
-                                    onClick={() => setIsStatusDialogOpen(false)}
-                                    className="min-w-[104px] order-2 sm:order-1 font-bold"
-                                >
-                                    <ChevronLeft className="w-4 h-4 mr-2" />
-                                    กลับไปตรวจสอบ
-                                </Button>
-                                <Button
-                                    size="lg"
-                                    onClick={() => {
-                                        setIsStatusDialogOpen(false);
-                                        // Navigate to detail page with status=in-review and check status info
-                                        const reasonsParam = softBlockReasons.length > 0 ? `&reasons=${softBlockReasons.join(',')}` : '';
-                                        router.push(`/dashboard/applications/${appId || 'draft'}?status=in-review&checkStatus=soft_block${reasonsParam}`);
-                                    }}
-                                    className="flex-[2] order-1 sm:order-2 font-bold bg-amber-500 hover:bg-amber-600 shadow-none text-white"
-                                >
-                                    <CheckCircle className="w-4 h-4 mr-2" />
-                                    รับทราบและดำเนินการต่อ
-                                </Button>
-                            </DialogFooter>
-                        </div>
-                    )}
+                    ) : null}
                 </DialogContent>
             </Dialog>
         </>

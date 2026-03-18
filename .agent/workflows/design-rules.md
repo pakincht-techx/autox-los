@@ -111,3 +111,13 @@ Every dialog follows a **Header → Body → Footer** structure:
 - **Headers**: Table headers (`TableHeader`) should use `bg-gray-50/50` for clear structural distinction.
 - **Cell Padding**: Standardize on `TableCell` padding that provides comfortable breathing room without excessive white space.
 - **Table Container**: For standalone tables (like relationship or social media tables), wrap the `Table` in a `div` with `border border-border-strong rounded-xl overflow-hidden bg-white` for a consistent, card-like appearance.
+
+## Input Units
+- **Standalone form inputs**: When an input has a unit (e.g., ปี, เดือน, คน, บาท), display the unit **inside the input** on the right side using an absolutely positioned `<span>`. Add sufficient `pr-` padding to avoid text overlap. Pattern:
+  ```tsx
+  <div className="relative">
+      <Input className="pr-12" ... />
+      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
+  </div>
+  ```
+- **Table inputs**: Do **not** include the unit inside the input. Instead, display the unit in the **table column header label** (e.g., `จำนวน (บาท)`). This keeps table cells compact and avoids redundancy.

@@ -15,13 +15,13 @@ interface PaymentHistorySheetProps {
 export function PaymentHistorySheet({ isOpen, onClose, loanId }: PaymentHistorySheetProps) {
     // Mock Data - in a real app, you'd fetch this using loanId
     const mockHistory = [
-        { no: 14, date: "25 ก.พ. 2024", amount: "฿ 2,500.00", status: "Pending" },
-        { no: 13, date: "25 ม.ค. 2024", amount: "฿ 2,500.00", status: "Paid" },
-        { no: 12, date: "25 ธ.ค. 2023", amount: "฿ 2,500.00", status: "Paid" },
-        { no: 11, date: "25 พ.ย. 2023", amount: "฿ 2,500.00", status: "Paid" },
-        { no: 10, date: "25 ต.ค. 2023", amount: "฿ 2,500.00", status: "Paid" },
-        { no: 9, date: "25 ก.ย. 2023", amount: "฿ 2,500.00", status: "Paid" },
-        { no: 8, date: "25 ส.ค. 2023", amount: "฿ 2,500.00", status: "Paid" },
+        { no: 14, date: "25 ก.พ. 2024", amount: "2,500.00", status: "Pending" },
+        { no: 13, date: "25 ม.ค. 2024", amount: "2,500.00", status: "Paid" },
+        { no: 12, date: "25 ธ.ค. 2023", amount: "2,500.00", status: "Paid" },
+        { no: 11, date: "25 พ.ย. 2023", amount: "2,500.00", status: "Paid" },
+        { no: 10, date: "25 ต.ค. 2023", amount: "2,500.00", status: "Paid" },
+        { no: 9, date: "25 ก.ย. 2023", amount: "2,500.00", status: "Paid" },
+        { no: 8, date: "25 ส.ค. 2023", amount: "2,500.00", status: "Paid" },
     ];
 
     return (

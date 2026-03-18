@@ -423,7 +423,7 @@ export function SpecialIncomeDialog({ open, onOpenChange, onSave, initialData }:
                     <div className="bg-emerald-50 rounded-xl p-5 border border-emerald-100 flex items-center justify-between shadow-inner">
                         <Label className="text-emerald-800 text-base">สรุปรายได้สุทธิ (ต่อเดือน)</Label>
                         <div className="text-3xl font-black text-emerald-600 font-mono">
-                            ฿{formatNumberWithCommas(netIncome)}
+                            {formatNumberWithCommas(netIncome)}
                         </div>
                     </div>
 
