@@ -11,7 +11,7 @@ import { Application, ApplicationStatus } from "@/components/applications/types"
 import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/combobox";
@@ -19,6 +19,17 @@ import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 // Mock Data
 const MOCK_DATA: Application[] = [
+    {
+        id: "mock-4",
+        applicationNo: "25690317TLTDL0009",
+        applicantName: "สมศักดิ์ ที่ดินทอง",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "17/03/2569 09:00",
+        requestedAmount: 500000,
+        status: "Draft",
+        productType: "สินเชื่อโฉนดที่ดิน",
+        lastActionTime: "17/03/2569 10:00"
+    },
     {
         id: "mock-1",
         applicationNo: "25680313ULCPL0001",
@@ -304,7 +315,7 @@ export default function ApplicationsPage() {
                     </div>
 
                     <Link href="/dashboard/pre-question">
-                        <Button className="font-bold active:scale-95 transition-all shadow-sm gap-2">
+                        <Button className="active:scale-95 transition-all shadow-sm gap-2">
                             <Plus className="w-4 h-4" />
                             เช็คราคา/สร้างใบสมัครใหม่
                         </Button>
@@ -358,11 +369,11 @@ export default function ApplicationsPage() {
                                     )}
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto flex flex-col">
+                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] flex flex-col">
                                 <DialogHeader className="flex-shrink-0">
                                     <DialogTitle>ตัวกรอง</DialogTitle>
                                 </DialogHeader>
-                                <div className="grid gap-5 py-4 flex-1 overflow-y-auto pr-2">
+                                <DialogBody className="space-y-4">
                                     <div className="space-y-2">
                                         <Label>ชื่อ-นามสกุล ผู้กู้</Label>
                                         <Combobox
@@ -462,13 +473,13 @@ export default function ApplicationsPage() {
                                             placeholder="ระบุชื่อผู้สร้างใบสมัคร"
                                         />
                                     </div>
-                                </div>
-                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0 pt-4 border-t">
+                                </DialogBody>
+                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0">
                                     <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
                                         ล้างตัวกรอง
                                     </Button>
                                     <DialogClose asChild>
-                                        <Button className="font-semibold px-8" onClick={() => setCurrentPage(1)}>
+                                        <Button className="font-semibold min-w-[120px]" onClick={() => setCurrentPage(1)}>
                                             ตกลง
                                         </Button>
                                     </DialogClose>

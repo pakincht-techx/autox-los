@@ -24,6 +24,7 @@ import {
 import { Plus, Pencil, Trash2, Users, ShieldCheck, AlertTriangle, ShieldAlert, Clock, ChevronLeft } from "lucide-react";
 import { Guarantor } from "@/types/application";
 import { toast } from "sonner";
+import { MandatoryFieldWarningDialog } from "../../components/MandatoryFieldWarningDialog";
 
 // ─── Status Helpers ──────────────────────────────────────────────────────────
 
@@ -106,6 +107,7 @@ export default function GuarantorsPage() {
     const { formData, appId, setSaveOverride } = useApplication();
     const [softBlockDialogOpen, setSoftBlockDialogOpen] = useState(false);
     const [softBlockGuarantors, setSoftBlockGuarantors] = useState<Guarantor[]>([]);
+    const [mandatoryWarningOpen, setMandatoryWarningOpen] = useState(false);
 
     // Use formData guarantors if available, else mock data for demo
     const guarantors: Guarantor[] =
@@ -113,9 +115,15 @@ export default function GuarantorsPage() {
             ? formData.guarantors
             : MOCK_GUARANTORS;
 
-    // Register custom save handler — checks for soft-blocked guarantors
+    // Register custom save handler — checks for mandatory fields and soft-blocked guarantors
     useEffect(() => {
         setSaveOverride(() => {
+            // Check mandatory: at least one guarantor must exist
+            if (guarantors.length === 0 || !guarantors[0]?.firstName) {
+                setMandatoryWarningOpen(true);
+                return;
+            }
+
             const watchlistGuarantors = guarantors.filter(
                 (g) => g.verificationStatus === 'WATCHLIST'
             );
@@ -244,19 +252,19 @@ export default function GuarantorsPage() {
 
             {/* Soft-Block Warning Dialog */}
             <Dialog open={softBlockDialogOpen} onOpenChange={setSoftBlockDialogOpen}>
-                <DialogContent className="sm:max-w-[480px] rounded-[2rem] p-8">
-                    <DialogHeader className="flex flex-col items-center text-center space-y-4">
-                        <div className="h-16 w-16 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
-                            <AlertTriangle className="h-10 w-10 text-amber-600" />
-                        </div>
-                        <div className="space-y-2 flex flex-col items-center">
-                            <DialogTitle className="text-xl font-bold text-gray-900">
+                <DialogContent className="sm:max-w-[480px] rounded-[2rem]">
+                    <DialogHeader className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
+                                <AlertTriangle className="h-5 w-5 text-amber-600" />
+                            </div>
+                            <DialogTitle>
                                 ผู้ค้ำประกันต้องตรวจสอบเพิ่มเติม
                             </DialogTitle>
-                            <DialogDescription className="text-base text-gray-500 text-center">
-                                ผู้ค้ำประกันด้านล่างนี้อยู่ในสถานะรอตรวจสอบ จะต้องผ่านการพิจารณาจากทีม Legal ก่อนอนุมัติ
-                            </DialogDescription>
                         </div>
+                        <DialogDescription>
+                            ผู้ค้ำประกันด้านล่างนี้อยู่ในสถานะรอตรวจสอบ จะต้องผ่านการพิจารณาจากทีม Legal ก่อนอนุมัติ
+                        </DialogDescription>
                     </DialogHeader>
 
                     {/* List of soft-blocked guarantors */}
@@ -297,11 +305,11 @@ export default function GuarantorsPage() {
                         ))}
                     </div>
 
-                    <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <DialogFooter>
                         <Button
                             variant="outline"
                             onClick={() => setSoftBlockDialogOpen(false)}
-                            className="flex-1 font-bold"
+                            className="min-w-[120px] font-bold"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1.5" />
                             กลับไปแก้ไข
@@ -324,6 +332,23 @@ export default function GuarantorsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Mandatory Field Warning Dialog */}
+            <MandatoryFieldWarningDialog
+                open={mandatoryWarningOpen}
+                onOpenChange={setMandatoryWarningOpen}
+                onSaveAndExit={() => {
+                    setMandatoryWarningOpen(false);
+                    toast.success("บันทึกข้อมูลสำเร็จ", {
+                        description: "ข้อมูลผู้ค้ำประกันถูกบันทึกเรียบร้อยแล้ว",
+                        duration: 2000,
+                    });
+                    setTimeout(() => {
+                        router.push(`/dashboard/applications/${appId || 'draft'}`);
+                    }, 500);
+                }}
+                onCancel={() => setMandatoryWarningOpen(false)}
+            />
         </>
     );
 }

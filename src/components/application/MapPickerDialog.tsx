@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
+    DialogFooterInfo,
 } from "@/components/ui/Dialog"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -98,8 +99,7 @@ export function MapPickerDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-white sm:rounded-2xl border-none shadow-2xl">
                 <DialogHeader className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
-                    <DialogTitle className="flex items-center gap-2 text-chaiyo-blue font-bold shrink-0">
-                        <MapPin className="w-5 h-5" />
+                    <DialogTitle className="shrink-0">
                         {title}
                     </DialogTitle>
 
@@ -116,7 +116,7 @@ export function MapPickerDialog({
                         <Button
                             type="submit"
                             disabled={isSearching}
-                            className="h-10 px-4 bg-chaiyo-blue text-white rounded-lg hover:bg-chaiyo-blue/90"
+                            className="h-10 px-4 bg-chaiyo-blue font-bold text-white rounded-lg hover:bg-chaiyo-blue/90"
                         >
                             {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : "ค้นหา"}
                         </Button>
@@ -146,8 +146,8 @@ export function MapPickerDialog({
                     )}
                 </div>
 
-                <div className="p-4 px-6 border-t bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                <DialogFooter className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <DialogFooterInfo className="w-full sm:w-auto">
                         {position ? (
                             <div className="flex items-center gap-3 bg-blue-50/50 p-2 px-3 rounded-xl border border-blue-100 shrink-0">
                                 <div className="w-8 h-8 bg-chaiyo-blue rounded-lg flex items-center justify-center shrink-0">
@@ -166,24 +166,24 @@ export function MapPickerDialog({
                                 ยังไม่ได้ระบุตำแหน่ง
                             </div>
                         )}
-                    </div>
+                    </DialogFooterInfo>
                     <div className="flex gap-2 w-full sm:w-auto">
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            className="bg-white h-11 px-6 rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
+                            className="bg-white h-11 font-bold min-w-[120px] rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
                         >
                             ยกเลิก
                         </Button>
                         <Button
                             onClick={handleConfirm}
                             disabled={!position}
-                            className="bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 h-11 px-8 rounded-xl flex-1 sm:flex-none"
+                            className="bg-chaiyo-blue font-bold  text-white hover:bg-chaiyo-blue/90 h-11 min-w-[120px] rounded-xl flex-1 sm:flex-none"
                         >
-                            <Save className="w-4 h-4 mr-2" /> บันทึกตำแหน่ง
+                            บันทึกตำแหน่ง
                         </Button>
                     </div>
-                </div>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )

@@ -35,35 +35,70 @@ Reference the `@theme` block in `globals.css` for all color tokens:
 
 - Always use **shadcn UI** components from `@/components/ui/` instead of creating custom HTML elements.
 - If a component variant doesn't exist (e.g., `Alert` with `warning`), add the variant to the shadcn component rather than building a custom div.
+- **No shadows on buttons.** All buttons must have `shadow-none` — no `box-shadow` of any kind. Keep a flat, clean button aesthetic across the entire design system.
 
 ## Dialogs
 
-- Dialog backdrops (overlays) must use **10% opacity black** (`bg-black/10`) with a blur effect (`backdrop-blur-sm`). Do not use the default heavy `bg-black/80`.
-- **Dialogs must not have a top-right close (X) icon.** All dialogs should be closed via explicit buttons in the footer (e.g., "Cancel", "Confirm") or the backdrop. The close button has been removed from the shared `DialogContent` component; do not attempt to re-add it in individual implementations.
-- **Dialog Header Pattern.** Use a plain `<DialogHeader>` without colored backgrounds or borders. Do **not** add `bg-blue-50`, `border-b`, or other custom background styling to `DialogHeader`. Use appropriate title size based on dialog type:
-  - **Exception:** When the dialog body uses a non-white background (e.g., `bg-gray-50/30`), add `bg-white border-b border-gray-100` to the `DialogHeader` to maintain clear visual separation between the header and content area.
-  - **Large/feature dialogs** (e.g., insurance picker, income form): `text-xl`
-  - **Standard dialogs** (e.g., confirmation, simple forms): `text-lg`
-  - **Small alerts**: default size (no size class)
-  
-  Standard pattern:
+### General Rules
+- Dialog backdrops (overlays) must use **10% opacity black** (`bg-black/10`) with a blur effect (`backdrop-blur-sm`).
+- **No top-right close (X) icon.** Close via footer buttons or backdrop only.
+- **Default background is `bg-white`** (set in base `DialogContent`/`AlertDialogContent`).
+- **Title color must be `text-gray-900`** — never use `text-chaiyo-blue` for dialog titles.
+- **All footer buttons must be `font-bold`.**
+- **No shadows on buttons** inside dialogs — use `shadow-none`.
+
+### 3-Section Structure
+
+Every dialog follows a **Header → Body → Footer** structure:
+
+#### 1. Header (`DialogHeader` / `AlertDialogHeader`)
+- **White background** (`bg-white`), sticky at top for scrollable dialogs.
+- Contains: **Title** (mandatory, `text-gray-900`), **Description** (optional), **Action** (optional, e.g., search bar).
+- Left-aligned. **No icons in dialog titles** — title text only.
+- Pattern:
   ```tsx
   <DialogHeader>
-      <DialogTitle className="text-lg text-chaiyo-blue flex items-center gap-2">
-          <IconComponent className="w-5 h-5" />
-          Dialog Title Text
-      </DialogTitle>
+      <DialogTitle className="text-gray-900">Title</DialogTitle>
+      <DialogDescription>Optional description</DialogDescription>
   </DialogHeader>
   ```
-- **Dialog Footer Pattern.** Use `<DialogFooter>` with a cancel button (`variant="outline"`) and a primary action button (`bg-chaiyo-blue`). Example:
+
+#### 2. Body (`DialogBody` / `AlertDialogBody`)
+- **Always wrap** content between header and footer with `DialogBody` to get consistent `px-6 py-4` padding aligned with header/footer.
+- Never use a raw `<div>` between header and footer — it will lack left/right padding.
+- Provides `overflow-y-auto` scrolling.
+- Examples: form fields, info boxes, filter options, image previews, lists.
+- For simple confirmation dialogs (just header + footer with no body content), you may omit `DialogBody`.
+
+#### 3. Footer (`DialogFooter` / `AlertDialogFooter`)
+- **White background** (`bg-white`), sticky at bottom for scrollable dialogs.
+- **Buttons right-aligned** (default layout: `sm:justify-end`).
+- **Button gap**: Footer has `gap-2` between buttons.
+- **Minimum button width**: `min-w-[120px]` on each individual button.
+- **Button style**: All buttons must be `font-bold shadow-none`.
+- **Optional left-side info** via `DialogFooterInfo` / `AlertDialogFooterInfo`:
   ```tsx
   <DialogFooter>
-      <Button variant="outline" onClick={() => onOpenChange(false)}>ยกเลิก</Button>
-      <Button onClick={handleSave} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold">
-          บันทึก
-      </Button>
+      <DialogFooterInfo>
+          <span>Lat: 13.82, Long: 100.56</span>
+      </DialogFooterInfo>
+      <Button variant="outline" className="min-w-[120px] font-bold">ยกเลิก</Button>
+      <Button className="min-w-[120px] font-bold bg-chaiyo-blue hover:bg-chaiyo-blue/90">บันทึก</Button>
   </DialogFooter>
   ```
+
+### Center-Aligned Dialogs (No Action Buttons)
+- For dialogs that show **loading states** or **success states** without action buttons, center-align the content:
+  ```tsx
+  <DialogHeader className="items-center text-center">
+  ```
+- Examples: status checking spinners, success confirmations that auto-dismiss.
+
+### Available Components
+| Component | Import from |
+|-----------|------------|
+| `Dialog`, `DialogBody`, `DialogFooter`, `DialogFooterInfo`, `DialogClose` | `@/components/ui/Dialog` |
+| `AlertDialog`, `AlertDialogBody`, `AlertDialogFooter`, `AlertDialogFooterInfo` | `@/components/ui/alert-dialog` |
 
 ## Layering & Z-Index
 

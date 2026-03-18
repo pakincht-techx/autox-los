@@ -5,13 +5,14 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogBody,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -56,6 +57,7 @@ const BASE_MOCK_APP = {
     applicantInitials: "JS",
     status: "Draft" as ApplicationStatus,
     phone: "080-000-0000",
+    applicantAge: 35,
     lastActionTime: "14-03-2569 10:30",
 
     // Section 2: Detail cards
@@ -64,6 +66,22 @@ const BASE_MOCK_APP = {
     incomePerMonth: 25000,
     debtPerMonth: 8500,
     guarantorCount: 1,
+    refinanceCount: 1,
+    uploadedDocCount: 5,
+    acceptedConsentCount: 3,
+
+    // Module completion status
+    moduleStatus: {
+        customerInfo: true,
+        collateral: true,
+        loanDetail: true,
+        income: true,
+        debt: true,
+        guarantor: true,
+        refinance: true,
+        documents: true,
+        consent: false,
+    } as Record<string, boolean>,
 
     // Loan detail
     loanProductLabel: "ULCR",
@@ -109,6 +127,18 @@ function getMockApp(mockCase: string | null) {
                 incomePerMonth: 0,
                 debtPerMonth: 0,
                 guarantorCount: 0,
+                uploadedDocCount: 0,
+                acceptedConsentCount: 0,
+                moduleStatus: {
+                    customerInfo: true,
+                    collateral: false,
+                    loanDetail: false,
+                    income: false,
+                    debt: false,
+                    guarantor: false,
+                    documents: false,
+                    consent: false,
+                },
             };
         case '2': // In Review — only customer info filled (Softblock)
             return {
@@ -119,11 +149,82 @@ function getMockApp(mockCase: string | null) {
                 incomePerMonth: 0,
                 debtPerMonth: 0,
                 guarantorCount: 0,
+                uploadedDocCount: 0,
+                acceptedConsentCount: 0,
+                moduleStatus: {
+                    customerInfo: true,
+                    collateral: false,
+                    loanDetail: false,
+                    income: false,
+                    debt: false,
+                    guarantor: false,
+                    documents: false,
+                    consent: false,
+                },
             };
         case '3': // Draft — all sections filled
             return {
                 ...BASE_MOCK_APP,
                 applicationNo: "25680313ULCPL0003",
+            };
+        case '4': // Draft — Land collateral, all sections filled
+            return {
+                ...BASE_MOCK_APP,
+                id: "mock-4",
+                applicationNo: "25690317TLTDL0009",
+                applicantName: "สมศักดิ์ ที่ดินทอง",
+                applicantInitials: "สท",
+                status: "Draft" as ApplicationStatus,
+                phone: "081-234-5678",
+                applicantAge: 42,
+                lastActionTime: "17-03-2569 10:00",
+                customerType: "ปกติ",
+                collateralType: "โฉนดที่ดิน",
+                incomePerMonth: 30000,
+                debtPerMonth: 5000,
+                guarantorCount: 1,
+                refinanceCount: 0,
+                uploadedDocCount: 3,
+                acceptedConsentCount: 2,
+                moduleStatus: {
+                    customerInfo: true,
+                    collateral: true,
+                    loanDetail: true,
+                    income: true,
+                    debt: true,
+                    guarantor: true,
+                    refinance: false,
+                    documents: true,
+                    consent: false,
+                },
+                loanProductLabel: "TLTD",
+                loanProductName: "ที่ดิน (จำนำ) ผ่อนรายเดือน",
+                loanAmount: 500000,
+                interestRate: 15,
+                term: 120,
+                installment: 8075,
+                insurance: {
+                    company: "เทเวศประกันภัย",
+                    logo: "",
+                    tier: "",
+                    premium: 5000,
+                    coverage: 500000,
+                    repairType: "",
+                },
+                totalInstallmentWithInsurance: 8075,
+                maxLoanAmount: 750000,
+                maxInstallment: 12113,
+                historyLog: [
+                    {
+                        date: "17 มี.ค. 2569",
+                        time: "09:00 น.",
+                        title: "สร้างใบสมัคร",
+                        team: "พนักงานสาขา",
+                        result: "",
+                        comment: undefined as string | undefined,
+                        attachments: undefined as { name: string; url: string }[] | undefined,
+                    },
+                ],
             };
         default:
             return BASE_MOCK_APP;
@@ -239,62 +340,35 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 hover:text-foreground">
-                            <Phone className="w-4 h-4 mr-1.5" />
-                            <span>{app.phone}</span>
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-gray-600 hover:text-foreground">
-                            <MessageCircle className="w-4 h-4 mr-1.5" />
-                            <span>LINE</span>
-                        </Button>
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-xs text-gray-400">เบอร์โทร</span>
+                            <span className="text-sm text-gray-700 font-semibold">{app.phone}</span>
+                        </div>
+                        <div className="w-px h-4 bg-gray-200"></div>
+                        <div className="flex items-center gap-1.5">
+                            <MessageCircle className="w-3.5 h-3.5 text-[#00B900]" />
+                            <span className="text-xs text-gray-400">LINE</span>
+                            <span className="text-sm text-gray-700 font-semibold">-</span>
+                        </div>
                     </div>
                 </div>
 
                 {/* ═══════════════════════════════════════════════════════════
                     SECTION 2: APP DETAIL
                 ═══════════════════════════════════════════════════════════ */}
-                <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Left: Summary Cards Grid */}
-                    <div className="grid grid-cols-2 gap-2 flex-1">
+                <div className="space-y-5">
+                    {/* ── Group 1: 2-column grid ── */}
+                    <div className="grid grid-cols-2 gap-2 auto-rows-[1fr]">
                         <SummaryCard
                             title="ข้อมูลผู้กู้"
-                            value={
-                                customerStatusOverride === 'not_pass' ? (
-                                    <div className="flex items-center gap-1.5 text-red-600">
-                                        <ShieldAlert className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
-                                        <span>ไม่ผ่านการตรวจสอบ</span>
-                                    </div>
-                                ) : customerStatusOverride === 'discretion' ? (
-                                    <div className="flex items-center gap-1.5 text-emerald-600">
-                                        <ShieldCheck className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
-                                        <span>ผ่านการตรวจสอบ</span>
-                                    </div>
-                                ) : checkStatus === 'soft_block' ? (
-                                    <div className="flex items-center gap-1.5 text-amber-600">
-                                        <AlertTriangle className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
-                                        <span>รอตรวจสอบเพิ่มเติม {reasonCodes.length > 0 ? `(${reasonCodes.join(', ')})` : ''}</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-emerald-600">
-                                        <ShieldCheck className="w-5 h-5 flex-shrink-0" strokeWidth={2.5} />
-                                        <span>ผ่านการตรวจสอบ</span>
-                                    </div>
-                                )
-                            }
+                            value={`${app.applicantAge} ปี`}
                             isEmpty={!app.customerType}
                             icon={<User className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.customerInfo ? 'completed' : 'incomplete'}
                             onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=draft`) : undefined}
                             onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="หลักประกัน"
-                            value={app.collateralType}
-                            isBold
-                            isEmpty={!app.collateralType}
-                            icon={<Car className="w-24 h-24" />}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=readonly`) : undefined}
                         />
                         <SummaryCard
                             title="อาชีพและรายได้"
@@ -302,15 +376,27 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             unit="บาท/เดือน"
                             isEmpty={app.incomePerMonth === 0}
                             icon={<Coins className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.income ? 'completed' : 'incomplete'}
                             onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=draft`) : undefined}
                             onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=readonly`) : undefined}
                         />
                         <SummaryCard
-                            title="หนี้สิน"
+                            title="หลักประกัน"
+                            value={app.collateralType}
+                            isBold
+                            isEmpty={!app.collateralType}
+                            icon={<Car className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.collateral ? 'completed' : 'incomplete'}
+                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=draft`) : undefined}
+                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=readonly`) : undefined}
+                        />
+                        <SummaryCard
+                            title="ภาระหนี้"
                             value={`${app.debtPerMonth.toLocaleString()}`}
                             unit="บาท/เดือน"
                             isEmpty={app.debtPerMonth === 0 || app.debtPerMonth === null}
                             icon={<Wallet className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.debt ? 'completed' : 'incomplete'}
                             onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=draft`) : undefined}
                             onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=readonly`) : undefined}
                         />
@@ -319,127 +405,58 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             value={`${app.guarantorCount} คน`}
                             isEmpty={app.guarantorCount === 0}
                             icon={<Users className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.guarantor ? 'completed' : 'incomplete'}
                             onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=draft`) : undefined}
                             onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=readonly`) : undefined}
                         />
+                        <SummaryCard
+                            title="รีไฟแนนซ์"
+                            value={`${app.refinanceCount} รายการ`}
+                            isEmpty={app.refinanceCount === 0}
+                            icon={<RefreshCw className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.refinance ? 'completed' : 'incomplete'}
+                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=draft`) : undefined}
+                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=readonly`) : undefined}
+                        />
                     </div>
 
-                    {/* Right: Loan Detail Panel */}
-                    <div className="w-full lg:w-[380px] shrink-0">
+                    {/* ── Group 2: รายละเอียดสินเชื่อ (full-width / 2-col span) ── */}
+                    <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดสินเชื่อ</p>
+                        <SummaryCard
+                            title="รายละเอียดสินเชื่อและประกันภัย"
+                            value={app.loanProductName}
+                            isBold
+                            isEmpty={false}
+                            icon={<FileText className="w-24 h-24" />}
+                            completionStatus={app.moduleStatus.loanDetail ? 'completed' : 'incomplete'}
+                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=draft`) : undefined}
+                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=readonly`) : undefined}
+                        />
+                    </div>
 
-                        {/* Outer Gray Container */}
-                        <div className="rounded-2xl bg-gray-50/80 p-5 flex flex-col h-full space-y-4">
-
-                            {/* Header */}
-                            <div className="flex items-center justify-between pb-1">
-                                <p className="text-lg font-bold text-foreground">รายละเอียดสินเชื่อ</p>
-                                {canEdit ? (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=draft`)}
-                                        className="h-8 px-4 text-xs font-bold rounded-full bg-white hover:bg-gray-50 border-gray-200 text-gray-700 shadow-sm transition-colors"
-                                    >
-                                        <Pencil className="w-3 h-3 mr-1.5" /> แก้ไข
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=readonly`)}
-                                        className="h-8 px-4 text-xs font-bold rounded-full bg-white hover:bg-gray-50 border-gray-200 text-gray-700 shadow-sm transition-colors"
-                                    >
-                                        <Eye className="w-3 h-3 mr-1.5" /> ดูรายละเอียด
-                                    </Button>
-                                )}
-                            </div>
-
-                            {/* ── Card 1: Loan Info + Insurance (merged) ── */}
-                            <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                {/* Product Tag */}
-                                <div className="mb-2">
-                                    <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
-                                        {app.loanProductLabel}
-                                    </span>
-                                </div>
-                                <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{app.loanProductName}</h3>
-
-                                {/* Freebie Badges */}
-                                <div className="flex flex-wrap gap-1.5 mb-4">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium border border-amber-100">
-                                        <Gift className="w-3 h-3" /> บัตรกดเงินไชโย
-                                    </span>
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100">
-                                        <ShieldCheck className="w-3 h-3" /> ประกันคุ้มครองวงเงินกู้
-                                    </span>
-                                </div>
-
-                                <div className="w-full h-px bg-gray-100 mb-4"></div>
-
-                                {/* Loan Stats */}
-                                <div className="space-y-2.5">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">วงเงิน</span>
-                                        <span className="font-bold text-foreground">{app.loanAmount.toLocaleString()} บาท</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">อัตราดอกเบี้ย</span>
-                                        <span className="font-bold text-foreground">{app.interestRate}%</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">ระยะเวลาผ่อน</span>
-                                        <span className="font-bold text-foreground">{app.term} เดือน</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">ค่างวดสินเชื่อ</span>
-                                        <span className="font-bold text-foreground">{app.installment.toLocaleString()} บาท/เดือน</span>
-                                    </div>
-                                </div>
-
-                                {/* Insurance divider */}
-                                <div className="w-full h-px bg-gray-100 my-4"></div>
-
-                                {/* Insurance Info */}
-                                <div className="flex items-center gap-2.5 mb-3">
-                                    {app.insurance.logo ? (
-                                        <img src={app.insurance.logo} alt={app.insurance.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
-                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
-                                        </div>
-                                    )}
-                                    <div>
-                                        <p className="font-bold text-foreground text-sm">{app.insurance.company}</p>
-                                        <p className="text-xs text-gray-400">{app.insurance.tier} · ซ่อม{app.insurance.repairType}</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-2.5">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">ทุนประกัน</span>
-                                        <span className="font-bold text-foreground">{app.insurance.coverage.toLocaleString()} บาท</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                        <span className="font-bold text-foreground">{app.insurance.premium.toLocaleString()} บาท</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* ── Card 2: Summary ── */}
-                            <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                <div className="flex justify-between items-center text-sm mb-3">
-                                    <span className="text-gray-500">ยอดจัดสินเชื่อสุทธิ</span>
-                                    <span className="font-bold text-foreground">{(app.loanAmount + app.insurance.premium).toLocaleString()} บาท</span>
-                                </div>
-                                <div className="border-t border-gray-100 pt-3">
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="font-semibold text-foreground text-sm">ค่าผ่อนต่อเดือน</p>
-                                            <p className="text-[11px] text-gray-400 mt-0.5">*รวมสินเชื่อและประกัน</p>
-                                        </div>
-                                        <span className="font-black text-chaiyo-blue text-xl">{(app.installment + 500).toLocaleString()} <span className="text-xs font-bold text-chaiyo-blue/60">บาท</span></span>
-                                    </div>
-                                </div>
-                            </div>
-
+                    {/* ── Group 3: เอกสารและสัญญา ── */}
+                    <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">เอกสารและสัญญา</p>
+                        <div className="grid grid-cols-2 gap-2 auto-rows-[1fr]">
+                            <SummaryCard
+                                title="อัพโหลดเอกสาร"
+                                value={`${app.uploadedDocCount} ไฟล์`}
+                                isEmpty={app.uploadedDocCount === 0}
+                                icon={<Upload className="w-24 h-24" />}
+                                completionStatus={app.moduleStatus.documents ? 'completed' : 'incomplete'}
+                                onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=draft`) : undefined}
+                                onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=readonly`) : undefined}
+                            />
+                            <SummaryCard
+                                title="T&C Consent"
+                                value={`${app.acceptedConsentCount} รายการ`}
+                                isEmpty={app.acceptedConsentCount === 0}
+                                icon={<ClipboardCheck className="w-24 h-24" />}
+                                completionStatus={app.moduleStatus.consent ? 'completed' : 'incomplete'}
+                                onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=draft`) : undefined}
+                                onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`) : undefined}
+                            />
                         </div>
                     </div>
                 </div>
@@ -534,17 +551,18 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
                 {/* Cancel Dialog (Maker) */}
                 <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-                    <DialogContent className="sm:max-w-[425px]">
+                    <DialogContent className="sm:max-w-[480px]">
                         <DialogHeader>
                             <DialogTitle>ยืนยันการยกเลิกแบบร่าง</DialogTitle>
-                            <DialogDescription className="pt-2 text-sm text-gray-500">
+                            <DialogDescription>
                                 คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสมัคร <strong>{app.applicationNo}</strong>? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter className="mt-4 flex sm:justify-end gap-2">
-                            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>ยกเลิก</Button>
+                        <DialogFooter>
+                            <Button variant="outline" className="min-w-[120px]" onClick={() => setCancelDialogOpen(false)}>ยกเลิก</Button>
                             <Button
                                 variant="destructive"
+                                className="min-w-[120px]"
                                 onClick={() => {
                                     setCurrentStatus('Cancelled');
                                     setCancelDialogOpen(false);
@@ -560,15 +578,15 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                 <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
                     <DialogContent className="sm:max-w-[480px]">
                         <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
+                            <DialogTitle>
                                 ให้ความเห็นสถานะลูกค้า
                             </DialogTitle>
-                            <DialogDescription className="pt-2 text-sm text-gray-500 flex flex-col space-y-1">
+                            <DialogDescription className="flex flex-col space-y-1">
                                 <span>ผู้กู้: <strong className="text-gray-800">{app.applicantName}</strong></span>
                                 <span>เลขที่ใบสมัคร: <strong className="text-gray-800">{app.applicationNo}</strong></span>
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="py-4 space-y-3">
+                        <DialogBody>
                             <p className="text-sm font-semibold text-gray-700 mb-2">ผลการตรวจสอบ</p>
                             <label
                                 className={cn(
@@ -612,7 +630,6 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                     <p className="text-xs text-gray-400 mt-0.5">ไม่ผ่านการตรวจสอบ ใบสมัครจะถูกปฏิเสธ</p>
                                 </div>
                             </label>
-                        </div>
 
                         {/* Additional Comments and Attachments */}
                         <div className="space-y-3 pt-2">
@@ -676,8 +693,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 </div>
                             </div>
                         </div>
+                        </DialogBody>
 
-                        <DialogFooter className="mt-4 flex sm:justify-end gap-2">
+                        <DialogFooter>
                             <Button variant="outline" onClick={() => {
                                 // Revoke URLs for attachments not yet submitted
                                 reviewAttachments.forEach(e => URL.revokeObjectURL(e.url));
@@ -689,8 +707,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             <Button
                                 disabled={!reviewResult}
                                 className={cn(
-                                    reviewResult === 'discretion' && "bg-emerald-600 hover:bg-emerald-700 text-white",
-                                    reviewResult === 'not_pass' && "bg-red-600 hover:bg-red-700 text-white",
+                                    "min-w-[120px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white",
                                     !reviewResult && "opacity-50"
                                 )}
                                 onClick={() => {
@@ -744,6 +761,7 @@ function SummaryCard({
     isBold = false,
     icon,
     isEmpty = false,
+    completionStatus,
     onEdit,
     onView,
 }: {
@@ -753,6 +771,7 @@ function SummaryCard({
     isBold?: boolean;
     icon?: React.ReactNode;
     isEmpty?: boolean;
+    completionStatus?: 'completed' | 'incomplete';
     onEdit?: () => void;
     onView?: () => void;
 }) {
@@ -760,8 +779,10 @@ function SummaryCard({
         <div className={cn(
             "rounded-2xl p-5 flex flex-col justify-between min-h-[140px] group relative overflow-hidden transition-all duration-300",
             isEmpty
-                ? (onEdit ? "bg-white border-2 border-dashed border-gray-200" : "bg-gray-50/50 border border-border-subtle")
-                : "bg-gray-50/80"
+                ? (onEdit ? "bg-white border-2 border-dashed border-gray-300" : "bg-gray-50/50 border border-border-subtle")
+                : completionStatus === 'completed'
+                    ? "bg-blue-50/40 border border-blue-100/60"
+                    : "bg-gray-50/80 border border-gray-200"
         )}>
             {/* Background Icon Watermark */}
             {icon && (
@@ -774,13 +795,23 @@ function SummaryCard({
             )}
 
             <div className="relative z-10">
-                <p className={cn("text-sm mb-2 font-medium", isEmpty ? "text-gray-400" : "text-gray-500")}>{title}</p>
+                <div className="flex items-center justify-between mb-2">
+                    <p className={cn("text-base font-semibold", isEmpty ? "text-gray-400" : "text-gray-700")}>{title}</p>
+                    {completionStatus && (
+                        completionStatus === 'completed' ? (
+                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue flex items-center justify-center shrink-0">
+                                <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                            </div>
+                        ) : (
+                            <Circle className="w-4.5 h-4.5 text-gray-300 shrink-0" strokeWidth={2} />
+                        )
+                    )}
+                </div>
                 {isEmpty ? (
-                    <p className="text-xl font-normal text-gray-300 mt-1">-</p>
+                    <p className="text-sm font-normal text-gray-300 mt-1">-</p>
                 ) : (
                     <>
-                        <div className={`text-xl font-bold text-foreground tracking-tight ${isBold ? '' : ''}`}>{value}</div>
-                        {unit && <p className="text-sm text-gray-400 mt-1">{unit}</p>}
+                        <div className={`text-sm font-medium text-foreground tracking-tight`}>{value}{unit && <span className="text-sm text-foreground ml-1">{unit}</span>}</div>
                     </>
                 )}
             </div>
@@ -791,8 +822,8 @@ function SummaryCard({
                     className={cn(
                         "relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5",
                         isEmpty
-                            ? "bg-chaiyo-blue text-white shadow-md"
-                            : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-chaiyo-blue shadow-sm"
+                            ? "bg-chaiyo-blue text-white"
+                            : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-chaiyo-blue"
                     )}
                 >
                     {isEmpty ? <Plus className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
@@ -803,7 +834,7 @@ function SummaryCard({
                 <Button
                     variant="outline"
                     onClick={onView}
-                    className="relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5 bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-chaiyo-blue shadow-sm"
+                    className="relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5 bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-chaiyo-blue"
                 >
                     <Eye className="w-3.5 h-3.5" />
                     ดูรายละเอียด

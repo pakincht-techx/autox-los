@@ -42,7 +42,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogTitle, DialogDescription, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
 import { AddressForm } from "@/components/application/AddressForm";
 import { CustomerFormData, IncomeOccupation, SpecialIncome, IncomeItem, EnterpriseIncome, IncomeDocument, PersonalDebt, ChaiyoLoan, SAIncome, ReferencePerson, BankAccount } from "@/types/application";
 
@@ -3607,20 +3607,24 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     </DialogTrigger>
                                                                     <DialogContent className="max-w-md">
                                                                         <DialogHeader>
-                                                                            <DialogTitle className="flex items-center gap-2">
-                                                                                <div className="w-8 h-8 rounded-lg bg-chaiyo-blue/10 text-chaiyo-blue flex items-center justify-center">
-                                                                                    <guide.icon className="w-4 h-4" />
-                                                                                </div>
+                                                                            <DialogTitle>
                                                                                 {guide.title}
                                                                             </DialogTitle>
-                                                                            <DialogDescription className="text-sm pt-2">
+                                                                            <DialogDescription>
                                                                                 {guide.description}
                                                                             </DialogDescription>
                                                                         </DialogHeader>
-                                                                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 mt-4 relative">
-                                                                            <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
-                                                                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
-                                                                        </div>
+                                                                        <DialogBody>
+                                                                            <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
+                                                                                <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                                <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                            </div>
+                                                                        </DialogBody>
+                                                                        <DialogFooter>
+                                                                            <DialogClose asChild>
+                                                                                <Button variant="outline" className="min-w-[120px]">ปิด</Button>
+                                                                            </DialogClose>
+                                                                        </DialogFooter>
                                                                     </DialogContent>
                                                                 </Dialog>
                                                             </div>
@@ -3906,7 +3910,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                 >
                     <div className="bg-white p-5 border-b border-border-subtle flex items-center justify-between">
                         <DialogHeader>
-                            <DialogTitle className="text-xl font-bold text-gray-800">
+                            <DialogTitle>
                                 เพิ่ม{currentDocContext?.label}
                             </DialogTitle>
 

@@ -209,15 +209,18 @@ function MockupContent() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="text-gray-600 hover:text-foreground">
-                            <Phone className="w-4 h-4 mr-1.5" />
-                            <span>{app.phone}</span>
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-gray-600 hover:text-foreground">
-                            <MessageCircle className="w-4 h-4 mr-1.5" />
-                            <span>LINE</span>
-                        </Button>
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5">
+                        <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-xs text-gray-400">เบอร์โทร</span>
+                            <span className="text-sm text-gray-700 font-semibold">{app.phone}</span>
+                        </div>
+                        <div className="w-px h-4 bg-gray-200"></div>
+                        <div className="flex items-center gap-1.5">
+                            <MessageCircle className="w-3.5 h-3.5 text-[#00B900]" />
+                            <span className="text-xs text-gray-400">LINE</span>
+                            <span className="text-sm text-gray-700 font-semibold">-</span>
+                        </div>
                     </div>
                 </div>
 

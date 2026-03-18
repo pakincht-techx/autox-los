@@ -41,7 +41,7 @@ export default function Home() {
           </p>
 
           <Link href="/dashboard/applications" className="w-full">
-            <Button size="xl" variant="accent" className="w-full text-lg font-bold shadow-lg">
+            <Button size="xl" variant="accent" className="w-full text-lg shadow-lg">
               เข้าสู่ระบบ
             </Button>
           </Link>

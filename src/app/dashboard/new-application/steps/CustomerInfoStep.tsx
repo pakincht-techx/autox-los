@@ -1639,7 +1639,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             variant="outline"
                                             onClick={handleSendOtp}
                                             disabled={!formData.phone || formData.phone.replace(/\D/g, '').length < 10}
-                                            className="shrink-0 h-12 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                            className="shrink-0 h-12"
                                         >
                                             ยืนยันเบอร์มือถือ
                                         </Button>
@@ -1757,13 +1757,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                 {/* Phone OTP Dialog */}
                                 <Dialog open={showOtpInput} onOpenChange={setShowOtpInput}>
-                                    <DialogContent className="max-w-[400px] p-6">
-                                        <DialogHeader className="items-center text-center">
-                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
-                                                <Smartphone className="w-6 h-6 text-chaiyo-blue" />
-                                            </div>
-                                            <DialogTitle className="text-xl font-bold text-gray-900">ยืนยันเบอร์โทรศัพท์</DialogTitle>
-                                            <DialogDescription className="text-sm text-gray-500">
+                                    <DialogContent className="sm:max-w-[480px]">
+                                        <DialogHeader className="space-y-3">
+                                            <DialogTitle>ยืนยันเบอร์โทรศัพท์</DialogTitle>
+                                            <DialogDescription>
                                                 กรุณากรอกรหัส OTP ที่ส่งไปยังเบอร์ {formData.phone}
                                                 {otpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {otpRef})</span>}
                                             </DialogDescription>
@@ -1804,16 +1801,16 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             </button>
                                         </div>
 
-                                        <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                                        <DialogFooter>
                                             <Button
                                                 variant="outline"
-                                                className="flex-1 h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                className="min-w-[120px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
                                                 onClick={() => setShowOtpInput(false)}
                                             >
                                                 ยกเลิก
                                             </Button>
                                             <Button
-                                                className="flex-1 h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                className="min-w-[120px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
                                                 onClick={handleVerifyOtp}
                                                 disabled={otp.length !== 6 || isVerifyingOtp}
                                             >
@@ -1856,7 +1853,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 variant="outline"
                                                 onClick={handleSendEmailOtp}
                                                 disabled={!formData.email || !formData.email.includes('@')}
-                                                className="shrink-0 h-12 border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
+                                                className="shrink-0 h-12"
                                             >
                                                 ยืนยันอีเมล
                                             </Button>
@@ -1865,13 +1862,10 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                     {/* Email OTP Dialog */}
                                     <Dialog open={showEmailOtpInput} onOpenChange={setShowEmailOtpInput}>
-                                        <DialogContent className="max-w-[400px] p-6">
-                                            <DialogHeader className="items-center text-center">
-                                                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2">
-                                                    <Mail className="w-6 h-6 text-chaiyo-blue" />
-                                                </div>
-                                                <DialogTitle className="text-xl font-bold text-gray-900">ยืนยันอีเมล</DialogTitle>
-                                                <DialogDescription className="text-sm text-gray-500">
+                                        <DialogContent className="sm:max-w-[480px]">
+                                            <DialogHeader className="space-y-3">
+                                                <DialogTitle>ยืนยันอีเมล</DialogTitle>
+                                                <DialogDescription>
                                                     กรุณากรอกรหัส OTP ที่ส่งไปยังอีเมล {formData.email}
                                                     {emailOtpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {emailOtpRef})</span>}
                                                 </DialogDescription>
@@ -1912,16 +1906,16 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                 </button>
                                             </div>
 
-                                            <DialogFooter className="flex flex-col sm:flex-row gap-3">
+                                            <DialogFooter>
                                                 <Button
                                                     variant="outline"
-                                                    className="flex-1 h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                    className="min-w-[120px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
                                                     onClick={() => setShowEmailOtpInput(false)}
                                                 >
                                                     ยกเลิก
                                                 </Button>
                                                 <Button
-                                                    className="flex-1 h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                    className="min-w-[120px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
                                                     onClick={handleVerifyEmailOtp}
                                                     disabled={emailOtp.length !== 6 || isVerifyingEmailOtp}
                                                 >
@@ -2511,8 +2505,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     ) : (
                                         <>
                                             <DialogHeader>
-                                                <DialogTitle className="text-chaiyo-blue flex items-center gap-2">
-                                                    <UserPlus className="w-5 h-5" /> {editingCoBorrowerIndex !== null ? "แก้ไขข้อมูลผู้กู้ร่วม" : "เพิ่มข้อมูลผู้กู้ร่วม"}
+                                                <DialogTitle>
+                                                    {editingCoBorrowerIndex !== null ? "แก้ไขข้อมูลผู้กู้ร่วม" : "เพิ่มข้อมูลผู้กู้ร่วม"}
                                                 </DialogTitle>
                                             </DialogHeader>
                                             <div className="space-y-4 py-4">
@@ -2810,8 +2804,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                     ) : (
                                         <>
                                             <DialogHeader>
-                                                <DialogTitle className="text-chaiyo-orange flex items-center gap-2">
-                                                    <ShieldCheck className="w-5 h-5" /> {editingGuarantorIndex !== null ? "แก้ไขข้อมูลผู้ค้ำประกัน" : "เพิ่มข้อมูลผู้ค้ำประกัน"}
+                                                <DialogTitle>
+                                                    {editingGuarantorIndex !== null ? "แก้ไขข้อมูลผู้ค้ำประกัน" : "เพิ่มข้อมูลผู้ค้ำประกัน"}
                                                 </DialogTitle>
                                             </DialogHeader>
                                             <div className="space-y-4 py-4">
@@ -3044,20 +3038,8 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
-                                alertDialog.variant === "error" ? "bg-red-100" : "bg-blue-100"
-                            )}>
-                                {alertDialog.variant === "error" ? (
-                                    <AlertCircle className="w-5 h-5 text-red-600" />
-                                ) : (
-                                    <Info className="w-5 h-5 text-blue-600" />
-                                )}
-                            </div>
-                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
                             {alertDialog.description}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -3073,7 +3055,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
             <Dialog open={showPhoneVerifyDialog} onOpenChange={setShowPhoneVerifyDialog}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-center text-xl font-bold flex flex-col items-center gap-4">
+                        <DialogTitle className="text-center flex flex-col items-center gap-4">
                             {isPhoneOwnershipVerifying ? (
                                 <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center relative">
                                     <div className="absolute inset-0 rounded-full border-4 border-chaiyo-blue/20 border-t-chaiyo-blue animate-spin" />

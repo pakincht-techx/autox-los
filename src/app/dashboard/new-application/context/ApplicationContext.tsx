@@ -148,6 +148,8 @@ interface ApplicationContextType {
     setPrevOverride: (fn: (() => void) | null) => void;
     setSaveOverride: (fn: (() => void) | null) => void;
     saveOverrideRef: React.RefObject<(() => void) | null>;
+    setMandatoryCheckOverride: (fn: (() => boolean) | null) => void;
+    mandatoryCheckRef: React.RefObject<(() => boolean) | null>;
     setHideLayoutNav: (hide: boolean) => void;
     hideLayoutNav: boolean;
 }
@@ -189,6 +191,7 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
     const nextOverrideRef = useRef<(() => void) | null>(null);
     const prevOverrideRef = useRef<(() => void) | null>(null);
     const saveOverrideRef = useRef<(() => void) | null>(null);
+    const mandatoryCheckRef = useRef<(() => boolean) | null>(null);
     const [hideLayoutNav, setHideLayoutNav] = useState(false);
 
     const setNextOverride = useCallback((fn: (() => void) | null) => {
@@ -201,6 +204,10 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
 
     const setSaveOverride = useCallback((fn: (() => void) | null) => {
         saveOverrideRef.current = fn;
+    }, []);
+
+    const setMandatoryCheckOverride = useCallback((fn: (() => boolean) | null) => {
+        mandatoryCheckRef.current = fn;
     }, []);
 
     // Reset per-page overrides on route change
@@ -378,6 +385,8 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
         setPrevOverride,
         setSaveOverride,
         saveOverrideRef,
+        setMandatoryCheckOverride,
+        mandatoryCheckRef,
         setHideLayoutNav,
         hideLayoutNav,
     };

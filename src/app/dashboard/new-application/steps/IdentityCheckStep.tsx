@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { CheckCircle, Loader2, CreditCard, User, Camera, ArrowRight, UserCheck, UserPlus, FileText, MapPin, Briefcase, Calendar, ShieldAlert, AlertTriangle, XCircle, ArrowLeft, AlertCircle, Info, Save, Check, Printer, MessageCircle, Phone } from "lucide-react";
+import { CheckCircle, Loader2, IdCard, User, Camera, ArrowRight, UserCheck, UserPlus, FileText, MapPin, Briefcase, Calendar, ShieldAlert, AlertTriangle, XCircle, ArrowLeft, AlertCircle, Info, Save, Check, Printer, MessageCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -27,6 +27,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogBody,
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -724,7 +725,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             <div className="space-y-6 animate-in zoom-in-95 duration-500">
                                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-4">
                                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
-                                        <CreditCard className="w-6 h-6 text-orange-600" />
+                                        <IdCard className="w-6 h-6 text-orange-600" />
                                     </div>
                                     <div className="flex-1">
                                         <h4 className="font-bold text-orange-800 text-sm">{stage === 'TAKING_ID_FRONT' ? 'ขั้นตอนที่ 1: ถ่ายรูปด้านหน้าบัตร' : 'ขั้นตอนที่ 2: ถ่ายรูปด้านหลังบัตร'}</h4>
@@ -809,7 +810,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                 <Button
                                                     size="default"
                                                     onClick={handleCaptureID}
-                                                    className="text-white font-bold px-10 h-12 text-lg shadow-xl"
+                                                    className="text-white font-bold px-10 h-12 text-lg shadow-none"
                                                 >
                                                     <Camera className="w-6 h-6 mr-2" /> {stage === 'TAKING_ID_FRONT' ? 'ถ่ายภาพด้านหน้า' : 'ถ่ายภาพด้านหลัง'}
                                                 </Button>
@@ -902,7 +903,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                             <div className="z-40 text-center px-6">
                                                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                                                 <p className="text-white font-bold">{cameraError}</p>
-                                                <Button variant="secondary" onClick={() => startCamera("user")} className="mt-4 font-bold px-8">ลองอีกครั้ง</Button>
+                                                <Button variant="secondary" onClick={() => startCamera("user")} className="mt-4 px-8">ลองอีกครั้ง</Button>
                                             </div>
                                         ) : !isCameraActive && (
                                             <div className="z-40 text-center">
@@ -937,7 +938,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
 
                                         <div className="flex flex-col items-center gap-4 w-full max-w-sm mt-12">
-                                            <Button size="default" className="w-full bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 font-bold shadow-xl shadow-blue-100" onClick={handleCreateProfile}>
+                                            <Button size="default" className="w-full bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 shadow-none" onClick={handleCreateProfile}>
                                                 ดำเนินการต่อ <ArrowRight className="ml-2 w-6 h-6" />
                                             </Button>
 
@@ -1237,23 +1238,8 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
-                                alertDialog.type === 'error' ? "bg-red-100" :
-                                    alertDialog.type === 'success' ? "bg-emerald-100" : "bg-amber-100"
-                            )}>
-                                {alertDialog.type === 'error' ? (
-                                    <XCircle className="w-5 h-5 text-red-600" />
-                                ) : alertDialog.type === 'success' ? (
-                                    <Check className="w-5 h-5 text-emerald-600" />
-                                ) : (
-                                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                                )}
-                            </div>
-                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
                             {alertDialog.description}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -1285,19 +1271,16 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
             {/* Not Continue Dialog */}
             <AlertDialog open={showNotContinueDialog} onOpenChange={setShowNotContinueDialog}>
-                <AlertDialogContent className="max-w-md rounded-3xl p-8">
-                    <AlertDialogHeader className="items-center text-center">
-                        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                            <Info className="w-8 h-8 text-chaiyo-blue" />
-                        </div>
-                        <AlertDialogTitle className="text-2xl font-black text-gray-900">ยืนยันการออกจากหน้านี้</AlertDialogTitle>
-                        <AlertDialogDescription className="text-base text-gray-500">
+                <AlertDialogContent className="max-w-md rounded-3xl">
+                    <AlertDialogHeader className="space-y-3">
+                        <AlertDialogTitle>ยืนยันการออกจากหน้านี้</AlertDialogTitle>
+                        <AlertDialogDescription>
                             ข้อมูลทั้งหมดจะถูกบันทึกเป็น 'ฉบับร่าง' โดยอัตโนมัติ คุณสามารถกลับมาดำเนินการต่อได้จากรายการใบสมัคร
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 
-                    <div className="space-y-6 py-6">
-                        <div className="bg-gray-50 rounded-2xl space-y-1">
+                    <AlertDialogBody className="space-y-6">
+                        <div className="bg-gray-50 rounded-2xl space-y-1 p-4">
                             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">ชื่อ-นามสกุล ลูกค้า</Label>
                             <p className="text-lg font-bold text-gray-900">{formData.firstName} {formData.lastName}</p>
                         </div>
@@ -1330,18 +1313,18 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         </div>
 
 
-                    </div>
+                    </AlertDialogBody>
 
-                    <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
+                    <AlertDialogFooter>
                         <AlertDialogAction
                             onClick={() => window.location.href = '/dashboard'}
-                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 flex-1 order-1 sm:order-2"
+                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[120px] order-1 sm:order-2"
                         >
                             <Save className="w-4 h-4" /> บันทึกและกลับสู่หน้าหลัก
                         </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => setShowNotContinueDialog(false)}
-                            className="border-gray-200 text-gray-500 hover:bg-gray-50 font-bold h-12 rounded-xl flex items-center justify-center gap-2 flex-1 order-2 sm:order-1"
+                            className="border-gray-200 text-gray-500 hover:bg-gray-50 font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[120px] order-2 sm:order-1"
                         >
                             ปิด
                         </AlertDialogCancel>

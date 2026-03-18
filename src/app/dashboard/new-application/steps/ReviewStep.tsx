@@ -1107,7 +1107,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             กรุณาตรวจสอบเอกสารสัญญาที่ระบบส่งให้ทาง SMS และลงนามเพื่อรับเงินโอนเข้าบัญชีภายใน 24 ชม.
                                         </p>
                                     </div>
-                                    <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-chaiyo-blue hover:bg-chaiyo-blue/90" onClick={onSubmit}>
+                                    <Button className="w-full h-14 text-lg rounded-2xl bg-chaiyo-blue hover:bg-chaiyo-blue/90" onClick={onSubmit}>
                                         ดำเนินการต่อ <ArrowRight className="w-5 h-5 ml-2" />
                                     </Button>
                                 </CardContent>
@@ -1135,7 +1135,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                     <p className="text-sm text-center text-muted leading-relaxed px-4">
                                         ท่านสามารถลองยื่นขอสินเชื่อใหม่ได้อีกครั้งเมื่อมีความพร้อม หรือติดต่อเจ้าหน้าที่เพื่อขอคำแนะนำเพิ่มเติม
                                     </p>
-                                    <Button variant="outline" className="w-full h-14 text-lg font-bold rounded-2xl border-gray-200" onClick={() => window.location.reload()}>
+                                    <Button variant="outline" className="w-full h-14 text-lg rounded-2xl border-gray-200" onClick={() => window.location.reload()}>
                                         กลับสู่หน้าหลัก
                                     </Button>
                                 </CardContent>
@@ -1166,7 +1166,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
                                             <p className="text-sm text-amber-900">กรุณารับสายจากเจ้าหน้าที่เพื่อยืนยันข้อมูล</p>
                                         </div>
                                     </div>
-                                    <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-amber-500 hover:bg-amber-600 text-white" onClick={onSubmit}>
+                                    <Button className="w-full h-14 text-lg rounded-2xl bg-amber-500 hover:bg-amber-600 text-white" onClick={onSubmit}>
                                         รับทราบนัดหมาย
                                     </Button>
                                 </CardContent>
@@ -1225,13 +1225,8 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
             <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                                <AlertCircle className="w-5 h-5 text-red-600" />
-                            </div>
-                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
                             {alertDialog.description}
                         </AlertDialogDescription>
                     </AlertDialogHeader>

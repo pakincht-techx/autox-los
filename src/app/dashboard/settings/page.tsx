@@ -79,10 +79,10 @@ export default function SettingsPage() {
                                     <h3 className="text-lg font-bold text-foreground">สมหญิง จริงใจ</h3>
                                     <p className="text-sm text-muted">ผู้ช่วยผู้จัดการสาขา (สาขาลาดพร้าว)</p>
                                     <div className="flex gap-2 mt-3">
-                                        <Button size="sm" variant="outline" className="h-8 text-[11px] px-3 font-bold border-border-strong">
+                                        <Button size="sm" variant="outline" className="h-8 text-[11px] px-3 border-border-strong">
                                             เปลี่ยนรูปภาพ
                                         </Button>
-                                        <Button size="sm" variant="ghost" className="h-8 text-[11px] px-3 font-bold text-red-500 hover:bg-red-50">
+                                        <Button size="sm" variant="ghost" className="h-8 text-[11px] px-3 text-red-500 hover:bg-red-50">
                                             ลบรูปภาพ
                                         </Button>
                                     </div>
@@ -109,8 +109,8 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="pt-6 flex justify-end gap-3">
-                                <Button variant="outline" className="h-10 px-6 font-bold text-sm">ยกเลิก</Button>
-                                <Button className="h-10 px-8 font-bold text-sm bg-chaiyo-blue hover:bg-blue-700">
+                                <Button variant="outline" className="h-10 px-6 text-sm">ยกเลิก</Button>
+                                <Button className="h-10 px-8 text-sm bg-chaiyo-blue hover:bg-blue-700">
                                     <Save className="w-4 h-4 mr-2" />
                                     บันทึกการเปลี่ยนแปลง
                                 </Button>
@@ -155,8 +155,8 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="pt-6 flex justify-end gap-3">
-                                <Button variant="outline" className="h-10 px-6 font-bold text-sm">การตั้งค่าเริ่มต้น</Button>
-                                <Button className="h-10 px-8 font-bold text-sm bg-chaiyo-blue hover:bg-blue-700">
+                                <Button variant="outline" className="h-10 px-6 text-sm">การตั้งค่าเริ่มต้น</Button>
+                                <Button className="h-10 px-8 text-sm bg-chaiyo-blue hover:bg-blue-700">
                                     บันทึกการตั้งค่า
                                 </Button>
                             </div>

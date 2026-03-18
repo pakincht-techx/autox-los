@@ -2809,11 +2809,10 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
             <Dialog open={photoGuideDialogOpen} onOpenChange={setPhotoGuideDialogOpen}>
                 <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Camera className="w-5 h-5 text-chaiyo-blue" />
+                        <DialogTitle>
                             รายการรูปถ่ายที่ต้องใช้
                         </DialogTitle>
-                        <DialogDescription className="text-sm text-gray-500">
+                        <DialogDescription>
                             กรุณาถ่ายรูปตามรายการด้านล่างให้ครบถ้วน
                         </DialogDescription>
                     </DialogHeader>
@@ -2842,11 +2841,10 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
             <Dialog open={paperGuideDialogOpen} onOpenChange={setPaperGuideDialogOpen}>
                 <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Book className="w-5 h-5 text-emerald-600" />
+                        <DialogTitle>
                             รายการเอกสารที่ต้องใช้
                         </DialogTitle>
-                        <DialogDescription className="text-sm text-gray-500">
+                        <DialogDescription>
                             กรุณาถ่ายรูปหรือสแกนเอกสารตามรายการด้านล่างให้ครบถ้วน
                         </DialogDescription>
                     </DialogHeader>

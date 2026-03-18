@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, EyeOff, X, ChevronRight, Plus, Minus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote, ShieldCheck, AlertTriangle, CheckCircle, ChevronDown, Calculator, Wallet, Info } from "lucide-react";
+import { ChevronLeft, Printer, FileText, PiggyBank, Briefcase, Car, Camera, Check, Sparkles, Bike, Truck, Tractor, Map, Upload, Eye, EyeOff, X, ChevronRight, Plus, Minus, CreditCard, Gift, Shield, Percent, ArrowRight, Star, User, Banknote, ShieldCheck, AlertTriangle, CheckCircle, ChevronDown, Calculator, Wallet, Info, Trash2 } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { ActionMenu } from "@/components/ui/ActionMenu";
 import { Switch } from "@/components/ui/switch";
@@ -1828,7 +1828,7 @@ function PreQuestionPageContent() {
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
-                                                                                            <X className="w-4 h-4" />
+                                                                                            <Trash2 className="w-4 h-4" />
                                                                                         </Button>
                                                                                     </TableCell>
                                                                                 </TableRow>
@@ -1908,7 +1908,7 @@ function PreQuestionPageContent() {
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
-                                                                                            <X className="w-4 h-4" />
+                                                                                            <Trash2 className="w-4 h-4" />
                                                                                         </Button>
                                                                                     </TableCell>
                                                                                 </TableRow>
@@ -2007,7 +2007,7 @@ function PreQuestionPageContent() {
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
-                                                                                            <X className="w-4 h-4" />
+                                                                                            <Trash2 className="w-4 h-4" />
                                                                                         </Button>
                                                                                     </TableCell>
                                                                                 </TableRow>
@@ -2087,30 +2087,13 @@ function PreQuestionPageContent() {
                                                                                                     : "text-red-500 hover:text-red-600 hover:bg-red-50"
                                                                                             )}
                                                                                         >
-                                                                                            <X className="w-4 h-4" />
+                                                                                            <Trash2 className="w-4 h-4" />
                                                                                         </Button>
                                                                                     </TableCell>
                                                                                 </TableRow>
                                                                             ))}
                                                                         </TableBody>
                                                                     </Table>
-                                                                </div>
-                                                                <div className="flex justify-between items-center px-4 py-4 bg-chaiyo-blue/[0.03] border border-border-strong rounded-xl mt-4">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
-                                                                            <Calculator className="w-4 h-4 text-chaiyo-blue" />
-                                                                        </div>
-                                                                        <div className="flex flex-col">
-                                                                            <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
-                                                                            <span className="text-sm font-bold text-gray-700">รวมราคาประเมินสุทธิ</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="text-right">
-                                                                        <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
-                                                                            {Number(formData.appraisalPrice || 0).toLocaleString()}
-                                                                        </div>
-                                                                        <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
-                                                                    </div>
                                                                 </div>
                                                             </div>
 
@@ -2123,10 +2106,20 @@ function PreQuestionPageContent() {
                                                                         value={formData.buildingAge || ''}
                                                                         onChange={(e) => setFormData({ ...formData, buildingAge: e.target.value })}
                                                                         className="h-12 text-base rounded-xl"
-                                                                        placeholder="กรอกอายุสิ่งปลูกสร้าง"
+                                                                        placeholder="ระบุอายุสิ่งปลูกสร้าง"
                                                                     />
                                                                 </div>
                                                             )}
+
+                                                            <div className="flex justify-between items-center px-6 py-4 bg-blue-50 border border-blue-200 rounded-xl mt-4">
+                                                                    <span className="text-sm font-bold text-chaiyo-blue">รวมราคาประเมินสุทธิ</span>
+                                                                    <div className="flex items-baseline gap-1.5">
+                                                                        <span className="text-lg font-bold font-mono text-chaiyo-blue">
+                                                                            {Number(formData.appraisalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                        </span>
+                                                                        <span className="text-sm text-gray-500">บาท</span>
+                                                                    </div>
+                                                                </div>
 
 
                                                         </div>
@@ -2743,7 +2736,7 @@ function PreQuestionPageContent() {
 
                                                                         {/* Footer (Actions) */}
                                                                         <div className="mt-4 flex pt-4 border-t border-gray-100">
-                                                                            <Button size="lg" onClick={handleCreateApplication} className="w-full font-bold bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
+                                                                            <Button size="lg" onClick={handleCreateApplication} className="w-full bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -3308,7 +3301,7 @@ function PreQuestionPageContent() {
                                                                         })}
                                                                 </ul>
                                                                 <div className="mt-4 flex pt-4 border-t border-gray-100">
-                                                                    <Button size="lg" onClick={handleCreateApplication} className="w-full font-bold bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
+                                                                    <Button size="lg" onClick={handleCreateApplication} className="w-full bg-chaiyo-blue text-white hover:bg-blue-800 rounded-xl h-12 shadow-sm transition-all">เลือก</Button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -3433,19 +3426,16 @@ function PreQuestionPageContent() {
                 }
                 {/* Condition Warning Dialog */}
                 <AlertDialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
-                    <AlertDialogContent className="max-w-[400px]">
-                        <AlertDialogHeader className="flex flex-col items-center text-center">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-2">
-                                <AlertTriangle className="w-10 h-10 text-red-500" />
-                            </div>
-                            <AlertDialogTitle className="text-xl font-bold text-gray-900 leading-tight">คุณสมบัติไม่เป็นไปตามเงื่อนไข</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-600 mt-2">
+                    <AlertDialogContent className="sm:max-w-[480px]">
+                        <AlertDialogHeader className="space-y-3">
+                            <AlertDialogTitle>คุณสมบัติไม่เป็นไปตามเงื่อนไข</AlertDialogTitle>
+                            <AlertDialogDescription>
                                 ข้อมูลของผู้กู้หรือข้อมูลหลักประกัน <span className="font-bold text-red-600">ไม่ตรงตามเงื่อนไขเบื้องต้น</span> ของบริษัทฯ
                                 <br /><br />
                                 กรุณาตรวจสอบความถูกต้องของข้อมูลอีกครั้ง หรือติดต่อผู้จัดการอาวุโสเพื่อขอคำแนะนำเพิ่มเติม
                             </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter className="sm:justify-center mt-2">
+                        <AlertDialogFooter className="sm:justify-center">
                             <AlertDialogAction
                                 onClick={() => setIsConditionDialogOpen(false)}
                                 className="bg-chaiyo-blue hover:bg-blue-800 text-white font-bold px-8 py-2 rounded-xl h-11 min-w-[120px]"

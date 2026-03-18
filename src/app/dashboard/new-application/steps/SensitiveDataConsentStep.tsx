@@ -185,21 +185,21 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
             </div>
 
             <AlertDialog open={isDeclineDialogOpen} onOpenChange={setIsDeclineDialogOpen}>
-                <AlertDialogContent className="rounded-[2rem] p-8 max-w-md">
+                <AlertDialogContent className="rounded-[2rem] max-w-md">
                     <AlertDialogHeader>
                         <div className="flex items-center gap-4 mb-2">
                             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                                 <XCircle className="w-6 h-6 text-red-600" />
                             </div>
-                            <AlertDialogTitle className="text-xl">ยืนยันการปฏิเสธ?</AlertDialogTitle>
+                            <AlertDialogTitle>ยืนยันการปฏิเสธ?</AlertDialogTitle>
                         </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogDescription>
                             หากคุณปฏิเสธการให้ความยินยอมข้อมูลส่วนบุคคลที่ละเอียดอ่อน คุณจะไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
                             ต้องการปฏิเสธและกลับหน้าหลักใช่หรือไม่?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-6 gap-3">
-                        <AlertDialogCancel className="min-w-[120px] rounded-xl h-11 border-gray-300 text-gray-700 font-bold hover:bg-gray-50">
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="min-w-[120px] rounded-xl h-11 border-gray-300 text-gray-700 hover:bg-gray-50">
                             ยกเลิก
                         </AlertDialogCancel>
                         <AlertDialogAction

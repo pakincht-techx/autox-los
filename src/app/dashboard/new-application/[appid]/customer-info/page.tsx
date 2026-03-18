@@ -9,6 +9,7 @@ import {
     Dialog,
     DialogContent,
     DialogHeader,
+    DialogBody,
     DialogTitle,
     DialogDescription,
     DialogFooter,
@@ -18,7 +19,7 @@ import { Loader2, CheckCircle, AlertCircle, ChevronLeft, ChevronRight, Info, XCi
 export default function CustomerInfoPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { formData, setFormData, appId, setNextOverride, setHideLayoutNav } = useApplication();
+    const { formData, setFormData, appId, setNextOverride, setHideLayoutNav, setMandatoryCheckOverride } = useApplication();
 
     // Detect if this is edit mode (coming back from detail page)
     const isEditMode = searchParams.get('state') === 'draft';
@@ -37,6 +38,16 @@ export default function CustomerInfoPage() {
         }
         return () => setHideLayoutNav(false);
     }, [isEditMode, setHideLayoutNav]);
+
+    // Register mandatory field check (edit mode only — new-app has its own flow)
+    useEffect(() => {
+        if (isEditMode) {
+            setMandatoryCheckOverride(() => {
+                return !formData.firstName || !formData.idNumber;
+            });
+        }
+        return () => setMandatoryCheckOverride(null);
+    }, [isEditMode, formData.firstName, formData.idNumber, setMandatoryCheckOverride]);
 
     // Register custom next handler
     useEffect(() => {
@@ -99,7 +110,7 @@ export default function CustomerInfoPage() {
                     <Button
                         size="lg"
                         onClick={handleNext}
-                        className="px-8 font-bold shadow-lg shadow-blue-500/20"
+                        className="px-8 font-bold shadow-none"
                     >
                         ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -113,52 +124,53 @@ export default function CustomerInfoPage() {
                     setIsStatusDialogOpen(false);
                 }
             }}>
-                <DialogContent className="sm:max-w-xl rounded-[2rem] p-8">
+                <DialogContent className="sm:max-w-xl rounded-[2rem]">
 
                     {/* ── Loading State ── */}
                     {!statusCheckResult || isCheckingStatus ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="h-12 w-12 text-chaiyo-blue animate-spin mb-6" />
-                            <DialogHeader className="space-y-2 flex flex-col items-center">
-                                <DialogTitle className="text-xl font-bold text-gray-900">กำลังตรวจสอบสถานะลูกค้า...</DialogTitle>
-                                <DialogDescription className="text-base text-gray-500 text-center">
+                            <DialogHeader className="space-y-2 items-center text-center">
+                                <DialogTitle>กำลังตรวจสอบสถานะลูกค้า...</DialogTitle>
+                                <DialogDescription>
                                     ระบบกำลังตรวจสอบข้อมูลผู้สมัครกับฐานข้อมูล<br />กรุณารอสักครู่
                                 </DialogDescription>
                             </DialogHeader>
                         </div>
 
-                    /* ── NORMAL: Pass ── */
+                        /* ── NORMAL: Pass ── */
                     ) : statusCheckResult === "NORMAL" ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
                                 <CheckCircle className="h-10 w-10 text-emerald-500" />
                             </div>
-                            <DialogHeader className="space-y-2 flex flex-col items-center">
-                                <DialogTitle className="text-xl font-bold text-gray-900">สถานะปกติ</DialogTitle>
-                                <DialogDescription className="text-base text-gray-500 text-center">
+                            <DialogHeader className="space-y-2 items-center text-center">
+                                <DialogTitle>สถานะปกติ</DialogTitle>
+                                <DialogDescription>
                                     ตรวจสอบสำเร็จ กำลังไปสู่ขั้นตอนถัดไป...
                                 </DialogDescription>
                             </DialogHeader>
                         </div>
 
-                    /* ── HARD BLOCK: Cannot proceed ── */
+                        /* ── HARD BLOCK: Cannot proceed ── */
                     ) : statusCheckResult === "HARD_BLOCK" ? (
                         <div className="space-y-8">
-                            <DialogHeader className="flex flex-col items-center text-center space-y-4">
-                                <div className="h-16 w-16 flex items-center justify-center rounded-full bg-red-50 shrink-0">
-                                    <XCircle className="h-10 w-10 text-red-500" />
-                                </div>
-                                <div className="space-y-2 flex flex-col items-center">
-                                    <DialogTitle className="text-xl font-bold text-gray-900">
+                            <DialogHeader className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-red-50 shrink-0">
+                                        <XCircle className="h-5 w-5 text-red-500" />
+                                    </div>
+                                    <DialogTitle>
                                         ไม่สามารถดำเนินการต่อได้
                                     </DialogTitle>
-                                    <DialogDescription className="text-base text-gray-500 text-center">
-                                        ผู้สมัครรายนี้ไม่ผ่านเกณฑ์การตรวจสอบ<br />
-                                        ไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
-                                    </DialogDescription>
                                 </div>
+                                <DialogDescription>
+                                    ผู้สมัครรายนี้ไม่ผ่านเกณฑ์การตรวจสอบ
+                                    ไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
+                                </DialogDescription>
                             </DialogHeader>
 
+                            <DialogBody>
                             <div className="bg-red-50 p-6 rounded-2xl text-red-800 border border-red-100">
                                 <p className="flex items-start gap-3">
                                     <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
@@ -168,8 +180,9 @@ export default function CustomerInfoPage() {
                                     </span>
                                 </p>
                             </div>
+                            </DialogBody>
 
-                            <DialogFooter className="pt-4">
+                            <DialogFooter>
                                 <Button
                                     variant="destructive"
                                     size="lg"
@@ -177,7 +190,7 @@ export default function CustomerInfoPage() {
                                         setIsStatusDialogOpen(false);
                                         router.push(`/dashboard/applications`);
                                     }}
-                                    className="w-full font-bold shadow-lg shadow-red-200"
+                                    className="w-full font-bold shadow-none"
                                 >
                                     <XCircle className="w-4 h-4 mr-2" />
                                     ยกเลิกใบสมัคร
@@ -185,23 +198,24 @@ export default function CustomerInfoPage() {
                             </DialogFooter>
                         </div>
 
-                    /* ── SOFT BLOCK: Can proceed with review ── */
+                        /* ── SOFT BLOCK: Can proceed with review ── */
                     ) : (
                         <div className="space-y-8">
-                            <DialogHeader className="flex flex-col items-center text-center space-y-4">
-                                <div className="h-16 w-16 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
-                                    <AlertCircle className="h-10 w-10 text-amber-600" />
-                                </div>
-                                <div className="space-y-2 flex flex-col items-center">
-                                    <DialogTitle className="text-xl font-bold text-gray-900">
+                            <DialogHeader className="space-y-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
+                                        <AlertCircle className="h-5 w-5 text-amber-600" />
+                                    </div>
+                                    <DialogTitle>
                                         ต้องการการตรวจสอบเพิ่มเติม
                                     </DialogTitle>
-                                    <DialogDescription className="text-base text-gray-500 text-center">
-                                        ผู้สมัครรายนี้จำเป็นต้องได้รับการตรวจสอบจากทีม Legal, Compliance และ Fraud ก่อนอนุมัติ
-                                    </DialogDescription>
                                 </div>
+                                <DialogDescription>
+                                    ผู้สมัครรายนี้จำเป็นต้องได้รับการตรวจสอบจากทีม Legal, Compliance และ Fraud ก่อนอนุมัติ
+                                </DialogDescription>
                             </DialogHeader>
 
+                            <DialogBody className="space-y-4">
                             {/* Reason Codes */}
                             {softBlockReasons.length > 0 && (
                                 <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -222,13 +236,14 @@ export default function CustomerInfoPage() {
                                     </span>
                                 </p>
                             </div>
+                            </DialogBody>
 
-                            <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
+                            <DialogFooter>
                                 <Button
                                     variant="outline"
                                     size="lg"
                                     onClick={() => setIsStatusDialogOpen(false)}
-                                    className="flex-1 order-2 sm:order-1 font-bold"
+                                    className="min-w-[120px] order-2 sm:order-1 font-bold"
                                 >
                                     <ChevronLeft className="w-4 h-4 mr-2" />
                                     กลับไปตรวจสอบ
@@ -241,7 +256,7 @@ export default function CustomerInfoPage() {
                                         const reasonsParam = softBlockReasons.length > 0 ? `&reasons=${softBlockReasons.join(',')}` : '';
                                         router.push(`/dashboard/applications/${appId || 'draft'}?status=in-review&checkStatus=soft_block${reasonsParam}`);
                                     }}
-                                    className="flex-[2] order-1 sm:order-2 font-bold bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200 text-white"
+                                    className="flex-[2] order-1 sm:order-2 font-bold bg-amber-500 hover:bg-amber-600 shadow-none text-white"
                                 >
                                     <CheckCircle className="w-4 h-4 mr-2" />
                                     รับทราบและดำเนินการต่อ

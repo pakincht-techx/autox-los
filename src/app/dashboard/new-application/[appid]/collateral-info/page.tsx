@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { CollateralStep } from "../../steps/CollateralStepNew";
 import { useApplication } from "../../context/ApplicationContext";
 
@@ -9,7 +10,16 @@ export default function CollateralInfoPage() {
         setFormData,
         isExistingCustomer,
         mockExistingCollaterals,
+        setMandatoryCheckOverride,
     } = useApplication();
+
+    // Register mandatory field check
+    useEffect(() => {
+        setMandatoryCheckOverride(() => {
+            return !formData.collateralType;
+        });
+        return () => setMandatoryCheckOverride(null);
+    }, [formData.collateralType, setMandatoryCheckOverride]);
 
     return (
         <CollateralStep

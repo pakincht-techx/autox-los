@@ -125,8 +125,7 @@ export function SpecialIncomeDialog({ open, onOpenChange, onSave, initialData }:
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl bg-gray-50 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-xl text-chaiyo-blue flex items-center gap-2">
-                        <Store className="w-5 h-5" />
+                    <DialogTitle>
                         เพิ่มรายได้พิเศษ (กิจการ/เกษตร)
                     </DialogTitle>
                 </DialogHeader>
@@ -432,7 +431,7 @@ export function SpecialIncomeDialog({ open, onOpenChange, onSave, initialData }:
 
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>ยกเลิก</Button>
-                    <Button onClick={handleSave} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold">
+                    <Button onClick={handleSave} className="bg-chaiyo-blue hover:bg-chaiyo-blue/90">
                         <Plus className="w-4 h-4 mr-2" /> บันทึกรายได้
                     </Button>
                 </DialogFooter>

@@ -365,8 +365,8 @@ export default function AddGuarantorPage() {
                                             <h3 className="text-xl font-bold">ไม่สามารถอ่านข้อมูลจากชิปได้</h3>
                                             <p className="text-sm mt-2 mb-8 max-w-sm leading-relaxed">พบข้อผิดพลาดขณะอ่านข้อมูลจากบัตรประชาชน <br /> กรุณาตรวจสอบการเสียบบัตรและลองอีกครั้ง</p>
                                             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center">
-                                                <Button variant="outline" onClick={handleOCRUpload} className="font-bold h-12 px-8 rounded-xl">ถ่ายรูปบัตรประชาชน</Button>
-                                                <Button onClick={handleReadCard} className="text-white font-bold h-12 px-8 rounded-xl">ลองอีกครั้ง</Button>
+                                                <Button variant="outline" onClick={handleOCRUpload} className="h-12 px-8 rounded-xl">ถ่ายรูปบัตรประชาชน</Button>
+                                                <Button onClick={handleReadCard} className="text-white h-12 px-8 rounded-xl">ลองอีกครั้ง</Button>
                                             </div>
                                         </div>
                                     ) : (
@@ -450,7 +450,7 @@ export default function AddGuarantorPage() {
                                     )}
                                     {isCameraActive && (
                                         <div className="absolute bottom-6 left-0 right-0 flex justify-center z-40">
-                                            <Button size="default" onClick={handleCaptureID} className="text-white font-bold px-10 h-12 text-lg shadow-xl">
+                                            <Button size="default" onClick={handleCaptureID} className="text-white px-10 h-12 text-lg shadow-xl">
                                                 <Camera className="w-6 h-6 mr-2" /> {stage === 'TAKING_ID_FRONT' ? 'ถ่ายภาพด้านหน้า' : 'ถ่ายภาพด้านหลัง'}
                                             </Button>
                                         </div>
@@ -496,7 +496,7 @@ export default function AddGuarantorPage() {
                                         </div>
                                         <span className="text-[10px] font-bold text-chaiyo-blue uppercase tracking-wider">จำลองข้อผิดพลาด</span>
                                     </div>
-                                    <Button variant="ghost" onClick={() => setShowNotContinueDialog(true)} className="text-red-500 font-bold hover:bg-red-50">
+                                    <Button variant="ghost" onClick={() => setShowNotContinueDialog(true)} className="text-red-500 hover:bg-red-50">
                                         <XCircle className="w-5 h-5 mr-1" /> ยกเลิก
                                     </Button>
                                 </div>
@@ -517,7 +517,7 @@ export default function AddGuarantorPage() {
                                         <div className="z-40 text-center px-6">
                                             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                                             <p className="text-white font-bold">{cameraError}</p>
-                                            <Button variant="secondary" onClick={() => startCamera("user")} className="mt-4 font-bold px-8">ลองอีกครั้ง</Button>
+                                            <Button variant="secondary" onClick={() => startCamera("user")} className="mt-4 px-8">ลองอีกครั้ง</Button>
                                         </div>
                                     ) : !isCameraActive && (
                                         <div className="z-40 text-center">
@@ -546,7 +546,7 @@ export default function AddGuarantorPage() {
                                     <h3 className="text-3xl font-black mb-2">ยืนยันตัวตนสำเร็จ</h3>
                                     <p className="text-lg max-w-md mx-auto">การตรวจสอบใบหน้าและ DOPA มีข้อมูลถูกต้องตรงกัน</p>
                                     <div className="flex flex-col items-center gap-4 w-full max-w-sm mt-12">
-                                        <Button size="default" className="w-full bg-chaiyo-blue text-white h-12 font-bold shadow-xl" onClick={handleCreateProfile}>
+                                        <Button size="default" className="w-full bg-chaiyo-blue text-white h-12 shadow-xl" onClick={handleCreateProfile}>
                                             ดำเนินการต่อ <ArrowRight className="ml-2 w-6 h-6" />
                                         </Button>
                                     </div>
@@ -564,7 +564,7 @@ export default function AddGuarantorPage() {
                                     </div>
                                     <h3 className="text-2xl font-black mb-2">การยืนยันตัวตนไม่สำเร็จ</h3>
                                     <p className="text-base max-w-sm mb-10">ตรวจสอบใบหน้าไม่ผ่านครบ 3 ครั้ง<br /> กรุณาลองใช้วิธีอื่น หรือตรวจสอบข้อมูล</p>
-                                    <Button onClick={() => setStage('INIT')} variant="outline" className="w-full max-w-sm h-12 rounded-xl font-bold">กลับไปหน้าเริ่มต้น</Button>
+                                    <Button onClick={() => setStage('INIT')} variant="outline" className="w-full max-w-sm h-12 rounded-xl">กลับไปหน้าเริ่มต้น</Button>
                                 </CardContent>
                             </Card>
                         </div>
@@ -575,13 +575,8 @@ export default function AddGuarantorPage() {
             <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0", alertDialog.type === 'error' ? "bg-red-100" : alertDialog.type === 'warning' ? "bg-amber-100" : "bg-emerald-100")}>
-                                {alertDialog.type === 'error' ? <XCircle className="w-5 h-5 text-red-600" /> : <AlertTriangle className="w-5 h-5 text-amber-600" />}
-                            </div>
-                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">{alertDialog.description}</AlertDialogDescription>
+                        <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+                        <AlertDialogDescription>{alertDialog.description}</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="gap-2">
                         {alertDialog.cancelAction && (

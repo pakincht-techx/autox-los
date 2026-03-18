@@ -363,7 +363,7 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
     return (
         <div className="w-full max-w-3xl mx-auto">
             <DialogHeader className="mb-6">
-                <DialogTitle className="text-center text-xl text-chaiyo-blue">
+                <DialogTitle className="text-center">
                     {title}
                 </DialogTitle>
             </DialogHeader>
@@ -377,18 +377,13 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
             <AlertDialog open={alertDialog.isOpen} onOpenChange={(open) => setAlertDialog({ ...alertDialog, isOpen: open })}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                                <AlertCircle className="w-5 h-5 text-red-600" />
-                            </div>
-                            <AlertDialogTitle className="text-lg">{alertDialog.title}</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
                             {alertDialog.description}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90">
+                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 min-w-[120px]">
                             ตรวจสอบอีกครั้ง
                         </AlertDialogAction>
                     </AlertDialogFooter>

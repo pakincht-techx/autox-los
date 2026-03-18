@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { FileText, User, X, ChevronLeft, ChevronRight, Printer } from "lucide-react";
+import { FileText, User, X, ChevronRight, Printer } from "lucide-react";
 import { useApplication } from "../context/ApplicationContext";
 
 const PdfViewer = dynamic(
@@ -75,33 +75,23 @@ export default function SalesheetPage() {
                 </label>
             </div>
 
-            <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+            <div className="flex justify-end items-center gap-2 pt-6 border-t border-gray-200">
                 <Button
                     variant="outline"
                     size="xl"
-                    onClick={() => router.push("/dashboard/new-application/identity-checker")}
-                    className="px-6 font-bold"
+                    onClick={() => window.open(pdfPath, '_blank')}
+                    className="px-6 font-bold border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2" /> ย้อนกลับ
+                    <Printer className="w-4 h-4 mr-2" /> พิมพ์ Salesheet
                 </Button>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="xl"
-                        onClick={() => window.open(pdfPath, '_blank')}
-                        className="px-6 font-bold border-chaiyo-blue text-chaiyo-blue hover:bg-blue-50"
-                    >
-                        <Printer className="w-4 h-4 mr-2" /> พิมพ์ Salesheet
-                    </Button>
-                    <Button
-                        size="xl"
-                        onClick={() => router.push(`/dashboard/new-application/${appId || "25690316ULCRL0001"}/customer-info`)}
-                        disabled={!formData.isSalesheetRead}
-                        className="px-8 font-bold"
-                    >
-                        ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
-                    </Button>
-                </div>
+                <Button
+                    size="xl"
+                    onClick={() => router.push(`/dashboard/new-application/${appId || "25690316ULCRL0001"}/customer-info`)}
+                    disabled={!formData.isSalesheetRead}
+                    className="px-8 font-bold"
+                >
+                    ดำเนินการต่อ <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
             </div>
         </div>
     );

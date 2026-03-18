@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, CheckCircle, Upload } from "lucide-react";
+import { FileText, CheckCircle2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { Label } from "@/components/ui/Label";
 import { cn } from "@/lib/utils";
 import { CustomerFormData } from "@/types/application";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/Table";
 
 interface DocumentUploadStepProps {
     formData: CustomerFormData;
@@ -31,81 +39,79 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
     };
 
     const requiredDocs = getRequiredDocs();
+    const uploadedCount = Object.values(uploads).filter(Boolean).length;
 
     return (
         <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
 
-
-            <div className="space-y-4">
-                {requiredDocs.map((doc) => (
-                    <div
-                        key={doc.id}
-                        className={cn(
-                            "flex items-center justify-between p-6 rounded-[1.5rem] border transition-all duration-300",
-                            uploads[doc.id]
-                                ? "bg-emerald-50/50 border-emerald-200 shadow-sm"
-                                : "bg-white border-border-subtle hover:border-chaiyo-blue/30 hover:shadow-md hover:shadow-gray-200/50"
-                        )}
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className={cn(
-                                "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
-                                uploads[doc.id] ? "bg-emerald-100 text-emerald-600" : "bg-gray-100/80 text-gray-500/80"
-                            )}>
-                                <FileText className="w-7 h-7" />
-                            </div>
-                            <div className="space-y-1">
-                                <h4 className={cn("text-base font-bold", uploads[doc.id] ? "text-emerald-900" : "text-foreground")}>
-                                    {doc.name}
-                                </h4>
-                                {doc.req && !uploads[doc.id] && (
-                                    <span className="text-[10px] bg-red-50 text-red-600 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-red-100">
-                                        จำเป็น
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {uploads[doc.id] ? (
-                            <div className="flex items-center gap-2 text-emerald-600">
-                                <span className="text-sm font-medium">แนบไฟล์แล้ว</span>
-                                <CheckCircle className="w-5 h-5" />
-                                <Button variant="ghost" size="sm" className="h-8 text-xs text-muted hover:text-red-500" onClick={() => setUploads(prev => ({ ...prev, [doc.id]: false }))}>
-                                    ลบ
-                                </Button>
-                            </div>
-                        ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleUpload(doc.id)}>
-                                <Upload className="w-4 h-4 mr-2" /> อัปโหลด
-                            </Button>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            <div className="flex items-center space-x-3 p-4 border border-blue-100 rounded-xl bg-blue-50/50 mt-6">
-                <Checkbox
-                    id="requireNCB"
-                    checked={formData.requireNCB || false}
-                    onCheckedChange={(checked) => setFormData((prev: CustomerFormData) => ({ ...prev, requireNCB: !!checked }))}
-                    className="border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                />
-                <div className="grid gap-1.5 leading-none">
-                    <label
-                        htmlFor="requireNCB"
-                        className="text-sm font-bold text-chaiyo-blue cursor-pointer"
-                    >
-                        ตรวจสอบเครดิตบูโร (NCB)
-                    </label>
-                    <p className="text-xs text-muted-foreground">
-                        หากเลือก การขอความยินยอมเปิดเผยข้อมูลเครดิต (NCB Consent) จะถูกเพิ่มในขั้นตอนการตรวจสอบ
-                    </p>
+            <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                    <Label className="text-sm font-bold text-gray-700">เอกสารประกอบการสมัคร ({uploadedCount}/{requiredDocs.length} ไฟล์)</Label>
+                </div>
+                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                    <Table>
+                        <TableHeader className="bg-gray-50/50">
+                            <TableRow>
+                                <TableHead className="w-[45%] text-xs">ประเภทเอกสาร</TableHead>
+                                <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {requiredDocs.map((doc) => {
+                                const isUploaded = uploads[doc.id];
+                                return (
+                                    <TableRow key={doc.id} className="hover:bg-transparent">
+                                        <TableCell className="py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={cn(
+                                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                                                    isUploaded ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                )}>
+                                                    {isUploaded ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{doc.name}</span>
+                                                    {doc.req && <span className="text-red-500 text-sm">*</span>}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {isUploaded ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleUpload(doc.id)}
+                                                    className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                >
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                    1 ไฟล์
+                                                </button>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleUpload(doc.id)}
+                                                    className="h-8 text-xs gap-1.5 font-medium"
+                                                >
+                                                    <Plus className="w-3.5 h-3.5" />
+                                                    เพิ่มเอกสาร
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
-
 
         </div>
     );
 }
-
-

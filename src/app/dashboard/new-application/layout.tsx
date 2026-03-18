@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationProvider, useApplication, APPLICATION_STEPS, ALL_FLOW_STEPS } from "./context/ApplicationContext";
+import { MandatoryFieldWarningDialog } from "./components/MandatoryFieldWarningDialog";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
+    DialogBody,
     DialogTitle,
     DialogDescription,
     DialogFooter,
@@ -50,6 +52,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         navigateNext,
         navigatePrev,
         saveOverrideRef,
+        mandatoryCheckRef,
         formData,
     } = useApplication();
 
@@ -58,6 +61,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [submitComment, setSubmitComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [mandatoryWarningOpen, setMandatoryWarningOpen] = useState(false);
 
     // Determine if we're in the application phase
     // applicationStepIndex covers standard stepper steps; also check ALL_FLOW_STEPS phase for extra pages like guarantors
@@ -122,7 +126,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             setBreadcrumbs(items);
         }
 
-        if (isApplicationStarted && !isReadonly) {
+        const isSalesheetPage = pathname.includes('/salesheet');
+        if (isApplicationStarted && !isReadonly && !isSalesheetPage) {
             setRightContent(
                 <Button
                     variant="default"
@@ -131,6 +136,11 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                         // If the current page has a custom save handler, use it
                         if (saveOverrideRef.current) {
                             saveOverrideRef.current();
+                            return;
+                        }
+                        // Check if mandatory fields are missing
+                        if (mandatoryCheckRef.current && mandatoryCheckRef.current()) {
+                            setMandatoryWarningOpen(true);
                             return;
                         }
                         // Default: save toast + navigate back
@@ -161,7 +171,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             setBreadcrumbs([]);
             setRightContent(null);
         };
-    }, [isApplicationStarted, appId, setBreadcrumbs, setRightContent, router, applicationStepIndex, isScreeningPhase, formData?.firstName, isReadonly]);
+    }, [isApplicationStarted, appId, setBreadcrumbs, setRightContent, router, applicationStepIndex, isScreeningPhase, formData?.firstName, isReadonly, pathname]);
 
 
 
@@ -207,19 +217,14 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
             {/* ── Confirm Leave Dialog ──────────────────────────────────── */}
             <AlertDialog open={confirmLeaveDialog} onOpenChange={setConfirmLeaveDialog}>
-                <AlertDialogContent className="rounded-[2rem] p-8">
+                <AlertDialogContent className="rounded-[2rem]">
                     <AlertDialogHeader>
-                        <div className="flex items-center gap-4 mb-2">
-                            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                                <AlertCircle className="w-6 h-6 text-amber-600" />
-                            </div>
-                            <AlertDialogTitle className="text-xl">ออกจากหน้า{applicationStepIndex >= 0 ? APPLICATION_STEPS[applicationStepIndex]?.title : 'นี้'}?</AlertDialogTitle>
-                        </div>
-                        <AlertDialogDescription className="text-base mt-2">
+                        <AlertDialogTitle>ออกจากหน้า{applicationStepIndex >= 0 ? APPLICATION_STEPS[applicationStepIndex]?.title : 'นี้'}?</AlertDialogTitle>
+                        <AlertDialogDescription>
                             ข้อมูลที่คุณกรอกไว้และยังไม่ได้บันทึกอาจจะสูญหาย คุณแน่ใจหรือไม่ว่าต้องการออกจากหน้านี้?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="mt-6 gap-3">
+                    <AlertDialogFooter>
                         <AlertDialogCancel className={cn(buttonVariants({ variant: "outline" }), "min-w-[120px]")}>
                             ยกเลิก
                         </AlertDialogCancel>
@@ -235,20 +240,20 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
             {/* ── Submit Application Dialog ─────────────────────────────── */}
             <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
-                <DialogContent className="rounded-[2rem] p-8 max-w-md">
+                <DialogContent className="rounded-[2rem] max-w-md">
                     <DialogHeader>
                         <div className="flex items-center gap-4 mb-2">
                             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                                 <Send className="w-6 h-6 text-chaiyo-blue" />
                             </div>
-                            <DialogTitle className="text-xl">ส่งใบสมัครสินเชื่อ</DialogTitle>
+                            <DialogTitle>ส่งใบสมัครสินเชื่อ</DialogTitle>
                         </div>
-                        <DialogDescription className="text-base mt-2">
+                        <DialogDescription>
                             กรุณาระบุหมายเหตุหรือคำแนะนำเพิ่มเติมสำหรับการส่งพิจารณาใบสมัครนี้
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4 py-4">
+                    <DialogBody>
                         <div className="space-y-2">
                             <Label htmlFor="comment" className="text-sm text-gray-700">หมายเหตุ / ความเห็นเพิ่มเติม</Label>
                             <Textarea
@@ -259,13 +264,13 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                                 className="min-h-[120px] resize-none"
                             />
                         </div>
-                    </div>
+                    </DialogBody>
 
-                    <DialogFooter className="mt-2 gap-3">
+                    <DialogFooter>
                         <Button
                             variant="outline"
                             onClick={() => setIsSubmitDialogOpen(false)}
-                            className="flex-1"
+                            className="min-w-[120px]"
                         >
                             ยกเลิก
                         </Button>
@@ -282,7 +287,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                                 }, 1500);
                             }}
                             variant="default"
-                            className="flex-1"
+                            className="min-w-[120px]"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (
@@ -297,6 +302,23 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* ── Mandatory Field Warning Dialog ─────────────────────────── */}
+            <MandatoryFieldWarningDialog
+                open={mandatoryWarningOpen}
+                onOpenChange={setMandatoryWarningOpen}
+                onSaveAndExit={() => {
+                    setMandatoryWarningOpen(false);
+                    toast.success("บันทึกข้อมูลสำเร็จ", {
+                        description: "ข้อมูลถูกบันทึกเรียบร้อยแล้ว",
+                        duration: 2000,
+                    });
+                    setTimeout(() => {
+                        router.push(`/dashboard/applications/${appId || 'draft'}`);
+                    }, 500);
+                }}
+                onCancel={() => setMandatoryWarningOpen(false)}
+            />
         </div>
     );
 }

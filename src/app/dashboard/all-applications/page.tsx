@@ -8,7 +8,7 @@ import { ApplicationTable, SortKey, SortDirection } from "@/components/applicati
 import { Application, ApplicationStatus } from "@/components/applications/types";
 import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogBody, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/Dialog";
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/combobox";
@@ -350,11 +350,11 @@ export default function AllApplicationsPage() {
                                     )}
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto flex flex-col">
+                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] flex flex-col">
                                 <DialogHeader className="flex-shrink-0">
                                     <DialogTitle>ตัวกรอง</DialogTitle>
                                 </DialogHeader>
-                                <div className="grid gap-5 py-4 flex-1 overflow-y-auto pr-2">
+                                <DialogBody className="space-y-4">
                                     <div className="space-y-2">
                                         <Label>ชื่อ-นามสกุล ผู้กู้</Label>
                                         <Combobox
@@ -454,13 +454,13 @@ export default function AllApplicationsPage() {
                                             placeholder="ระบุชื่อผู้สร้างใบสมัคร"
                                         />
                                     </div>
-                                </div>
-                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0 pt-4 border-t">
+                                </DialogBody>
+                                <DialogFooter className="flex items-center sm:justify-between sm:space-x-0 w-full flex-shrink-0">
                                     <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
                                         ล้างตัวกรอง
                                     </Button>
                                     <DialogClose asChild>
-                                        <Button className="font-semibold px-8" onClick={() => setCurrentPage(1)}>
+                                        <Button className="font-semibold min-w-[120px]" onClick={() => setCurrentPage(1)}>
                                             ตกลง
                                         </Button>
                                     </DialogClose>

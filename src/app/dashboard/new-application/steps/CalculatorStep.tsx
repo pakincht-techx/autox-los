@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift } from "lucide-react";
+import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Slider } from "@/components/ui/slider";
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 const THAI_BANKS = [
@@ -61,13 +62,34 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [selectedInsurances, setSelectedInsurances] = useState<string[]>([]);
     const [includeInsuranceInLoan, setIncludeInsuranceInLoan] = useState<boolean>(true);
 
+    // PA Insurance State (Land only)
+    const [paInsuranceEnabled, setPaInsuranceEnabled] = useState<boolean>(formData?.paInsuranceEnabled || false);
+    const PA_INSURANCE_PREMIUM = 5000; // Mock premium
+    const paInsuranceCoverageMonths = months; // Coverage = loan duration
+
+    // Helper: format date to DD/MM/YYYY B.E.
+    const formatDateBE = (date: Date) => {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear() + 543;
+        return `${dd}/${mm}/${yyyy}`;
+    };
+
+    const today = new Date();
+    const paStartDate = formatDateBE(today);
+    const paEndDate = (() => {
+        const end = new Date(today);
+        end.setMonth(end.getMonth() + paInsuranceCoverageMonths);
+        return formatDateBE(end);
+    })();
+
     // Dialog State
     const [isInsuranceDialogOpen, setIsInsuranceDialogOpen] = useState(false);
     const [draftInsurances, setDraftInsurances] = useState<string[]>([]);
 
     // Filter State
-    const [filterTier, setFilterTier] = useState<string>('all');
-    const [filterRepairType, setFilterRepairType] = useState<string>('all');
+    const [filterTier, setFilterTier] = useState<string[]>([]);
+    const [filterRepairType, setFilterRepairType] = useState<string[]>([]);
     const [filterCompany, setFilterCompany] = useState<string[]>([]);
 
 
@@ -116,8 +138,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     // Derived filtered options
     const filteredCarInsurances = COMPLEX_INSURANCE_OPTIONS.filter(opt => {
         if (opt.type !== 'car') return false;
-        if (filterTier !== 'all' && opt.tier !== filterTier) return false;
-        if (filterRepairType !== 'all' && opt.repairType !== filterRepairType) return false;
+        if (filterTier.length > 0 && !filterTier.includes(opt.tier || '')) return false;
+        if (filterRepairType.length > 0 && !filterRepairType.includes(opt.repairType || '')) return false;
         if (filterCompany.length > 0 && !filterCompany.includes(opt.company || '')) return false;
         return true;
     });
@@ -130,10 +152,15 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     });
 
     const calculateTotalInsurancePremium = () => {
-        return selectedInsurances.reduce((total, id) => {
+        let total = selectedInsurances.reduce((sum, id) => {
             const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-            return total + (option ? option.price : 0);
+            return sum + (option ? option.price : 0);
         }, 0);
+        // Add PA insurance premium if enabled (land only)
+        if (paInsuranceEnabled && selectedProduct === 'land') {
+            total += PA_INSURANCE_PREMIUM;
+        }
+        return total;
     };
 
     // Calculate Max Loan based on formData (if available)
@@ -201,7 +228,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
     useEffect(() => {
         calculateLoan();
-    }, [amount, months, selectedProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan]);
+    }, [amount, months, selectedProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan, paInsuranceEnabled]);
 
     // Sync state to formData continuously to support external navigation
     useEffect(() => {
@@ -214,7 +241,12 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                 interestRate: INTEREST_RATES[selectedProduct] || 0.2399,
                 paymentMethod: localPaymentMethod, // Sync payment method back
                 selectedInsurances: selectedInsurances,
-                includeInsuranceInLoan: includeInsuranceInLoan
+                includeInsuranceInLoan: includeInsuranceInLoan,
+                paInsuranceEnabled: paInsuranceEnabled && selectedProduct === 'land',
+                paInsurancePremium: paInsuranceEnabled && selectedProduct === 'land' ? PA_INSURANCE_PREMIUM : 0,
+                paInsuranceCoverageMonths: paInsuranceCoverageMonths,
+                paInsuranceCoverageStartDate: paStartDate,
+                paInsuranceCoverageEndDate: paEndDate,
             };
 
             // Only sync collateralType if NOT in read-only mode
@@ -235,7 +267,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                 };
             });
         }
-    }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan, setFormData]);
+    }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan, paInsuranceEnabled, setFormData]);
 
     const calculateLoan = () => {
         if (amount <= 0 || months <= 0) {
@@ -530,6 +562,86 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
 
                                 </div>
+
+                                {/* 3. PA Insurance Section (Land only) */}
+                                {true && (
+                                    <div className="space-y-4 pt-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-md font-bold text-chaiyo-blue">ประกัน PA (ประกันอุบัติเหตุส่วนบุคคล)</Label>
+                                            <Switch
+                                                checked={paInsuranceEnabled}
+                                                onCheckedChange={setPaInsuranceEnabled}
+                                            />
+                                        </div>
+
+                                        {paInsuranceEnabled && (
+                                            <div className="rounded-xl border border-blue-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                                                {/* Company Header */}
+                                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
+                                                    <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-sm">
+                                                        <ShieldCheck className="w-6 h-6 text-chaiyo-blue" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold text-gray-800">เทเวศประกันภัย</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">ประกันอุบัติเหตุส่วนบุคคล (PA)</p>
+                                                    </div>
+                                                    <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()} ฿</span>
+                                                </div>
+
+                                                {/* Detail Rows */}
+                                                <div className="divide-y divide-gray-100">
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
+                                                        <span className="text-sm font-semibold text-gray-800 font-mono">{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <span className="text-xs text-gray-500">ทุนประกัน</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm font-semibold text-chaiyo-blue font-mono">{amount.toLocaleString()} บาท</span>
+                                                            <span className="text-[10px] text-blue-400 bg-blue-50 px-1.5 py-0.5 rounded font-medium">= วงเงินสินเชื่อ</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <span className="text-xs text-gray-500">ระยะเวลาคุ้มครอง</span>
+                                                        <span className="text-sm font-semibold text-gray-800 font-mono">{paInsuranceCoverageMonths} เดือน</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <span className="text-xs text-gray-500">วันที่เริ่มความคุ้มครอง</span>
+                                                        <span className="text-sm font-medium text-gray-700">{paStartDate}</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between px-4 py-3">
+                                                        <span className="text-xs text-gray-500">วันที่สิ้นสุดคุ้มครอง</span>
+                                                        <span className="text-sm font-medium text-gray-700">{paEndDate}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* ผู้รับผลประโยชน์ Section */}
+                                                <div className="border-t border-blue-100 p-4 bg-gray-50/50">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <Users className="w-4 h-4 text-chaiyo-blue" />
+                                                        <span className="text-xs font-bold text-gray-600">ผู้รับผลประโยชน์</span>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
+                                                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue text-white flex items-center justify-center text-[9px] font-bold shrink-0">1</div>
+                                                            <div>
+                                                                <p className="text-xs font-semibold text-gray-800">บริษัท ออโต้ เอกซ์ จำกัด</p>
+                                                                <p className="text-[10px] text-gray-400">ผู้รับผลประโยชน์อันดับแรก</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
+                                                            <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
+                                                            <div>
+                                                                <p className="text-xs font-semibold text-gray-800">ทายาททางกฎหมาย</p>
+                                                                <p className="text-[10px] text-gray-400">ผู้รับผลประโยชน์อันดับถัดไป</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
@@ -538,8 +650,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Dialog open={isInsuranceDialogOpen} onOpenChange={setIsInsuranceDialogOpen}>
                         <DialogContent className="w-[calc(100%-2rem)] max-w-6xl p-0 gap-0 overflow-hidden border-border-strong rounded-2xl h-[85vh] flex flex-col">
                             <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100">
-                                <DialogTitle className="text-xl flex items-center gap-2 text-chaiyo-blue">
-                                    <ShieldCheck className="w-5 h-5" />
+                                <DialogTitle>
                                     เลือกประกันเพิ่มเติม
                                 </DialogTitle>
                             </DialogHeader>
@@ -549,14 +660,14 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     <div className="p-4 bg-gray-50/50 border-b border-gray-100 shrink-0">
                                         <h3 className="font-bold text-sm text-gray-700 flex items-center justify-between">
                                             ตัวกรอง
-                                            {(filterTier !== 'all' || filterRepairType !== 'all' || filterCompany.length > 0) && (
+                                            {(filterTier.length > 0 || filterRepairType.length > 0 || filterCompany.length > 0) && (
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-6 px-2 text-[10px] text-chaiyo-blue"
                                                     onClick={() => {
-                                                        setFilterTier('all');
-                                                        setFilterRepairType('all');
+                                                        setFilterTier([]);
+                                                        setFilterRepairType([]);
                                                         setFilterCompany([]);
                                                     }}
                                                 >
@@ -569,44 +680,53 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         <AccordionItem value="tier" className="border-b-0 px-2">
                                             <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">ชั้นประกัน</AccordionTrigger>
                                             <AccordionContent>
-                                                <RadioGroup value={filterTier} onValueChange={setFilterTier} className="space-y-2.5">
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="all" id="tier-all" />
-                                                        <Label htmlFor="tier-all" className="cursor-pointer text-sm text-gray-600">ทั้งหมด</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="1" id="tier-1" />
-                                                        <Label htmlFor="tier-1" className="cursor-pointer text-sm text-gray-600">ชั้น 1</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="2+" id="tier-2p" />
-                                                        <Label htmlFor="tier-2p" className="cursor-pointer text-sm text-gray-600">ชั้น 2+</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="3+" id="tier-3p" />
-                                                        <Label htmlFor="tier-3p" className="cursor-pointer text-sm text-gray-600">ชั้น 3+</Label>
-                                                    </div>
-                                                </RadioGroup>
+                                                <div className="space-y-2.5">
+                                                    {['1', '2+', '3+'].map(tier => (
+                                                        <div key={tier} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`tier-${tier}`}
+                                                                checked={filterTier.includes(tier)}
+                                                                onCheckedChange={(checked) => {
+                                                                    if (checked) {
+                                                                        setFilterTier([...filterTier, tier]);
+                                                                    } else {
+                                                                        setFilterTier(filterTier.filter(t => t !== tier));
+                                                                    }
+                                                                }}
+                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                            />
+                                                            <Label htmlFor={`tier-${tier}`} className="cursor-pointer text-sm text-gray-600">ชั้น {tier}</Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </AccordionContent>
                                         </AccordionItem>
 
                                         <AccordionItem value="repair" className="border-b-0 px-2 border-t border-gray-100 mt-2">
                                             <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">การซ่อม</AccordionTrigger>
                                             <AccordionContent>
-                                                <RadioGroup value={filterRepairType} onValueChange={setFilterRepairType} className="space-y-2.5">
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="all" id="repair-all" />
-                                                        <Label htmlFor="repair-all" className="cursor-pointer text-sm text-gray-600">ทั้งหมด</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="ศูนย์" id="repair-center" />
-                                                        <Label htmlFor="repair-center" className="cursor-pointer text-sm text-gray-600">ซ่อมศูนย์</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="อู่" id="repair-garage" />
-                                                        <Label htmlFor="repair-garage" className="cursor-pointer text-sm text-gray-600">ซ่อมอู่</Label>
-                                                    </div>
-                                                </RadioGroup>
+                                                <div className="space-y-2.5">
+                                                    {[
+                                                        { value: 'ศูนย์', label: 'ซ่อมศูนย์' },
+                                                        { value: 'อู่', label: 'ซ่อมอู่' }
+                                                    ].map(repair => (
+                                                        <div key={repair.value} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`repair-${repair.value}`}
+                                                                checked={filterRepairType.includes(repair.value)}
+                                                                onCheckedChange={(checked) => {
+                                                                    if (checked) {
+                                                                        setFilterRepairType([...filterRepairType, repair.value]);
+                                                                    } else {
+                                                                        setFilterRepairType(filterRepairType.filter(r => r !== repair.value));
+                                                                    }
+                                                                }}
+                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                            />
+                                                            <Label htmlFor={`repair-${repair.value}`} className="cursor-pointer text-sm text-gray-600">{repair.label}</Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </AccordionContent>
                                         </AccordionItem>
 
@@ -739,7 +859,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" className="h-9 px-4 rounded-lg text-sm text-gray-600 border-gray-200 hover:bg-gray-50" onClick={() => setIsInsuranceDialogOpen(false)}>ยกเลิก</Button>
-                                    <Button className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold text-sm" onClick={() => {
+                                    <Button className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white text-sm" onClick={() => {
                                         setSelectedInsurances(draftInsurances);
                                         setIsInsuranceDialogOpen(false);
                                     }} >ยืนยันการเลือก</Button>
@@ -880,6 +1000,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                         {(() => {
                             const netAmount = amount + (includeInsuranceInLoan ? calculateTotalInsurancePremium() : 0);
                             const hasInsurance = includeInsuranceInLoan && calculateTotalInsurancePremium() > 0;
+                            const hasPaInsurance = paInsuranceEnabled;
                             const isFreebieEligible = ['car', 'moto', 'truck', 'agri'].includes(selectedProduct);
                             const income = Number(formData?.income) || 0;
                             const debt = Number(formData?.monthlyDebt) || 0;
@@ -944,7 +1065,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         </div>
 
                                         {/* Insurance (merged into same card) */}
-                                        {hasInsurance && (
+                                        {(hasInsurance || hasPaInsurance) && (
                                             <>
                                                 <div className="w-full h-px bg-gray-100 my-4"></div>
                                                 <div className="space-y-4">
@@ -981,6 +1102,31 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             </div>
                                                         );
                                                     })}
+
+                                                    {/* PA Insurance in summary */}
+                                                    {hasPaInsurance && (
+                                                        <div>
+                                                            <div className="flex items-center gap-2.5 mb-3">
+                                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                                    <ShieldCheck className="w-4 h-4 text-chaiyo-blue" strokeWidth={2} />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-bold text-foreground text-sm">ประกัน PA</p>
+                                                                    <p className="text-xs text-gray-400">เทเวศประกันภัย · {paInsuranceCoverageMonths} เดือน</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2.5">
+                                                                <div className="flex justify-between items-center text-sm">
+                                                                    <span className="text-gray-500">ทุนประกัน</span>
+                                                                    <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                                                </div>
+                                                                <div className="flex justify-between items-center text-sm">
+                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                    <span className="font-bold text-foreground">{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}

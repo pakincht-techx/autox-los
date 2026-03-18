@@ -398,6 +398,13 @@ export interface CustomerFormData {
     selectedInsurances?: string[];
     includeInsuranceInLoan?: boolean;
 
+    // PA Insurance (Land only)
+    paInsuranceEnabled?: boolean;
+    paInsurancePremium?: number;
+    paInsuranceCoverageMonths?: number;
+    paInsuranceCoverageStartDate?: string;
+    paInsuranceCoverageEndDate?: string;
+
     // Appraisal
     appraisalPrice?: number;
     aiAppraisal?: number;
