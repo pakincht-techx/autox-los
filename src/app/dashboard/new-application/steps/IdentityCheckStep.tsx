@@ -42,14 +42,10 @@ type KYCStage = 'INIT' | 'READING_CARD' | 'CHECKING_MEMBER' | 'CARD_SUCCESS' | '
 export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityCheckStepProps) {
     const [stage, setStage] = useState<KYCStage>('INIT');
     const [verificationMethod, setVerificationMethod] = useState<'DIPCHIP' | 'MANUAL' | null>('DIPCHIP');
-    const [dipchipError, setDipchipError] = useState(false);
-    const [isSimulatingError, setIsSimulatingError] = useState(false);
     const [isMockCamera, setIsMockCamera] = useState(true); // Toggle this for real camera
 
 
-    // Liveness Failure Simulation
     const [livenessAttempts, setLivenessAttempts] = useState(0);
-    const [simulateLivenessFail, setSimulateLivenessFail] = useState(false);
 
     const [isExistingMember, setIsExistingMember] = useState<boolean>(false);
     const [existingProfile, setExistingProfile] = useState<any>(null);
@@ -206,15 +202,8 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
     // 1. Dip Chip -> Then Review Data
     const handleReadCard = async () => {
-        setDipchipError(false);
         setStage('READING_CARD');
         await new Promise(resolve => setTimeout(resolve, 2000));
-
-        if (isSimulatingError) {
-            setDipchipError(true);
-            setStage('INIT');
-            return;
-        }
 
         // Mock Data
         const mockData = {
@@ -415,37 +404,8 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
             return;
         }
 
-        // Use either the master toggle or the section-specific toggle
-        const shouldFail = simulateLivenessFail || isSimulatingError;
-
         setStage('READING_CARD'); // Show matching processing
-        const delay = shouldFail ? 4000 : 2000;
-        await new Promise(resolve => setTimeout(resolve, delay));
-
-        if (shouldFail) {
-            const nextAttempt = livenessAttempts + 1;
-            setLivenessAttempts(nextAttempt);
-
-            if (nextAttempt < 3) {
-                setAlertDialog({
-                    isOpen: true,
-                    title: "ยืนยันตัวตนไม่สำเร็จ",
-                    description: `ไม่สามารถยืนยันใบหน้าได้ (ครั้งที่ ${nextAttempt}/3) กรุณาลองใหม่อีกครั้ง`,
-                    type: "warning",
-                    action: () => setStage('FACE_VERIFY'),
-                    cancelAction: () => {
-                        setStage('INIT');
-                        setVerificationMethod('DIPCHIP');
-                        setLivenessAttempts(0);
-                    },
-                    cancelText: "ยกเลิก"
-                });
-                return;
-            } else {
-                setStage('FACE_FAILED');
-                return;
-            }
-        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         setMockLivePhoto(photo);
         setStage('FACE_SUCCESS');
@@ -593,62 +553,19 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {/* Combined Identity Verification Methods */}
                         {(stage === 'INIT' || stage === 'READING_CARD') && (
                             <div className="space-y-8 relative">
-                                {/* Prototype simulation toggle */}
-                                {stage === 'INIT' && (
-                                    <div className="absolute -top-12 right-0 flex items-center gap-2 bg-gray-100/50 px-3 py-1.5 rounded-full border border-gray-200/50 scale-90 origin-right hover:bg-gray-100 transition-colors">
-                                        <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-                                            style={{ backgroundColor: isSimulatingError ? '#10069F' : '#e5e7eb' }}
-                                            onClick={() => setIsSimulatingError(!isSimulatingError)}
-                                        >
-                                            <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", isSimulatingError ? "translate-x-4" : "translate-x-1")} />
-                                        </div>
-                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">จำลองข้อผิดพลาด</span>
-                                    </div>
-                                )}
 
                                 {/* Primary Option: Dipchip */}
                                 {formData.customerGroup !== 'ethnic' && (
                                     <Card className={cn(
                                         "border-2 transition-all duration-300 shadow-none overflow-hidden",
-                                        dipchipError
-                                            ? ""
-                                            : "border-chaiyo-blue/10 bg-blue-50/20 hover:bg-blue-50/40 cursor-pointer"
-                                    )} onClick={!dipchipError ? handleReadCard : undefined}>
+                                        "border-chaiyo-blue/10 bg-blue-50/20 hover:bg-blue-50/40 cursor-pointer"
+                                    )} onClick={handleReadCard}>
                                         <CardContent className="flex flex-col items-center justify-center py-10 text-center relative px-8">
                                             {stage === 'READING_CARD' ? (
                                                 <>
                                                     <Loader2 className="w-16 h-16 text-chaiyo-blue animate-spin mb-4" />
                                                     <h3 className="text-xl font-bold text-chaiyo-blue">กำลังอ่านข้อมูล...</h3>
                                                 </>
-                                            ) : dipchipError ? (
-                                                <div className="animate-in fade-in zoom-in-95 duration-500 w-full flex flex-col items-center">
-                                                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-                                                        <XCircle className="w-10 h-10 text-red-600" />
-                                                    </div>
-                                                    <h3 className="text-xl font-bold">ไม่สามารถอ่านข้อมูลจากชิปได้</h3>
-                                                    <p className="text-sm mt-2 mb-8 max-w-sm leading-relaxed">
-                                                        พบข้อผิดพลาดขณะอ่านข้อมูลจากบัตรประชาชน <br />
-                                                        กรุณาตรวจสอบการเสียบบัตรและลองอีกครั้ง หรือใช้วิธีถ่ายรูปแทน
-                                                    </p>
-                                                    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md justify-center">
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                setVerificationMethod('MANUAL');
-                                                                handleOCRUpload('THAI_ID');
-                                                            }}
-                                                            className="font-bold h-12 px-8 rounded-xl"
-                                                        >
-                                                            ถ่ายรูปบัตรประชาชน
-                                                        </Button>
-                                                        <Button
-                                                            onClick={handleReadCard}
-                                                            className="text-white font-bold h-12 px-8 rounded-xl "
-                                                        >
-                                                            ลองอีกครั้ง
-                                                        </Button>
-                                                    </div>
-                                                </div>
                                             ) : (
                                                 <>
                                                     <div className="w-32 h-24 shadow-lg border border-gray-100 rounded-xl flex items-center justify-center mb-6 p-4 bg-white">
@@ -664,7 +581,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 )}
 
                                 {/* Secondary Options: OCR/Manual */}
-                                {stage === 'INIT' && !dipchipError && (
+                                {stage === 'INIT' && (
                                     <div className="space-y-4">
                                         {formData.customerGroup !== 'ethnic' && (
                                             <div className="flex items-center gap-4">
@@ -853,16 +770,6 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                     </div>
 
                                     <div className="flex items-center gap-4">
-                                        {/* Simulation Toggle */}
-                                        <div className="flex items-center gap-2 bg-white/50 px-2.5 py-1 rounded-full border border-chaiyo-blue/10 scale-90 origin-right">
-                                            <div className="relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none"
-                                                style={{ backgroundColor: simulateLivenessFail ? '#10069F' : '#e5e7eb' }}
-                                                onClick={() => setSimulateLivenessFail(!simulateLivenessFail)}
-                                            >
-                                                <span className={cn("pointer-events-none block h-3 w-3 rounded-full bg-white shadow-lg ring-0 transition-transform", simulateLivenessFail ? "translate-x-4" : "translate-x-1")} />
-                                            </div>
-                                            <span className="text-[10px] font-bold text-chaiyo-blue uppercase tracking-wider">จำลองข้อผิดพลาด</span>
-                                        </div>
 
                                         <Button
                                             variant="ghost"
@@ -1271,7 +1178,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
             {/* Not Continue Dialog */}
             <AlertDialog open={showNotContinueDialog} onOpenChange={setShowNotContinueDialog}>
-                <AlertDialogContent className="max-w-md rounded-3xl">
+                <AlertDialogContent>
                     <AlertDialogHeader className="space-y-3">
                         <AlertDialogTitle>ยืนยันการออกจากหน้านี้</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -1318,13 +1225,13 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                     <AlertDialogFooter>
                         <AlertDialogAction
                             onClick={() => window.location.href = '/dashboard'}
-                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[120px] order-1 sm:order-2"
+                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-1 sm:order-2"
                         >
                             <Save className="w-4 h-4" /> บันทึกและกลับสู่หน้าหลัก
                         </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => setShowNotContinueDialog(false)}
-                            className="border-gray-200 text-gray-500 hover:bg-gray-50 font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[120px] order-2 sm:order-1"
+                            className="border-gray-200 text-gray-500 hover:bg-gray-50 font-bold h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-2 sm:order-1"
                         >
                             ปิด
                         </AlertDialogCancel>

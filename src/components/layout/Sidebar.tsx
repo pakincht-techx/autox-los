@@ -282,7 +282,7 @@ export function Sidebar() {
             </div>
 
             <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-                <DialogContent className="sm:max-w-[480px]">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>ข้อมูลผู้ใช้งาน</DialogTitle>
                         <DialogDescription>
@@ -323,7 +323,7 @@ export function Sidebar() {
                 </DialogContent>
             </Dialog>
             <Dialog open={isBranchInfoOpen} onOpenChange={setIsBranchInfoOpen}>
-                                <DialogContent className="sm:max-w-[480px]">
+                                <DialogContent>
                     <DialogHeader>
                         <DialogTitle>ข้อมูลสาขา</DialogTitle>
                         <DialogDescription>

@@ -3605,7 +3605,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             <Info className="w-4 h-4" />
                                                                         </button>
                                                                     </DialogTrigger>
-                                                                    <DialogContent className="max-w-md">
+                                                                    <DialogContent>
                                                                         <DialogHeader>
                                                                             <DialogTitle>
                                                                                 {guide.title}
@@ -3622,7 +3622,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         </DialogBody>
                                                                         <DialogFooter>
                                                                             <DialogClose asChild>
-                                                                                <Button variant="outline" className="min-w-[120px]">ปิด</Button>
+                                                                                <Button variant="outline" className="min-w-[104px]">ปิด</Button>
                                                                             </DialogClose>
                                                                         </DialogFooter>
                                                                     </DialogContent>

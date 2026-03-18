@@ -97,7 +97,7 @@ export function MapPickerDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 overflow-hidden bg-white sm:rounded-2xl border-none shadow-2xl">
+            <DialogContent size="xl" className="h-[85vh] flex flex-col p-0 overflow-hidden bg-white sm:rounded-2xl border-none shadow-2xl">
                 <DialogHeader className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
                     <DialogTitle className="shrink-0">
                         {title}
@@ -171,14 +171,14 @@ export function MapPickerDialog({
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            className="bg-white h-11 font-bold min-w-[120px] rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
+                            className="bg-white h-11 font-bold min-w-[104px] rounded-xl border-gray-200 hover:bg-gray-50 flex-1 sm:flex-none"
                         >
                             ยกเลิก
                         </Button>
                         <Button
                             onClick={handleConfirm}
                             disabled={!position}
-                            className="bg-chaiyo-blue font-bold  text-white hover:bg-chaiyo-blue/90 h-11 min-w-[120px] rounded-xl flex-1 sm:flex-none"
+                            className="bg-chaiyo-blue font-bold  text-white hover:bg-chaiyo-blue/90 h-11 min-w-[104px] rounded-xl flex-1 sm:flex-none"
                         >
                             บันทึกตำแหน่ง
                         </Button>

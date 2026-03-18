@@ -1460,7 +1460,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    <div className="flex justify-center w-full min-w-[120px]">
+                                                    <div className="flex justify-center w-full min-w-[104px]">
                                                         {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
                                                             <Select
                                                                 value={memberData.hasInsurance || "no"}
@@ -1757,7 +1757,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                 {/* Phone OTP Dialog */}
                                 <Dialog open={showOtpInput} onOpenChange={setShowOtpInput}>
-                                    <DialogContent className="sm:max-w-[480px]">
+                                    <DialogContent>
                                         <DialogHeader className="space-y-3">
                                             <DialogTitle>ยืนยันเบอร์โทรศัพท์</DialogTitle>
                                             <DialogDescription>
@@ -1804,13 +1804,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                         <DialogFooter>
                                             <Button
                                                 variant="outline"
-                                                className="min-w-[120px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                className="min-w-[104px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
                                                 onClick={() => setShowOtpInput(false)}
                                             >
                                                 ยกเลิก
                                             </Button>
                                             <Button
-                                                className="min-w-[120px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                className="min-w-[104px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
                                                 onClick={handleVerifyOtp}
                                                 disabled={otp.length !== 6 || isVerifyingOtp}
                                             >
@@ -1862,7 +1862,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                                     {/* Email OTP Dialog */}
                                     <Dialog open={showEmailOtpInput} onOpenChange={setShowEmailOtpInput}>
-                                        <DialogContent className="sm:max-w-[480px]">
+                                        <DialogContent>
                                             <DialogHeader className="space-y-3">
                                                 <DialogTitle>ยืนยันอีเมล</DialogTitle>
                                                 <DialogDescription>
@@ -1909,13 +1909,13 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
                                             <DialogFooter>
                                                 <Button
                                                     variant="outline"
-                                                    className="min-w-[120px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                    className="min-w-[104px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
                                                     onClick={() => setShowEmailOtpInput(false)}
                                                 >
                                                     ยกเลิก
                                                 </Button>
                                                 <Button
-                                                    className="min-w-[120px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                    className="min-w-[104px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
                                                     onClick={handleVerifyEmailOtp}
                                                     disabled={emailOtp.length !== 6 || isVerifyingEmailOtp}
                                                 >
@@ -2495,7 +2495,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                             {/* Add Co-Borrower Dialog */}
                             <Dialog open={isAddingCoBorrower} onOpenChange={setIsAddingCoBorrower}>
-                                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                                <DialogContent size="lg" className="max-h-[90vh] overflow-y-auto">
                                     {coBorrowerStage === 'KYC' ? (
                                         <KYCProcess
                                             title="ยืนยันตัวตนผู้กู้ร่วม (eKYC)"
@@ -2794,7 +2794,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
                             {/* Add Guarantor Dialog */}
                             <Dialog open={isAddingGuarantor} onOpenChange={setIsAddingGuarantor}>
-                                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                                <DialogContent size="lg" className="max-h-[90vh] overflow-y-auto">
                                     {guarantorStage === 'KYC' ? (
                                         <KYCProcess
                                             title="ยืนยันตัวตนผู้ค้ำประกัน (eKYC)"
@@ -3053,7 +3053,7 @@ export function CustomerInfoStep({ formData, setFormData }: CustomerInfoStepProp
 
             {/* Phone Ownership Verification Dialog */}
             <Dialog open={showPhoneVerifyDialog} onOpenChange={setShowPhoneVerifyDialog}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="text-center flex flex-col items-center gap-4">
                             {isPhoneOwnershipVerifying ? (

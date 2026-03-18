@@ -2807,7 +2807,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
             {/* Photo Guideline Dialog */}
             <Dialog open={photoGuideDialogOpen} onOpenChange={setPhotoGuideDialogOpen}>
-                <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
                             รายการรูปถ่ายที่ต้องใช้
@@ -2839,7 +2839,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
             {/* Paper Guideline Dialog */}
             <Dialog open={paperGuideDialogOpen} onOpenChange={setPaperGuideDialogOpen}>
-                <DialogContent className="sm:max-w-[480px] max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
                             รายการเอกสารที่ต้องใช้

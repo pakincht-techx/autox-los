@@ -185,7 +185,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
             </div>
 
             <AlertDialog open={isDeclineDialogOpen} onOpenChange={setIsDeclineDialogOpen}>
-                <AlertDialogContent className="rounded-[2rem] max-w-md">
+                <AlertDialogContent>
                     <AlertDialogHeader>
                         <div className="flex items-center gap-4 mb-2">
                             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
@@ -199,12 +199,12 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="min-w-[120px] rounded-xl h-11 border-gray-300 text-gray-700 hover:bg-gray-50">
+                        <AlertDialogCancel className="min-w-[104px] rounded-xl h-11 border-gray-300 text-gray-700 hover:bg-gray-50">
                             ยกเลิก
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => router.push("/dashboard/applications")}
-                            className="bg-red-600 hover:bg-red-700 text-white min-w-[120px] rounded-xl h-11 font-bold shadow-sm shadow-red-200"
+                            className="bg-red-600 hover:bg-red-700 text-white min-w-[104px] rounded-xl h-11 font-bold shadow-sm shadow-red-200"
                         >
                             ยืนยันการปฏิเสธ
                         </AlertDialogAction>

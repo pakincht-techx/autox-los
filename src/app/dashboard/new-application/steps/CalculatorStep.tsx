@@ -576,14 +576,14 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                         {paInsuranceEnabled && (
                                             <div className="rounded-xl border border-blue-100 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                                                {/* Company Header */}
-                                                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
-                                                    <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0 shadow-sm">
-                                                        <ShieldCheck className="w-6 h-6 text-chaiyo-blue" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-bold text-gray-800">เทเวศประกันภัย</p>
-                                                        <p className="text-xs text-gray-400 mt-0.5">ประกันอุบัติเหตุส่วนบุคคล (PA)</p>
+                                                {/* Company Header — matches ประกันรถยนต์ card */}
+                                                <div className="flex justify-between items-center p-3 rounded-xl border border-blue-100 bg-blue-50/30">
+                                                    <div className="flex items-center gap-3">
+                                                        <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-semibold text-gray-800">เทเวศประกันภัย</span>
+                                                            <span className="text-xs text-gray-500">ประกันอุบัติเหตุส่วนบุคคล (PA)</span>
+                                                        </div>
                                                     </div>
                                                     <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()} ฿</span>
                                                 </div>
@@ -626,14 +626,12 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             <div className="w-5 h-5 rounded-full bg-chaiyo-blue text-white flex items-center justify-center text-[9px] font-bold shrink-0">1</div>
                                                             <div>
                                                                 <p className="text-xs font-semibold text-gray-800">บริษัท ออโต้ เอกซ์ จำกัด</p>
-                                                                <p className="text-[10px] text-gray-400">ผู้รับผลประโยชน์อันดับแรก</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3 p-2.5 bg-white rounded-lg border border-gray-100">
-                                                            <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
+                                                            <div className="w-5 h-5 rounded-full bg-chaiyo-blue text-white flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
                                                             <div>
                                                                 <p className="text-xs font-semibold text-gray-800">ทายาททางกฎหมาย</p>
-                                                                <p className="text-[10px] text-gray-400">ผู้รับผลประโยชน์อันดับถัดไป</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -648,7 +646,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                     {/* Insurance Dialog */}
                     <Dialog open={isInsuranceDialogOpen} onOpenChange={setIsInsuranceDialogOpen}>
-                        <DialogContent className="w-[calc(100%-2rem)] max-w-6xl p-0 gap-0 overflow-hidden border-border-strong rounded-2xl h-[85vh] flex flex-col">
+                        <DialogContent size="xl" className="p-0 gap-0 overflow-hidden border-border-strong rounded-2xl h-[85vh] flex flex-col">
                             <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100">
                                 <DialogTitle>
                                     เลือกประกันเพิ่มเติม

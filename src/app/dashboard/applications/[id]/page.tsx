@@ -551,7 +551,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
                 {/* Cancel Dialog (Maker) */}
                 <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-                    <DialogContent className="sm:max-w-[480px]">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>ยืนยันการยกเลิกแบบร่าง</DialogTitle>
                             <DialogDescription>
@@ -559,10 +559,10 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                            <Button variant="outline" className="min-w-[120px]" onClick={() => setCancelDialogOpen(false)}>ยกเลิก</Button>
+                            <Button variant="outline" className="min-w-[104px]" onClick={() => setCancelDialogOpen(false)}>ยกเลิก</Button>
                             <Button
                                 variant="destructive"
-                                className="min-w-[120px]"
+                                className="min-w-[104px]"
                                 onClick={() => {
                                     setCurrentStatus('Cancelled');
                                     setCancelDialogOpen(false);
@@ -576,7 +576,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
                 {/* Review Result Dialog (Legal Team / Approver) */}
                 <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-                    <DialogContent className="sm:max-w-[480px]">
+                    <DialogContent>
                         <DialogHeader>
                             <DialogTitle>
                                 ให้ความเห็นสถานะลูกค้า
@@ -707,7 +707,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             <Button
                                 disabled={!reviewResult}
                                 className={cn(
-                                    "min-w-[120px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white",
+                                    "min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white",
                                     !reviewResult && "opacity-50"
                                 )}
                                 onClick={() => {

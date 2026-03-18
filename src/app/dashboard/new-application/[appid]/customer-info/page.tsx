@@ -124,7 +124,7 @@ export default function CustomerInfoPage() {
                     setIsStatusDialogOpen(false);
                 }
             }}>
-                <DialogContent className="sm:max-w-xl rounded-[2rem]">
+                <DialogContent>
 
                     {/* ── Loading State ── */}
                     {!statusCheckResult || isCheckingStatus ? (
@@ -243,7 +243,7 @@ export default function CustomerInfoPage() {
                                     variant="outline"
                                     size="lg"
                                     onClick={() => setIsStatusDialogOpen(false)}
-                                    className="min-w-[120px] order-2 sm:order-1 font-bold"
+                                    className="min-w-[104px] order-2 sm:order-1 font-bold"
                                 >
                                     <ChevronLeft className="w-4 h-4 mr-2" />
                                     กลับไปตรวจสอบ

@@ -26,7 +26,7 @@ export function MandatoryFieldWarningDialog({
 }: MandatoryFieldWarningDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px] rounded-[2rem]">
+            <DialogContent>
                 <DialogHeader className="space-y-3">
                     <DialogTitle>
                         มีข้อมูลที่จำเป็นยังไม่ได้กรอก
@@ -40,13 +40,13 @@ export function MandatoryFieldWarningDialog({
                     <Button
                         variant="outline"
                         onClick={onCancel}
-                        className="min-w-[120px]"
+                        className="min-w-[104px]"
                     >
                         ยกเลิก
                     </Button>
                     <Button
                         onClick={onSaveAndExit}
-                        className="min-w-[120px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold text-white"
+                        className="min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 font-bold text-white"
                     >
                         บันทึกและออก
                     </Button>

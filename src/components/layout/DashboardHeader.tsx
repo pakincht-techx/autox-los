@@ -109,7 +109,7 @@ export function DashboardHeader() {
                                 <ChevronDown className="w-4 h-4 text-muted group-hover:text-foreground transition-colors" />
                             </div>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[480px]">
+                        <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>ข้อมูลสาขา</DialogTitle>
                                 <DialogDescription>

@@ -1523,7 +1523,7 @@ function PreQuestionPageContent() {
                                                     setAiDetectedFields([]);
                                                 }}
                                                 className={cn(
-                                                    "flex-1 min-w-[120px] py-3 px-4 rounded-xl border text-sm font-bold transition-all text-center group flex flex-col items-center justify-center gap-2",
+                                                    "flex-1 min-w-[104px] py-3 px-4 rounded-xl border text-sm font-bold transition-all text-center group flex flex-col items-center justify-center gap-2",
                                                     formData.collateralType === p.id
                                                         ? "border-chaiyo-blue bg-blue-50 text-chaiyo-blue"
                                                         : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
@@ -3426,7 +3426,7 @@ function PreQuestionPageContent() {
                 }
                 {/* Condition Warning Dialog */}
                 <AlertDialog open={isConditionDialogOpen} onOpenChange={setIsConditionDialogOpen}>
-                    <AlertDialogContent className="sm:max-w-[480px]">
+                    <AlertDialogContent>
                         <AlertDialogHeader className="space-y-3">
                             <AlertDialogTitle>คุณสมบัติไม่เป็นไปตามเงื่อนไข</AlertDialogTitle>
                             <AlertDialogDescription>
@@ -3438,7 +3438,7 @@ function PreQuestionPageContent() {
                         <AlertDialogFooter className="sm:justify-center">
                             <AlertDialogAction
                                 onClick={() => setIsConditionDialogOpen(false)}
-                                className="bg-chaiyo-blue hover:bg-blue-800 text-white font-bold px-8 py-2 rounded-xl h-11 min-w-[120px]"
+                                className="bg-chaiyo-blue hover:bg-blue-800 text-white font-bold px-8 py-2 rounded-xl h-11 min-w-[104px]"
                             >
                                 รับทราบ
                             </AlertDialogAction>

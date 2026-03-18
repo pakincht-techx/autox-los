@@ -252,7 +252,7 @@ export default function GuarantorsPage() {
 
             {/* Soft-Block Warning Dialog */}
             <Dialog open={softBlockDialogOpen} onOpenChange={setSoftBlockDialogOpen}>
-                <DialogContent className="sm:max-w-[480px] rounded-[2rem]">
+                <DialogContent>
                     <DialogHeader className="space-y-3">
                         <div className="flex items-center gap-3">
                             <div className="h-10 w-10 flex items-center justify-center rounded-full bg-amber-50 shrink-0">
@@ -309,7 +309,7 @@ export default function GuarantorsPage() {
                         <Button
                             variant="outline"
                             onClick={() => setSoftBlockDialogOpen(false)}
-                            className="min-w-[120px] font-bold"
+                            className="min-w-[104px] font-bold"
                         >
                             <ChevronLeft className="w-4 h-4 mr-1.5" />
                             กลับไปแก้ไข

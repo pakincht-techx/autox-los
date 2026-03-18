@@ -217,7 +217,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
             {/* ── Confirm Leave Dialog ──────────────────────────────────── */}
             <AlertDialog open={confirmLeaveDialog} onOpenChange={setConfirmLeaveDialog}>
-                <AlertDialogContent className="rounded-[2rem]">
+                <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>ออกจากหน้า{applicationStepIndex >= 0 ? APPLICATION_STEPS[applicationStepIndex]?.title : 'นี้'}?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -225,12 +225,12 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className={cn(buttonVariants({ variant: "outline" }), "min-w-[120px]")}>
+                        <AlertDialogCancel className={cn(buttonVariants({ variant: "outline" }), "min-w-[104px]")}>
                             ยกเลิก
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => router.push(leaveDestination)}
-                            className={cn(buttonVariants({ variant: "destructive" }), "min-w-[120px]")}
+                            className={cn(buttonVariants({ variant: "destructive" }), "min-w-[104px]")}
                         >
                             ยืนยันการออก
                         </AlertDialogAction>
@@ -240,7 +240,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
             {/* ── Submit Application Dialog ─────────────────────────────── */}
             <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
-                <DialogContent className="rounded-[2rem] max-w-md">
+                <DialogContent>
                     <DialogHeader>
                         <div className="flex items-center gap-4 mb-2">
                             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
@@ -270,7 +270,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                         <Button
                             variant="outline"
                             onClick={() => setIsSubmitDialogOpen(false)}
-                            className="min-w-[120px]"
+                            className="min-w-[104px]"
                         >
                             ยกเลิก
                         </Button>
@@ -287,7 +287,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                                 }, 1500);
                             }}
                             variant="default"
-                            className="min-w-[120px]"
+                            className="min-w-[104px]"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (

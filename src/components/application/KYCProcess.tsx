@@ -383,7 +383,7 @@ export function KYCProcess({ onComplete, onCancel, title = "ยืนยัน�
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 min-w-[120px]">
+                        <AlertDialogAction className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 min-w-[104px]">
                             ตรวจสอบอีกครั้ง
                         </AlertDialogAction>
                     </AlertDialogFooter>

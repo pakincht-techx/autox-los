@@ -123,7 +123,7 @@ export function SpecialIncomeDialog({ open, onOpenChange, onSave, initialData }:
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl bg-gray-50 max-h-[90vh] overflow-y-auto">
+            <DialogContent size="lg" className="bg-gray-50 max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
                         เพิ่มรายได้พิเศษ (กิจการ/เกษตร)

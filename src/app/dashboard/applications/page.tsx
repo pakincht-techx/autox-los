@@ -369,7 +369,7 @@ export default function ApplicationsPage() {
                                     )}
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[450px] max-h-[90vh] flex flex-col">
+                            <DialogContent className="max-h-[90vh] flex flex-col">
                                 <DialogHeader className="flex-shrink-0">
                                     <DialogTitle>ตัวกรอง</DialogTitle>
                                 </DialogHeader>
@@ -479,7 +479,7 @@ export default function ApplicationsPage() {
                                         ล้างตัวกรอง
                                     </Button>
                                     <DialogClose asChild>
-                                        <Button className="font-semibold min-w-[120px]" onClick={() => setCurrentPage(1)}>
+                                        <Button className="font-semibold min-w-[104px]" onClick={() => setCurrentPage(1)}>
                                             ตกลง
                                         </Button>
                                     </DialogClose>
