@@ -1531,7 +1531,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                 <div className="space-y-1.5 text-sm">
 
                                     <div className="flex justify-between text-gray-600">
-                                        <span>ภาระหนี้ในระบบ (NCB include เงินไชโย)</span>
+                                        <span>ภาระหนี้ในระบบ (รวมภาระหนี้จาก NCB)</span>
                                         <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">

@@ -1055,7 +1055,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         { label: "ธนาคารกรุงไทย", value: "KTB", logo: "/bank-logo/Type=Krungthai Bank.svg" },
         { label: "ธนาคารทหารไทยธนชาต", value: "ttb", logo: "/bank-logo/Type=TTB.svg" },
         { label: "ธนาคารออมสิน", value: "GSB", logo: "/bank-logo/Type=GSB.svg" },
-        { label: "ทรูมันนี่", value: "TRUEMONEY", logo: "/bank-logo/Type=Truemoney.svg" },
+        { label: "ทรูมันนี่วอลเล็ท", value: "TRUEMONEY", logo: "/bank-logo/Type=Truemoney.svg" },
     ];
 
     const INCOME_DOC_TYPES = [
