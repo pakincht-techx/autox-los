@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
       "lucide-react": "lucide-react/dist/cjs/lucide-react.js",
     },
   },
-  allowedDevOrigins: ["192.168.243.3", "192.168.242.195", "localhost:3000"],
+  allowedDevOrigins: ["192.168.243.3", "192.168.242.195", "192.168.243.10", "localhost:3000"],
 };
 
 export default nextConfig;
