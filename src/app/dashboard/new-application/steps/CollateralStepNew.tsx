@@ -3026,54 +3026,105 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                     {/* Empty col */}
                                                                                     <div></div>
 
-                                                                                    {/* Row 2: รวมราคาประเมิน, หักค่าเสื่อม, ราคาหลัง */}
-                                                                                    <div className="space-y-1">
-                                                                                        <Label className="text-[12px] text-gray-600">ราคาประเมิน (ก่อนหักค่าเสื่อม) <span className="text-red-500">*</span></Label>
-                                                                                        <div className="relative">
-                                                                                            <Input
-                                                                                                value={building.totalAppraisalBeforeDepreciation ? Number(building.totalAppraisalBeforeDepreciation).toLocaleString() : ""}
-                                                                                                onChange={(e) => {
-                                                                                                    const val = e.target.value.replace(/,/g, '');
-                                                                                                    if (/^\d*$/.test(val)) updateBuilding('totalAppraisalBeforeDepreciation', val);
-                                                                                                }}
-                                                                                                className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                                            />
-                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท/ตร.ม.</span>
-                                                                                        </div>
-                                                                                    </div>
+                                                                                    {/* Row 2: Conditional - Approach sections for external appraisal, or depreciation fields */}
+                                                                                    {methodKey === "ใบประเมินราคาจากบริษัทภายนอก" ? (
+                                                                                        <>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">รวมราคาประเมิน (ก่อนหักค่าเสื่อม) <span className="text-red-500">*</span></Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        value={building.costBeforeDepreciation ? Number(building.costBeforeDepreciation).toLocaleString() : ""}
+                                                                                                        onChange={(e) => {
+                                                                                                            const val = e.target.value.replace(/,/g, '');
+                                                                                                            if (/^\d*$/.test(val)) updateBuilding('costBeforeDepreciation', val);
+                                                                                                        }}
+                                                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">หักค่าเสื่อม <span className="text-red-500">*</span></Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        value={building.costDepreciation ? Number(building.costDepreciation).toLocaleString() : ""}
+                                                                                                        onChange={(e) => {
+                                                                                                            const val = e.target.value.replace(/,/g, '');
+                                                                                                            if (/^\d*$/.test(val)) updateBuilding('costDepreciation', val);
+                                                                                                        }}
+                                                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">ราคาประเมิน (หลังหักค่าเสื่อม)</Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        readOnly
+                                                                                                        value={(() => {
+                                                                                                            const before = Number(building.costBeforeDepreciation || 0);
+                                                                                                            const depreciation = Number(building.costDepreciation || 0);
+                                                                                                            const after = before - depreciation;
+                                                                                                            return after > 0 ? after.toLocaleString() : "";
+                                                                                                        })()}
+                                                                                                        className="h-9 rounded-lg bg-gray-100 border-gray-200 text-xs text-right px-2 pr-8 text-gray-600"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        <>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">ราคาประเมิน (ก่อนหักค่าเสื่อม) <span className="text-red-500">*</span></Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        value={building.totalAppraisalBeforeDepreciation ? Number(building.totalAppraisalBeforeDepreciation).toLocaleString() : ""}
+                                                                                                        onChange={(e) => {
+                                                                                                            const val = e.target.value.replace(/,/g, '');
+                                                                                                            if (/^\d*$/.test(val)) updateBuilding('totalAppraisalBeforeDepreciation', val);
+                                                                                                        }}
+                                                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท/ตร.ม.</span>
+                                                                                                </div>
+                                                                                            </div>
 
-                                                                                    <div className="space-y-1">
-                                                                                        <Label className="text-[12px] text-gray-600">หักค่าเสื่อม</Label>
-                                                                                        <div className="relative">
-                                                                                            <Input
-                                                                                                value={building.depreciationAmount ? Number(building.depreciationAmount).toLocaleString() : ""}
-                                                                                                onChange={(e) => {
-                                                                                                    const val = e.target.value.replace(/,/g, '');
-                                                                                                    if (/^\d*$/.test(val)) updateBuilding('depreciationAmount', val);
-                                                                                                }}
-                                                                                                placeholder="0"
-                                                                                                className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                                            />
-                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
-                                                                                        </div>
-                                                                                    </div>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">หักค่าเสื่อม</Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        value={building.depreciationAmount ? Number(building.depreciationAmount).toLocaleString() : ""}
+                                                                                                        onChange={(e) => {
+                                                                                                            const val = e.target.value.replace(/,/g, '');
+                                                                                                            if (/^\d*$/.test(val)) updateBuilding('depreciationAmount', val);
+                                                                                                        }}
+                                                                                                        placeholder="0"
+                                                                                                        className="h-9 rounded-lg bg-white border-gray-200 text-xs text-right px-2 pr-8 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                                                </div>
+                                                                                            </div>
 
-                                                                                    <div className="space-y-1">
-                                                                                        <Label className="text-[12px] text-gray-600">ราคาประเมิน (หลังหักค่าเสื่อม)</Label>
-                                                                                        <div className="relative">
-                                                                                            <Input
-                                                                                                readOnly
-                                                                                                value={(() => {
-                                                                                                    const before = Number(building.totalAppraisalBeforeDepreciation || 0);
-                                                                                                    const depreciation = Number(building.depreciationAmount || 0);
-                                                                                                    const after = before - depreciation;
-                                                                                                    return after > 0 ? after.toLocaleString() : "";
-                                                                                                })()}
-                                                                                                className="h-9 rounded-lg bg-gray-100 border-gray-200 text-xs text-right px-2 pr-8 text-gray-600"
-                                                                                            />
-                                                                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
-                                                                                        </div>
-                                                                                    </div>
+                                                                                            <div className="space-y-1">
+                                                                                                <Label className="text-[12px] text-gray-600">ราคาประเมิน (หลังหักค่าเสื่อม)</Label>
+                                                                                                <div className="relative">
+                                                                                                    <Input
+                                                                                                        readOnly
+                                                                                                        value={(() => {
+                                                                                                            const before = Number(building.totalAppraisalBeforeDepreciation || 0);
+                                                                                                            const depreciation = Number(building.depreciationAmount || 0);
+                                                                                                            const after = before - depreciation;
+                                                                                                            return after > 0 ? after.toLocaleString() : "";
+                                                                                                        })()}
+                                                                                                        className="h-9 rounded-lg bg-gray-100 border-gray-200 text-xs text-right px-2 pr-8 text-gray-600"
+                                                                                                    />
+                                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground">บาท</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </>
+                                                                                    )}
 
                                                                                     {/* Row 3: อายุ, รีโนเวท, ปีรีโนเวท */}
                                                                                     <div className="space-y-1">
