@@ -1592,14 +1592,9 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                 <div className="w-6 h-6 bg-chaiyo-blue rounded-md flex items-center justify-center shrink-0">
                                                                     <Navigation className="w-3.5 h-3.5 text-white" />
                                                                 </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
-                                                                        {parseFloat(formData.landLat).toFixed(6)}
-                                                                    </span>
-                                                                    <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
-                                                                        {parseFloat(formData.landLng).toFixed(6)}
-                                                                    </span>
-                                                                </div>
+                                                                <span className="text-[10px] font-mono font-bold text-chaiyo-blue">
+                                                                    {parseFloat(formData.landLat).toFixed(6)}, {parseFloat(formData.landLng).toFixed(6)}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -4114,27 +4109,22 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         {/* Paste Coordinates */}
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">ป้อนพิกัด โดยตรง</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <Label className="text-xs text-gray-600">ละติจูด (Latitude)</Label>
-                                    <Input
-                                        placeholder="เช่น 14.352519"
-                                        value={searchLat}
-                                        onChange={(e) => setSearchLat(e.target.value)}
-                                        className="h-9 text-xs border-gray-200"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs text-gray-600">ลองจิจูด (Longitude)</Label>
-                                    <Input
-                                        placeholder="เช่น 100.562641"
-                                        value={searchLng}
-                                        onChange={(e) => setSearchLng(e.target.value)}
-                                        className="h-9 text-xs border-gray-200"
-                                    />
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500">สามารถคัดลอก lat/lng จาก Google Maps ได้</p>
+                            <Input
+                                placeholder="เช่น 14.352519, 100.562641"
+                                value={searchLat && searchLng ? `${searchLat}, ${searchLng}` : ""}
+                                onChange={(e) => {
+                                    const val = e.target.value.trim();
+                                    const parts = val.split(',').map(s => s.trim());
+                                    if (parts.length === 2) {
+                                        setSearchLat(parts[0]);
+                                        setSearchLng(parts[1]);
+                                    } else if (parts.length === 1 && val) {
+                                        setSearchLat(val);
+                                    }
+                                }}
+                                className="h-10 text-sm border-gray-200"
+                            />
+                            <p className="text-xs text-gray-500">ป้อนเป็น "ละติจูด, ลองจิจูด" เช่น 14.352519, 100.562641</p>
                         </div>
                     </div>
 
