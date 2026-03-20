@@ -1964,6 +1964,35 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </>
                             )}
 
+                            {/* ตรวจสอบหลักประกันรถแล้ว - only for car collateral */}
+                            {formData.collateralType === 'car' && (
+                                <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
+                                    <span className="text-sm text-gray-700 font-bold">ตรวจสอบหลักประกันรถแล้ว</span>
+                                    <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ผ่าน' })}
+                                            className={cn(
+                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                formData.vehicleVerified === 'ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                            )}
+                                        >
+                                            ผ่าน
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ไม่ผ่าน' })}
+                                            className={cn(
+                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                formData.vehicleVerified === 'ไม่ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                            )}
+                                        >
+                                            ไม่ผ่าน
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             {COLLATERAL_QUESTIONS[formData.collateralType]?.length > 0 && !(formData.collateralType === 'land' && formData.landDeedType === 'อ.ช. 2') && (
                                 <div className="pt-8 border-t border-border-subtle mt-8">
                                     <button
@@ -2078,35 +2107,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             </div>
                                         </div>
                                     )}
-                                </div>
-                            )}
-
-                            {/* ตรวจสอบหลักประกันรถแล้ว - only for car collateral */}
-                            {formData.collateralType === 'car' && (
-                                <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
-                                    <span className="text-sm text-gray-700 font-bold">ตรวจสอบหลักประกันรถแล้ว</span>
-                                    <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ผ่าน' })}
-                                            className={cn(
-                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                formData.vehicleVerified === 'ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                            )}
-                                        >
-                                            ผ่าน
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ไม่ผ่าน' })}
-                                            className={cn(
-                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                formData.vehicleVerified === 'ไม่ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                            )}
-                                        >
-                                            ไม่ผ่าน
-                                        </button>
-                                    </div>
                                 </div>
                             )}
                         </div>
