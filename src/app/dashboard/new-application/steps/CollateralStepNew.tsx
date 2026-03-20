@@ -3608,7 +3608,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         <TableHead className="w-[60px] text-center text-xs">คันที่</TableHead>
                                                         <TableHead className="text-xs">ประเภทรถ</TableHead>
                                                         <TableHead className="text-xs">ยี่ห้อรถ</TableHead>
-                                                        <TableHead className="text-xs">รุ่นรถ</TableHead>
                                                         <TableHead className="text-xs">สถานะสินทรัพย์</TableHead>
                                                         <TableHead className="w-[50px]"></TableHead>
                                                     </TableRow>
@@ -3616,7 +3615,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 <TableBody>
                                                     {(formData.otherVehicles || []).length === 0 ? (
                                                         <TableRow>
-                                                            <TableCell colSpan={6} className="text-center py-6 text-gray-400 text-sm">
+                                                            <TableCell colSpan={5} className="text-center py-6 text-gray-400 text-sm">
                                                                 คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลรถยนต์
                                                             </TableCell>
                                                         </TableRow>
@@ -3652,7 +3651,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                         value={vehicle.brand || ""}
                                                                         onValueChange={(value) => {
                                                                             const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], brand: value, model: "" };
+                                                                            newVehicles[idx] = { ...newVehicles[idx], brand: value };
                                                                             setFormData({ ...formData, otherVehicles: newVehicles });
                                                                         }}
                                                                     >
@@ -3665,29 +3664,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                     {brand.label}
                                                                                 </SelectItem>
                                                                             ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={vehicle.model || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], model: value };
-                                                                            setFormData({ ...formData, otherVehicles: newVehicles });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {vehicle.brand && MODELS_BY_BRAND[vehicle.brand] ? (
-                                                                                MODELS_BY_BRAND[vehicle.brand].map((model) => (
-                                                                                    <SelectItem key={model.value} value={model.value}>
-                                                                                        {model.label}
-                                                                                    </SelectItem>
-                                                                                ))
-                                                                            ) : null}
                                                                         </SelectContent>
                                                                     </Select>
                                                                 </TableCell>
