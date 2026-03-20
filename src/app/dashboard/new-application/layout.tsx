@@ -135,7 +135,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             setRightContent(
                 <Button
                     variant="default"
-                    className="font-bold"
+                    className=""
                     onClick={() => {
                         // If the current page has a custom save handler, use it
                         if (saveOverrideRef.current) {

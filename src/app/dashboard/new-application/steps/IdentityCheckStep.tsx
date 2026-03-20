@@ -851,7 +851,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
 
                                             <Button
                                                 variant="outline"
-                                                className="w-full h-12 text-chaiyo-blue font-bold hover:bg-blue-50"
+                                                className="w-full h-12 text-chaiyo-blue hover:bg-blue-50"
                                                 onClick={() => setShowNotContinueDialog(true)}
                                             >
                                                 ไว้ภายหลัง
@@ -918,7 +918,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                             </Button>
                                             <Button
                                                 variant="default"
-                                                className="h-12 rounded-xl font-bold text-white flex items-center justify-center gap-2 order-1 sm:order-2"
+                                                className="h-12 text-white flex items-center justify-center gap-2 order-1 sm:order-2"
                                                 onClick={() => {
                                                     setAlertDialog({
                                                         isOpen: true,

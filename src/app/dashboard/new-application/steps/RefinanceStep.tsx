@@ -137,7 +137,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                         <FileText className="w-5 h-5" />
-                        สัญญาเงินกู้
+                        ข้อมูลสินเชื่อเดิม
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-6 pb-6 pt-6">
@@ -145,7 +145,8 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         {/* ชื่อไฟแนนซ์เดิม */}
                         <div className="space-y-1.5">
                             <Label>
-                                ชื่อไฟแนนซ์เดิม <span className="text-red-500">*</span>
+                                ชื่อสถาบันการเงิน/ไฟแนนซ์เดิม
+                                <span className="text-red-500">*</span>
                             </Label>
                             <Select value={financeCompany} onValueChange={setFinanceCompany}>
                                 <SelectTrigger className="h-11 bg-white">

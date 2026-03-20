@@ -301,7 +301,6 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
             setRightContent(
                 <Button
                     variant="default"
-                    className="font-bold"
                     onClick={() => setIsSubmitDialogOpen(true)}
                 >
                     <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร

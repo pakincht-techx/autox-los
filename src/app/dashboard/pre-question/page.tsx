@@ -1203,54 +1203,36 @@ function PreQuestionPageContent() {
         }));
     };
 
-    const handleUpdateCondoUnitAppraisal = (index: number, field: string, value: any) => {
-        const updated = [...(formData.condoUnitAppraisals || [])];
-        if (updated[index]) {
-            if (field === 'source') {
-                const label = CONDO_APPRAISAL_SOURCES.find(s => s.value === value)?.label || '';
-                updated[index] = { ...updated[index], source: value, label };
-            } else {
-                updated[index] = { ...updated[index], [field]: value };
-            }
-            updateCondoAppraisal(updated, formData.condoBalconyAppraisals || []);
+    // Merged condo appraisal handlers — one row = one source with unitPrice + balconyPrice
+    const handleAddCondoMergedRow = () => {
+        const newEntry = { source: '', label: '', price: '', hidden: false };
+        const updatedUnit = [...(formData.condoUnitAppraisals || []), { ...newEntry }];
+        const updatedBalcony = [...(formData.condoBalconyAppraisals || []), { ...newEntry }];
+        updateCondoAppraisal(updatedUnit, updatedBalcony);
+    };
+
+    const handleRemoveCondoMergedRow = (index: number) => {
+        const updatedUnit = [...(formData.condoUnitAppraisals || [])];
+        const updatedBalcony = [...(formData.condoBalconyAppraisals || [])];
+        if (updatedUnit.length <= 1) return;
+        updatedUnit.splice(index, 1);
+        updatedBalcony.splice(index, 1);
+        updateCondoAppraisal(updatedUnit, updatedBalcony);
+    };
+
+    const handleUpdateCondoMergedRow = (index: number, field: 'source' | 'unitPrice' | 'balconyPrice', value: any) => {
+        const updatedUnit = [...(formData.condoUnitAppraisals || [])];
+        const updatedBalcony = [...(formData.condoBalconyAppraisals || [])];
+        if (field === 'source') {
+            const label = CONDO_APPRAISAL_SOURCES.find(s => s.value === value)?.label || '';
+            if (updatedUnit[index]) updatedUnit[index] = { ...updatedUnit[index], source: value, label };
+            if (updatedBalcony[index]) updatedBalcony[index] = { ...updatedBalcony[index], source: value, label };
+        } else if (field === 'unitPrice') {
+            if (updatedUnit[index]) updatedUnit[index] = { ...updatedUnit[index], price: value };
+        } else if (field === 'balconyPrice') {
+            if (updatedBalcony[index]) updatedBalcony[index] = { ...updatedBalcony[index], price: value };
         }
-    };
-
-    const handleAddCondoUnitAppraisal = () => {
-        const updated = [...(formData.condoUnitAppraisals || []), { source: '', label: '', price: '', hidden: false }];
-        updateCondoAppraisal(updated, formData.condoBalconyAppraisals || []);
-    };
-
-    const handleRemoveCondoUnitAppraisal = (index: number) => {
-        const updated = [...(formData.condoUnitAppraisals || [])];
-        if (updated.length <= 1) return;
-        updated.splice(index, 1);
-        updateCondoAppraisal(updated, formData.condoBalconyAppraisals || []);
-    };
-
-    const handleUpdateCondoBalconyAppraisal = (index: number, field: string, value: any) => {
-        const updated = [...(formData.condoBalconyAppraisals || [])];
-        if (updated[index]) {
-            if (field === 'source') {
-                const label = CONDO_APPRAISAL_SOURCES.find(s => s.value === value)?.label || '';
-                updated[index] = { ...updated[index], source: value, label };
-            } else {
-                updated[index] = { ...updated[index], [field]: value };
-            }
-            updateCondoAppraisal(formData.condoUnitAppraisals || [], updated);
-        }
-    };
-
-    const handleAddCondoBalconyAppraisal = () => {
-        const updated = [...(formData.condoBalconyAppraisals || []), { source: '', label: '', price: '', hidden: false }];
-        updateCondoAppraisal(formData.condoUnitAppraisals || [], updated);
-    };
-
-    const handleRemoveCondoBalconyAppraisal = (index: number) => {
-        const updated = [...(formData.condoBalconyAppraisals || [])];
-        if (updated.length <= 1) return;
-        updated.splice(index, 1);
-        updateCondoAppraisal(formData.condoUnitAppraisals || [], updated);
+        updateCondoAppraisal(updatedUnit, updatedBalcony);
     };
 
     const handleUpdateIncomeBreakdown = (index: number, value: any) => {
@@ -1757,181 +1739,109 @@ function PreQuestionPageContent() {
 
                                                     {/* 6. ราคาประเมิน */}
                                                     {formData.landDeedType === 'orchor2' ? (
-                                                        <div className="space-y-6 md:col-span-2">
-                                                            {/* ราคาประเมินพื้นที่ห้องชุด Table */}
+                                                        <div className="space-y-4 md:col-span-2">
+                                                            {/* Merged ราคาประเมิน Table — one row per source, columns for ห้องชุด + ระเบียง */}
                                                             <div className="space-y-2">
                                                                 <div className="flex items-center justify-between">
-                                                                    <Label className="text-sm font-bold text-gray-700">ราคาประเมินพื้นที่ห้องชุด <span className="text-red-500">*</span></Label>
+                                                                    <Label className="text-sm font-bold text-gray-700">ราคาประเมิน <span className="text-red-500">*</span></Label>
                                                                     <Button
                                                                         type="button"
                                                                         variant="outline"
                                                                         size="sm"
                                                                         disabled={(formData.condoUnitAppraisals || []).length >= CONDO_APPRAISAL_SOURCES.length}
-                                                                        onClick={handleAddCondoUnitAppraisal}
+                                                                        onClick={handleAddCondoMergedRow}
                                                                         className="h-8 gap-1"
                                                                     >
                                                                         <Plus className="w-3 h-3" /> เพิ่มแหล่งข้อมูล
                                                                     </Button>
                                                                 </div>
                                                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                                                    <Table className="table-fixed">
+                                                                    <Table>
                                                                         <TableHeader>
-                                                                            <TableRow>
-                                                                                <TableHead className="w-[45%] font-bold text-gray-600">แหล่งที่มา</TableHead>
-                                                                                <TableHead className="w-auto text-right font-bold text-gray-600">ราคา (บาท)</TableHead>
-                                                                                <TableHead className="w-12 text-center"></TableHead>
+                                                                            <TableRow className="bg-gray-50">
+                                                                                <TableHead className="font-bold text-gray-600 w-[36%]">แหล่งที่มา</TableHead>
+                                                                                <TableHead className="text-right font-bold text-gray-600">ราคาพื้นที่ห้องชุด (บาท)</TableHead>
+                                                                                <TableHead className="text-right font-bold text-gray-600">ราคาพื้นที่ระเบียง (บาท)</TableHead>
+                                                                                <TableHead className="w-10 text-center"></TableHead>
                                                                             </TableRow>
                                                                         </TableHeader>
                                                                         <TableBody>
-                                                                            {(formData.condoUnitAppraisals || []).map((item: any, idx: number) => (
-                                                                                <TableRow key={idx}>
-                                                                                    <TableCell className="font-medium text-gray-700">
-                                                                                        <Select
-                                                                                            value={item.source}
-                                                                                            onValueChange={(val) => handleUpdateCondoUnitAppraisal(idx, 'source', val)}
-                                                                                        >
-                                                                                            <SelectTrigger className="h-10 bg-white">
-                                                                                                <SelectValue placeholder="เลือกแหล่งที่มา" />
-                                                                                            </SelectTrigger>
-                                                                                            <SelectContent>
-                                                                                                {CONDO_APPRAISAL_SOURCES.map(source => {
-                                                                                                    const isUsed = (formData.condoUnitAppraisals || []).some((a: any, i: number) => a.source === source.value && i !== idx);
-                                                                                                    return (
-                                                                                                        <SelectItem key={source.value} value={source.value} disabled={isUsed}>
-                                                                                                            {source.label}
-                                                                                                        </SelectItem>
-                                                                                                    );
-                                                                                                })}
-                                                                                            </SelectContent>
-                                                                                        </Select>
-                                                                                    </TableCell>
-                                                                                    <TableCell>
-                                                                                        <Input
-                                                                                            type="text"
-                                                                                            className="h-10 text-right font-mono border border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue transition-colors text-gray-900 bg-white"
-                                                                                            value={item.price ? Number(item.price).toLocaleString() : ''}
-                                                                                            onChange={(e) => handleUpdateCondoUnitAppraisal(idx, 'price', e.target.value.replace(/,/g, ''))}
-                                                                                            placeholder="0"
-                                                                                        />
-                                                                                    </TableCell>
-                                                                                    <TableCell className="text-center">
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="ghost"
-                                                                                            size="sm"
-                                                                                            onClick={() => handleRemoveCondoUnitAppraisal(idx)}
-                                                                                            disabled={(formData.condoUnitAppraisals || []).length <= 1}
-                                                                                            className={cn(
-                                                                                                "h-8 w-8 p-0",
-                                                                                                (formData.condoUnitAppraisals || []).length <= 1
-                                                                                                    ? "text-gray-300 cursor-not-allowed"
-                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                                                            )}
-                                                                                        >
-                                                                                            <Trash2 className="w-4 h-4" />
-                                                                                        </Button>
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ))}
+                                                                            {(formData.condoUnitAppraisals || []).map((unitItem: any, idx: number) => {
+                                                                                const balconyItem = (formData.condoBalconyAppraisals || [])[idx] || {};
+                                                                                const rowCount = (formData.condoUnitAppraisals || []).length;
+                                                                                return (
+                                                                                    <TableRow key={idx}>
+                                                                                        <TableCell className="font-medium text-gray-700">
+                                                                                            <Select
+                                                                                                value={unitItem.source}
+                                                                                                onValueChange={(val) => handleUpdateCondoMergedRow(idx, 'source', val)}
+                                                                                            >
+                                                                                                <SelectTrigger className="h-10 bg-white">
+                                                                                                    <SelectValue placeholder="เลือกแหล่งที่มา" />
+                                                                                                </SelectTrigger>
+                                                                                                <SelectContent>
+                                                                                                    {CONDO_APPRAISAL_SOURCES.map(source => {
+                                                                                                        const isUsed = (formData.condoUnitAppraisals || []).some((a: any, i: number) => a.source === source.value && i !== idx);
+                                                                                                        return (
+                                                                                                            <SelectItem key={source.value} value={source.value} disabled={isUsed}>
+                                                                                                                {source.label}
+                                                                                                            </SelectItem>
+                                                                                                        );
+                                                                                                    })}
+                                                                                                </SelectContent>
+                                                                                            </Select>
+                                                                                        </TableCell>
+                                                                                        <TableCell>
+                                                                                            <Input
+                                                                                                type="text"
+                                                                                                className="h-10 text-right font-mono border border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue transition-colors text-gray-900 bg-white"
+                                                                                                value={unitItem.price ? Number(unitItem.price).toLocaleString() : ''}
+                                                                                                onChange={(e) => handleUpdateCondoMergedRow(idx, 'unitPrice', e.target.value.replace(/,/g, ''))}
+                                                                                                placeholder="0"
+                                                                                            />
+                                                                                        </TableCell>
+                                                                                        <TableCell>
+                                                                                            <Input
+                                                                                                type="text"
+                                                                                                className="h-10 text-right font-mono border border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue transition-colors text-gray-900 bg-white"
+                                                                                                value={balconyItem.price ? Number(balconyItem.price).toLocaleString() : ''}
+                                                                                                onChange={(e) => handleUpdateCondoMergedRow(idx, 'balconyPrice', e.target.value.replace(/,/g, ''))}
+                                                                                                placeholder="0"
+                                                                                            />
+                                                                                        </TableCell>
+                                                                                        <TableCell className="text-center">
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                onClick={() => handleRemoveCondoMergedRow(idx)}
+                                                                                                disabled={rowCount <= 1}
+                                                                                                className={cn(
+                                                                                                    "h-8 w-8 p-0",
+                                                                                                    rowCount <= 1
+                                                                                                        ? "text-gray-300 cursor-not-allowed"
+                                                                                                        : "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                                                                                )}
+                                                                                            >
+                                                                                                <Trash2 className="w-4 h-4" />
+                                                                                            </Button>
+                                                                                        </TableCell>
+                                                                                    </TableRow>
+                                                                                );
+                                                                            })}
                                                                         </TableBody>
                                                                     </Table>
                                                                 </div>
                                                             </div>
 
-                                                            {/* ราคาประเมินพื้นที่ระเบียง Table */}
-                                                            <div className="space-y-2">
-                                                                <div className="flex items-center justify-between">
-                                                                    <Label className="text-sm font-bold text-gray-700">ราคาประเมินพื้นที่ระเบียง</Label>
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={handleAddCondoBalconyAppraisal}
-                                                                        className="h-8 gap-1"
-                                                                        disabled={(formData.condoBalconyAppraisals || []).length >= CONDO_APPRAISAL_SOURCES.length}
-                                                                    >
-                                                                        <Plus className="w-3 h-3" /> เพิ่มแหล่งข้อมูล
-                                                                    </Button>
-                                                                </div>
-                                                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                                                    <Table className="table-fixed">
-                                                                        <TableHeader>
-                                                                            <TableRow>
-                                                                                <TableHead className="w-[45%] font-bold text-gray-600">แหล่งที่มา</TableHead>
-                                                                                <TableHead className="w-auto text-right font-bold text-gray-600">ราคา (บาท)</TableHead>
-                                                                                <TableHead className="w-12 text-center"></TableHead>
-                                                                            </TableRow>
-                                                                        </TableHeader>
-                                                                        <TableBody>
-                                                                            {(formData.condoBalconyAppraisals || []).map((item: any, idx: number) => (
-                                                                                <TableRow key={idx}>
-                                                                                    <TableCell className="font-medium text-gray-700">
-                                                                                        <Select
-                                                                                            value={item.source}
-                                                                                            onValueChange={(val) => handleUpdateCondoBalconyAppraisal(idx, 'source', val)}
-                                                                                        >
-                                                                                            <SelectTrigger className="h-10 bg-white">
-                                                                                                <SelectValue placeholder="เลือกแหล่งที่มา" />
-                                                                                            </SelectTrigger>
-                                                                                            <SelectContent>
-                                                                                                {CONDO_APPRAISAL_SOURCES.map(source => {
-                                                                                                    const isUsed = (formData.condoBalconyAppraisals || []).some((a: any, i: number) => a.source === source.value && i !== idx);
-                                                                                                    return (
-                                                                                                        <SelectItem key={source.value} value={source.value} disabled={isUsed}>
-                                                                                                            {source.label}
-                                                                                                        </SelectItem>
-                                                                                                    );
-                                                                                                })}
-                                                                                            </SelectContent>
-                                                                                        </Select>
-                                                                                    </TableCell>
-                                                                                    <TableCell>
-                                                                                        <Input
-                                                                                            type="text"
-                                                                                            className="h-10 text-right font-mono border border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue transition-colors text-gray-900 bg-white"
-                                                                                            value={item.price ? Number(item.price).toLocaleString() : ''}
-                                                                                            onChange={(e) => handleUpdateCondoBalconyAppraisal(idx, 'price', e.target.value.replace(/,/g, ''))}
-                                                                                            placeholder="0"
-                                                                                        />
-                                                                                    </TableCell>
-                                                                                    <TableCell className="text-center">
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="ghost"
-                                                                                            size="sm"
-                                                                                            onClick={() => handleRemoveCondoBalconyAppraisal(idx)}
-                                                                                            disabled={(formData.condoBalconyAppraisals || []).length <= 1}
-                                                                                            className={cn(
-                                                                                                "h-8 w-8 p-0",
-                                                                                                (formData.condoBalconyAppraisals || []).length <= 1
-                                                                                                    ? "text-gray-300 cursor-not-allowed"
-                                                                                                    : "text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                                                            )}
-                                                                                        >
-                                                                                            <Trash2 className="w-4 h-4" />
-                                                                                        </Button>
-                                                                                    </TableCell>
-                                                                                </TableRow>
-                                                                            ))}
-                                                                        </TableBody>
-                                                                    </Table>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex justify-between items-center px-4 py-4 bg-chaiyo-blue/[0.03] border border-border-strong rounded-xl mt-4">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="w-8 h-8 rounded-full bg-chaiyo-blue/10 flex items-center justify-center">
-                                                                        <Calculator className="w-4 h-4 text-chaiyo-blue" />
-                                                                    </div>
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-widest leading-none mb-1">Grand Total</span>
-                                                                        <span className="text-sm font-bold text-gray-700">รวมราคาประเมินห้องชุด</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <div className="text-xl font-mono font-black text-chaiyo-blue leading-none">
-                                                                        {Number(formData.appraisalPrice || 0).toLocaleString()}
-                                                                    </div>
-                                                                    <span className="text-[10px] font-bold text-gray-400 uppercase mt-1 inline-block">บาท (Baht)</span>
+                                                            {/* Total */}
+                                                            <div className="flex justify-between items-center px-6 py-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                                                <span className="text-sm font-bold text-chaiyo-blue">รวมราคาประเมินสุทธิ</span>
+                                                                <div className="flex items-baseline gap-1.5">
+                                                                    <span className="text-lg font-bold font-mono text-chaiyo-blue">
+                                                                        {Number(formData.appraisalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </span>
+                                                                    <span className="text-sm text-gray-500">บาท</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -2112,14 +2022,14 @@ function PreQuestionPageContent() {
                                                             )}
 
                                                             <div className="flex justify-between items-center px-6 py-4 bg-blue-50 border border-blue-200 rounded-xl mt-4">
-                                                                    <span className="text-sm font-bold text-chaiyo-blue">รวมราคาประเมินสุทธิ</span>
-                                                                    <div className="flex items-baseline gap-1.5">
-                                                                        <span className="text-lg font-bold font-mono text-chaiyo-blue">
-                                                                            {Number(formData.appraisalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                                        </span>
-                                                                        <span className="text-sm text-gray-500">บาท</span>
-                                                                    </div>
+                                                                <span className="text-sm font-bold text-chaiyo-blue">รวมราคาประเมินสุทธิ</span>
+                                                                <div className="flex items-baseline gap-1.5">
+                                                                    <span className="text-lg font-bold font-mono text-chaiyo-blue">
+                                                                        {Number(formData.appraisalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </span>
+                                                                    <span className="text-sm text-gray-500">บาท</span>
                                                                 </div>
+                                                            </div>
 
 
                                                         </div>
@@ -2187,12 +2097,15 @@ function PreQuestionPageContent() {
                                                                 </div>
                                                             </div>
 
-                                                            {/* 7. แสดง Sum รวม */}
-                                                            <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
-                                                                <Label className="text-sm text-gray-700">ราคารวม (ที่ดิน + สิ่งปลูกสร้าง)</Label>
-                                                                <span className="text-xl font-bold text-chaiyo-blue">
-                                                                    {((Number(formData.appraisedLandPrice) || 0) + (Number(formData.appraisedBuildingPrice) || 0)).toLocaleString()} บาท
-                                                                </span>
+                                                            {/* Total */}
+                                                            <div className="flex justify-between items-center px-6 py-4 bg-blue-50 border border-blue-200 rounded-xl mt-4">
+                                                                <span className="text-sm font-bold text-chaiyo-blue">รวมราคาประเมินสุทธิ</span>
+                                                                <div className="flex items-baseline gap-1.5">
+                                                                    <span className="text-lg font-bold font-mono text-chaiyo-blue">
+                                                                        {Number(formData.appraisalPrice || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </span>
+                                                                    <span className="text-sm text-gray-500">บาท</span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}

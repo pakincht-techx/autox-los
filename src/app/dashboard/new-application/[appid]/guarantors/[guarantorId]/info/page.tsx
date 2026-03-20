@@ -86,7 +86,6 @@ export default function GuarantorInfoPage() {
                 <div className="flex items-center gap-3">
                     <Button
                         variant="default"
-                        className="font-bold"
                         onClick={() => {
                             // Always show mandatory warning — in real app, check actual fields
                             mandatoryWarningRef.current(true);
