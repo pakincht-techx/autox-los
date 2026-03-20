@@ -498,7 +498,6 @@ const getPaperDocs = (type: string, data: any = {}) => {
         { label: "รูปถ่ายเล่มทะเบียน หน้ากลางเล่ม", required: true },
         { label: "รูปถ่ายเล่มทะเบียน หน้ารายการภาษี", required: true },
         { label: "รูปถ่ายเล่มทะเบียน หน้าบันทึกเจ้าหน้าที่", required: true },
-        { label: "ผลเช็คต้น (ตามเงื่อนไข)", required: true },
         { label: "รูปภาพป้ายภาษี", required: true },
         { label: "หน้าตรวจสอบการชำระภาษีจากเว็ปกรมการขนส่งทางบก", required: true }
     ];
