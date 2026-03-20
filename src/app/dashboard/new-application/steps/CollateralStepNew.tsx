@@ -3583,62 +3583,87 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                 {formData.hasOtherVehicles === "yes" && (
                                     <div className="pl-6 border-l-2 border-blue-100 space-y-4 animate-in slide-in-from-left-2 duration-200">
-                                        <div className="flex items-center gap-4">
-                                            <Label className="text-sm font-bold text-gray-700">จำนวน</Label>
-                                            <div className="relative w-24">
-                                                <Input
-                                                    type="text"
-                                                    placeholder="0"
-                                                    className="h-10 pr-8 text-right font-bold border-gray-200"
-                                                    value={formData.otherVehicleCount || ""}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        if (/^\d*$/.test(val)) {
-                                                            setFormData({ ...formData, otherVehicleCount: val });
-                                                        }
-                                                    }}
-                                                />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">คัน</span>
-                                            </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const currentVehicles = formData.otherVehicles || [];
+                                                    setFormData({
+                                                        ...formData,
+                                                        otherVehicles: [...currentVehicles, { id: Date.now(), type: "", brand: "", status: "" }]
+                                                    });
+                                                }}
+                                                className="text-xs gap-1 h-8"
+                                            >
+                                                <Plus className="w-3 h-3" /> เพิ่มรถ ({(formData.otherVehicles || []).length})
+                                            </Button>
                                         </div>
 
-                                        <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                                            <Table>
-                                                <TableHeader className="bg-gray-50/80">
-                                                    <TableRow>
-                                                        <TableHead className="w-[80px] text-center font-bold text-gray-600">ลำดับ</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">ประเภทรถ</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">ยี่ห้อ/รุ่น</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">สถานะ</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {[1, 2].map((i) => (
-                                                        <TableRow key={i} className="hover:bg-gray-50/30 transition-colors">
-                                                            <TableCell className="text-center font-medium text-gray-400">{i}</TableCell>
-                                                            <TableCell>
+                                        {(formData.otherVehicles || []).length === 0 ? (
+                                            <div className="text-center py-4 text-gray-400 text-sm border border-dashed border-gray-300 rounded-lg">
+                                                คลิก "เพิ่มรถ" เพื่อเพิ่มข้อมูล
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {(formData.otherVehicles || []).map((vehicle: any, idx: number) => (
+                                                    <div key={vehicle.id || idx} className="flex items-end gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded">รถที่ {idx + 1}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-3 gap-2">
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="เช่น รถเก๋ง, มอเตอร์ไซค์"
+                                                                    placeholder="ประเภทรถ (เช่น รถเก๋ง)"
+                                                                    value={vehicle.type || ""}
+                                                                    onChange={(e) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], type: e.target.value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                            <TableCell>
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="เช่น Toyota Camry"
+                                                                    placeholder="ยี่ห้อ/รุ่น (เช่น Toyota Camry)"
+                                                                    value={vehicle.brand || ""}
+                                                                    onChange={(e) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], brand: e.target.value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                            <TableCell>
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="เช่น ผ่อนหมดแล้ว"
+                                                                    placeholder="สถานะ (เช่น ผ่อนหมดแล้ว)"
+                                                                    value={vehicle.status || ""}
+                                                                    onChange={(e) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], status: e.target.value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
+                                                            </div>
+                                                        </div>
+                                                        {(formData.otherVehicles || []).length > 0 && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const newVehicles = (formData.otherVehicles || []).filter((_: any, i: number) => i !== idx);
+                                                                    setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                }}
+                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2 text-xs"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -3665,62 +3690,87 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                 {formData.hasOtherLands === "yes" && (
                                     <div className="pl-6 border-l-2 border-green-100 space-y-4 animate-in slide-in-from-left-2 duration-200">
-                                        <div className="flex items-center gap-4">
-                                            <Label className="text-sm font-bold text-gray-700">จำนวนที่ดิน</Label>
-                                            <div className="relative w-24">
-                                                <Input
-                                                    type="text"
-                                                    placeholder="0"
-                                                    className="h-10 pr-10 text-right font-bold border-gray-200"
-                                                    value={formData.otherLandCount || ""}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        if (/^\d*$/.test(val)) {
-                                                            setFormData({ ...formData, otherLandCount: val });
-                                                        }
-                                                    }}
-                                                />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">แปลง</span>
-                                            </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const currentLands = formData.otherLands || [];
+                                                    setFormData({
+                                                        ...formData,
+                                                        otherLands: [...currentLands, { id: Date.now(), type: "", area: "", province: "" }]
+                                                    });
+                                                }}
+                                                className="text-xs gap-1 h-8"
+                                            >
+                                                <Plus className="w-3 h-3" /> เพิ่มที่ดิน ({(formData.otherLands || []).length})
+                                            </Button>
                                         </div>
 
-                                        <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-                                            <Table>
-                                                <TableHeader className="bg-gray-50/80">
-                                                    <TableRow>
-                                                        <TableHead className="w-[80px] text-center font-bold text-gray-600">ลำดับ</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">ประเภทที่ดิน</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">เนื้อที่ (ไร่-งาน-วา)</TableHead>
-                                                        <TableHead className="font-bold text-gray-600">ที่ตั้ง (จังหวัด)</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {[1].map((i) => (
-                                                        <TableRow key={i} className="hover:bg-gray-50/30 transition-colors">
-                                                            <TableCell className="text-center font-medium text-gray-400">{i}</TableCell>
-                                                            <TableCell>
+                                        {(formData.otherLands || []).length === 0 ? (
+                                            <div className="text-center py-4 text-gray-400 text-sm border border-dashed border-gray-300 rounded-lg">
+                                                คลิก "เพิ่มที่ดิน" เพื่อเพิ่มข้อมูล
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {(formData.otherLands || []).map((land: any, idx: number) => (
+                                                    <div key={land.id || idx} className="flex items-end gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+                                                        <div className="flex-1 space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded">ที่ดินที่ {idx + 1}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-3 gap-2">
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="เช่น ที่นา, ที่สวน"
+                                                                    placeholder="ประเภท (เช่น ที่นา, ที่สวน)"
+                                                                    value={land.type || ""}
+                                                                    onChange={(e) => {
+                                                                        const newLands = [...(formData.otherLands || [])];
+                                                                        newLands[idx] = { ...newLands[idx], type: e.target.value };
+                                                                        setFormData({ ...formData, otherLands: newLands });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                            <TableCell>
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="ตัวอย่าง 5-2-50"
+                                                                    placeholder="เนื้อที่ (เช่น 5-2-50)"
+                                                                    value={land.area || ""}
+                                                                    onChange={(e) => {
+                                                                        const newLands = [...(formData.otherLands || [])];
+                                                                        newLands[idx] = { ...newLands[idx], area: e.target.value };
+                                                                        setFormData({ ...formData, otherLands: newLands });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                            <TableCell>
                                                                 <Input
-                                                                    className="h-9 border-transparent bg-transparent hover:bg-white hover:border-gray-200 focus:bg-white focus:border-chaiyo-blue transition-all"
-                                                                    placeholder="ระบุจังหวัด"
+                                                                    placeholder="จังหวัด"
+                                                                    value={land.province || ""}
+                                                                    onChange={(e) => {
+                                                                        const newLands = [...(formData.otherLands || [])];
+                                                                        newLands[idx] = { ...newLands[idx], province: e.target.value };
+                                                                        setFormData({ ...formData, otherLands: newLands });
+                                                                    }}
+                                                                    className="h-9 text-sm border-gray-200"
                                                                 />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
+                                                            </div>
+                                                        </div>
+                                                        {(formData.otherLands || []).length > 0 && (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const newLands = (formData.otherLands || []).filter((_: any, i: number) => i !== idx);
+                                                                    setFormData({ ...formData, otherLands: newLands });
+                                                                }}
+                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 px-2 text-xs"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
