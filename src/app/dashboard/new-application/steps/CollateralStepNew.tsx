@@ -3687,9 +3687,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                         {model.label}
                                                                                     </SelectItem>
                                                                                 ))
-                                                                            ) : (
-                                                                                <SelectItem value="">กรุณาเลือกยี่ห้อก่อน</SelectItem>
-                                                                            )}
+                                                                            ) : null}
                                                                         </SelectContent>
                                                                     </Select>
                                                                 </TableCell>
