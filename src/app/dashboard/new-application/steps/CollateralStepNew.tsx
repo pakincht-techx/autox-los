@@ -1592,9 +1592,14 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                 <div className="w-6 h-6 bg-chaiyo-blue rounded-md flex items-center justify-center shrink-0">
                                                                     <Navigation className="w-3.5 h-3.5 text-white" />
                                                                 </div>
-                                                                <span className="text-[10px] font-mono font-bold text-chaiyo-blue">
-                                                                    {parseFloat(formData.landLat).toFixed(6)}, {parseFloat(formData.landLng).toFixed(6)}
-                                                                </span>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
+                                                                        {parseFloat(formData.landLat).toFixed(6)}
+                                                                    </span>
+                                                                    <span className="text-[10px] font-mono font-bold text-chaiyo-blue leading-tight">
+                                                                        {parseFloat(formData.landLng).toFixed(6)}
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -1959,35 +1964,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </>
                             )}
 
-                            {/* ตรวจสอบหลักประกันรถแล้ว - only for car collateral */}
-                            {formData.collateralType === 'car' && (
-                                <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
-                                    <span className="text-sm text-gray-700 font-bold">ตรวจสอบหลักประกันรถแล้ว</span>
-                                    <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ผ่าน' })}
-                                            className={cn(
-                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                formData.vehicleVerified === 'ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                            )}
-                                        >
-                                            ผ่าน
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, vehicleVerified: 'ไม่ผ่าน' })}
-                                            className={cn(
-                                                "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                formData.vehicleVerified === 'ไม่ผ่าน' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                            )}
-                                        >
-                                            ไม่ผ่าน
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
                             {COLLATERAL_QUESTIONS[formData.collateralType]?.length > 0 && !(formData.collateralType === 'land' && formData.landDeedType === 'อ.ช. 2') && (
                                 <div className="pt-8 border-t border-border-subtle mt-8">
                                     <button
@@ -2073,31 +2049,43 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                                 {/* ที่ดินทำกินมีคนช่วยทำงานหรือไม่ - moved after land_q9 */}
                                                 {formData.collateralType === 'land' && (
-                                                    <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
-                                                        <span className="text-sm text-gray-700 font-bold">ที่ดินทำกินมีคนช่วยทำงานหรือไม่</span>
-                                                        <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setFormData({ ...formData, hasHelpers: 'yes' })}
-                                                                className={cn(
-                                                                    "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                                    formData.hasHelpers === 'yes' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                                                )}
-                                                            >
-                                                                มี
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setFormData({ ...formData, hasHelpers: 'no' })}
-                                                                className={cn(
-                                                                    "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
-                                                                    formData.hasHelpers === 'no' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
-                                                                )}
-                                                            >
-                                                                ไม่มี
-                                                            </button>
+                                                    <>
+                                                        <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
+                                                            <span className="text-sm text-gray-700 font-bold">ที่ดินทำกินมีคนช่วยทำงานหรือไม่</span>
+                                                            <div className="flex items-center gap-1.5 bg-white border border-border-strong p-1 rounded-lg shrink-0">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setFormData({ ...formData, hasHelpers: 'yes' })}
+                                                                    className={cn(
+                                                                        "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                        formData.hasHelpers === 'yes' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                                                    )}
+                                                                >
+                                                                    มี
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setFormData({ ...formData, hasHelpers: 'no' })}
+                                                                    className={cn(
+                                                                        "px-5 py-1.5 rounded-md text-sm font-bold transition-all",
+                                                                        formData.hasHelpers === 'no' ? "bg-chaiyo-blue text-white shadow-sm" : "text-gray-400 hover:text-gray-600"
+                                                                    )}
+                                                                >
+                                                                    ไม่มี
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </div>
+
+                                                        <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
+                                                            <span className="text-sm text-gray-700 font-bold">ใช้ทำมาหากินด้านไหน</span>
+                                                            <Input
+                                                                placeholder="ระบุ เช่น ทำสวน, ค้าขาย"
+                                                                className="h-10 w-full md:w-80 bg-white border-gray-200 focus:border-chaiyo-blue"
+                                                                value={formData.landUsageType || ""}
+                                                                onChange={(e) => setFormData({ ...formData, landUsageType: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
@@ -2908,7 +2896,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                             <div className="space-y-4">
                                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                                                     <div className="space-y-1">
-                                                                        <Label className="text-[13px] text-gray-600 ml-1">ชื่อหมู่บ้าน</Label>
+                                                                        <Label className="text-[13px] text-gray-600 ml-1">ชื่อหมู่บ้านจัดสรร (ถ้ามี)</Label>
                                                                         <Select
                                                                             value={methodData.subdivisionName || ""}
                                                                             onValueChange={(val) => updateMethodData('subdivisionName', val)}
@@ -3542,16 +3530,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         </CardHeader>
                         <CardContent className="p-6">
                             <div className="space-y-4">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-50/50 border border-gray-100 rounded-xl gap-4">
-                                    <span className="text-sm text-gray-700 font-bold">ใช้ทำมาหากินด้านไหน</span>
-                                    <Input
-                                        placeholder="ระบุ เช่น ทำสวน, ค้าขาย"
-                                        className="h-11 w-full md:w-80 bg-white border-gray-200 focus:border-chaiyo-blue"
-                                        value={formData.landUsageType || ""}
-                                        onChange={(e) => setFormData({ ...formData, landUsageType: e.target.value })}
-                                    />
-                                </div>
-
                                 {formData.hasHelpers === 'yes' && (
                                     <div className="flex flex-col gap-2 pl-6 border-l-2 border-blue-100 animate-in slide-in-from-left-2 duration-200">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-blue-50/20 border border-blue-50 rounded-xl gap-4">
@@ -3628,7 +3606,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <UserCheck className="w-5 h-5" />
-                            ประเมินความสามารถลูกค้า
+                            ข้อมูลทรัพย์สินอื่นๆ
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
@@ -4109,22 +4087,27 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         {/* Paste Coordinates */}
                         <div className="space-y-3">
                             <Label className="text-sm font-medium">ป้อนพิกัด โดยตรง</Label>
-                            <Input
-                                placeholder="เช่น 14.352519, 100.562641"
-                                value={searchLat && searchLng ? `${searchLat}, ${searchLng}` : ""}
-                                onChange={(e) => {
-                                    const val = e.target.value.trim();
-                                    const parts = val.split(',').map(s => s.trim());
-                                    if (parts.length === 2) {
-                                        setSearchLat(parts[0]);
-                                        setSearchLng(parts[1]);
-                                    } else if (parts.length === 1 && val) {
-                                        setSearchLat(val);
-                                    }
-                                }}
-                                className="h-10 text-sm border-gray-200"
-                            />
-                            <p className="text-xs text-gray-500">ป้อนเป็น "ละติจูด, ลองจิจูด" เช่น 14.352519, 100.562641</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-xs text-gray-600">ละติจูด (Latitude)</Label>
+                                    <Input
+                                        placeholder="เช่น 14.352519"
+                                        value={searchLat}
+                                        onChange={(e) => setSearchLat(e.target.value)}
+                                        className="h-9 text-xs border-gray-200"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-xs text-gray-600">ลองจิจูด (Longitude)</Label>
+                                    <Input
+                                        placeholder="เช่น 100.562641"
+                                        value={searchLng}
+                                        onChange={(e) => setSearchLng(e.target.value)}
+                                        className="h-9 text-xs border-gray-200"
+                                    />
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-500">สามารถคัดลอก lat/lng จาก Google Maps ได้</p>
                         </div>
                     </div>
 
