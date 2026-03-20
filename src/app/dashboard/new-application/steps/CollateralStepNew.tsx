@@ -588,6 +588,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 cc: formData.cc || "1,799",
                 horsePower: formData.horsePower || "141",
                 color: formData.color || "ขาว (Platinum White Pearl)",
+                vehicleConditionInspection: formData.vehicleConditionInspection || "",
                 ryNumber: formData.ryNumber || "รย.1",
                 appearance: formData.appearance || "เก๋งสองตอน",
                 usageType: formData.usageType || "ส่วนบุคคล",
@@ -1958,6 +1959,39 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     ))}
                                                 </SelectContent>
                                             </Select>
+                                        </div>
+                                    </div>
+
+                                    {/* Vehicle Condition Inspection */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 mt-6 pt-6 border-t border-gray-100">
+                                        <div className="flex flex-col md:col-span-2">
+                                            <Label className="text-[13px] font-medium text-gray-700 mb-3">การตรวจสอบสภาพรถ</Label>
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, vehicleConditionInspection: 'ผ่าน' })}
+                                                    className={cn(
+                                                        "px-6 py-2 rounded-lg text-sm font-bold transition-all",
+                                                        formData.vehicleConditionInspection === 'ผ่าน'
+                                                            ? "bg-chaiyo-blue text-white shadow-sm"
+                                                            : "bg-white border border-gray-200 text-gray-700 hover:border-chaiyo-blue hover:text-chaiyo-blue"
+                                                    )}
+                                                >
+                                                    ผ่าน
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, vehicleConditionInspection: 'ไม่ผ่าน' })}
+                                                    className={cn(
+                                                        "px-6 py-2 rounded-lg text-sm font-bold transition-all",
+                                                        formData.vehicleConditionInspection === 'ไม่ผ่าน'
+                                                            ? "bg-red-600 text-white shadow-sm"
+                                                            : "bg-white border border-gray-200 text-gray-700 hover:border-red-600 hover:text-red-600"
+                                                    )}
+                                                >
+                                                    ไม่ผ่าน
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
