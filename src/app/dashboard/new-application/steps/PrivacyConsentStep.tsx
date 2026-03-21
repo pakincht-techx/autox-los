@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { Shield, User } from "lucide-react";
+import { Shield, User, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Printer } from "lucide-react";
 import { privacyNoticeHtml } from "@/data/privacy-notice-content";
@@ -15,7 +15,34 @@ interface PrivacyConsentStepProps {
 
 export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: PrivacyConsentStepProps) => {
     const [isPrivacyAccepted, setIsPrivacyAccepted] = useState(false);
+    const [hasReadConsent, setHasReadConsent] = useState(false);
     const [showStaffBanner, setShowStaffBanner] = useState(true);
+
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+
+    const checkScrollable = () => {
+        if (scrollRef.current) {
+            const { scrollHeight, clientHeight } = scrollRef.current;
+            if (scrollHeight <= clientHeight) {
+                setHasReadConsent(true);
+            }
+        }
+    };
+
+    useEffect(() => {
+        checkScrollable();
+        window.addEventListener('resize', checkScrollable);
+        return () => window.removeEventListener('resize', checkScrollable);
+    }, []);
+
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            if (scrollTop + clientHeight >= scrollHeight - 30) {
+                setHasReadConsent(true);
+            }
+        }
+    };
 
     const handleOpenSalesSheet = () => {
         const pdfPath = collateralType === 'land'
@@ -57,9 +84,17 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                     <div className="flex items-center gap-2 font-semibold text-gray-700">
                         กรุณาอ่านและทำความเข้าใจรายละเอียดเอกสารก่อนดำเนินการต่อ
                     </div>
+                    {!hasReadConsent && (
+                        <div className="text-xs text-orange-500 flex items-center gap-1 animate-pulse">
+                            <ChevronDown className="w-3 h-3" />
+                            กรุณาเลื่อนอ่านจนจบ
+                        </div>
+                    )}
                 </div>
 
                 <div
+                    ref={scrollRef}
+                    onScroll={handleScroll}
                     className="h-[500px] overflow-y-auto p-6 text-sm text-gray-700 leading-relaxed scroll-smooth privacy-content"
                     dangerouslySetInnerHTML={{ __html: privacyNoticeHtml }}
                 />
@@ -72,12 +107,19 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
                     className="mt-1"
                     checked={isPrivacyAccepted}
                     onCheckedChange={(checked) => setIsPrivacyAccepted(checked as boolean)}
+                    disabled={!hasReadConsent}
                 />
                 <label
                     htmlFor="accept-privacy"
-                    className="cursor-pointer select-none text-gray-700"
+                    className={cn(
+                        "cursor-pointer select-none",
+                        !hasReadConsent ? "text-gray-400" : "text-gray-700"
+                    )}
                 >
                     <span className="font-bold">ข้าพเจ้าได้อ่านและรับทราบประกาศนโยบายความเป็นส่วนตัว (Privacy Notice)</span>
+                    {!hasReadConsent && (
+                        <p className="text-xs text-orange-500 mt-1">* กรุณาเลื่อนอ่านรายละเอียดด้านบนให้ครบถ้วนก่อนยอมรับ</p>
+                    )}
                 </label>
             </div>
 

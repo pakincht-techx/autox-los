@@ -11,6 +11,7 @@ These are the design conventions that **must** be followed when implementing UI 
 - **Use white backgrounds.** Do not use `bg-gray-50` or `bg-gray-100` for default input backgrounds unless it is specifically disabled. Rely on the base `bg-white` from the default Shadcn component.
 - The default UI components (`Input`, `Select`, `Combobox`) have been preconfigured to use `h-12` and `bg-white` by default. Do not add redundant `className="h-12 border-gray-200 ..."` inline classes when rendering these fields.
 - **Mandatory fields.** Visually indicate mandatory fields by appending a red asterisk `*` to the label. Implementation should use `<span className="text-red-500">*</span>` inside the `Label` component. e.g. `<Label>ชื่อ <span className="text-red-500">*</span></Label>`
+- **Mandatory fields in tables.** When inputs inside a table are mandatory but have no individual label (the column header serves as the label), append the red asterisk `*` to the **`TableHead`** instead. This keeps cells compact and avoids repeating the asterisk per row. e.g. `<TableHead className="text-xs">ประเภทสินเชื่อ <span className="text-red-500">*</span></TableHead>`
 ## Dates & Years
 - **Strictly use Buddhist Era (พ.ศ.).** All dates displayed to the user or entered by the user **must** use B.E. years (e.g., 2567). 
 - **No A.D. (C.E.) years.** Never show Western years (e.g., 2024) in any part of the UI.
@@ -121,3 +122,11 @@ Every dialog follows a **Header → Body → Footer** structure:
   </div>
   ```
 - **Table inputs**: Do **not** include the unit inside the input. Instead, display the unit in the **table column header label** (e.g., `จำนวน (บาท)`). This keeps table cells compact and avoids redundancy.
+
+## Select / Dropdown
+- **Fixed-height dropdown list.** When a `Select` may contain many options (e.g., months, years, provinces), always set a fixed max-height on `SelectContent` with scrollable overflow to prevent the dropdown from overflowing the screen. Use `max-h-[200px] overflow-y-auto`.
+  ```tsx
+  <SelectContent className="max-h-[200px] overflow-y-auto">
+      ...
+  </SelectContent>
+  ```

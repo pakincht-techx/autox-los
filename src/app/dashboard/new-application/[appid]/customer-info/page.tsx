@@ -116,9 +116,9 @@ export default function CustomerInfoPage() {
                         <div className="flex flex-col items-center justify-center py-12">
                             <Loader2 className="h-12 w-12 text-chaiyo-blue animate-spin mb-6" />
                             <DialogHeader className="space-y-2 items-center text-center">
-                                <DialogTitle>กำลังตรวจสอบสถานะลูกค้า...</DialogTitle>
+                                <DialogTitle>กำลังตรวจสอบสถานะลูกค้า</DialogTitle>
                                 <DialogDescription>
-                                    ระบบกำลังตรวจสอบข้อมูลผู้สมัครกับฐานข้อมูล<br />กรุณารอสักครู่
+                                    ระบบกำลังตรวจสอบข้อมูลผู้สมัครกับฐานข้อมูล<br />กรุณารอสักครู่...
                                 </DialogDescription>
                             </DialogHeader>
                         </div>

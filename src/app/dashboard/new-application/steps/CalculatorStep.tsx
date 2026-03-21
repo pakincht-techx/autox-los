@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users } from "lucide-react";
+import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Slider } from "@/components/ui/slider";
@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { PolicyChecklist } from "@/components/calculator/PolicyChecklist";
+import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 const THAI_BANKS = [
     { label: "ธนาคารกสิกรไทย", value: "KBANK", logo: "/bank-logo/Type=KBank.svg" },
@@ -66,7 +67,18 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     // PA Insurance State (Land only)
     const [paInsuranceEnabled, setPaInsuranceEnabled] = useState<boolean>(formData?.paInsuranceEnabled || false);
     const PA_INSURANCE_PREMIUM = 5000; // Mock premium
-    const paInsuranceCoverageMonths = months; // Coverage = loan duration
+    const [paCoverageMonths, setPaCoverageMonths] = useState<number>(months);
+    const [paStartDateValue, setPaStartDateValue] = useState<string>(() => {
+        const d = new Date();
+        return d.toISOString().split('T')[0]; // yyyy-mm-dd for input[type=date]
+    });
+
+    // Ensure paCoverageMonths doesn't exceed loan term
+    useEffect(() => {
+        if (paCoverageMonths > months) {
+            setPaCoverageMonths(months);
+        }
+    }, [months, paCoverageMonths]);
 
     // Helper: format date to DD/MM/YYYY B.E.
     const formatDateBE = (date: Date) => {
@@ -76,11 +88,11 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         return `${dd}/${mm}/${yyyy}`;
     };
 
-    const today = new Date();
-    const paStartDate = formatDateBE(today);
+    const paInsuranceCoverageMonths = paCoverageMonths;
+    const paStartDate = formatDateBE(new Date(paStartDateValue));
     const paEndDate = (() => {
-        const end = new Date(today);
-        end.setMonth(end.getMonth() + paInsuranceCoverageMonths);
+        const end = new Date(paStartDateValue);
+        end.setMonth(end.getMonth() + paCoverageMonths);
         return formatDateBE(end);
     })();
 
@@ -401,7 +413,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-baseline">
-                                        <Label className="text-sm">สินเชื่อที่ต้องการ (บาท)</Label>
+                                        <Label className="text-sm">สินเชื่อที่ต้องการ</Label>
                                         {formData && (
                                             <Popover open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                                                 <PopoverTrigger asChild>
@@ -463,8 +475,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                         const numericValue = Number(e.target.value.replace(/,/g, ''));
                                                         if (!isNaN(numericValue) && numericValue <= maxLoanAmount) setAmount(numericValue);
                                                     }}
-                                                    className="pl-9 pr-4 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-right"
+                                                    className="pl-9 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-right"
                                                 />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">บาท</span>
                                             </div>
                                         </>
                                     )}
@@ -474,7 +487,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                 <div className="flex flex-col justify-end space-y-2">
                                     <div className="flex items-baseline min-h-[20px]">
-                                        <Label className="text-sm">ระยะเวลาผ่อนชำระ (เดือน)</Label>
+                                        <Label className="text-sm">ระยะเวลาผ่อนชำระ</Label>
                                     </div>
                                     <Select
                                         disabled={maxLoanAmount <= 0}
@@ -503,13 +516,11 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                 {/* 1. Freebie Insurance (Mock Logic: Car/Moto/Truck/Agri get free loan protection) */}
                                 {['car', 'moto', 'truck', 'agri'].includes(selectedProduct) && (
-                                    <div className="p-4 bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-xl flex items-start gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                            <ShieldCheck className="w-4 h-4 text-blue-600" />
-                                        </div>
+                                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl flex items-start gap-3">
+                                        <img src="/insurance-logo/Property 1=FWD.png" alt="FWD" className="w-8 h-8 object-contain shrink-0" />
                                         <div>
-                                            <p className="text-sm font-bold text-blue-800">ฟรี! ประกันคุ้มครองวงเงินกู้</p>
-                                            <p className="text-xs text-blue-600/80 mt-1">
+                                            <p className="text-sm font-bold text-orange-800">ฟรี! ประกันคุ้มครองวงเงินกู้จาก FWD</p>
+                                            <p className="text-xs text-orange-600/80">
                                                 คุ้มครองวงเงินกู้สูงสุดตามยอดหนี้คงเหลือ กรณีเสียชีวิตหรือทุพพลภาพ
                                             </p>
                                         </div>
@@ -539,7 +550,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
                                                 if (!option) return null;
                                                 return (
-                                                    <div key={id} className="flex justify-between items-center p-3 rounded-xl border border-blue-100 bg-blue-50/30">
+                                                    <div key={id} className="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white">
                                                         <div className="flex items-center gap-3">
                                                             {option.logo ? (
                                                                 <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
@@ -571,7 +582,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 {true && (
                                     <div className="space-y-4 pt-2">
                                         <div className="flex items-center justify-between">
-                                            <Label className="text-md font-bold">ประกัน PA (ประกันอุบัติเหตุส่วนบุคคล)</Label>
+                                            <Label className="text-md font-bold">ประกันอุบัติเหตุส่วนบุคคล (PA)</Label>
                                             <Switch
                                                 checked={paInsuranceEnabled}
                                                 onCheckedChange={setPaInsuranceEnabled}
@@ -579,35 +590,66 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         </div>
 
                                         {paInsuranceEnabled && (
-                                            <div className="rounded-xl border border-blue-100 bg-blue-50/30 overflow-hidden">
-                                                {/* Company Header */}
-                                                <div className="flex justify-between items-center p-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-semibold text-gray-800">เทเวศประกันภัย</span>
-                                                            <span className="text-xs text-gray-500">ประกันอุบัติเหตุส่วนบุคคล (PA)</span>
+                                            <>
+                                                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+                                                    {/* Company Header */}
+                                                    <div className="flex justify-between items-center p-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-semibold text-gray-800">เทเวศประกันภัย</span>
+                                                                <span className="text-xs text-gray-500">ประกันอุบัติเหตุส่วนบุคคล (PA)</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()}</span>
-                                                </div>
-
-                                                {/* Detail Rows */}
-                                                <div className="divide-y divide-blue-100/60 border-t border-blue-100/60">
-                                                    <div className="flex items-center justify-between px-4 py-2.5">
-                                                        <span className="text-xs text-gray-500">ทุนประกัน</span>
-                                                        <span className="text-sm font-semibold">{amount.toLocaleString()} บาท</span>
+                                                        <span className="text-sm font-bold text-chaiyo-blue whitespace-nowrap">+{PA_INSURANCE_PREMIUM.toLocaleString()}</span>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between px-4 py-2.5">
-                                                        <span className="text-xs text-gray-500">วันที่เริ่ม-สิ้นสุดความคุ้มครอง</span>
-                                                        <span className="text-sm font-semibold text-gray-700">{paStartDate} - {paEndDate} ({paInsuranceCoverageMonths} เดือน)</span>
+                                                    {/* Detail Rows */}
+                                                    <div className="divide-y divide-gray-100 border-t border-gray-100">
+                                                        <div className="flex items-center justify-between px-4 py-2.5">
+                                                            <span className="text-xs text-gray-500">ทุนประกัน</span>
+                                                            <span className="text-sm">{amount.toLocaleString()} บาท</span>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between px-4 py-2.5">
+                                                            <span className="text-xs text-gray-500">เวลาการคุ้มครอง</span>
+                                                            <Select
+                                                                value={paCoverageMonths.toString()}
+                                                                onValueChange={(val) => setPaCoverageMonths(Number(val))}
+                                                            >
+                                                                <SelectTrigger className="w-[160px] h-9 rounded-lg bg-white border-gray-200 text-sm">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent className="max-h-[200px] overflow-y-auto">
+                                                                    {Array.from({ length: months }, (_, i) => i + 1).map((m) => (
+                                                                        <SelectItem key={m} value={m.toString()}>
+                                                                            {m} เดือน
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between px-4 py-2.5">
+                                                            <span className="text-xs text-gray-500">วันที่เริ่มการคุ้มครอง</span>
+                                                            <DatePickerBE
+                                                                value={paStartDateValue}
+                                                                onChange={(val) => setPaStartDateValue(val)}
+                                                                className="w-[160px]"
+                                                                inputClassName="h-9 rounded-lg"
+                                                            />
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between px-4 py-2.5">
+                                                            <span className="text-xs text-gray-500">วันที่สิ้นสุดความคุ้มครอง</span>
+                                                            <span className="text-sm text-gray-700">{paEndDate}</span>
+                                                        </div>
                                                     </div>
 
                                                 </div>
 
                                                 {/* ผู้รับผลประโยชน์ Section */}
-                                                <div className=" px-3 py-3">
+                                                <div className="pt-2">
                                                     <div className="flex items-center gap-2 mb-3">
                                                         <span className="text-xs font-bold text-gray-600">ผู้รับผลประโยชน์</span>
                                                     </div>
@@ -632,7 +674,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                         </Table>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -1024,7 +1066,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         {isFreebieEligible && (
                                             <div className="flex flex-wrap gap-1.5 mb-4">
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium border border-amber-100">
-                                                    <Gift className="w-3 h-3" /> บัตรกดเงินไชโย
+                                                    <CreditCard className="w-3 h-3" /> บัตรกดเงินไชโย
                                                 </span>
                                                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100">
                                                     <ShieldCheck className="w-3 h-3" /> ประกันคุ้มครองวงเงินกู้
@@ -1103,8 +1145,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             <div className="flex items-center gap-2.5 mb-3">
                                                                 <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                                                 <div>
-                                                                    <p className="font-bold text-foreground text-sm">ประกัน PA</p>
-                                                                    <p className="text-xs text-gray-400">เทเวศประกันภัย · {paInsuranceCoverageMonths} เดือน</p>
+                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
+                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
                                                                 </div>
                                                             </div>
                                                             <div className="space-y-2.5">

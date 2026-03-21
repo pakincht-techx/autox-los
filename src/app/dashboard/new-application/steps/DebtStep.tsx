@@ -47,6 +47,7 @@ interface DebtStepProps {
     formData: CustomerFormData;
     setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
     isExistingCustomer?: boolean;
+    isGuarantor?: boolean;
 }
 
 const OCCUPATIONS = [
@@ -145,6 +146,15 @@ const DEBT_TYPES_MAPPING = [
     ...ADDITIONAL_DEBT_TYPES.map(label => ({ value: label, label, isDefault: false })),
 ];
 
+const GUARANTOR_DEBT_TYPES = [
+    "ผ่อนบ้าน/ค่าเช่าบ้าน",
+    "ผ่อนรถ",
+    "ผ่อนบัตรเครดิต/บัตรกดเงินสด",
+    "ผ่อนสินเชื่ออื่นๆ (ไม่รวมสินเชื่อเงินไชโย)",
+    "ผ่อนเงินกู้สหกรณ์",
+    "ผ่อนเงินกู้นอกระบบ",
+];
+
 // Mock staff list — replace with API data in production
 const MOCK_STAFF_LIST = [
     { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
@@ -154,7 +164,7 @@ const MOCK_STAFF_LIST = [
     { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
-export function DebtStep({ formData, setFormData, isExistingCustomer = false }: DebtStepProps) {
+export function DebtStep({ formData, setFormData, isExistingCustomer = false, isGuarantor = false }: DebtStepProps) {
     const handleChange = <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -174,18 +184,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
     const generateId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
     const occupations = formData.occupations || [{ id: 'main', isMain: true }];
 
-    // Determine required reference person count based on income channel
-    const hasCashChannel = occupations.some(
-        (occ: IncomeOccupation) => (occ.incomeChannels || []).includes('cash')
-    );
-    const isSAWithPayslipOrStatement = occupations.some(
-        (occ: IncomeOccupation) =>
-            occ.employmentType === 'SA' &&
-            (occ.incomeDocuments || []).some(
-                (doc: IncomeDocument) => doc.type === 'payslip' || doc.type === 'statement'
-            )
-    ) && !hasCashChannel;
-    const requiredReferenceCount = hasCashChannel ? 2 : isSAWithPayslipOrStatement ? 0 : 1;
+
 
     const [isSpecialIncomeDialogOpen, setIsSpecialIncomeDialogOpen] = useState(false);
     const [editingSpecialIncome, setEditingSpecialIncome] = useState<SpecialIncomeSource | null>(null);
@@ -273,8 +272,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
 
         if (itemToDelete.type === 'special' && itemToDelete.id) {
             handleRemoveSpecialIncome(itemToDelete.id);
-        } else if (itemToDelete.type === 'reference' && itemToDelete.index !== undefined) {
-            handleRemoveReference(itemToDelete.index);
         } else if (itemToDelete.type === 'categorizedPhoto' && itemToDelete.categoryId) {
             handleRemoveCategorizedPhoto(itemToDelete.categoryId, itemToDelete.photoIndex);
         } else if (itemToDelete.type === 'bankAccount' && itemToDelete.occId && itemToDelete.index !== undefined) {
@@ -434,7 +431,8 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
         const hasDefaults = currentDebts.some(d => d.isDefault);
 
         if (currentDebts.length === 0 || !hasDefaults) {
-            const defaultRows = DEFAULT_DEBT_TYPES.map((label, idx) => ({
+            const sourceTypes = isGuarantor ? GUARANTOR_DEBT_TYPES : DEFAULT_DEBT_TYPES;
+            const defaultRows = sourceTypes.map((label, idx) => ({
                 id: `debt-default-${idx}`,
                 type: label,
                 description: "",
@@ -444,45 +442,12 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
             }));
 
             // If there were already some debts (but no defaults), keep them but put defaults first
-            const combined = [...defaultRows, ...currentDebts.filter(d => !d.isDefault)];
+            const nonDefaults = isGuarantor ? [] : currentDebts.filter(d => !d.isDefault);
+            const combined = [...defaultRows, ...nonDefaults];
             handleChange("personalDebts", combined);
         }
     }, []);
 
-    // Auto-add reference person rows when requiredReferenceCount changes
-    useEffect(() => {
-        const currentRefs = formData.referencePersons || [];
-        if (currentRefs.length < requiredReferenceCount) {
-            const toAdd = requiredReferenceCount - currentRefs.length;
-            const newRefs = [...currentRefs];
-            for (let i = 0; i < toAdd; i++) {
-                newRefs.push({ name: "", phone: "", relationship: "", customRelationship: "" });
-            }
-            handleChange("referencePersons", newRefs);
-        }
-    }, [requiredReferenceCount]);
-
-    // Reference Persons
-    const handleAddReference = () => {
-        const refs = formData.referencePersons || [];
-        setFormData((prev: CustomerFormData) => ({
-            ...prev,
-            referencePersons: [...refs, { name: "", phone: "", relationship: "", customRelationship: "" }]
-        }));
-    };
-
-    const handleUpdateReference = (index: number, field: string, value: string) => {
-        const refs = [...(formData.referencePersons || [])];
-        refs[index] = { ...refs[index], [field]: value };
-        handleChange("referencePersons", refs);
-    };
-
-    const handleRemoveReference = (index: number) => {
-        const refs = [...(formData.referencePersons || [])];
-        refs.splice(index, 1);
-        handleChange("referencePersons", refs);
-        setItemToDelete(null);
-    };
 
     // Occupations Management
 
@@ -1104,17 +1069,19 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                             <div className="md:col-span-2 space-y-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <h5 className="font-bold text-gray-700 flex items-center gap-2">
-                                        <span>ภาระหนี้นอกระบบ</span>
+                                        <span>{isGuarantor ? "ภาระหนี้อื่นๆ (ไม่รวมเงินไชโย)" : "ภาระหนี้นอกระบบ"}</span>
                                     </h5>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleAddDebtRow}
-                                        className="h-8 text-[11px] font-medium"
-                                    >
-                                        <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการหนี้
-                                    </Button>
+                                    {!isGuarantor && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleAddDebtRow}
+                                            className="h-8 text-[11px] font-medium"
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการหนี้
+                                        </Button>
+                                    )}
                                 </div>
 
                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -1122,8 +1089,8 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow>
                                                 <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
-                                                <TableHead className="w-[50%] text-xs">ประเภทสินเชื่อ</TableHead>
-                                                <TableHead className="w-[30%] text-xs text-right pr-10">ค่างวด (บาท/เดือน)</TableHead>
+                                                <TableHead className="w-[50%] text-xs">ประเภทสินเชื่อ <span className="text-red-500">*</span></TableHead>
+                                                <TableHead className="w-[30%] text-xs text-right pr-10">ค่างวด (บาท/เดือน) <span className="text-red-500">*</span></TableHead>
                                                 <TableHead className="w-[10%] text-center text-xs">จัดการ</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -1308,120 +1275,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                     </CardContent>
                 </Card>
 
-                {/* ===== SECTION 3: Reference Persons (บุคคลอ้างอิง) ===== */}
-                <Card className="border-border-strong">
-                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Users className="w-5 h-5 text-chaiyo-blue" />
-                                <div>
-                                    <CardTitle className="text-lg text-chaiyo-blue">
-                                        บุคคลอ้างอิง
-                                        {requiredReferenceCount >= 2 ? (
-                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น อย่างน้อย 2 คน) *</span>
-                                        ) : requiredReferenceCount === 1 ? (
-                                            <span className="text-red-500 ml-1.5 text-xs font-normal">(จำเป็น อย่างน้อย 1 คน) *</span>
-                                        ) : (
-                                            <span className="text-muted-foreground ml-1.5 text-xs font-normal">(ถ้ามี)</span>
-                                        )}
-                                    </CardTitle>
-                                    <p className="text-xs text-muted-foreground mt-0.5">บุคคลอ้างอิงห้ามเป็นกู้/ผู้ค้า/คนในครอบครัว/คนใกล้ชิด/ลูกจ้าง</p>
-                                </div>
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className=""
-                                onClick={handleAddReference}
-                            >
-                                <Plus className="w-3 h-3 mr-1" /> เพิ่มบุคคลอ้างอิง
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                            <Table>
-                                <TableHeader className="bg-gray-50/50">
-                                    <TableRow className="hover:bg-transparent border-none">
-                                        <TableHead className="w-[8%] text-center text-xs">ลำดับ</TableHead>
-                                        <TableHead className="w-[37%] text-xs">ชื่อ-นามสกุล</TableHead>
-                                        <TableHead className="w-[35%] text-xs">ความเกี่ยวข้อง</TableHead>
-                                        <TableHead className="w-[10%] text-xs text-center">จัดการ</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(!formData.referencePersons || formData.referencePersons.length === 0) ? (
-                                        <TableRow className="hover:bg-transparent border-none">
-                                            <TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic text-xs">
-                                                ยังไม่มีข้อมูลบุคคลอ้างอิง — กรุณากดปุ่มเพิ่มเพื่อระบุข้อมูล
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        formData.referencePersons.map((ref: ReferencePerson, index: number) => (
-                                            <TableRow key={index} className="group transition-colors hover:bg-gray-50/50">
-                                                <TableCell className="py-3 text-center text-xs font-medium text-gray-500">
-                                                    {index + 1}
-                                                </TableCell>
-                                                <TableCell className="py-2">
-                                                    <Input
-                                                        value={ref.name || ""}
-                                                        onChange={(e) => handleUpdateReference(index, "name", e.target.value)}
-                                                        placeholder="ระบุชื่อ-นามสกุล"
-                                                        className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="py-2">
-                                                    <div className="space-y-1.5 transition-all duration-200">
-                                                        <Select
-                                                            value={ref.relationship || ""}
-                                                            onValueChange={(val) => handleUpdateReference(index, "relationship", val)}
-                                                        >
-                                                            <SelectTrigger className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20">
-                                                                <SelectValue placeholder="เลือกความเกี่ยวข้อง" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {REFERENCE_RELATIONSHIPS.map(rel => (
-                                                                    <SelectItem key={rel.value} value={rel.value} className="text-sm cursor-pointer">{rel.label}</SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-
-                                                        {ref.relationship === 'other' && (
-                                                            <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
-                                                                <Input
-                                                                    value={ref.customRelationship || ""}
-                                                                    onChange={(e) => handleUpdateReference(index, "customRelationship", e.target.value)}
-                                                                    placeholder="โปรดระบุรายละเอียด"
-                                                                    className="h-8 text-xs bg-white border-dashed border-gray-300 focus:border-chaiyo-blue"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="py-2 text-center text-gray-500">
-                                                    {index >= requiredReferenceCount ? (
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
-                                                            onClick={() => setItemToDelete({
-                                                                index,
-                                                                name: ref.name || `บุคคลที่ ${index + 1}`,
-                                                                type: 'reference'
-                                                            })}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    ) : null}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </CardContent>
-                </Card>
 
 
                 {/* ===== SECTION 5: Workplace Assessor (ผู้ประเมินสถานที่ทำงาน) ===== */}
@@ -1505,7 +1358,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                             {/* Income Breakdown */}
                             <div className="space-y-2">
                                 <h4 className="text-sm font-bold text-emerald-700 flex items-center gap-2">
-                                    รายได้รับ   <TrendingUp className="w-4 h-4" />
+                                    รายได้   <TrendingUp className="w-4 h-4" />
                                 </h4>
                                 <div className="space-y-1.5 text-sm">
                                     <div className="flex justify-between text-gray-600">
@@ -1531,11 +1384,11 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false }: 
                                 <div className="space-y-1.5 text-sm">
 
                                     <div className="flex justify-between text-gray-600">
-                                        <span>ภาระหนี้ในระบบ (รวมภาระหนี้จาก NCB)</span>
+                                        <span>{isGuarantor ? "ภาระหนี้ที่ลูกค้ามีกับเงินไชโย" : "ภาระหนี้ในระบบ (รวมภาระหนี้จาก NCB)"}</span>
                                         <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between text-gray-600">
-                                        <span>ภาระหนี้นอกระบบ</span>
+                                        <span>{isGuarantor ? "ภาระหนี้อื่นๆ (ไม่รวมเงินไชโย)" : "ภาระหนี้นอกระบบ"}</span>
                                         <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalPersonalDebt || 0)).toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">

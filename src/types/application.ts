@@ -83,6 +83,7 @@ export interface SpecialIncome {
 export interface IncomeDocument {
     id: string;
     name: string;
+    originalName?: string;
     url: string;
     type?: string;
     status?: string;
@@ -113,6 +114,7 @@ export interface IncomeOccupation {
     seCosts?: EnterpriseIncome[];
     incomeDocuments?: IncomeDocument[];
     customDocTypes?: { id: string; label: string }[];
+    customOccDocTypes?: { id: string; label: string }[];
     incomeChannels?: string[];
     bankAccounts?: BankAccount[];
     workLandmark?: string;
@@ -318,6 +320,10 @@ export interface CustomerFormData {
     chaiyoInsuranceInstallment?: number;
     referencePersons?: ReferencePerson[];
     incomeRemarks?: string;
+
+    // Guarantor-specific fields
+    guarantorRelationship?: string;
+    combineIncomeWithBorrower?: boolean;
 
     // Reference Codes
     ampApplicationId?: string;

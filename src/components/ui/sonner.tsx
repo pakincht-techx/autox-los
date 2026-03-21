@@ -18,20 +18,21 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="light"
+      richColors
       className="toaster group"
       position="bottom-right"
       icons={{
-        success: <CircleCheck className="h-4 w-4 text-green-600" />,
-        info: <Info className="h-4 w-4 text-blue-600" />,
-        warning: <TriangleAlert className="h-4 w-4 text-amber-600" />,
-        error: <OctagonX className="h-4 w-4 text-red-600" />,
-        loading: <LoaderCircle className="h-4 w-4 animate-spin" />,
+        success: <CircleCheck className="h-5 w-5" style={{ color: 'currentColor' }} />,
+        info: <Info className="h-5 w-5" style={{ color: 'currentColor' }} />,
+        warning: <TriangleAlert className="h-5 w-5" style={{ color: 'currentColor' }} />,
+        error: <OctagonX className="h-5 w-5" style={{ color: 'currentColor' }} />,
+        loading: <LoaderCircle className="h-5 w-5 animate-spin" />,
       }}
       toastOptions={{
         classNames: {
           toast:
-            "group toast font-sans group-[.toaster]:!bg-white group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg group-[.toaster]:font-sans",
-          description: "group-[.toast]:text-muted-foreground font-sans",
+            "group toast font-sans group-[.toaster]:bg-white group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-xl group-[.toaster]:font-sans",
+          description: "font-sans",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground font-sans",
           cancelButton:
@@ -39,7 +40,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
         style: {
           fontFamily: 'var(--font-ibm-plex-thai), ui-sans-serif, system-ui, -apple-system, sans-serif'
-        }
+        },
       }}
       {...props}
     />

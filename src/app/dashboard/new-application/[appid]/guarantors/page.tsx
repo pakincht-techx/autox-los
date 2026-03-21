@@ -214,7 +214,7 @@ export default function GuarantorsPage() {
                             <Users className="w-8 h-8 text-gray-300" />
                         </div>
                         <p className="text-base font-semibold text-gray-400">ยังไม่มีผู้ค้ำประกัน</p>
-                        <p className="text-sm text-gray-300 mt-1">กดปุ่ม "เพิ่มผู้ค้ำประกัน" เพื่อเริ่มเพิ่มข้อมูล</p>
+                        <p className="text-sm text-gray-300 mt-1">กดปุ่ม "เพิ่มผู้ค้ำประกัน" เพื่อเพิ่มข้อมูล</p>
                     </div>
                 )}
             </div>

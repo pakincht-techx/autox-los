@@ -1,15 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
-import { Check, ClipboardCheck } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { Button } from "@/components/ui/Button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/Dialog";
-import { Label } from "@/components/ui/Label";
-import { cn } from "@/lib/utils";
 
 // Policy row types
 type PolicyResult = "ผ่าน" | "ไม่ผ่าน" | null;
@@ -19,7 +15,6 @@ interface PolicyRow {
     policy: string;
     customerInfo: string | string[];
     result: PolicyResult;
-    canOverride?: boolean;
 }
 
 interface PolicySection {
@@ -43,7 +38,6 @@ const BORROWER_ROWS: PolicyRow[] = [
         policy: "อายุผู้กู้",
         customerInfo: "22 ปี",
         result: "ไม่ผ่าน",
-        canOverride: true,
     },
     {
         id: "borrower_age_with_term",
@@ -56,7 +50,6 @@ const BORROWER_ROWS: PolicyRow[] = [
         policy: "อาชีพ",
         customerInfo: ["อาชีพหลัก: นักการเมือง-กำนัน", "อาชีพเสริม: เกษตรกร"],
         result: "ไม่ผ่าน",
-        canOverride: true,
     },
     {
         id: "borrower_income",
@@ -189,7 +182,6 @@ const GUARANTORS: Guarantor[] = [
                 policy: "IIR ผู้ค้ำประกัน",
                 customerInfo: "1.8 เท่า",
                 result: "ไม่ผ่าน",
-                canOverride: true,
             },
             {
                 id: "g2_dsr",
@@ -296,12 +288,10 @@ function ResultBadge({ result }: { result: PolicyResult }) {
     );
 }
 
-function PolicyRows({ rows, onOverride, overrideReasons }: { rows: PolicyRow[]; onOverride: (row: PolicyRow) => void; overrideReasons: Record<string, string> }) {
+function PolicyRows({ rows }: { rows: PolicyRow[] }) {
     return (
         <>
-            {rows.map((row) => {
-                const isFilled = !!overrideReasons[row.id];
-                return (
+            {rows.map((row) => (
                     <TableRow
                         key={row.id}
                         className="hover:bg-gray-50/50 transition-colors"
@@ -334,33 +324,8 @@ function PolicyRows({ rows, onOverride, overrideReasons }: { rows: PolicyRow[]; 
                         <TableCell className="px-4 py-3 text-center">
                             <ResultBadge result={row.result} />
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-right">
-                            {row.result === "ไม่ผ่าน" && row.canOverride && (
-                                isFilled ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 text-xs border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
-                                        onClick={() => onOverride(row)}
-                                    >
-                                        <Check className="w-3.5 h-3.5 mr-1" />
-                                        อนุโลมแล้ว
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 text-xs"
-                                        onClick={() => onOverride(row)}
-                                    >
-                                        ขออนุโลม
-                                    </Button>
-                                )
-                            )}
-                        </TableCell>
                     </TableRow>
-                );
-            })}
+            ))}
         </>
     );
 }
@@ -368,7 +333,7 @@ function PolicyRows({ rows, onOverride, overrideReasons }: { rows: PolicyRow[]; 
 function SectionHeader({ label, note }: { label: string; note?: string }) {
     return (
         <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-            <TableCell colSpan={4} className="px-4 py-3.5">
+            <TableCell colSpan={3} className="px-4 py-3.5">
                 <span className="text-sm font-bold text-gray-700">
                     {label}
                 </span>
@@ -385,7 +350,7 @@ function SectionHeader({ label, note }: { label: string; note?: string }) {
 function PlaceholderRow() {
     return (
         <TableRow className="hover:bg-gray-50/50 transition-colors">
-            <TableCell colSpan={4} className="px-4 py-4 text-center">
+            <TableCell colSpan={3} className="px-4 py-4 text-center">
                 <span className="text-sm text-gray-400">รอกำหนด Policy</span>
             </TableCell>
         </TableRow>
@@ -395,28 +360,6 @@ function PlaceholderRow() {
 // ── Main Component ───────────────────────────────────────
 
 export function PolicyChecklist() {
-    const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
-    const [overrideTarget, setOverrideTarget] = useState<PolicyRow | null>(null);
-    const [overrideReason, setOverrideReason] = useState("");
-    const [overrideReasons, setOverrideReasons] = useState<Record<string, string>>({});
-
-    const handleOverride = (row: PolicyRow) => {
-        setOverrideTarget(row);
-        setOverrideReason(overrideReasons[row.id] || "");
-        setOverrideDialogOpen(true);
-    };
-
-    const handleSaveOverride = () => {
-        if (overrideTarget) {
-            setOverrideReasons((prev) => ({
-                ...prev,
-                [overrideTarget.id]: overrideReason,
-            }));
-        }
-        setOverrideDialogOpen(false);
-        setOverrideTarget(null);
-        setOverrideReason("");
-    };
 
     // Compute passed / total
     const allRows: PolicyRow[] = [
@@ -430,7 +373,6 @@ export function PolicyChecklist() {
     const allPassed = passedCount === totalCount;
 
     return (
-        <>
             <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <div className="flex items-center justify-between">
@@ -453,7 +395,7 @@ export function PolicyChecklist() {
                                     <React.Fragment key={section.id}>
                                         <SectionHeader label={section.label} note={section.note} />
                                         {section.rows.length > 0 ? (
-                                            <PolicyRows rows={section.rows} onOverride={handleOverride} overrideReasons={overrideReasons} />
+                                            <PolicyRows rows={section.rows} />
                                         ) : (
                                             <PlaceholderRow />
                                         )}
@@ -467,7 +409,7 @@ export function PolicyChecklist() {
                                             <SectionHeader
                                                 label={`ข้อมูลผู้ค้ำประกัน คนที่ ${index + 1} - ${guarantor.name}`}
                                             />
-                                            <PolicyRows rows={guarantor.rows} onOverride={handleOverride} overrideReasons={overrideReasons} />
+                                            <PolicyRows rows={guarantor.rows} />
                                         </React.Fragment>
                                     ))
                                 ) : (
@@ -482,7 +424,7 @@ export function PolicyChecklist() {
                                     <React.Fragment key={section.id}>
                                         <SectionHeader label={section.label} note={section.note} />
                                         {section.rows.length > 0 ? (
-                                            <PolicyRows rows={section.rows} onOverride={handleOverride} overrideReasons={overrideReasons} />
+                                            <PolicyRows rows={section.rows} />
                                         ) : (
                                             <PlaceholderRow />
                                         )}
@@ -493,55 +435,5 @@ export function PolicyChecklist() {
                     </div>
                 </CardContent>
             </Card>
-
-            {/* Override Dialog */}
-            <Dialog open={overrideDialogOpen} onOpenChange={setOverrideDialogOpen}>
-                <DialogContent className="sm:max-w-[480px]">
-                    <DialogHeader>
-                        <DialogTitle className="text-gray-900">ขออนุโลม</DialogTitle>
-                        <p className="text-sm text-gray-500 mt-1">
-                            กรุณาระบุเหตุผลประกอบการพิจารณาให้สำนักงานใหญ่ เพื่ออธิบายว่าถึงแม้ลูกค้าไม่ผ่านเกณฑ์ที่กำหนด แต่มีเหตุผลสมควรที่จะอนุมัติได้
-                        </p>
-                    </DialogHeader>
-                    <DialogBody>
-                        <div className="space-y-4">
-                            {overrideTarget && (
-                                <div className="p-3 bg-red-50 rounded-xl border border-red-100">
-                                    <p className="text-sm font-bold text-red-700">{overrideTarget.policy}</p>
-                                    <p className="text-xs text-red-600 mt-1">
-                                        ค่าปัจจุบัน: {Array.isArray(overrideTarget.customerInfo) ? overrideTarget.customerInfo.join(", ") : overrideTarget.customerInfo}
-                                    </p>
-                                </div>
-                            )}
-                            <div className="space-y-1.5">
-                                <Label className="text-sm">เหตุผลการขออนุโลม <span className="text-red-500">*</span></Label>
-                                <textarea
-                                    value={overrideReason}
-                                    onChange={(e) => setOverrideReason(e.target.value)}
-                                    placeholder="ระบุเหตุผลการขออนุโลม..."
-                                    className="w-full min-h-[120px] px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white resize-none focus:outline-none focus:ring-2 focus:ring-chaiyo-blue/20 focus:border-chaiyo-blue transition-colors"
-                                />
-                            </div>
-                        </div>
-                    </DialogBody>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            className="min-w-[120px] font-bold shadow-none"
-                            onClick={() => setOverrideDialogOpen(false)}
-                        >
-                            ยกเลิก
-                        </Button>
-                        <Button
-                            className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue hover:bg-chaiyo-blue/90"
-                            onClick={handleSaveOverride}
-                            disabled={!overrideReason.trim()}
-                        >
-                            บันทึก
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
     );
 }

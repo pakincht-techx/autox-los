@@ -131,7 +131,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                                     <InfoRow label="ชื่อ-นามสกุล" value={MOCK_CUSTOMER.name} />
                                     <InfoRow label="รหัสบัตรประชาชน" value="1-2345-67890-12-3" />
                                     <InfoRow label="วันเกิด" value="12 พฤษภาคม 1985 (38 ปี)" />
-                                    <InfoRow label="เบอร์โทรศัพท์" value={MOCK_CUSTOMER.phone} />
+                                    <InfoRow label="เบอร์โทรศัพท์มือถือ" value={MOCK_CUSTOMER.phone} />
                                     <InfoRow label="อีเมล" value={MOCK_CUSTOMER.email} />
                                     <InfoRow label="อาชีพ" value={MOCK_CUSTOMER.occupation} />
                                     <InfoRow label="รายได้ต่อเดือน" value={MOCK_CUSTOMER.salary} />

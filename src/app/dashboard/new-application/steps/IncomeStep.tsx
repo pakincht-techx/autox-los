@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock } from "lucide-react";
+import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock, ChevronUp, ChevronDown } from "lucide-react";
 import { BahtSign } from "@/components/icons/BahtSign";
 import { cn } from "@/lib/utils";
 import {
@@ -153,6 +153,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const generateId = (prefix: string) => `${prefix}-${++idCounterRef.current}`;
     const occupations = formData.occupations || [{ id: 'main', isMain: true }];
 
+    // Determine required reference person count based on income channel
+    const hasCashChannel = occupations.some(
+        (occ: IncomeOccupation) => (occ.incomeChannels || []).includes('cash')
+    );
+    const isSAWithPayslipOrStatement = occupations.some(
+        (occ: IncomeOccupation) =>
+            occ.employmentType === 'SA' &&
+            (occ.incomeDocuments || []).some(
+                (doc: IncomeDocument) => doc.type === 'payslip' || doc.type === 'statement'
+            )
+    ) && !hasCashChannel;
+    const requiredReferenceCount = hasCashChannel ? 2 : isSAWithPayslipOrStatement ? 0 : 1;
+
     const [isSpecialIncomeDialogOpen, setIsSpecialIncomeDialogOpen] = useState(false);
     const [editingSpecialIncome, setEditingSpecialIncome] = useState<SpecialIncomeSource | null>(null);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -173,6 +186,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const fileInputRef = useRef<HTMLInputElement>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
     const [currentDocContext, setCurrentDocContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
+    const [viewFilesContext, setViewFilesContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
+    const [uploadSessionDocIds, setUploadSessionDocIds] = useState<Set<string>>(new Set());
     const [currentPhotoCategory, setCurrentPhotoCategory] = useState<string | null>(null);
 
 
@@ -200,10 +215,34 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         setItemToDelete(null);
     };
 
+    // Reference Persons
+    const handleAddReference = () => {
+        const refs = formData.referencePersons || [];
+        setFormData((prev: CustomerFormData) => ({
+            ...prev,
+            referencePersons: [...refs, { name: "", phone: "", relationship: "", customRelationship: "" }]
+        }));
+    };
+
+    const handleUpdateReference = (index: number, field: string, value: string) => {
+        const refs = [...(formData.referencePersons || [])];
+        refs[index] = { ...refs[index], [field]: value };
+        handleChange("referencePersons", refs);
+    };
+
+    const handleRemoveReference = (index: number) => {
+        const refs = [...(formData.referencePersons || [])];
+        refs.splice(index, 1);
+        handleChange("referencePersons", refs);
+        setItemToDelete(null);
+    };
+
     const confirmDelete = () => {
         if (!itemToDelete) return;
 
-        if (itemToDelete.type === 'special' && itemToDelete.id) {
+        if (itemToDelete.type === 'reference' && itemToDelete.index !== undefined) {
+            handleRemoveReference(itemToDelete.index);
+        } else if (itemToDelete.type === 'special' && itemToDelete.id) {
             handleRemoveSpecialIncome(itemToDelete.id);
         } else if (itemToDelete.type === 'categorizedPhoto' && itemToDelete.categoryId) {
             handleRemoveCategorizedPhoto(itemToDelete.categoryId, itemToDelete.photoIndex);
@@ -544,6 +583,31 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         { label: "โบนัส", value: "bonus" },
     ];
 
+    const REFERENCE_RELATIONSHIPS = [
+        { value: "kamnan", label: "กำนัน" },
+        { value: "phuyaiban", label: "ผู้ใหญ่บ้าน" },
+        { value: "neighbor", label: "เพื่อนบ้าน" },
+        { value: "community_leader", label: "ผู้นำชุมชน" },
+        { value: "obt_official", label: "เจ้าหน้าที่ อบต" },
+        { value: "obh_official", label: "เจ้าหน้าที่ อบจ" },
+        { value: "employer", label: "นายจ้าง" },
+        { value: "customer", label: "ลูกค้าในร้าน" },
+        { value: "nearby_shop", label: "ร้านค้าข้างเคียง" },
+        { value: "other", label: "อื่นๆ โปรดระบุ" },
+    ];
+
+    // Auto-add reference person rows when requiredReferenceCount changes
+    useEffect(() => {
+        const currentRefs = formData.referencePersons || [];
+        if (currentRefs.length < requiredReferenceCount) {
+            const toAdd = requiredReferenceCount - currentRefs.length;
+            const newRefs = [...currentRefs];
+            for (let i = 0; i < toAdd; i++) {
+                newRefs.push({ name: "", phone: "", relationship: "", customRelationship: "" });
+            }
+            handleChange("referencePersons", newRefs);
+        }
+    }, [requiredReferenceCount]);
 
     const PHOTO_GUIDES = [
         {
@@ -737,7 +801,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const currentYearBE = new Date().getFullYear() + 543;
     const FARM_YEARS = Array.from({ length: 11 }, (_, i) => {
         const year = currentYearBE - 5 + i;
-        return { label: `พ.ศ. ${year}`, value: String(year) };
+        return { label: String(year), value: String(year) };
     });
     const FARM_MONTHS = [
         { label: "มกราคม", value: "1" },
@@ -891,6 +955,10 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
     const handleAddIncomeDocument = (occId: string, docType: string, label: string) => {
         setCurrentDocContext({ occId, docType, label });
+        // Snapshot existing doc IDs so upload dialog only shows newly uploaded files
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        const existingIds = new Set((occ?.incomeDocuments || []).map((d: IncomeDocument) => d.id));
+        setUploadSessionDocIds(existingIds);
         setIsUploadDialogOpen(true);
     };
 
@@ -953,9 +1021,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                     id: generateId('doc'),
                     type: payslipKey,
                     name: file.name,
+                    originalName: file.name,
                     url: URL.createObjectURL(file),
                     status: 'success',
-                    uploadedAt: new Date().toISOString()
+                    uploadedAt: new Date().toISOString(),
+                    // DEV MOCK: first file always has password
+                    ...(fileIdx === 0 ? { isLocked: true, password: 'mock1234' } : {})
                 });
                 allNewOCRRows = [...allNewOCRRows, ...generateMockOCRIncomeRows(payslipKey)];
             });
@@ -969,13 +1040,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                 totalIncome: totalIncome
             });
         } else {
-            const newDocs: IncomeDocument[] = files.map(file => ({
+            const newDocs: IncomeDocument[] = files.map((file, fileIdx) => ({
                 id: generateId('doc'),
                 type: docType,
                 name: file.name,
+                originalName: file.name,
                 url: URL.createObjectURL(file),
                 status: 'success',
-                uploadedAt: new Date().toISOString()
+                uploadedAt: new Date().toISOString(),
+                // DEV MOCK: first file always has password
+                ...(fileIdx === 0 ? { isLocked: true, password: 'mock1234' } : {})
             }));
 
             const newMockOCRRows = generateMockOCRIncomeRows(docType);
@@ -1012,10 +1086,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
             ? `payslip_${currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('payslip_')).length}`
             : docType;
 
+        const scanName = `สแกน_${new Date().getTime()}.pdf`;
         const newDoc: IncomeDocument = {
             id: generateId('doc'),
             type: actualDocType,
-            name: `สแกน_${new Date().getTime()}.pdf`,
+            name: scanName,
+            originalName: scanName,
             url: pages[0],
             status: 'success',
             uploadedAt: new Date().toISOString()
@@ -1045,6 +1121,18 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         const currentDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.id !== docId);
         handleOccupationChange(occId, 'incomeDocuments', currentDocs);
         setItemToDelete(null);
+    };
+
+    const handleReorderIncomeDocument = (occId: string, docId: string, direction: 'up' | 'down') => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const docs = [...(occ.incomeDocuments || [])];
+        const currentIndex = docs.findIndex((d: IncomeDocument) => d.id === docId);
+        if (currentIndex === -1) return;
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        if (targetIndex < 0 || targetIndex >= docs.length) return;
+        [docs[currentIndex], docs[targetIndex]] = [docs[targetIndex], docs[currentIndex]];
+        handleOccupationChange(occId, 'incomeDocuments', docs);
     };
 
     const THAI_BANKS = [
@@ -1130,9 +1218,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     <div className="flex flex-col items-start gap-0.5">
                                                         <span className="flex items-center gap-1.5 text-sm font-semibold">
                                                             {occ.isMain ? (
-                                                                <>
-                                                                    <Briefcase className="w-3.5 h-3.5" /> อาชีพหลัก
-                                                                </>
+                                                                <>อาชีพหลัก</>
                                                             ) : (
                                                                 `อาชีพเสริม ${index}`
                                                             )}
@@ -1325,7 +1411,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     )}
 
                                                     <div className="space-y-2">
-                                                        <Label>ประเทศที่มา-รายได้ <span className="text-red-500">*</span></Label>
+                                                        <Label>ประเทศที่มาของรายได้ <span className="text-red-500">*</span></Label>
                                                         <Select
                                                             value={occ.incomeCountry || "TH"}
                                                             onValueChange={(val) => handleOccupationChange(occ.id, "incomeCountry", val)}
@@ -1351,7 +1437,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     </div>
 
                                                     <div className="space-y-2">
-                                                        <Label>แหล่งที่มา-รายได้ <span className="text-red-500">*</span></Label>
+                                                        <Label>แหล่งที่มาของรายได้ <span className="text-red-500">*</span></Label>
                                                         <Select
                                                             value={occ.incomeSource || ""}
                                                             onValueChange={(val) => handleOccupationChange(occ.id, "incomeSource", val)}
@@ -1384,7 +1470,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     formData={occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {}) : occ}
                                                     onChange={(field, val) => handleOccupationChange(occ.id, field, val)}
                                                     disabled={!!occ.isSameAsMainAddress}
-                                                    requiredFields={['province', 'district', 'subDistrict', 'zipCode']}
+                                                    requiredFields={occ.employmentType === 'SA' ? ['houseNumber', 'province', 'district', 'subDistrict', 'zipCode'] : ['province', 'district', 'subDistrict', 'zipCode']}
+                                                    groupRequiredNote={occ.employmentType === 'SA' ? 'กรุณาระบุอย่างน้อย 1 รายการ: หมู่ที่, ซอย, แยก, หรือถนน' : undefined}
                                                     headerChildren={
                                                         !occ.isMain ? (
                                                             <div className="space-y-4 mb-4 mt-2">
@@ -1484,7 +1571,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             {!(occ.employmentType === 'SE' && !['FARMER', 'LIVESTOCK'].includes(occ.occupationCode || '')) && (
                                                                 <div className="pt-4 border-t border-gray-100">
                                                                     <div className="space-y-3">
-                                                                        <Label className="text-xs text-muted-foreground">สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA' || occ.employmentType === 'SE') && <span className="text-red-500">*</span>}</Label>
+                                                                        <Label className="text-xs text-muted-foreground">สถานะกิจการปัจจุบัน {(occ.employmentType === 'SA') && <span className="text-red-500">*</span>}</Label>
                                                                         <RadioGroup
                                                                             value={(occ.isSameAsMainAddress ? (formData.occupations?.find((o: IncomeOccupation) => o.id === occ.isSameAsMainAddress) || {} as IncomeOccupation).businessStatus : occ.businessStatus) || ""}
                                                                             onValueChange={(val) => handleOccupationChange(occ.id, "businessStatus", val)}
@@ -1558,8 +1645,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 <Table>
                                                                     <TableHeader className="bg-gray-50/50">
                                                                         <TableRow>
-                                                                            <TableHead className="w-[40%] text-xs">ธนาคาร</TableHead>
-                                                                            <TableHead className="w-[45%] text-xs">เลขที่บัญชี</TableHead>
+                                                                            <TableHead className="w-[40%] text-xs">ธนาคาร <span className="text-red-500">*</span></TableHead>
+                                                                            <TableHead className="w-[45%] text-xs">เลขที่บัญชี <span className="text-red-500">*</span></TableHead>
                                                                             <TableHead className="w-[15%]"></TableHead>
                                                                         </TableRow>
                                                                     </TableHeader>
@@ -1736,7 +1823,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         {uploadedDocs.length > 0 ? (
                                                                                             <button
                                                                                                 type="button"
-                                                                                                onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                                onClick={() => setViewFilesContext({ occId: occ.id, docType: docType.id, label: docType.label })}
                                                                                                 className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                                             >
                                                                                                 <FileText className="w-3.5 h-3.5" />
@@ -1792,6 +1879,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     <div className="space-y-3 pt-2">
                                                         <div className="flex items-center justify-between mb-2">
                                                             <Label className="text-sm font-bold text-gray-700">เอกสารยืนยันอาชีพ</Label>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const current = occ.customOccDocTypes || [];
+                                                                    const newId = `occ_other_${Date.now()}`;
+                                                                    handleOccupationChange(occ.id, 'customOccDocTypes', [...current, { id: newId, label: 'เอกสารอื่นๆ' }]);
+                                                                }}
+                                                                className="h-8 text-xs font-medium"
+                                                            >
+                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มเอกสารอื่นๆ
+                                                            </Button>
                                                         </div>
                                                         <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
                                                             <Table>
@@ -1806,6 +1906,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     {[
                                                                         { id: 'occ_doc_1', label: 'เอกสารประกอบอาชีพ 1' },
                                                                         { id: 'occ_doc_2', label: 'เอกสารประกอบอาชีพ 2' },
+                                                                        ...(occ.customOccDocTypes || []).map((ct: { id: string; label: string }) => ({ ...ct, isCustom: true })),
                                                                     ].map((docType) => {
                                                                         const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === docType.id);
                                                                         return (
@@ -1818,14 +1919,28 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         )}>
                                                                                             {uploadedDocs.length > 0 ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                                                                                         </div>
-                                                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{docType.label}</span>
+                                                                                        {'isCustom' in docType ? (
+                                                                                            <Input
+                                                                                                value={docType.label}
+                                                                                                onChange={(e) => {
+                                                                                                    const updated = (occ.customOccDocTypes || []).map((ct: { id: string; label: string }) =>
+                                                                                                        ct.id === docType.id ? { ...ct, label: e.target.value } : ct
+                                                                                                    );
+                                                                                                    handleOccupationChange(occ.id, 'customOccDocTypes', updated);
+                                                                                                }}
+                                                                                                className="h-8 text-sm font-medium max-w-[200px]"
+                                                                                                placeholder="ชื่อเอกสาร"
+                                                                                            />
+                                                                                        ) : (
+                                                                                            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{docType.label}</span>
+                                                                                        )}
                                                                                     </div>
                                                                                 </TableCell>
                                                                                 <TableCell>
                                                                                     {uploadedDocs.length > 0 ? (
                                                                                         <button
                                                                                             type="button"
-                                                                                            onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                            onClick={() => setViewFilesContext({ occId: occ.id, docType: docType.id, label: docType.label })}
                                                                                             className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                                         >
                                                                                             <FileText className="w-3.5 h-3.5" />
@@ -1836,16 +1951,33 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                     )}
                                                                                 </TableCell>
                                                                                 <TableCell className="text-right">
-                                                                                    <Button
-                                                                                        type="button"
-                                                                                        variant="outline"
-                                                                                        size="sm"
-                                                                                        onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
-                                                                                        className="h-8 text-xs gap-1.5 font-medium"
-                                                                                    >
-                                                                                        <Plus className="w-3.5 h-3.5" />
-                                                                                        เพิ่มเอกสาร
-                                                                                    </Button>
+                                                                                    <div className="flex items-center justify-end gap-1">
+                                                                                        <Button
+                                                                                            type="button"
+                                                                                            variant="outline"
+                                                                                            size="sm"
+                                                                                            onClick={() => handleAddIncomeDocument(occ.id, docType.id, docType.label)}
+                                                                                            className="h-8 text-xs gap-1.5 font-medium"
+                                                                                        >
+                                                                                            <Plus className="w-3.5 h-3.5" />
+                                                                                            เพิ่มเอกสาร
+                                                                                        </Button>
+                                                                                        {'isCustom' in docType && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                onClick={() => {
+                                                                                                    const updated = (occ.customOccDocTypes || []).filter((ct: { id: string }) => ct.id !== docType.id);
+                                                                                                    handleOccupationChange(occ.id, 'customOccDocTypes', updated);
+                                                                                                }}
+                                                                                                className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                                                title="ลบประเภท"
+                                                                                            >
+                                                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                                                            </Button>
+                                                                                        )}
+                                                                                    </div>
                                                                                 </TableCell>
                                                                             </TableRow>
                                                                         );
@@ -1871,50 +2003,50 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             <div className="space-y-2">
                                                                 <Label className="text-sm font-bold text-gray-700">อายุงานปัจจุบัน <span className="text-red-500">*</span></Label>
                                                                 <div className="flex items-center gap-3 max-w-md">
-                                                                    <div className="flex-1 flex items-center gap-2">
+                                                                    <div className="flex-1 relative">
                                                                         <Input
                                                                             type="text"
-                                                                            className="h-12 bg-white text-center rounded-xl"
+                                                                            className="h-12 bg-white text-center rounded-xl pr-10"
                                                                             placeholder="0"
                                                                             value={occ.currentTenureYear || ""}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "currentTenureYear", e.target.value.replace(/\D/g, ''))}
                                                                         />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">ปี</span>
                                                                     </div>
-                                                                    <div className="flex-1 flex items-center gap-2">
+                                                                    <div className="flex-1 relative">
                                                                         <Input
                                                                             type="text"
-                                                                            className="h-12 bg-white text-center rounded-xl"
+                                                                            className="h-12 bg-white text-center rounded-xl pr-14"
                                                                             placeholder="0"
                                                                             value={occ.currentTenureMonth || ""}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "currentTenureMonth", e.target.value.replace(/\D/g, ''))}
                                                                         />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">เดือน</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <div className="space-y-2">
                                                                 <Label className="text-sm font-bold text-gray-700">อายุงานก่อนหน้า <span className="text-red-500">*</span></Label>
                                                                 <div className="flex items-center gap-3 max-w-md">
-                                                                    <div className="flex-1 flex items-center gap-2">
+                                                                    <div className="flex-1 relative">
                                                                         <Input
                                                                             type="text"
-                                                                            className="h-12 bg-white text-center rounded-xl"
+                                                                            className="h-12 bg-white text-center rounded-xl pr-10"
                                                                             placeholder="0"
                                                                             value={occ.prevTenureYear || ""}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "prevTenureYear", e.target.value.replace(/\D/g, ''))}
                                                                         />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">ปี</span>
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">ปี</span>
                                                                     </div>
-                                                                    <div className="flex-1 flex items-center gap-2">
+                                                                    <div className="flex-1 relative">
                                                                         <Input
                                                                             type="text"
-                                                                            className="h-12 bg-white text-center rounded-xl"
+                                                                            className="h-12 bg-white text-center rounded-xl pr-14"
                                                                             placeholder="0"
                                                                             value={occ.prevTenureMonth || ""}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "prevTenureMonth", e.target.value.replace(/\D/g, ''))}
                                                                         />
-                                                                        <span className="text-sm text-muted-foreground whitespace-nowrap">เดือน</span>
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">เดือน</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1959,8 +2091,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 return (
                                                                     <div key={sourceKey || 'other'} className="space-y-3">
                                                                         <div className="flex items-center justify-between pl-1 pr-1">
-                                                                            <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                                                {sourceKey ? <FileText className="w-4 h-4 text-emerald-600" /> : <TrendingUp className="w-4 h-4 text-gray-600" />}
+                                                                            <Label className="text-xs font-semibold text-gray-600">
                                                                                 {title}
                                                                             </Label>
                                                                             {showAddButton && (
@@ -1980,9 +2111,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             <Table>
                                                                                 <TableHeader className="bg-gray-50/50">
                                                                                     <TableRow>
-                                                                                        <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้</TableHead>
+                                                                                        <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้ <span className="text-red-500">*</span></TableHead>
                                                                                         <TableHead className="w-[40%] text-xs py-3">รายละเอียดรายได้</TableHead>
-                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท)</TableHead>
+                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท) <span className="text-red-500">*</span></TableHead>
                                                                                         <TableHead className="w-[10%] text-center text-xs py-3">จัดการ</TableHead>
                                                                                     </TableRow>
                                                                                 </TableHeader>
@@ -2103,9 +2234,69 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             });
                                                             customDocTypes.forEach(ct => dynamicDocTypes.push(ct));
 
+                                                            // Separate doc types into payslip, statement, and other categories
+                                                            const payslipUploaded = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
+                                                            const statementUploaded = uploadedDocTypes.filter(dt => dt.startsWith('statement_'));
+                                                            const otherUploaded = uploadedDocTypes.filter(dt => !dt.startsWith('payslip_') && !dt.startsWith('statement_'));
+
                                                             return (
                                                                 <>
-                                                                    {uploadedDocTypes.map(docType => {
+                                                                    {/* Payslip Section - Tabbed by Month */}
+                                                                    {payslipUploaded.length > 0 && (
+                                                                        <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                            <div className="flex items-center gap-2 pb-2.5 border-b border-border-color">
+                                                                                <FileText className="w-4 h-4 text-emerald-600" />
+                                                                                <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: สลิปเงินเดือน (Payslip)</span>
+                                                                            </div>
+                                                                            <Tabs defaultValue={payslipUploaded[0]} className="w-full">
+                                                                                <TabsList className="w-full justify-start bg-gray-100/80 rounded-lg p-1 h-auto flex-wrap gap-1">
+                                                                                    {payslipUploaded.map((dt, idx) => (
+                                                                                        <TabsTrigger key={dt} value={dt} className="text-xs px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">
+                                                                                            {THAI_MONTHS_SHORT[idx % 12]}
+                                                                                        </TabsTrigger>
+                                                                                    ))}
+                                                                                </TabsList>
+                                                                                {payslipUploaded.map((dt, idx) => (
+                                                                                    <TabsContent key={dt} value={dt} className="mt-3">
+                                                                                        {renderIncomeTable(`สลิปเงินเดือน - ${THAI_MONTHS_SHORT[idx % 12]}`, dt, incomesBySource[dt] || [])}
+                                                                                    </TabsContent>
+                                                                                ))}
+                                                                            </Tabs>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Statement Section - Tabbed by Bank */}
+                                                                    {statementUploaded.length > 0 && (
+                                                                        <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                            <div className="flex items-center gap-2 pb-2.5 border-b border-border-color">
+                                                                                <FileText className="w-4 h-4 text-emerald-600" />
+                                                                                <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: รายการเดินบัญชี (Statement)</span>
+                                                                            </div>
+                                                                            <Tabs defaultValue={statementUploaded[0]} className="w-full">
+                                                                                <TabsList className="w-full justify-start bg-gray-100/80 rounded-lg p-1 h-auto flex-wrap gap-1">
+                                                                                    {statementUploaded.map((dt) => {
+                                                                                        const bankLabel = dynamicDocTypes.find(d => d.id === dt)?.label?.replace('รายการเดินบัญชี - ', '') || dt;
+                                                                                        return (
+                                                                                            <TabsTrigger key={dt} value={dt} className="text-xs px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">
+                                                                                                {bankLabel}
+                                                                                            </TabsTrigger>
+                                                                                        );
+                                                                                    })}
+                                                                                </TabsList>
+                                                                                {statementUploaded.map((dt) => {
+                                                                                    const label = dynamicDocTypes.find(d => d.id === dt)?.label || dt;
+                                                                                    return (
+                                                                                        <TabsContent key={dt} value={dt} className="mt-3">
+                                                                                            {renderIncomeTable(label, dt, incomesBySource[dt] || [])}
+                                                                                        </TabsContent>
+                                                                                    );
+                                                                                })}
+                                                                            </Tabs>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Other Doc Types - Flat (ทวิ 50, หนังสือรับรองเงินเดือน, custom, etc.) */}
+                                                                    {otherUploaded.map(docType => {
                                                                         const label = dynamicDocTypes.find(d => d.id === docType)?.label || docType;
                                                                         const sourceIncomes = incomesBySource[docType] || [];
                                                                         return renderIncomeTable(`รายการรายได้จาก: ${label}`, docType, sourceIncomes);
@@ -2213,51 +2404,55 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label>จำนวนพนักงาน (คน)</Label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        value={occ.employeeCount || ""}
-                                                                        onChange={(e) => handleOccupationChange(occ.id, "employeeCount", e.target.value.replace(/\D/g, ''))}
-                                                                        placeholder="0"
-                                                                        className="h-11 bg-white"
-                                                                    />
+                                                                    <Label>จำนวนพนักงาน</Label>
+                                                                    <div className="relative">
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={occ.employeeCount || ""}
+                                                                            onChange={(e) => handleOccupationChange(occ.id, "employeeCount", e.target.value.replace(/\D/g, ''))}
+                                                                            placeholder="0"
+                                                                            className="h-11 bg-white pr-10"
+                                                                        />
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">คน</span>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div className="space-y-2">
-                                                                    <Label>อายุกิจการ (ปี) <span className="text-red-500">*</span></Label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        value={occ.businessAgeYear || ""}
-                                                                        onChange={(e) => handleOccupationChange(occ.id, "businessAgeYear", e.target.value.replace(/\D/g, ''))}
-                                                                        placeholder="0"
-                                                                        className="h-11 bg-white"
-                                                                    />
+                                                                    <Label>อายุกิจการ <span className="text-red-500">*</span></Label>
+                                                                    <div className="relative">
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={occ.businessAgeYear || ""}
+                                                                            onChange={(e) => handleOccupationChange(occ.id, "businessAgeYear", e.target.value.replace(/\D/g, ''))}
+                                                                            placeholder="0"
+                                                                            className="h-11 bg-white pr-8"
+                                                                        />
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ปี</span>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div className="space-y-2">
                                                                     <Label>เวลาทำการ <span className="text-red-500">*</span></Label>
-                                                                    <div>
-                                                                        <ToggleGroup
-                                                                            type="multiple"
-                                                                            variant="outline"
-                                                                            value={((occ.seIncomes?.[0] || {}) as EnterpriseIncome).operatingHours || []}
-                                                                            onValueChange={(vals) => handleUpdateSEIncomeRow(occ.id, 0, { operatingHours: vals })}
-                                                                            className="w-full gap-0 -space-x-px"
-                                                                        >
-                                                                            {SE_OPERATING_HOURS.map((hour) => (
-                                                                                <ToggleGroupItem
-                                                                                    key={hour.value}
-                                                                                    value={hour.value}
-                                                                                    className={cn(
-                                                                                        "h-11 flex-1 text-sm font-medium rounded-none first:rounded-l-xl last:rounded-r-xl transition-all",
-                                                                                        "data-[state=on]:bg-chaiyo-blue data-[state=on]:text-white data-[state=on]:border-chaiyo-blue data-[state=on]:z-10",
-                                                                                        "hover:bg-blue-50 hover:text-chaiyo-blue"
-                                                                                    )}
-                                                                                >
-                                                                                    {hour.label}
-                                                                                </ToggleGroupItem>
-                                                                            ))}
-                                                                        </ToggleGroup>
+                                                                    <div className="flex flex-wrap gap-6 mt-1">
+                                                                        {SE_OPERATING_HOURS.map((hour) => {
+                                                                            const currentHours = ((occ.seIncomes?.[0] || {}) as EnterpriseIncome).operatingHours || [];
+                                                                            const isChecked = currentHours.includes(hour.value);
+                                                                            return (
+                                                                                <div key={hour.value} className="flex items-center space-x-2">
+                                                                                    <Checkbox
+                                                                                        id={`operating-${hour.value}-${occ.id}`}
+                                                                                        checked={isChecked}
+                                                                                        onCheckedChange={() => {
+                                                                                            const newHours = isChecked
+                                                                                                ? currentHours.filter((h: string) => h !== hour.value)
+                                                                                                : [...currentHours, hour.value];
+                                                                                            handleUpdateSEIncomeRow(occ.id, 0, { operatingHours: newHours });
+                                                                                        }}
+                                                                                    />
+                                                                                    <Label htmlFor={`operating-${hour.value}-${occ.id}`} className="font-normal cursor-pointer">{hour.label}</Label>
+                                                                                </div>
+                                                                            );
+                                                                        })}
                                                                     </div>
                                                                 </div>
                                                             </>
@@ -2278,9 +2473,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <Table>
                                                                         <TableHeader className="bg-gray-50/50">
                                                                             <TableRow>
-                                                                                <TableHead className="w-[25%] text-xs">ความถี่</TableHead>
-                                                                                <TableHead className="w-[25%] text-xs">ยอดขาย (บาท)</TableHead>
-                                                                                <TableHead className="w-[25%] text-xs">จำนวน</TableHead>
+                                                                                <TableHead className="w-[25%] text-xs">ความถี่ <span className="text-red-500">*</span></TableHead>
+                                                                                <TableHead className="w-[25%] text-xs">ยอดขาย (บาท) <span className="text-red-500">*</span></TableHead>
+                                                                                <TableHead className="w-[25%] text-xs">
+                                                                                    {(() => {
+                                                                                        const freq = ((occ.seIncomes?.[0] || {}) as EnterpriseIncome).frequency;
+                                                                                        if (freq === 'daily') return 'จำนวนวันต่อเดือน';
+                                                                                        if (freq === 'weekly') return 'จำนวนสัปดาห์ต่อเดือน';
+                                                                                        return 'จำนวน';
+                                                                                    })()}
+                                                                                </TableHead>
                                                                                 <TableHead className="w-[25%] text-xs text-right pr-6">รวมยอดขายต่อเดือน</TableHead>
                                                                             </TableRow>
                                                                         </TableHeader>
@@ -2388,11 +2590,20 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <Table>
                                                                         <TableHeader className="bg-gray-50/50">
                                                                             <TableRow>
-                                                                                <TableHead className="w-[20%] text-xs">ประเภทต้นทุน</TableHead>
+                                                                                <TableHead className="w-[20%] text-xs">ประเภทต้นทุน <span className="text-red-500">*</span></TableHead>
                                                                                 <TableHead className="w-[20%] text-xs">รายละเอียดต้นทุน</TableHead>
-                                                                                <TableHead className="w-[15%] text-xs">ความถี่</TableHead>
-                                                                                <TableHead className="w-[15%] text-xs">ต้นทุน (บาท)</TableHead>
-                                                                                <TableHead className="w-[10%] text-xs">จำนวน</TableHead>
+                                                                                <TableHead className="w-[15%] text-xs">ความถี่ <span className="text-red-500">*</span></TableHead>
+                                                                                <TableHead className="w-[15%] text-xs">ต้นทุน (บาท) <span className="text-red-500">*</span></TableHead>
+                                                                                <TableHead className="w-[10%] text-xs">
+                                                                                    {(() => {
+                                                                                        const costs = (occ.seCosts || []) as EnterpriseIncome[];
+                                                                                        const freqs = costs.map(c => c.frequency).filter(Boolean);
+                                                                                        const allSame = freqs.length > 0 && freqs.every(f => f === freqs[0]);
+                                                                                        if (allSame && freqs[0] === 'daily') return 'จำนวนวันต่อเดือน';
+                                                                                        if (allSame && freqs[0] === 'weekly') return 'จำนวนสัปดาห์ต่อเดือน';
+                                                                                        return 'จำนวน';
+                                                                                    })()}
+                                                                                </TableHead>
                                                                                 <TableHead className="w-[15%] text-xs text-right">รวมต่อเดือน</TableHead>
                                                                                 <TableHead className="w-[5%] text-center text-xs">จัดการ</TableHead>
                                                                             </TableRow>
@@ -2407,7 +2618,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             ) : (
                                                                                 occ.seCosts.map((item: EnterpriseIncome, idx: number) => (
                                                                                     <TableRow key={idx} className="group transition-colors hover:bg-gray-50/50">
-                                                                                        <TableCell className="py-3">
+                                                                                        <TableCell className="py-3 align-top">
                                                                                             <div className="space-y-2">
                                                                                                 <Select
                                                                                                     value={item.type || ""}
@@ -2440,12 +2651,17 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                             </div>
                                                                                         </TableCell>
                                                                                         <TableCell className="py-3 align-top">
-                                                                                            <Input
-                                                                                                type="text"
+                                                                                            <Textarea
                                                                                                 value={item.costDetail || ""}
                                                                                                 onChange={(e) => handleUpdateSECostRow(occ.id, idx, { costDetail: e.target.value })}
                                                                                                 placeholder="รายละเอียด"
-                                                                                                className="h-9 text-xs bg-gray-50/30 text-left"
+                                                                                                className="text-xs bg-gray-50/30 text-left min-h-[36px] resize-none overflow-hidden"
+                                                                                                rows={1}
+                                                                                                onInput={(e) => {
+                                                                                                    const target = e.target as HTMLTextAreaElement;
+                                                                                                    target.style.height = 'auto';
+                                                                                                    target.style.height = target.scrollHeight + 'px';
+                                                                                                }}
                                                                                             />
                                                                                         </TableCell>
                                                                                         <TableCell className="py-3 align-top">
@@ -2741,13 +2957,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 {/* จำนวนรอบที่ปลูกต่อปี */}
                                                                 <div className="space-y-2">
                                                                     <Label>จำนวนรอบที่ปลูกต่อปี <span className="text-red-500">*</span></Label>
-                                                                    <Input
-                                                                        type="text"
-                                                                        value={occ.cyclesPerYear || ""}
-                                                                        onChange={(e) => handleOccupationChange(occ.id, "cyclesPerYear", e.target.value.replace(/\D/g, ''))}
-                                                                        placeholder="เช่น 1"
-                                                                        className="h-11 bg-gray-50/30"
-                                                                    />
+                                                                    <div className="relative">
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={occ.cyclesPerYear || ""}
+                                                                            onChange={(e) => handleOccupationChange(occ.id, "cyclesPerYear", e.target.value.replace(/\D/g, ''))}
+                                                                            placeholder="เช่น 1"
+                                                                            className="h-11 bg-gray-50/30 pr-10"
+                                                                        />
+                                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">รอบ</span>
+                                                                    </div>
                                                                 </div>
 
                                                                 {/* เขตชลประทาน */}
@@ -3107,39 +3326,42 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                             <div className="space-y-2">
                                                                 <Label>จำนวนรอบใน 1 ปี <span className="text-red-500">*</span> <span className="text-muted-foreground text-[10px] font-normal">(สูงสุด 12 รอบ)</span></Label>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={occ.livestockCyclesPerYear || ""}
-                                                                    onChange={(e) => {
-                                                                        const val = e.target.value.replace(/\D/g, '');
-                                                                        const num = val === "" ? 0 : Math.min(12, parseInt(val));
-                                                                        handleOccupationChange(occ.id, "livestockCyclesPerYear", num > 0 ? String(num) : "");
+                                                                <div className="relative">
+                                                                    <Input
+                                                                        type="text"
+                                                                        value={occ.livestockCyclesPerYear || ""}
+                                                                        onChange={(e) => {
+                                                                            const val = e.target.value.replace(/\D/g, '');
+                                                                            const num = val === "" ? 0 : Math.min(12, parseInt(val));
+                                                                            handleOccupationChange(occ.id, "livestockCyclesPerYear", num > 0 ? String(num) : "");
 
-                                                                        // Sync rows
-                                                                        const currentCycles = occ.livestockCycles || [];
-                                                                        let newCycles = [...currentCycles];
-                                                                        if (newCycles.length < num) {
-                                                                            for (let i = newCycles.length; i < num; i++) {
-                                                                                newCycles.push({
-                                                                                    cycleNo: i + 1,
-                                                                                    quantity: "",
-                                                                                    isHigherThanStandard: false,
-                                                                                    customerPrice: "",
-                                                                                    customerCost: "",
-                                                                                    incomeBeforeExpenses: "",
-                                                                                    incomeAfterExpenses: "",
-                                                                                    otherExpenses: "",
-                                                                                    netIncome: "0"
-                                                                                });
+                                                                            // Sync rows
+                                                                            const currentCycles = occ.livestockCycles || [];
+                                                                            let newCycles = [...currentCycles];
+                                                                            if (newCycles.length < num) {
+                                                                                for (let i = newCycles.length; i < num; i++) {
+                                                                                    newCycles.push({
+                                                                                        cycleNo: i + 1,
+                                                                                        quantity: "",
+                                                                                        isHigherThanStandard: false,
+                                                                                        customerPrice: "",
+                                                                                        customerCost: "",
+                                                                                        incomeBeforeExpenses: "",
+                                                                                        incomeAfterExpenses: "",
+                                                                                        otherExpenses: "",
+                                                                                        netIncome: "0"
+                                                                                    });
+                                                                                }
+                                                                            } else if (newCycles.length > num) {
+                                                                                newCycles = newCycles.slice(0, num);
                                                                             }
-                                                                        } else if (newCycles.length > num) {
-                                                                            newCycles = newCycles.slice(0, num);
-                                                                        }
-                                                                        handleOccupationChange(occ.id, "livestockCycles", newCycles);
-                                                                    }}
-                                                                    placeholder="ระบุจำนวนรอบ"
-                                                                    className="h-11 bg-white"
-                                                                />
+                                                                            handleOccupationChange(occ.id, "livestockCycles", newCycles);
+                                                                        }}
+                                                                        placeholder="ระบุจำนวนรอบ"
+                                                                        className="h-11 bg-white pr-10"
+                                                                    />
+                                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">รอบ</span>
+                                                                </div>
                                                             </div>
 
                                                             {occ.farmingType === 'self' && (
@@ -3470,7 +3692,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <div className="w-3 h-3 rounded-md border border-gray-300 bg-white"></div>
                                                                     <span>ยังไม่ได้เลือก</span>
                                                                 </div>
-                                                                <button
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
                                                                     type="button"
                                                                     onClick={() => {
                                                                         const LIVESTOCK_STAGES = ["เพาะเลี้ยง", "ขาย"];
@@ -3481,7 +3705,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 >
                                                                     <RotateCcw className="w-3 h-3" />
                                                                     <span>รีเซ็ต</span>
-                                                                </button>
+                                                                </Button>
                                                             </div>
                                                         </div>
 
@@ -3568,6 +3792,119 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                             )}
                                         </>
                                     )}
+                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab) ===== */}
+                                    {occ.isMain && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                                <Users className="w-5 h-5 text-chaiyo-blue" /> บุคคลอ้างอิง
+                                            </h4>
+                                            <div>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <Label className="text-sm font-bold text-gray-700">รายชื่อบุคคลอ้างอิง</Label>
+                                                        {requiredReferenceCount >= 2 ? (
+                                                            <span className="text-red-500 text-xs font-normal">(จำเป็น อย่างน้อย 2 คน) *</span>
+                                                        ) : requiredReferenceCount === 1 ? (
+                                                            <span className="text-red-500 text-xs font-normal">(จำเป็น อย่างน้อย 1 คน) *</span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground text-xs font-normal">(ถ้ามี)</span>
+                                                        )}
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={handleAddReference}
+                                                        className="h-8 text-xs font-medium"
+                                                    >
+                                                        <Plus className="w-3 h-3 mr-1" /> เพิ่มบุคคลอ้างอิง
+                                                    </Button>
+                                                </div>
+                                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                    <Table>
+                                                        <TableHeader className="bg-gray-50/50">
+                                                            <TableRow className="hover:bg-transparent border-none">
+                                                                <TableHead className="w-[8%] text-center text-xs">ลำดับ</TableHead>
+                                                                <TableHead className="w-[37%] text-xs">ชื่อ-นามสกุล <span className="text-red-500">*</span></TableHead>
+                                                                <TableHead className="w-[35%] text-xs">ความเกี่ยวข้อง <span className="text-red-500">*</span></TableHead>
+                                                                <TableHead className="w-[10%] text-xs text-center">จัดการ</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {(!formData.referencePersons || formData.referencePersons.length === 0) ? (
+                                                                <TableRow className="hover:bg-transparent border-none">
+                                                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic text-xs">
+                                                                        ยังไม่มีข้อมูลบุคคลอ้างอิง — กรุณากดปุ่มเพิ่มเพื่อระบุข้อมูล
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ) : (
+                                                                formData.referencePersons.map((ref: ReferencePerson, index: number) => (
+                                                                    <TableRow key={index} className="group transition-colors hover:bg-gray-50/50">
+                                                                        <TableCell className="py-3 text-center text-xs font-medium text-gray-500">
+                                                                            {index + 1}
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2">
+                                                                            <Input
+                                                                                value={ref.name || ""}
+                                                                                onChange={(e) => handleUpdateReference(index, "name", e.target.value)}
+                                                                                placeholder="ระบุชื่อ-นามสกุล"
+                                                                                className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20"
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2">
+                                                                            <div className="space-y-1.5 transition-all duration-200">
+                                                                                <Select
+                                                                                    value={ref.relationship || ""}
+                                                                                    onValueChange={(val) => handleUpdateReference(index, "relationship", val)}
+                                                                                >
+                                                                                    <SelectTrigger className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20">
+                                                                                        <SelectValue placeholder="เลือกความเกี่ยวข้อง" />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        {REFERENCE_RELATIONSHIPS.map(rel => (
+                                                                                            <SelectItem key={rel.value} value={rel.value} className="text-sm cursor-pointer">{rel.label}</SelectItem>
+                                                                                        ))}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                                {ref.relationship === 'other' && (
+                                                                                    <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
+                                                                                        <Input
+                                                                                            value={ref.customRelationship || ""}
+                                                                                            onChange={(e) => handleUpdateReference(index, "customRelationship", e.target.value)}
+                                                                                            placeholder="โปรดระบุรายละเอียด"
+                                                                                            className="h-8 text-xs bg-white border-dashed border-gray-300 focus:border-chaiyo-blue"
+                                                                                        />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2 text-center text-gray-500">
+                                                                            {index >= requiredReferenceCount ? (
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                                    onClick={() => setItemToDelete({
+                                                                                        index,
+                                                                                        name: ref.name || `บุคคลที่ ${index + 1}`,
+                                                                                        type: 'reference'
+                                                                                    })}
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                </Button>
+                                                                            ) : null}
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-2 pl-1">บุคคลอ้างอิงห้ามเป็นกู้/ผู้ค้า/คนในครอบครัว/คนใกล้ชิด/ลูกจ้าง</p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* อัพโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
                                     {occ.occupationCode !== 'UNEMPLOYED' && occ.businessStatus !== 'closed' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
@@ -3743,7 +4080,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                             {/* Income Breakdown */}
                             <div className="space-y-2">
                                 <h4 className="text-sm font-bold text-chaiyo-blue flex items-center gap-2">
-                                    รายได้รับ   <TrendingUp className="w-4 h-4" />
+                                    รายได้   <TrendingUp className="w-4 h-4" />
                                 </h4>
                                 <div className="space-y-1.5 text-sm">
                                     <div className="flex justify-between text-gray-600">
@@ -3783,7 +4120,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
             />
 
             <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => !open && setItemToDelete(null)}>
-                <AlertDialogContent>
+                <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
                             {itemToDelete?.type === 'occupation' ? 'ลบอาชีพเสริม?' : 'ยืนยันการลบข้อมูล'}
@@ -3897,16 +4234,152 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
             }
 
             {/* Method Selection & Uploaded Files Dialog */}
+            {/* View Uploaded Files Dialog */}
+            <Dialog open={!!viewFilesContext} onOpenChange={(open) => { if (!open && !itemToDelete) setViewFilesContext(null); }}>
+                <DialogContent
+                    className="max-w-3xl"
+                    onInteractOutside={(e) => { if (itemToDelete) e.preventDefault(); }}
+                    onPointerDownOutside={(e) => { if (itemToDelete) e.preventDefault(); }}
+                >
+                    <DialogHeader>
+                        <DialogTitle>
+                            ไฟล์ที่อัพโหลด — {viewFilesContext?.label}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <DialogBody>
+                        {(() => {
+                            if (!viewFilesContext) return null;
+                            const occ = occupations.find((o: IncomeOccupation) => o.id === viewFilesContext.occId);
+                            if (!occ) return null;
+                            const fileList = (occ.incomeDocuments || []).filter((d: IncomeDocument) =>
+                                viewFilesContext.docType === 'payslip'
+                                    ? d.type?.startsWith('payslip')
+                                    : viewFilesContext.docType === 'statement'
+                                        ? d.type?.startsWith('statement')
+                                        : d.type === viewFilesContext.docType
+                            );
+
+                            if (fileList.length === 0) return (
+                                <div className="text-center py-10 text-muted-foreground">
+                                    <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                                    <p className="text-sm">ไม่มีไฟล์ที่อัพโหลด</p>
+                                </div>
+                            );
+
+                            const hasAnyPassword = fileList.some((d: IncomeDocument) => d.isLocked);
+
+                            return (
+                                <div className="bg-white rounded-xl border overflow-hidden">
+                                    <div className="max-h-[480px] overflow-y-auto">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/50">
+                                                <TableRow>
+                                                    <TableHead className="w-[50px] text-xs"></TableHead>
+                                                    <TableHead className={cn("text-xs", hasAnyPassword ? "w-[45%]" : "w-[60%]")}>ชื่อไฟล์</TableHead>
+                                                    {hasAnyPassword && (
+                                                        <TableHead className="w-[25%] text-xs">รหัสผ่าน</TableHead>
+                                                    )}
+                                                    <TableHead className="w-[80px] text-right text-xs">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {fileList.map((doc: IncomeDocument, idx: number) => (
+                                                    <TableRow key={doc.id} className="hover:bg-transparent">
+                                                        <TableCell className="py-3 px-2">
+                                                            <div className="flex items-center gap-0.5">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'up')}
+                                                                    disabled={idx === 0}
+                                                                    className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
+                                                                    title="เลื่อนขึ้น"
+                                                                >
+                                                                    <ChevronUp className="w-4 h-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'down')}
+                                                                    disabled={idx === fileList.length - 1}
+                                                                    className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
+                                                                    title="เลื่อนลง"
+                                                                >
+                                                                    <ChevronDown className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="py-3 align-top">
+                                                            <div className="space-y-1">
+                                                                <span className="text-sm text-gray-700 font-medium block truncate">{doc.name}</span>
+                                                                {doc.originalName && doc.originalName !== doc.name && (
+                                                                    <span className="text-[11px] text-muted-foreground truncate block">{doc.originalName}</span>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
+                                                        {hasAnyPassword && (
+                                                            <TableCell className="py-3 align-top">
+                                                                {doc.isLocked && doc.password ? (
+                                                                    <span className="text-xs text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">{doc.password}</span>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground italic">-</span>
+                                                                )}
+                                                            </TableCell>
+                                                        )}
+                                                        <TableCell className="text-right py-3 align-top">
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => window.open(doc.url, "_blank")}
+                                                                    className="h-8 w-8 p-0 rounded-full text-chaiyo-blue hover:text-chaiyo-blue hover:bg-blue-50"
+                                                                    title="ดูไฟล์"
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => setItemToDelete({ id: doc.id, name: doc.name, occId: occ.id, type: 'incomeDocument' })}
+                                                                    className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                    title="ลบ"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setViewFilesContext(null)}
+                            className="min-w-[100px]"
+                        >
+                            ปิด
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Upload Document Dialog */}
             <Dialog open={isUploadDialogOpen} onOpenChange={(open) => {
-                // Don't allow closing while scanner is active
-                if (isScannerOpen) return;
+                // Don't allow closing while scanner or delete dialog is active
+                if (isScannerOpen || itemToDelete) return;
                 setIsUploadDialogOpen(open);
                 if (!open) setCurrentDocContext(null);
             }}>
                 <DialogContent
                     className="max-w-3xl"
-                    onInteractOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
-                    onPointerDownOutside={(e) => { if (isScannerOpen) e.preventDefault(); }}
+                    onInteractOutside={(e) => { if (isScannerOpen || itemToDelete) e.preventDefault(); }}
+                    onPointerDownOutside={(e) => { if (isScannerOpen || itemToDelete) e.preventDefault(); }}
                 >
                     <DialogHeader>
                         <DialogTitle>
@@ -3952,9 +4425,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                             if (!currentDocContext) return null;
                             const occ = occupations.find((o: IncomeOccupation) => o.id === currentDocContext.occId);
                             if (!occ) return null;
-                            const currentFileList = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type === currentDocContext.docType);
+                            const currentFileList = (occ.incomeDocuments || []).filter((d: IncomeDocument) => {
+                                // Only show files uploaded during this session
+                                if (uploadSessionDocIds.has(d.id)) return false;
+                                return currentDocContext.docType === 'payslip'
+                                    ? d.type?.startsWith('payslip')
+                                    : currentDocContext.docType === 'statement'
+                                        ? d.type?.startsWith('statement')
+                                        : d.type === currentDocContext.docType;
+                            });
 
                             if (currentFileList.length === 0) return null;
+
+                            const hasAnyPw = currentFileList.some((d: IncomeDocument) => d.isLocked);
 
                             return (
                                 <div>
@@ -3962,58 +4445,72 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                         ไฟล์ที่อัพโหลด ({currentFileList.length})
                                     </div>
                                     <div className="bg-white rounded-xl border overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-                                        <div className="overflow-x-auto border-t border-border-subtle">
+                                        <div className="max-h-[480px] overflow-y-auto border-t border-border-subtle">
                                             <Table>
                                                 <TableHeader className="bg-gray-50/50">
                                                     <TableRow>
-                                                        <TableHead className="w-[45%] text-xs">ชื่อไฟล์</TableHead>
-                                                        <TableHead className="w-[40%] text-xs">มีรหัสผ่าน</TableHead>
-                                                        <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                        <TableHead className="w-[50px] text-xs"></TableHead>
+                                                        <TableHead className={cn("text-xs", hasAnyPw ? "w-[45%]" : "w-[60%]")}>ชื่อไฟล์ <span className="text-red-500">*</span></TableHead>
+                                                        {hasAnyPw && (
+                                                            <TableHead className="w-[25%] text-xs">รหัสผ่าน <span className="text-red-500">*</span></TableHead>
+                                                        )}
+                                                        <TableHead className="w-[80px] text-right text-xs">จัดการ</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {currentFileList.map((doc: IncomeDocument) => (
+                                                    {currentFileList.map((doc: IncomeDocument, idx: number) => (
                                                         <TableRow key={doc.id} className="hover:bg-transparent">
-                                                            {/* File Name Input */}
-                                                            <TableCell className="py-3">
-                                                                <div className="flex items-center gap-3">
+                                                            <TableCell className="py-3 px-2">
+                                                                <div className="flex items-center gap-0.5">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'up')}
+                                                                        disabled={idx === 0}
+                                                                        className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
+                                                                        title="เลื่อนขึ้น"
+                                                                    >
+                                                                        <ChevronUp className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'down')}
+                                                                        disabled={idx === currentFileList.length - 1}
+                                                                        className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
+                                                                        title="เลื่อนลง"
+                                                                    >
+                                                                        <ChevronDown className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="py-3 align-top">
+                                                                <div className="space-y-1">
                                                                     <Input
                                                                         value={doc.name}
                                                                         onChange={(e) => handleUpdateIncomeDocument(occ.id, doc.id, { name: e.target.value })}
-                                                                        className="h-9 text-xs bg-white"
+                                                                        className={cn("h-8 text-xs bg-white", !doc.name?.trim() && "border-red-500 focus-visible:ring-red-500")}
+                                                                        placeholder="ตั้งชื่อไฟล์"
                                                                     />
+                                                                    <span className="text-[11px] text-muted-foreground truncate block">{doc.originalName || doc.name}</span>
                                                                 </div>
                                                             </TableCell>
-
-                                                            {/* Lock/Unlock Status */}
-                                                            <TableCell className="py-3">
-                                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <Switch
-                                                                            checked={doc.isLocked || false}
-                                                                            onCheckedChange={(checked) => {
-                                                                                handleUpdateIncomeDocument(occ.id, doc.id, {
-                                                                                    isLocked: checked,
-                                                                                    ...(checked ? {} : { password: '' }) // Clear password if unlocked
-                                                                                });
-                                                                            }}
-                                                                            className="data-[state=checked]:bg-chaiyo-blue shrink-0"
-                                                                        />
-                                                                    </div>
-                                                                    {doc.isLocked && (
+                                                            {hasAnyPw && (
+                                                                <TableCell className="py-3 align-top">
+                                                                    {doc.isLocked ? (
                                                                         <Input
                                                                             type="text"
                                                                             value={doc.password || ''}
                                                                             onChange={(e) => handleUpdateIncomeDocument(occ.id, doc.id, { password: e.target.value })}
                                                                             placeholder="ระบุรหัสผ่าน"
-                                                                            className="h-9 text-xs w-full sm:w-[140px] bg-white"
+                                                                            className={cn("h-8 text-xs bg-white w-full max-w-[180px]", !doc.password?.trim() && "border-red-500 focus-visible:ring-red-500")}
                                                                         />
+                                                                    ) : (
+                                                                        <span className="text-xs text-muted-foreground italic">-</span>
                                                                     )}
-                                                                </div>
-                                                            </TableCell>
-
-                                                            {/* Actions */}
-                                                            <TableCell className="text-right py-3">
+                                                                </TableCell>
+                                                            )}
+                                                            <TableCell className="text-right py-3 align-top">
                                                                 <div className="flex items-center justify-end gap-1">
                                                                     <Button
                                                                         variant="ghost"
@@ -4027,7 +4524,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="sm"
-                                                                        onClick={() => handleRemoveIncomeDocument(occ.id, doc.id)}
+                                                                        onClick={() => setItemToDelete({ id: doc.id, name: doc.name, occId: occ.id, type: 'incomeDocument' })}
                                                                         className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
                                                                         title="ลบ"
                                                                     >
@@ -4047,6 +4544,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                     </DialogBody>
 
                     <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsUploadDialogOpen(false);
+                                setCurrentDocContext(null);
+                            }}
+                            className="min-w-[120px] font-bold"
+                        >
+                            ยกเลิก
+                        </Button>
                         <Button
                             onClick={() => {
                                 setIsUploadDialogOpen(false);

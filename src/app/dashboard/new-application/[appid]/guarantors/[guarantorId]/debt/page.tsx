@@ -95,6 +95,7 @@ export default function GuarantorDebtPage() {
                 <DebtStep
                     formData={guarantorFormData}
                     setFormData={setGuarantorFormData}
+                    isGuarantor={true}
                 />
             </div>
 

@@ -1,6 +1,6 @@
 import React from "react";
 import dynamic from "next/dynamic";
-import { MapPin, RefreshCcw, Navigation, ExternalLink, Loader2 } from "lucide-react";
+import { MapPin, RefreshCcw, Navigation, ExternalLink, Loader2, Info } from "lucide-react";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -26,6 +26,7 @@ interface AddressFormProps {
     footerChildren?: React.ReactNode;
     hideFields?: boolean;
     requiredFields?: string[];
+    groupRequiredNote?: string;
 }
 
 export const AddressForm = ({
@@ -37,7 +38,8 @@ export const AddressForm = ({
     headerChildren,
     footerChildren,
     hideFields = false,
-    requiredFields = DEFAULT_REQUIRED_FIELDS
+    requiredFields = DEFAULT_REQUIRED_FIELDS,
+    groupRequiredNote
 }: AddressFormProps) => {
     const [showMapDialog, setShowMapDialog] = React.useState(false);
     const getField = (name: string) => prefix ? `${prefix}${name.charAt(0).toUpperCase() + name.slice(1)}` : name;
@@ -189,6 +191,13 @@ export const AddressForm = ({
                                     />
                                 </div>
                             </div>
+
+                            {groupRequiredNote && (
+                                <div className="col-span-1 md:col-span-2 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                                    <Info className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{groupRequiredNote}</span>
+                                </div>
+                            )}
 
                             <div className="space-y-2">
                                 <Label className="text-xs text-muted-foreground">จังหวัด {requiredFields.includes('province') && <span className="text-red-500">*</span>}</Label>

@@ -651,6 +651,55 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
 
+            {/* GUARANTOR-ONLY SECTION: Relationship with Borrower */}
+            {isGuarantor && (
+                <Card className="border-border-strong">
+                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                            <Users className="w-5 h-5" />
+                            ข้อมูลผู้ค้ำประกัน
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="space-y-5">
+                            <div className="space-y-2 max-w-md">
+                                <Label>ความสัมพันธ์กับผู้กู้ <span className="text-red-500">*</span></Label>
+                                <Select
+                                    value={formData.guarantorRelationship || ""}
+                                    onValueChange={(val) => handleChange("guarantorRelationship", val)}
+                                >
+                                    <SelectTrigger className="h-12 bg-white">
+                                        <SelectValue placeholder="เลือกความสัมพันธ์" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="สามี/ภรรยา">สามี/ภรรยา</SelectItem>
+                                        <SelectItem value="บิดา">บิดา</SelectItem>
+                                        <SelectItem value="มารดา">มารดา</SelectItem>
+                                        <SelectItem value="บุตร/บุตรี">บุตร/บุตรี</SelectItem>
+                                        <SelectItem value="พี่น้อง">พี่น้อง</SelectItem>
+                                        <SelectItem value="ญาติ">ญาติ</SelectItem>
+                                        <SelectItem value="เพื่อน">เพื่อน</SelectItem>
+                                        <SelectItem value="นายจ้าง">นายจ้าง</SelectItem>
+                                        <SelectItem value="เพื่อนร่วมงาน">เพื่อนร่วมงาน</SelectItem>
+                                        <SelectItem value="อื่นๆ">อื่นๆ</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                                <Checkbox
+                                    id="combineIncomeWithBorrower"
+                                    checked={formData.combineIncomeWithBorrower || false}
+                                    onCheckedChange={(checked) => handleChange("combineIncomeWithBorrower", !!checked)}
+                                />
+                                <Label htmlFor="combineIncomeWithBorrower" className="cursor-pointer text-sm font-medium">
+                                    รวมรายได้กับผู้กู้
+                                </Label>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* MAIN APPLICANT - SECTION 1: Personal Info */}
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
@@ -767,22 +816,22 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                     </div>
 
                                     {!isGuarantor && (
-                                    <div className="space-y-2">
-                                        <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            value={formData.educationLevel || ""}
-                                            onValueChange={(val) => handleChange("educationLevel", val)}
-                                        >
-                                            <SelectTrigger className="h-12 bg-white">
-                                                <SelectValue placeholder="เลือกระดับการศึกษา" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {EDUCATION_LEVELS.map((level) => (
-                                                    <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                        <div className="space-y-2">
+                                            <Label>ระดับการศึกษา <span className="text-red-500">*</span></Label>
+                                            <Select
+                                                value={formData.educationLevel || ""}
+                                                onValueChange={(val) => handleChange("educationLevel", val)}
+                                            >
+                                                <SelectTrigger className="h-12 bg-white">
+                                                    <SelectValue placeholder="เลือกระดับการศึกษา" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {EDUCATION_LEVELS.map((level) => (
+                                                        <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     )}
 
 
@@ -1279,344 +1328,344 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
 
             {/* MAIN APPLICANT - SECTION 3: Family Info */}
             {!isGuarantor && (
-            <Card className="border-border-strong">
-                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <Home className="w-5 h-5" />
-                        {isGuarantor ? 'ข้อมูลครอบครัว (ผู้ค้ำประกัน)' : 'ข้อมูลครอบครัว (ผู้กู้หลัก)'}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-                        <div className="space-y-2">
-                            <Label>สถานะการสมรส <span className="text-red-500">*</span></Label>
-                            <Select
-                                value={formData.maritalStatus || ""}
-                                onValueChange={(val) => handleChange("maritalStatus", val)}
-                            >
-                                <SelectTrigger className="h-12 bg-white">
-                                    <SelectValue placeholder="เลือกสถานะการสมรส" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {MARITAL_STATUSES.map((status) => (
-                                        <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                <Card className="border-border-strong">
+                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                            <Home className="w-5 h-5" />
+                            {isGuarantor ? 'ข้อมูลครอบครัว (ผู้ค้ำประกัน)' : 'ข้อมูลครอบครัว (ผู้กู้หลัก)'}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                            <div className="space-y-2">
+                                <Label>สถานะการสมรส <span className="text-red-500">*</span></Label>
+                                <Select
+                                    value={formData.maritalStatus || ""}
+                                    onValueChange={(val) => handleChange("maritalStatus", val)}
+                                >
+                                    <SelectTrigger className="h-12 bg-white">
+                                        <SelectValue placeholder="เลือกสถานะการสมรส" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {MARITAL_STATUSES.map((status) => (
+                                            <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {!isGuarantor && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
+                                        <Select
+                                            value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
+                                            onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white">
+                                                <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="true">ใช่</SelectItem>
+                                                <SelectItem value="false">ไม่ใช่</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {formData.isHouseholdHeadBorrower !== undefined && (
+                                        <>
+                                            <div className="space-y-2">
+                                                <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                                                <Select
+                                                    value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
+                                                    onValueChange={(val) => handleChange("householdHeadGender", val)}
+                                                >
+                                                    <SelectTrigger className="h-12 bg-white">
+                                                        <SelectValue placeholder="เลือกเพศ" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="ชาย">ชาย</SelectItem>
+                                                        <SelectItem value="หญิง">หญิง</SelectItem>
+                                                        <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
+                                                <Input
+                                                    type="number"
+                                                    className="h-12 bg-white"
+                                                    placeholder="ระบุอายุ"
+                                                    value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
+                                                    onChange={(e) => handleChange("householdHeadAge", e.target.value)}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            )}
+
                         </div>
 
                         {!isGuarantor && (
-                        <>
-                        <div className="space-y-2">
-                            <Label>หัวหน้าครัวเรือนเป็นผู้กู้ <span className="text-red-500">*</span></Label>
-                            <Select
-                                value={formData.isHouseholdHeadBorrower === true ? "true" : (formData.isHouseholdHeadBorrower === false ? "false" : "")}
-                                onValueChange={(val) => handleChange("isHouseholdHeadBorrower", val === "true")}
-                            >
-                                <SelectTrigger className="h-12 bg-white">
-                                    <SelectValue placeholder="เลือกการเป็นหัวหน้าครัวเรือน" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="true">ใช่</SelectItem>
-                                    <SelectItem value="false">ไม่ใช่</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {formData.isHouseholdHeadBorrower !== undefined && (
                             <>
-                                <div className="space-y-2">
-                                    <Label>เพศหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
-                                    <Select
-                                        value={formData.householdHeadGender || (formData.isHouseholdHeadBorrower ? formData.gender : "") || ""}
-                                        onValueChange={(val) => handleChange("householdHeadGender", val)}
-                                    >
-                                        <SelectTrigger className="h-12 bg-white">
-                                            <SelectValue placeholder="เลือกเพศ" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="ชาย">ชาย</SelectItem>
-                                            <SelectItem value="หญิง">หญิง</SelectItem>
-                                            <SelectItem value="ไม่ระบุ">ไม่ระบุ</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                                        <Users className="w-4 h-4 text-chaiyo-blue" /> จำนวนสมาชิกในครอบครัว
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <div className="space-y-2 group">
+                                            <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ <span className="text-red-500">*</span></Label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
+                                                    placeholder="0"
+                                                    value={formData.employedFamilyCount || ""}
+                                                    onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 group">
+                                            <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ <span className="text-red-500">*</span></Label>
+                                            <div className="relative">
+                                                <Input
+                                                    type="number"
+                                                    className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
+                                                    placeholder="0"
+                                                    value={formData.unemployedFamilyCount || ""}
+                                                    onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
+                                                />
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
+                                            <div className="h-12 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
+
+                                                <div className="flex items-baseline gap-1.5">
+                                                    <span className="text-2xl font-black text-chaiyo-blue tabular-nums">
+                                                        {(Number(formData.employedFamilyCount) || 0) + (Number(formData.unemployedFamilyCount) || 0)}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-wider">คน</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label>อายุหัวหน้าครัวเรือน <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        type="number"
-                                        className="h-12 bg-white"
-                                        placeholder="ระบุอายุ"
-                                        value={formData.householdHeadAge || (formData.isHouseholdHeadBorrower ? formData.age : "") || ""}
-                                        onChange={(e) => handleChange("householdHeadAge", e.target.value)}
-                                    />
+                                <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
+                                        <Users className="w-4 h-4 text-chaiyo-blue" /> ความสัมพันธ์และภาระค่าใช้จ่าย
+                                    </div>
+                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[180px]">ความสัมพันธ์</TableHead>
+                                                    <TableHead className="w-[200px]">สถานะ</TableHead>
+                                                    <TableHead className="w-[140px]">อายุ</TableHead>
+                                                    <TableHead>มีค่าใช้จ่ายประกัน</TableHead>
+                                                    <TableHead>มีภาระใช้จ่ายสุขภาพ</TableHead>
+
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {[
+                                                    { id: 'father', label: 'พ่อ' },
+                                                    { id: 'mother', label: 'แม่' },
+                                                    { id: 'spouse', label: 'คู่สมรส' }
+                                                ].map((rel) => {
+                                                    const memberData = formData.familyMembers?.[rel.id] || { status: 'living_together' };
+
+                                                    const updateMember = (field: string, val: unknown) => {
+                                                        const currentMembers = formData.familyMembers || {};
+                                                        handleChange("familyMembers", {
+                                                            ...currentMembers,
+                                                            [rel.id]: {
+                                                                ...(currentMembers[rel.id] || { status: 'living_together' }),
+                                                                [field]: val
+                                                            }
+                                                        });
+                                                    };
+
+                                                    return (
+                                                        <TableRow key={rel.id} className="border-b border-border-subtle transition-colors hover:bg-gray-50/50">
+                                                            <TableCell className="font-bold text-gray-800">{rel.label}</TableCell>
+                                                            <TableCell>
+                                                                <Select
+                                                                    value={memberData.status || "living_together"}
+                                                                    onValueChange={(val) => updateMember("status", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-12 bg-white">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="living_together">อยู่ด้วยกัน</SelectItem>
+                                                                        <SelectItem value="separated">แยกกันอยู่</SelectItem>
+                                                                        <SelectItem value="deceased">เสียชีวิตแล้ว</SelectItem>
+                                                                        {rel.id === 'spouse' && (
+                                                                            <SelectItem value="none">ไม่มี</SelectItem>
+                                                                        )}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="text-center">
+                                                                {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
+                                                                    <Input
+                                                                        type="number"
+                                                                        placeholder="อายุ"
+                                                                        className="h-12 bg-white"
+                                                                        value={memberData.age || ""}
+                                                                        onChange={(e) => updateMember("age", e.target.value)}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-muted-foreground">-</span>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className="text-center">
+                                                                <div className="flex justify-center w-full min-w-[104px]">
+                                                                    {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
+                                                                        <Select
+                                                                            value={memberData.hasInsurance || "no"}
+                                                                            onValueChange={(val) => updateMember("hasInsurance", val)}
+                                                                        >
+                                                                            <SelectTrigger className="h-12 bg-white">
+                                                                                <SelectValue placeholder="เลือก" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="yes">มี</SelectItem>
+                                                                                <SelectItem value="no">ไม่มี</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">-</span>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell className="text-center">
+                                                                <div className="flex justify-center w-full min-w-[180px]">
+                                                                    {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
+                                                                        <Select
+                                                                            value={memberData.hasHealthExp || "no"}
+                                                                            onValueChange={(val) => updateMember("hasHealthExp", val)}
+                                                                        >
+                                                                            <SelectTrigger className="h-12 bg-white">
+                                                                                <SelectValue placeholder="เลือก" />
+                                                                            </SelectTrigger>
+                                                                            <SelectContent>
+                                                                                <SelectItem value="yes">มี</SelectItem>
+                                                                                <SelectItem value="no">ไม่มี</SelectItem>
+                                                                                <SelectItem value="temporary">มีชั่วคราว (ภายในช่วง 3-6 เดือน)</SelectItem>
+                                                                            </SelectContent>
+                                                                        </Select>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">-</span>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+
+                                {/* Children Table */}
+                                <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                                            <Users className="w-4 h-4 text-chaiyo-blue" /> ข้อมูลบุตร
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleAddChild}
+                                        >
+                                            <Plus className="w-4 h-4 mr-1" /> เพิ่มข้อมูลบุตร
+                                        </Button>
+                                    </div>
+                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[80px] text-center">ลำดับ</TableHead>
+                                                    <TableHead className="w-[200px]">อายุ (ปี)</TableHead>
+                                                    <TableHead>อาชีพ</TableHead>
+                                                    <TableHead className="w-[100px] text-center">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {(!formData.children || formData.children.length === 0) ? (
+                                                    <TableRow className="hover:bg-transparent">
+                                                        <TableCell colSpan={4} className="text-center text-muted-foreground py-10 bg-gray-50/30">
+                                                            <div className="flex flex-col items-center gap-2">
+                                                                <Users className="w-8 h-8 text-gray-300" />
+                                                                <p>ยังไม่มีข้อมูลบุตร</p>
+                                                                <p className="text-xs text-gray-400">คลิก &quot;เพิ่มข้อมูลบุตร&quot; เพื่อเพิ่มรายการ</p>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    formData.children.map((child, idx) => (
+                                                        <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors group">
+                                                            <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
+                                                            <TableCell className="py-3">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={child.age || ""}
+                                                                    onChange={(e) => handleUpdateChild(idx, "age", e.target.value)}
+                                                                    placeholder="ระบุอายุ"
+                                                                    className="h-12 bg-white"
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell className="py-3">
+                                                                <Select
+                                                                    value={child.occupation || "student"}
+                                                                    onValueChange={(val) => handleUpdateChild(idx, "occupation", val)}
+                                                                >
+                                                                    <SelectTrigger className="h-12 bg-white">
+                                                                        <SelectValue placeholder="เลือกอาชีพ" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="student">นักเรียน/นักศึกษา</SelectItem>
+                                                                        <SelectItem value="employee">พนักงานบริษัท</SelectItem>
+                                                                        <SelectItem value="government">ข้าราชการ</SelectItem>
+                                                                        <SelectItem value="farmer">เกษตรกร</SelectItem>
+                                                                        <SelectItem value="owner">เจ้าของกิจการ</SelectItem>
+                                                                        <SelectItem value="freelance">รับจ้างทั่วไป</SelectItem>
+                                                                        <SelectItem value="none">ยังไม่เข้าเรียน/ว่างงาน</SelectItem>
+                                                                        <SelectItem value="other">อื่นๆ</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="py-3 text-center">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-9 w-9 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                                    onClick={() => handleRemoveChild(idx)}
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 </div>
                             </>
                         )}
-                        </>
-                        )}
 
-                    </div>
-
-                    {!isGuarantor && (
-                    <>
-                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
-                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                            <Users className="w-4 h-4 text-chaiyo-blue" /> จำนวนสมาชิกในครอบครัว
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">มีงานทำ <span className="text-red-500">*</span></Label>
-                                <div className="relative">
-                                    <Input
-                                        type="number"
-                                        className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
-                                        placeholder="0"
-                                        value={formData.employedFamilyCount || ""}
-                                        onChange={(e) => handleChange("employedFamilyCount", e.target.value)}
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2 group">
-                                <Label className="group-focus-within:text-chaiyo-blue transition-colors">ไม่มีงานทำ <span className="text-red-500">*</span></Label>
-                                <div className="relative">
-                                    <Input
-                                        type="number"
-                                        className="h-12 bg-white focus-visible:ring-chaiyo-blue/20 pr-12"
-                                        placeholder="0"
-                                        value={formData.unemployedFamilyCount || ""}
-                                        onChange={(e) => handleChange("unemployedFamilyCount", e.target.value)}
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
-                                <div className="h-12 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
-
-                                    <div className="flex items-baseline gap-1.5">
-                                        <span className="text-2xl font-black text-chaiyo-blue tabular-nums">
-                                            {(Number(formData.employedFamilyCount) || 0) + (Number(formData.unemployedFamilyCount) || 0)}
-                                        </span>
-                                        <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-wider">คน</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
-                        <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                            <Users className="w-4 h-4 text-chaiyo-blue" /> ความสัมพันธ์และภาระค่าใช้จ่าย
-                        </div>
-                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                            <Table>
-                                <TableHeader className="bg-gray-50/50">
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableHead className="w-[180px]">ความสัมพันธ์</TableHead>
-                                        <TableHead className="w-[200px]">สถานะ</TableHead>
-                                        <TableHead className="w-[140px]">อายุ</TableHead>
-                                        <TableHead>มีค่าใช้จ่ายประกัน</TableHead>
-                                        <TableHead>มีภาระใช้จ่ายสุขภาพ</TableHead>
-
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {[
-                                        { id: 'father', label: 'พ่อ' },
-                                        { id: 'mother', label: 'แม่' },
-                                        { id: 'spouse', label: 'คู่สมรส' }
-                                    ].map((rel) => {
-                                        const memberData = formData.familyMembers?.[rel.id] || { status: 'living_together' };
-
-                                        const updateMember = (field: string, val: unknown) => {
-                                            const currentMembers = formData.familyMembers || {};
-                                            handleChange("familyMembers", {
-                                                ...currentMembers,
-                                                [rel.id]: {
-                                                    ...(currentMembers[rel.id] || { status: 'living_together' }),
-                                                    [field]: val
-                                                }
-                                            });
-                                        };
-
-                                        return (
-                                            <TableRow key={rel.id} className="border-b border-border-subtle transition-colors hover:bg-gray-50/50">
-                                                <TableCell className="font-bold text-gray-800">{rel.label}</TableCell>
-                                                <TableCell>
-                                                    <Select
-                                                        value={memberData.status || "living_together"}
-                                                        onValueChange={(val) => updateMember("status", val)}
-                                                    >
-                                                        <SelectTrigger className="h-12 bg-white">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="living_together">อยู่ด้วยกัน</SelectItem>
-                                                            <SelectItem value="separated">แยกกันอยู่</SelectItem>
-                                                            <SelectItem value="deceased">เสียชีวิตแล้ว</SelectItem>
-                                                            {rel.id === 'spouse' && (
-                                                                <SelectItem value="none">ไม่มี</SelectItem>
-                                                            )}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
-                                                        <Input
-                                                            type="number"
-                                                            placeholder="อายุ"
-                                                            className="h-12 bg-white"
-                                                            value={memberData.age || ""}
-                                                            onChange={(e) => updateMember("age", e.target.value)}
-                                                        />
-                                                    ) : (
-                                                        <span className="text-muted-foreground">-</span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <div className="flex justify-center w-full min-w-[104px]">
-                                                        {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
-                                                            <Select
-                                                                value={memberData.hasInsurance || "no"}
-                                                                onValueChange={(val) => updateMember("hasInsurance", val)}
-                                                            >
-                                                                <SelectTrigger className="h-12 bg-white">
-                                                                    <SelectValue placeholder="เลือก" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="yes">มี</SelectItem>
-                                                                    <SelectItem value="no">ไม่มี</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        ) : (
-                                                            <span className="text-muted-foreground">-</span>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <div className="flex justify-center w-full min-w-[180px]">
-                                                        {memberData.status !== 'deceased' && memberData.status !== 'none' ? (
-                                                            <Select
-                                                                value={memberData.hasHealthExp || "no"}
-                                                                onValueChange={(val) => updateMember("hasHealthExp", val)}
-                                                            >
-                                                                <SelectTrigger className="h-12 bg-white">
-                                                                    <SelectValue placeholder="เลือก" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="yes">มี</SelectItem>
-                                                                    <SelectItem value="no">ไม่มี</SelectItem>
-                                                                    <SelectItem value="temporary">มีชั่วคราว (ภายในช่วง 3-6 เดือน)</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        ) : (
-                                                            <span className="text-muted-foreground">-</span>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </div>
-
-                    {/* Children Table */}
-                    <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                <Users className="w-4 h-4 text-chaiyo-blue" /> ข้อมูลบุตร
-                            </div>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={handleAddChild}
-                            >
-                                <Plus className="w-4 h-4 mr-1" /> เพิ่มข้อมูลบุตร
-                            </Button>
-                        </div>
-                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                            <Table>
-                                <TableHeader className="bg-gray-50/50">
-                                    <TableRow className="hover:bg-transparent">
-                                        <TableHead className="w-[80px] text-center">ลำดับ</TableHead>
-                                        <TableHead className="w-[200px]">อายุ (ปี)</TableHead>
-                                        <TableHead>อาชีพ</TableHead>
-                                        <TableHead className="w-[100px] text-center">จัดการ</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(!formData.children || formData.children.length === 0) ? (
-                                        <TableRow className="hover:bg-transparent">
-                                            <TableCell colSpan={4} className="text-center text-muted-foreground py-10 bg-gray-50/30">
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <Users className="w-8 h-8 text-gray-300" />
-                                                    <p>ยังไม่มีข้อมูลบุตร</p>
-                                                    <p className="text-xs text-gray-400">คลิก &quot;เพิ่มข้อมูลบุตร&quot; เพื่อเริ่มรายการ</p>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        formData.children.map((child, idx) => (
-                                            <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors group">
-                                                <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
-                                                <TableCell className="py-3">
-                                                    <Input
-                                                        type="number"
-                                                        value={child.age || ""}
-                                                        onChange={(e) => handleUpdateChild(idx, "age", e.target.value)}
-                                                        placeholder="ระบุอายุ"
-                                                        className="h-12 bg-white"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="py-3">
-                                                    <Select
-                                                        value={child.occupation || "student"}
-                                                        onValueChange={(val) => handleUpdateChild(idx, "occupation", val)}
-                                                    >
-                                                        <SelectTrigger className="h-12 bg-white">
-                                                            <SelectValue placeholder="เลือกอาชีพ" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="student">นักเรียน/นักศึกษา</SelectItem>
-                                                            <SelectItem value="employee">พนักงานบริษัท</SelectItem>
-                                                            <SelectItem value="government">ข้าราชการ</SelectItem>
-                                                            <SelectItem value="farmer">เกษตรกร</SelectItem>
-                                                            <SelectItem value="owner">เจ้าของกิจการ</SelectItem>
-                                                            <SelectItem value="freelance">รับจ้างทั่วไป</SelectItem>
-                                                            <SelectItem value="none">ยังไม่เข้าเรียน/ว่างงาน</SelectItem>
-                                                            <SelectItem value="other">อื่นๆ</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </TableCell>
-                                                <TableCell className="py-3 text-center">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-9 w-9 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                                        onClick={() => handleRemoveChild(idx)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </div>
-                    </>
-                    )}
-
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             )}
 
 
@@ -1656,10 +1705,10 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                     </div>
                                     {!isOtpVerified && (
                                         <Button
-                                            variant="outline"
+                                            variant="default"
                                             onClick={handleSendOtp}
                                             disabled={!formData.phone || formData.phone.replace(/\D/g, '').length < 10}
-                                            className="shrink-0 h-12"
+                                            className="shrink-0 h-12 bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                                         >
                                             ยืนยันเบอร์มือถือ
                                         </Button>
@@ -1778,9 +1827,12 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                 {/* Phone OTP Dialog */}
                                 <Dialog open={showOtpInput} onOpenChange={setShowOtpInput}>
                                     <DialogContent>
-                                        <DialogHeader className="space-y-3">
-                                            <DialogTitle>ยืนยันเบอร์โทรศัพท์</DialogTitle>
-                                            <DialogDescription>
+                                        <DialogHeader className="space-y-4 items-center text-center">
+                                            <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+                                                <Smartphone className="w-8 h-8 text-chaiyo-blue" />
+                                            </div>
+                                            <DialogTitle className="text-center">ยืนยันเบอร์โทรศัพท์มือถือ</DialogTitle>
+                                            <DialogDescription className="text-center">
                                                 กรุณากรอกรหัส OTP ที่ส่งไปยังเบอร์ {formData.phone}
                                                 {otpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {otpRef})</span>}
                                             </DialogDescription>
@@ -1821,16 +1873,16 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                             </button>
                                         </div>
 
-                                        <DialogFooter>
+                                        <DialogFooter className="grid grid-cols-2 gap-2">
                                             <Button
                                                 variant="outline"
-                                                className="min-w-[104px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                className="w-full h-12 rounded-xl text-gray-600"
                                                 onClick={() => setShowOtpInput(false)}
                                             >
                                                 ยกเลิก
                                             </Button>
                                             <Button
-                                                className="min-w-[104px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                className="w-full h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
                                                 onClick={handleVerifyOtp}
                                                 disabled={otp.length !== 6 || isVerifyingOtp}
                                             >
@@ -1870,10 +1922,10 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                         </div>
                                         {!isEmailOtpVerified && (
                                             <Button
-                                                variant="outline"
+                                                variant="default"
                                                 onClick={handleSendEmailOtp}
                                                 disabled={!formData.email || !formData.email.includes('@')}
-                                                className="shrink-0 h-12"
+                                                className="shrink-0 h-12 bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                                             >
                                                 ยืนยันอีเมล
                                             </Button>
@@ -1883,9 +1935,12 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                     {/* Email OTP Dialog */}
                                     <Dialog open={showEmailOtpInput} onOpenChange={setShowEmailOtpInput}>
                                         <DialogContent>
-                                            <DialogHeader className="space-y-3">
-                                                <DialogTitle>ยืนยันอีเมล</DialogTitle>
-                                                <DialogDescription>
+                                            <DialogHeader className="space-y-4 items-center text-center">
+                                                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+                                                    <Mail className="w-8 h-8 text-chaiyo-blue" />
+                                                </div>
+                                                <DialogTitle className="text-center">ยืนยันอีเมล</DialogTitle>
+                                                <DialogDescription className="text-center">
                                                     กรุณากรอกรหัส OTP ที่ส่งไปยังอีเมล {formData.email}
                                                     {emailOtpRef && <span className="block mt-1 font-bold text-gray-700">(Ref: {emailOtpRef})</span>}
                                                 </DialogDescription>
@@ -1926,16 +1981,16 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                                 </button>
                                             </div>
 
-                                            <DialogFooter>
+                                            <DialogFooter className="grid grid-cols-2 gap-2">
                                                 <Button
                                                     variant="outline"
-                                                    className="min-w-[104px] h-12 rounded-xl text-gray-600 order-2 sm:order-1"
+                                                    className="w-full h-12 rounded-xl text-gray-600"
                                                     onClick={() => setShowEmailOtpInput(false)}
                                                 >
                                                     ยกเลิก
                                                 </Button>
                                                 <Button
-                                                    className="min-w-[104px] h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90 order-1 sm:order-2"
+                                                    className="w-full h-12 rounded-xl bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
                                                     onClick={handleVerifyEmailOtp}
                                                     disabled={emailOtp.length !== 6 || isVerifyingEmailOtp}
                                                 >
@@ -2015,7 +2070,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                                     <div className="flex flex-col items-center gap-2">
                                                         <Globe className="w-8 h-8 text-gray-300" />
                                                         <p>ยังไม่มีข้อมูลโซเชียลมีเดีย</p>
-                                                        <p className="text-xs text-gray-400">คลิก &quot;เพิ่มบัญชีโซเชียลมีเดีย&quot; เพื่อเริ่มรายการ</p>
+                                                        <p className="text-xs text-gray-400">คลิก &quot;เพิ่มบัญชีโซเชียลมีเดีย&quot; เพื่อเพิ่มรายการ</p>
                                                     </div>
                                                 </TableCell>
                                             </TableRow>
@@ -2074,354 +2129,354 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
 
             {/* REFERENCE CODES SECTION */}
             {!isGuarantor && (
-            <Card className="border-border-strong">
-                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <ClipboardList className="w-5 h-5" />
-                        รหัสอ้างอิง
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="space-y-2">
-                            <Label>AMP Application ID</Label>
-                            <Input
-                                value={formData.ampApplicationId || ""}
-                                onChange={(e) => handleChange("ampApplicationId", e.target.value)}
-                                placeholder="ระบุ AMP Application ID"
-                                className="h-12 bg-white"
-                            />
+                <Card className="border-border-strong">
+                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                            <ClipboardList className="w-5 h-5" />
+                            รหัสอ้างอิง
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                                <Label>AMP Application ID</Label>
+                                <Input
+                                    value={formData.ampApplicationId || ""}
+                                    onChange={(e) => handleChange("ampApplicationId", e.target.value)}
+                                    placeholder="ระบุ AMP Application ID"
+                                    className="h-12 bg-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>รหัสผู้แนะนำลูกค้า</Label>
+                                <Input
+                                    value={formData.referrerCode || ""}
+                                    onChange={(e) => handleChange("referrerCode", e.target.value)}
+                                    placeholder="ระบุรหัสผู้แนะนำลูกค้า"
+                                    className="h-12 bg-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>รหัสโปรโมชั่น</Label>
+                                <Input
+                                    value={formData.promotionCode || ""}
+                                    onChange={(e) => handleChange("promotionCode", e.target.value)}
+                                    placeholder="ระบุรหัสโปรโมชั่น"
+                                    className="h-12 bg-white"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>รหัสผู้แนะนำลูกค้า</Label>
-                            <Input
-                                value={formData.referrerCode || ""}
-                                onChange={(e) => handleChange("referrerCode", e.target.value)}
-                                placeholder="ระบุรหัสผู้แนะนำลูกค้า"
-                                className="h-12 bg-white"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>รหัสโปรโมชั่น</Label>
-                            <Input
-                                value={formData.promotionCode || ""}
-                                onChange={(e) => handleChange("promotionCode", e.target.value)}
-                                placeholder="ระบุรหัสโปรโมชั่น"
-                                className="h-12 bg-white"
-                            />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             )}
 
             {/* QUESTIONNAIRE SECTION */}
             {!isGuarantor && (
-            <Card className="border-border-strong">
-                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <ClipboardList className="w-5 h-5" />
-                        แบบสอบถาม
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                    <div className="flex flex-col gap-4">
-                        {/* Sub-section 1: Extra Income */}
-                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <Wallet className="w-4 h-4 text-chaiyo-blue" />
-                                <h3 className="text-sm font-bold text-gray-700">การหารายได้เสริม</h3>
-                            </div>
-
-                            <div className="space-y-4 pt-2">
-                                {/* Intention Rating */}
-                                <div className="pb-2 border-b border-gray-100">
-                                    <RatingGroup
-                                        label="ความตั้งใจ ในการสร้างรายได้ เพื่อชำระหนี้"
-                                        value={formData.qDebtRepaymentIntention}
-                                        onChange={(v) => handleChange("qDebtRepaymentIntention", v)}
-                                    />
+                <Card className="border-border-strong">
+                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                            <ClipboardList className="w-5 h-5" />
+                            แบบสอบถาม
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-6">
+                        <div className="flex flex-col gap-4">
+                            {/* Sub-section 1: Extra Income */}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <Wallet className="w-4 h-4 text-chaiyo-blue" />
+                                    <h3 className="text-sm font-bold text-gray-700">การหารายได้เสริม</h3>
                                 </div>
 
-                                {/* Skill Select */}
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-medium text-gray-700">ความสามารถพิเศษอื่นๆ ที่จะสร้างรายได้เพิ่ม</Label>
-                                    <Select
-                                        value={formData.qExtraSkill}
-                                        onValueChange={(val) => handleChange("qExtraSkill", val)}
-                                    >
-                                        <SelectTrigger className="h-12 bg-white rounded-xl border-gray-200">
-                                            <SelectValue placeholder="เลือกความสามารถพิเศษ" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">ไม่มี</SelectItem>
-                                            <SelectItem value="cooking">ทำกับข้าวขาย</SelectItem>
-                                            <SelectItem value="online_sales">ขายของออนไลน์</SelectItem>
-                                            <SelectItem value="labor">รับจ้างใช้แรงงาน</SelectItem>
-                                            <SelectItem value="housekeeper">แม่บ้าน พนักงานทำความสะอาด</SelectItem>
-                                            <SelectItem value="musician">เล่นดนตรี นักร้อง</SelectItem>
-                                            <SelectItem value="caregiver">เลี้ยงเด็ก ดูแลผู้ป่วย</SelectItem>
-                                            <SelectItem value="other">อื่นๆ โปรดระบุ</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    {formData.qExtraSkill === "other" && (
-                                        <div className="pt-1">
-                                            <Input
-                                                placeholder="โปรดระบุความสามารถพิเศษ"
-                                                value={formData.qExtraSkillOther || ""}
-                                                onChange={(e) => handleChange("qExtraSkillOther", e.target.value)}
-                                                className="h-12 bg-white rounded-xl border-gray-200"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Known Apps Multi-select */}
-                                <div className="space-y-3 pt-2">
-                                    <Label className="text-sm font-bold text-gray-700">แอปที่รู้จัก และใช้เป็น</Label>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                        {[
-                                            { id: "Tiktok", label: "Tiktok", logo: "/application/tiktok.png" },
-                                            { id: "Shopee", label: "Shopee", logo: "/application/shopee.png" },
-                                            { id: "Lazada", label: "Lazada", logo: "/application/lazada.png" },
-                                            { id: "Grab", label: "Grab", logo: "/application/grab.png" },
-                                            { id: "Lineman", label: "Lineman", logo: "/application/lineman.png" },
-                                        ].map((app) => {
-                                            const isSelected = (formData.qAppsKnown || []).includes(app.id);
-                                            return (
-                                                <div key={app.id} className={cn(
-                                                    "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer group",
-                                                    isSelected
-                                                        ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
-                                                        : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
-                                                )}
-                                                    onClick={() => {
-                                                        const currentApps = formData.qAppsKnown || [];
-                                                        const newApps = currentApps.includes(app.id)
-                                                            ? currentApps.filter(a => a !== app.id)
-                                                            : [...currentApps, app.id];
-                                                        handleChange("qAppsKnown", newApps);
-                                                    }}>
-                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-100">
-                                                        <img src={app.logo} alt={app.label} className="w-full h-full object-contain" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <Label className="text-sm font-bold cursor-pointer block truncate">{app.label}</Label>
-                                                    </div>
-                                                    <Checkbox
-                                                        id={`app-${app.id}`}
-                                                        checked={isSelected}
-                                                        onCheckedChange={() => { }}
-                                                        className="rounded-md"
-                                                    />
-                                                </div>
-                                            );
-                                        })}
-                                        <div className={cn(
-                                            "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer",
-                                            (formData.qAppsKnown || []).includes("อื่นๆ")
-                                                ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
-                                                : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
-                                        )}
-                                            onClick={() => {
-                                                const app = "อื่นๆ";
-                                                const currentApps = formData.qAppsKnown || [];
-                                                const newApps = currentApps.includes(app)
-                                                    ? currentApps.filter(a => a !== app)
-                                                    : [...currentApps, app];
-                                                handleChange("qAppsKnown", newApps);
-                                            }}>
-                                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                                                <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <Label className="text-sm font-bold cursor-pointer block truncate">อื่นๆ โปรดระบุ</Label>
-                                            </div>
-                                            <Checkbox
-                                                id="app-other"
-                                                checked={(formData.qAppsKnown || []).includes("อื่นๆ")}
-                                                onCheckedChange={() => { }}
-                                                className="rounded-md"
-                                            />
-                                        </div>
+                                <div className="space-y-4 pt-2">
+                                    {/* Intention Rating */}
+                                    <div className="pb-2 border-b border-gray-100">
+                                        <RatingGroup
+                                            label="ความตั้งใจ ในการสร้างรายได้ เพื่อชำระหนี้"
+                                            value={formData.qDebtRepaymentIntention}
+                                            onChange={(v) => handleChange("qDebtRepaymentIntention", v)}
+                                        />
                                     </div>
-                                    {(formData.qAppsKnown || []).includes("อื่นๆ") && (
-                                        <div className="pt-1">
-                                            <Input
-                                                placeholder="โปรดระบุแอปอื่นๆ"
-                                                value={formData.qAppsKnownOther || ""}
-                                                onChange={(e) => handleChange("qAppsKnownOther", e.target.value)}
-                                                className="h-12 bg-white rounded-xl border-gray-200"
-                                            />
+
+                                    {/* Skill Select */}
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-medium text-gray-700">ความสามารถพิเศษอื่นๆ ที่จะสร้างรายได้เพิ่ม</Label>
+                                        <Select
+                                            value={formData.qExtraSkill}
+                                            onValueChange={(val) => handleChange("qExtraSkill", val)}
+                                        >
+                                            <SelectTrigger className="h-12 bg-white rounded-xl border-gray-200">
+                                                <SelectValue placeholder="เลือกความสามารถพิเศษ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="none">ไม่มี</SelectItem>
+                                                <SelectItem value="cooking">ทำกับข้าวขาย</SelectItem>
+                                                <SelectItem value="online_sales">ขายของออนไลน์</SelectItem>
+                                                <SelectItem value="labor">รับจ้างใช้แรงงาน</SelectItem>
+                                                <SelectItem value="housekeeper">แม่บ้าน พนักงานทำความสะอาด</SelectItem>
+                                                <SelectItem value="musician">เล่นดนตรี นักร้อง</SelectItem>
+                                                <SelectItem value="caregiver">เลี้ยงเด็ก ดูแลผู้ป่วย</SelectItem>
+                                                <SelectItem value="other">อื่นๆ โปรดระบุ</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {formData.qExtraSkill === "other" && (
+                                            <div className="pt-1">
+                                                <Input
+                                                    placeholder="โปรดระบุความสามารถพิเศษ"
+                                                    value={formData.qExtraSkillOther || ""}
+                                                    onChange={(e) => handleChange("qExtraSkillOther", e.target.value)}
+                                                    className="h-12 bg-white rounded-xl border-gray-200"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Known Apps Multi-select */}
+                                    <div className="space-y-3 pt-2">
+                                        <Label className="text-sm font-bold text-gray-700">แอปที่รู้จัก และใช้เป็น</Label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {[
+                                                { id: "Tiktok", label: "Tiktok", logo: "/application/tiktok.png" },
+                                                { id: "Shopee", label: "Shopee", logo: "/application/shopee.png" },
+                                                { id: "Lazada", label: "Lazada", logo: "/application/lazada.png" },
+                                                { id: "Grab", label: "Grab", logo: "/application/grab.png" },
+                                                { id: "Lineman", label: "Lineman", logo: "/application/lineman.png" },
+                                            ].map((app) => {
+                                                const isSelected = (formData.qAppsKnown || []).includes(app.id);
+                                                return (
+                                                    <div key={app.id} className={cn(
+                                                        "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer group",
+                                                        isSelected
+                                                            ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
+                                                            : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
+                                                    )}
+                                                        onClick={() => {
+                                                            const currentApps = formData.qAppsKnown || [];
+                                                            const newApps = currentApps.includes(app.id)
+                                                                ? currentApps.filter(a => a !== app.id)
+                                                                : [...currentApps, app.id];
+                                                            handleChange("qAppsKnown", newApps);
+                                                        }}>
+                                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-white border border-gray-100">
+                                                            <img src={app.logo} alt={app.label} className="w-full h-full object-contain" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <Label className="text-sm font-bold cursor-pointer block truncate">{app.label}</Label>
+                                                        </div>
+                                                        <Checkbox
+                                                            id={`app-${app.id}`}
+                                                            checked={isSelected}
+                                                            onCheckedChange={() => { }}
+                                                            className="rounded-md"
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                            <div className={cn(
+                                                "flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer",
+                                                (formData.qAppsKnown || []).includes("อื่นๆ")
+                                                    ? "border-chaiyo-blue bg-blue-50/30 shadow-sm"
+                                                    : "border-gray-200 bg-white hover:border-chaiyo-blue/30"
+                                            )}
+                                                onClick={() => {
+                                                    const app = "อื่นๆ";
+                                                    const currentApps = formData.qAppsKnown || [];
+                                                    const newApps = currentApps.includes(app)
+                                                        ? currentApps.filter(a => a !== app)
+                                                        : [...currentApps, app];
+                                                    handleChange("qAppsKnown", newApps);
+                                                }}>
+                                                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                                    <MoreHorizontal className="w-4 h-4 text-gray-400" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <Label className="text-sm font-bold cursor-pointer block truncate">อื่นๆ โปรดระบุ</Label>
+                                                </div>
+                                                <Checkbox
+                                                    id="app-other"
+                                                    checked={(formData.qAppsKnown || []).includes("อื่นๆ")}
+                                                    onCheckedChange={() => { }}
+                                                    className="rounded-md"
+                                                />
+                                            </div>
                                         </div>
-                                    )}
+                                        {(formData.qAppsKnown || []).includes("อื่นๆ") && (
+                                            <div className="pt-1">
+                                                <Input
+                                                    placeholder="โปรดระบุแอปอื่นๆ"
+                                                    value={formData.qAppsKnownOther || ""}
+                                                    onChange={(e) => handleChange("qAppsKnownOther", e.target.value)}
+                                                    className="h-12 bg-white rounded-xl border-gray-200"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Sub-section 2: Financial Behavior */}
-                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <TrendingUp className="w-4 h-4 text-[#FFD100]" />
-                                <h3 className="text-sm font-bold text-gray-700">พฤติกรรมทางการเงิน</h3>
-                            </div>
+                            {/* Sub-section 2: Financial Behavior */}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <TrendingUp className="w-4 h-4 text-[#FFD100]" />
+                                    <h3 className="text-sm font-bold text-gray-700">พฤติกรรมทางการเงิน</h3>
+                                </div>
 
 
-                            <div className="flex flex-col gap-0 text-gray-800">
-                                <RatingGroup
-                                    label="ก่อนที่ท่านจะซื้อสินค้า ท่านได้ไตร่ตรองอย่างถี่ถ้วน ว่ามีเงินพอจ่ายได้"
-                                    value={formData.qFinancialPonder}
-                                    onChange={(v) => handleChange("qFinancialPonder", v)}
-                                />
-                                <RatingGroup
-                                    label="ท่านชำระเงินค่าใช้จ่ายต่างๆ ตรงเวลา"
-                                    value={formData.qFinancialOnTime}
-                                    onChange={(v) => handleChange("qFinancialOnTime", v)}
-                                />
-                                <RatingGroup
-                                    label="ท่านดูแลเรื่องเงินของตัวเองอย่างใกล้ชิด เช่นรู้ว่ามีรายได้ และรายจ่ายเท่าไหร่"
-                                    value={formData.qFinancialCloseMonitor}
-                                    onChange={(v) => handleChange("qFinancialCloseMonitor", v)}
-                                />
-                                <RatingGroup
-                                    label="ท่านมีวางแผนตั้งเป้าหมายทางการเงินระยะยาว อย่างน้อย 1-3 ปี"
-                                    value={formData.qFinancialLongTermGoal}
-                                    onChange={(v) => handleChange("qFinancialLongTermGoal", v)}
-                                />
-                                <RatingGroup
-                                    label="ในการซื้อสินค้าหรือบริการท่านเปรียบเทียบข้อมูลก่อนการซื้อ และศึกษาข้อมูลจากแหล่งที่เหมาะสมก่อนตัดสินใจซื้อ"
-                                    value={formData.qFinancialCompareInfo}
-                                    onChange={(v) => handleChange("qFinancialCompareInfo", v)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Sub-section 3: Debt Repayment */}
-                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <CreditCard className="w-4 h-4 text-emerald-600" />
-                                <h3 className="text-sm font-bold text-gray-700">การชำระหนี้</h3>
-                            </div>
-
-                            <div className="flex flex-col gap-0 text-gray-800">
-                                <RatingGroup
-                                    label="ท่านมีความกังวลข้อมูลเครดิต"
-                                    value={formData.qCreditConcern}
-                                    onChange={(v) => handleChange("qCreditConcern", v)}
-                                />
-                                <RatingGroup
-                                    label="ท่านมีความกังวลในการชำระหนี้ที่มีการค้างชำระอยู่"
-                                    value={formData.qDebtConcern}
-                                    onChange={(v) => handleChange("qDebtConcern", v)}
-                                />
-                                <RatingGroup
-                                    label="ท่านมีความกังวลที่จะถูกยึดหลักประกัน"
-                                    value={formData.qCollateralConcern}
-                                    onChange={(v) => handleChange("qCollateralConcern", v)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Sub-section 4: Delinquency */}
-                        <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                <AlertCircle className="w-4 h-4 text-red-500" />
-                                <h3 className="text-sm font-bold text-gray-700">หากจำเป็นต้องค้างชำระเงินกู้ สาเหตุของปัญหาคือด้านใด</h3>
-                            </div>
-                            <div className="">
-                                <div className="flex flex-col">
-                                    <YesNoGroup
-                                        label="ต้นทุนสูงขึ้น (ค่าใช้จ่ายของการผลิตสูงขึ้น)"
-                                        value={formData.qDelinquencyHigherCost}
-                                        onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
+                                <div className="flex flex-col gap-0 text-gray-800">
+                                    <RatingGroup
+                                        label="ก่อนที่ท่านจะซื้อสินค้า ท่านได้ไตร่ตรองอย่างถี่ถ้วน ว่ามีเงินพอจ่ายได้"
+                                        value={formData.qFinancialPonder}
+                                        onChange={(v) => handleChange("qFinancialPonder", v)}
                                     />
-                                    <YesNoGroup
-                                        label="ขายสินค้าไม่ออก เช่น ผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
-                                        value={formData.qDelinquencyUnsold}
-                                        onChange={(v) => handleChange("qDelinquencyUnsold", v)}
+                                    <RatingGroup
+                                        label="ท่านชำระเงินค่าใช้จ่ายต่างๆ ตรงเวลา"
+                                        value={formData.qFinancialOnTime}
+                                        onChange={(v) => handleChange("qFinancialOnTime", v)}
                                     />
-                                    <YesNoGroup
-                                        label="มีรายจ่ายหนี้สินอื่นๆ"
-                                        value={formData.qDelinquencyOtherDebt}
-                                        onChange={(v) => handleChange("qDelinquencyOtherDebt", v)}
+                                    <RatingGroup
+                                        label="ท่านดูแลเรื่องเงินของตัวเองอย่างใกล้ชิด เช่นรู้ว่ามีรายได้ และรายจ่ายเท่าไหร่"
+                                        value={formData.qFinancialCloseMonitor}
+                                        onChange={(v) => handleChange("qFinancialCloseMonitor", v)}
                                     />
-                                    <YesNoGroup
-                                        label="มีค่าใช้จ่ายภายในครอบครัว"
-                                        value={formData.qDelinquencyFamilyExpense}
-                                        onChange={(v) => handleChange("qDelinquencyFamilyExpense", v)}
+                                    <RatingGroup
+                                        label="ท่านมีวางแผนตั้งเป้าหมายทางการเงินระยะยาว อย่างน้อย 1-3 ปี"
+                                        value={formData.qFinancialLongTermGoal}
+                                        onChange={(v) => handleChange("qFinancialLongTermGoal", v)}
                                     />
-                                    <YesNoGroup
-                                        label="มีค่าใช้จ่ายในการศึกษาบุตรเพิ่มขึ้น"
-                                        value={formData.qDelinquencyEducationExpense}
-                                        onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="อุบัติเหตุ/ความเจ็บป่วย หรือถึงแก่กรรม"
-                                        value={formData.qDelinquencyAccident}
-                                        onChange={(v) => handleChange("qDelinquencyAccident", v)}
-                                    />
-
-                                    <YesNoGroup
-                                        label="เกิดปัญหาในครอบครัว เช่น หย่าร้าง หรือคู่สมรสเสียชีวิต"
-                                        value={formData.qDelinquencyFamilyDispute}
-                                        onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="กิจการที่ทำอยู่ประสบปัญหา"
-                                        value={formData.qDelinquencyBusinessProblem}
-                                        onChange={(v) => handleChange("qDelinquencyBusinessProblem", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="ประสบปัญหาด้านสุขภาพ"
-                                        value={formData.qDelinquencyHealthProblem}
-                                        onChange={(v) => handleChange("qDelinquencyHealthProblem", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="มีค่าใช้จ่ายหลายทาง/ภาระค่าใช้จ่ายสูง"
-                                        value={formData.qDelinquencyHighExpense}
-                                        onChange={(v) => handleChange("qDelinquencyHighExpense", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="การย้ายถิ่นที่อยู่อาศัย"
-                                        value={formData.qDelinquencyRelocation}
-                                        onChange={(v) => handleChange("qDelinquencyRelocation", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="ขาดความเข้าใจในกระบวนการ/ขั้นตอนการจัดการหนี้"
-                                        value={formData.qDelinquencyDebtProcessIgnorance}
-                                        onChange={(v) => handleChange("qDelinquencyDebtProcessIgnorance", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="ถูกฟ้องให้ชำระหนี้สิน"
-                                        value={formData.qDelinquencyLawsuit}
-                                        onChange={(v) => handleChange("qDelinquencyLawsuit", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="ย้ายไปประกอบธุรกิจที่จังหวัดอื่น"
-                                        value={formData.qDelinquencyMoveBusiness}
-                                        onChange={(v) => handleChange("qDelinquencyMoveBusiness", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="ภาวะทางเศรษฐกิจ"
-                                        value={formData.qDelinquencyEconomy}
-                                        onChange={(v) => handleChange("qDelinquencyEconomy", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="เกิดภัยธรรมชาติ"
-                                        value={formData.qDelinquencyNaturalDisaster}
-                                        onChange={(v) => handleChange("qDelinquencyNaturalDisaster", v)}
-                                    />
-                                    <YesNoGroup
-                                        label="รัฐบาลเปลี่ยนแปลงนโยบายบ่อย"
-                                        value={formData.qDelinquencyGovernmentPolicy}
-                                        onChange={(v) => handleChange("qDelinquencyGovernmentPolicy", v)}
+                                    <RatingGroup
+                                        label="ในการซื้อสินค้าหรือบริการท่านเปรียบเทียบข้อมูลก่อนการซื้อ และศึกษาข้อมูลจากแหล่งที่เหมาะสมก่อนตัดสินใจซื้อ"
+                                        value={formData.qFinancialCompareInfo}
+                                        onChange={(v) => handleChange("qFinancialCompareInfo", v)}
                                     />
                                 </div>
                             </div>
+
+                            {/* Sub-section 3: Debt Repayment */}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <CreditCard className="w-4 h-4 text-emerald-600" />
+                                    <h3 className="text-sm font-bold text-gray-700">การชำระหนี้</h3>
+                                </div>
+
+                                <div className="flex flex-col gap-0 text-gray-800">
+                                    <RatingGroup
+                                        label="ท่านมีความกังวลข้อมูลเครดิต"
+                                        value={formData.qCreditConcern}
+                                        onChange={(v) => handleChange("qCreditConcern", v)}
+                                    />
+                                    <RatingGroup
+                                        label="ท่านมีความกังวลในการชำระหนี้ที่มีการค้างชำระอยู่"
+                                        value={formData.qDebtConcern}
+                                        onChange={(v) => handleChange("qDebtConcern", v)}
+                                    />
+                                    <RatingGroup
+                                        label="ท่านมีความกังวลที่จะถูกยึดหลักประกัน"
+                                        value={formData.qCollateralConcern}
+                                        onChange={(v) => handleChange("qCollateralConcern", v)}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Sub-section 4: Delinquency */}
+                            <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
+                                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                    <h3 className="text-sm font-bold text-gray-700">หากจำเป็นต้องค้างชำระเงินกู้ สาเหตุของปัญหาคือด้านใด</h3>
+                                </div>
+                                <div className="">
+                                    <div className="flex flex-col">
+                                        <YesNoGroup
+                                            label="ต้นทุนสูงขึ้น (ค่าใช้จ่ายของการผลิตสูงขึ้น)"
+                                            value={formData.qDelinquencyHigherCost}
+                                            onChange={(v) => handleChange("qDelinquencyHigherCost", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ขายสินค้าไม่ออก เช่น ผลิตมากเกินไป หรือขาดตลาดไม่ต้องการ"
+                                            value={formData.qDelinquencyUnsold}
+                                            onChange={(v) => handleChange("qDelinquencyUnsold", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีรายจ่ายหนี้สินอื่นๆ"
+                                            value={formData.qDelinquencyOtherDebt}
+                                            onChange={(v) => handleChange("qDelinquencyOtherDebt", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายภายในครอบครัว"
+                                            value={formData.qDelinquencyFamilyExpense}
+                                            onChange={(v) => handleChange("qDelinquencyFamilyExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายในการศึกษาบุตรเพิ่มขึ้น"
+                                            value={formData.qDelinquencyEducationExpense}
+                                            onChange={(v) => handleChange("qDelinquencyEducationExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="อุบัติเหตุ/ความเจ็บป่วย หรือถึงแก่กรรม"
+                                            value={formData.qDelinquencyAccident}
+                                            onChange={(v) => handleChange("qDelinquencyAccident", v)}
+                                        />
+
+                                        <YesNoGroup
+                                            label="เกิดปัญหาในครอบครัว เช่น หย่าร้าง หรือคู่สมรสเสียชีวิต"
+                                            value={formData.qDelinquencyFamilyDispute}
+                                            onChange={(v) => handleChange("qDelinquencyFamilyDispute", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="กิจการที่ทำอยู่ประสบปัญหา"
+                                            value={formData.qDelinquencyBusinessProblem}
+                                            onChange={(v) => handleChange("qDelinquencyBusinessProblem", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ประสบปัญหาด้านสุขภาพ"
+                                            value={formData.qDelinquencyHealthProblem}
+                                            onChange={(v) => handleChange("qDelinquencyHealthProblem", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="มีค่าใช้จ่ายหลายทาง/ภาระค่าใช้จ่ายสูง"
+                                            value={formData.qDelinquencyHighExpense}
+                                            onChange={(v) => handleChange("qDelinquencyHighExpense", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="การย้ายถิ่นที่อยู่อาศัย"
+                                            value={formData.qDelinquencyRelocation}
+                                            onChange={(v) => handleChange("qDelinquencyRelocation", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ขาดความเข้าใจในกระบวนการ/ขั้นตอนการจัดการหนี้"
+                                            value={formData.qDelinquencyDebtProcessIgnorance}
+                                            onChange={(v) => handleChange("qDelinquencyDebtProcessIgnorance", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ถูกฟ้องให้ชำระหนี้สิน"
+                                            value={formData.qDelinquencyLawsuit}
+                                            onChange={(v) => handleChange("qDelinquencyLawsuit", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ย้ายไปประกอบธุรกิจที่จังหวัดอื่น"
+                                            value={formData.qDelinquencyMoveBusiness}
+                                            onChange={(v) => handleChange("qDelinquencyMoveBusiness", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="ภาวะทางเศรษฐกิจ"
+                                            value={formData.qDelinquencyEconomy}
+                                            onChange={(v) => handleChange("qDelinquencyEconomy", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="เกิดภัยธรรมชาติ"
+                                            value={formData.qDelinquencyNaturalDisaster}
+                                            onChange={(v) => handleChange("qDelinquencyNaturalDisaster", v)}
+                                        />
+                                        <YesNoGroup
+                                            label="รัฐบาลเปลี่ยนแปลงนโยบายบ่อย"
+                                            value={formData.qDelinquencyGovernmentPolicy}
+                                            onChange={(v) => handleChange("qDelinquencyGovernmentPolicy", v)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             )}
 
             {
@@ -3095,7 +3150,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                         {isPhoneOwnershipVerifying ? (
                             <div className="space-y-4 text-center">
                                 <p className="text-gray-600">
-                                    กำลังตรวจสอบความถูกต้องของหมายเลขโทรศัพท์กับเลขบัตรประชาชนผ่านระบบผู้ให้บริการเครือข่าย...
+                                    กำลังตรวจสอบความถูกต้องของเบอร์มือถือกับเลขบัตรประชาชนผ่านระบบผู้ให้บริการเครือข่าย...
                                 </p>
                             </div>
                         ) : phoneOwnershipStatus === 'success' ? (
@@ -3121,7 +3176,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                             <div className="space-y-4">
                                 <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
                                     <p className="text-red-700 text-sm">
-                                        หมายเลขโทรศัพท์ {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
+                                        เบอร์มือถือ {formData.phone ? `${formData.phone.slice(0, 3)}-XXX-${formData.phone.slice(-4)}` : "0XX-XXX-XXXX"} <span className="font-bold underline">ไม่ได้จดทะเบียน</span> ภายใต้เลขบัตรประชาชน {formData.idNumber ? `${formData.idNumber.slice(0, 1)}-XXXX-XXXXX-XX-${formData.idNumber.slice(-1)}` : "X-XXXX-XXXXX-XX-X"}
                                     </p>
                                 </div>
                                 <div className="p-3 bg-gray-50 text-gray-600 rounded-lg text-xs leading-relaxed border border-gray-100">

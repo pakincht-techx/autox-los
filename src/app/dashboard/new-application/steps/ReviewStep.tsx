@@ -358,7 +358,7 @@ export function ReviewStep({ formData, setFormData, onSubmit, onEdit }: ReviewSt
 
                                 <hr className="border-dashed border-gray-200 my-4" />
                                 <div className="flex justify-between">
-                                    <span className="text-muted">เบอร์โทรศัพท์</span>
+                                    <span className="text-muted">เบอร์โทรศัพท์มือถือ</span>
                                     <span className="font-medium text-right">{formData.phone || formData.phoneNumber || "-"}</span>
                                 </div>
                                 <div className="flex justify-between">

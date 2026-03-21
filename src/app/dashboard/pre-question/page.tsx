@@ -1574,7 +1574,7 @@ function PreQuestionPageContent() {
                                                             <AlertTriangle className="h-4 w-4 text-red-600" />
                                                             <AlertTitle className="font-bold">วิเคราะห์รูปถ่ายไม่สำเร็จ!</AlertTitle>
                                                             <AlertDescription>
-                                                                ข้อมูลไม่เพียงพอ กรุณาส่งรูปถ่ายเพิ่มเติมเพื่อเริ่มการวิเคราะห์อัตโนมัติ
+                                                                ข้อมูลไม่เพียงพอ กรุณาส่งรูปถ่ายเพิ่มเติมเพื่อเพิ่มการวิเคราะห์อัตโนมัติ
                                                             </AlertDescription>
                                                         </Alert>
                                                     )}
@@ -1760,7 +1760,7 @@ function PreQuestionPageContent() {
                                                                         <TableHeader>
                                                                             <TableRow className="bg-gray-50">
                                                                                 <TableHead className="font-bold text-gray-600 w-[36%]">แหล่งที่มา</TableHead>
-                                                                                <TableHead className="text-right font-bold text-gray-600">ราคาพื้นที่ห้องชุด (บาท)</TableHead>
+                                                                                <TableHead className="text-right font-bold text-gray-600">ราคาพื้นที่ห้องชุด (บาท) <span className="text-red-500">*</span></TableHead>
                                                                                 <TableHead className="text-right font-bold text-gray-600">ราคาพื้นที่ระเบียง (บาท)</TableHead>
                                                                                 <TableHead className="w-10 text-center"></TableHead>
                                                                             </TableRow>

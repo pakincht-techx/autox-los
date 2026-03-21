@@ -23,6 +23,8 @@ interface SensitiveDataConsentStepProps {
 
 export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataConsentStepProps) => {
     const router = useRouter();
+    // Track which consent step we're on: 1 = first consent, 2 = second consent
+    const [consentStep, setConsentStep] = useState<1 | 2>(1);
     const [hasReadConsent, setHasReadConsent] = useState(false);
     const [isConsentAccepted, setIsConsentAccepted] = useState(false);
     const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
@@ -43,7 +45,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
         return () => window.removeEventListener('resize', checkScrollable);
-    }, []);
+    }, [consentStep]);
 
     const handleScroll = () => {
         if (scrollRef.current) {
@@ -54,8 +56,82 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
         }
     };
 
+    const handleAcceptConsent = () => {
+        if (consentStep === 1) {
+            // Move to second consent
+            setConsentStep(2);
+            setHasReadConsent(false);
+            setIsConsentAccepted(false);
+            // Scroll content back to top
+            if (scrollRef.current) {
+                scrollRef.current.scrollTop = 0;
+            }
+        } else {
+            // Both consents accepted, proceed
+            onAccept();
+        }
+    };
+
+    const handleBack = () => {
+        if (consentStep === 2) {
+            // Go back to first consent
+            setConsentStep(1);
+            setHasReadConsent(false);
+            setIsConsentAccepted(false);
+            if (scrollRef.current) {
+                scrollRef.current.scrollTop = 0;
+            }
+        } else if (onBack) {
+            onBack();
+        }
+    };
+
+    // ─── Consent 1: Biometric / Face Recognition ───
+    const consent1 = {
+        title: "หนังสือให้ความยินยอมเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อน",
+        subtitle: "เพื่อการให้บริการที่ครบถ้วน กรุณาอ่านและให้ความยินยอม",
+        sectionTitle: "ความยินยอมข้อมูลอ่อนไหว (Sensitive Data)",
+        checkboxLabel: "ให้ความยินยอมเกี่ยวกับข้อมูลส่วนบุคคลอ่อนไหว (สำหรับการตรวจสอบความแม่นยำของเทคโนโลยี face recognition)",
+        content: (
+            <>
+                <p>
+                    ธนาคารมีความจำเป็นต้องใช้ข้อมูลชีวภาพ (biometric) ได้แก่ ข้อมูลการจดจำใบหน้า (face recognition) ในการพิสูจน์และยืนยันตัวตนของคุณก่อนการทำธุรกรรม โดยเป็นการใช้ในครั้งนี้เท่านั้น
+                </p>
+                <p>
+                    โปรด <strong>"ยินยอม"</strong> ให้ธนาคารใช้ข้อมูลดังกล่าว
+                </p>
+                <p>
+                    หากธนาคารไม่ได้รับความยินยอมจากคุณ ธนาคารจะไม่สามารถให้บริการแก่คุณได้ เนื่องจากธนาคารจะต้องใช้ข้อมูลการจดจำใบหน้าในการพิสูจน์และยืนยันตัวตนก่อนการทำธุรกรรมของคุณ
+                </p>
+            </>
+        ),
+    };
+
+    // ─── Consent 2: Face Recognition Accuracy Verification ───
+    const consent2 = {
+        title: "ความยินยอมเกี่ยวกับข้อมูลส่วนบุคคลอ่อนไหว (สำหรับการตรวจสอบความแม่นยำของเทคโนโลยี face recognition)",
+        subtitle: "กรุณาอ่านและให้ความยินยอมเพิ่มเติม",
+        sectionTitle: "ความยินยอมข้อมูลอ่อนไหว ฉบับที่ 2 (Sensitive Data #2)",
+        checkboxLabel: "ให้ความยินยอมเกี่ยวกับข้อมูลส่วนบุคคลอ่อนไหว (สำหรับการตรวจสอบความแม่นยำของเทคโนโลยี face recognition)",
+        content: (
+            <>
+                <p>
+                    บริษัทมีความจำเป็นต้องเก็บรวบรวมและใช้ข้อมูลชีวภาพ (biometric) ได้แก่ ข้อมูลการจดจำใบหน้า (face recognition) เพื่อการตรวจสอบความแม่นยำของเทคโนโลยี face recognition ซึ่งผลการตรวจสอบดังกล่าวจะถูกนำไปใช้เป็นการภายในบริษัท และ/หรือใช้จัดทำรายงานการใช้เทคโนโลยี face recognition นำส่งให้แก่ธนาคารแห่งประเทศไทย โดยข้อมูลที่ปรากฏในรายงานดังกล่าวจะเป็นผลสรุปเกี่ยวกับการทำ face recognition โดยไม่ปรากฏข้อมูลชีวภาพดังกล่าวแต่อย่างใด
+                </p>
+                <p>
+                    โปรด <strong>"ยินยอม"</strong> ให้บริษัทเก็บและใช้ข้อมูลดังกล่าว
+                </p>
+                <p>
+                    หากบริษัทไม่ได้รับความยินยอมจากคุณ บริษัทอาจมีข้อมูลไม่เพียงพอและไม่สามารถตรวจสอบความแม่นยำของเทคโนโลยี face recognition ได้
+                </p>
+            </>
+        ),
+    };
+
+    const currentConsent = consentStep === 1 ? consent1 : consent2;
+
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
+        <div key={consentStep} className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             {/* Staff Instruction Banner */}
             {showStaffBanner && (
                 <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex items-center gap-4 shadow-sm -mt-2">
@@ -73,19 +149,20 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                 </div>
             )}
 
+
             <div className="text-center space-y-2 mb-6">
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <ShieldAlert className="w-8 h-8 text-chaiyo-blue" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">หนังสือให้ความยินยอมเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อน</h2>
-                <p className="text-muted-foreground">เพื่อการให้บริการที่ครบถ้วน กรุณาอ่านและให้ความยินยอม</p>
+                <h2 className="text-2xl font-bold text-gray-800">{currentConsent.title}</h2>
+                <p className="text-muted-foreground">{currentConsent.subtitle}</p>
             </div>
 
             <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mt-6">
                 <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                     <div className="flex items-center gap-2 font-semibold text-gray-700">
                         <FileText className="w-4 h-4 text-chaiyo-blue" />
-                        ความยินยอมข้อมูลอ่อนไหว (Sensitive Data)
+                        {currentConsent.sectionTitle}
                     </div>
                     {!hasReadConsent && (
                         <div className="text-xs text-orange-500 flex items-center gap-1 animate-pulse">
@@ -100,54 +177,38 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                     onScroll={handleScroll}
                     className="h-[400px] overflow-y-auto p-6 text-sm text-gray-600 space-y-4 leading-relaxed scroll-smooth"
                 >
-                    <p>
-                        <strong>ข้อมูลส่วนบุคคลที่ละเอียดอ่อน (Sensitive Personal Data)</strong><br />
-                        บริษัทฯ มีความจำเป็นต้องเก็บรวบรวม ใช้ และ/หรือเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อนของท่าน เพื่อวัตถุประสงค์ในการพิสูจน์และยืนยันตัวตน (KYC/CDD) ตามกฎหมายว่าด้วยการป้องกันและปราบปรามการฟอกเงิน และกฎหมายอื่นๆ ที่เกี่ยวข้อง
-                    </p>
-                    <p>
-                        <strong>ข้อมูลที่จัดเก็บ</strong><br />
-                        ข้อมูลที่ปรากฏบนบัตรประจำตัวประชาชนของท่าน ซึ่งอาจรวมถึงข้อมูล <strong>ศาสนา</strong> และ/หรือ <strong>หมู่โลหิต</strong> ที่ไม่ได้มีการขีดฆ่า หรือปิดทับไว้อย่างชัดเจน
-                    </p>
-                    <p>
-                        <strong>การให้ความยินยอม</strong><br />
-                        ข้าพเจ้ายินยอมให้บริษัทฯ เก็บรวบรวม ใช้ และ/หรือเปิดเผยข้อมูลศาสนา และ/หรือหมู่โลหิตที่ปรากฏบนบัตรประจำตัวประชาชนและเอกสารอื่นๆ ของข้าพเจ้า เพื่อการพิสูจน์และยืนยันตัวตนของข้าพเจ้า
-                        ทั้งนี้ การที่ท่านกดตกลง หรือดำเนินธุรกรรมต่อไป ถือว่าท่านได้อ่าน ทำความเข้าใจ และให้ความยินยอมในการประมวลผลข้อมูลส่วนบุคคลที่ละเอียดอ่อนดังกล่าวแก่บริษัทฯ ตามวัตถุประสงค์ที่ระบุไว้
-                    </p>
-                    <p>
-                        -------------------------------------------------<br />
-                        ข้าพเจ้าได้อ่านและทำความเข้าใจข้อความข้างต้นทั้งหมดแล้ว และตกลงยินยอมตามเงื่อนไขที่ระบุไว้ทุกประการ
-                    </p>
+                    {currentConsent.content}
                     <div className="h-10"></div>
                 </div>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-start gap-3">
                 <Checkbox
-                    id="accept-sensitive"
+                    id={`accept-sensitive-${consentStep}`}
                     className="mt-1"
                     checked={isConsentAccepted}
                     onCheckedChange={(checked) => setIsConsentAccepted(checked as boolean)}
                     disabled={!hasReadConsent}
                 />
                 <label
-                    htmlFor="accept-sensitive"
+                    htmlFor={`accept-sensitive-${consentStep}`}
                     className={cn(
                         "cursor-pointer select-none",
                         !hasReadConsent ? "text-gray-400" : "text-gray-700"
                     )}
                 >
-                    <span className="font-bold">ข้าพเจ้าได้อ่าน และรับทราบการเก็บรวบรวมการใช้ และเปิดเผยข้อมูลส่วนบุคคลที่ละเอียดอ่อน</span>
+                    <span className="font-bold">{currentConsent.checkboxLabel}</span>
                     {!hasReadConsent && (
                         <p className="text-xs text-orange-500 mt-1">* กรุณาเลื่อนอ่านรายละเอียดด้านบนให้ครบถ้วนก่อนยอมรับ</p>
                     )}
                 </label>
             </div>
 
-            <div className={cn("flex pt-4 flex-col sm:flex-row gap-4", onBack ? "justify-between" : "justify-end")}>
-                {onBack && (
+            <div className={cn("flex pt-4 flex-col sm:flex-row gap-4", (onBack || consentStep === 2) ? "justify-between" : "justify-end")}>
+                {(onBack || consentStep === 2) && (
                     <Button
                         variant="outline"
-                        onClick={onBack}
+                        onClick={handleBack}
                         className="min-w-[200px] h-12 rounded-xl text-gray-500 hover:text-gray-900 border-gray-300 bg-white font-bold"
                     >
                         ย้อนกลับ
@@ -166,10 +227,10 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                         )}
                     >
                         <XCircle className="w-5 h-5 mr-2" />
-                        ปฏิเสธการให้ความยินยอม
+                        ไม่ยินยอม
                     </Button>
                     <Button
-                        onClick={onAccept}
+                        onClick={handleAcceptConsent}
                         disabled={!isConsentAccepted}
                         className={cn(
                             "min-w-[200px] h-12 transition-all rounded-xl font-bold",
@@ -179,7 +240,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                         )}
                     >
                         <CheckCircle className="w-5 h-5 mr-2" />
-                        ยืนยันการให้ความยินยอม
+                        ยินยอม
                     </Button>
                 </div>
             </div>

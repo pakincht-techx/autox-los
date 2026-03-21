@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogBody, DialogTitle, DialogTri
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/combobox";
-import { DatePickerBE } from "@/components/ui/DatePickerBE";
+import { DateRangePickerBE } from "@/components/ui/DateRangePickerBE";
 import { motion } from "framer-motion";
 
 // Mock Data — all applications in the branch (from all makers), only completed statuses
@@ -141,6 +141,52 @@ const MOCK_DATA: Application[] = [
         productType: "สินเชื่อส่วนบุคคล",
         lastActionTime: "30/10/2569 11:20"
     },
+    {
+        id: "b12",
+        applicationNo: "25690201ULCRL0032",
+        applicantName: "กมล พงษ์เจริญ",
+        makerName: "สมหญิง จริงใจ",
+        submissionDate: "01/11/2569 09:30",
+        requestedAmount: 350000,
+        status: "Draft",
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "01/11/2569 09:30"
+    },
+    {
+        id: "b13",
+        applicationNo: "25690203TLTDL0034",
+        applicantName: "รัตนา สุขสม",
+        makerName: "กานต์ สว่างใจ",
+        submissionDate: "03/11/2569 14:15",
+        requestedAmount: 180000,
+        status: "Draft",
+        productType: "สินเชื่อโฉนดที่ดิน",
+        lastActionTime: "03/11/2569 14:15"
+    },
+    {
+        id: "b14",
+        applicationNo: "25690205ULCRL0036",
+        applicantName: "ประยุทธ์ แสนดี",
+        makerName: "สมหญิง จริงใจ",
+        submissionDate: "05/11/2569 11:00",
+        requestedAmount: 520000,
+        status: "Sent Back",
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        previousProcessorName: "มาลี ศรีเมือง",
+        lastActionTime: "08/11/2569 15:20"
+    },
+    {
+        id: "b15",
+        applicationNo: "25690207ULCRL0038",
+        applicantName: "สุวรรณี ทองคำ",
+        makerName: "กานต์ สว่างใจ",
+        submissionDate: "07/11/2569 08:45",
+        requestedAmount: 75000,
+        status: "Sent Back",
+        productType: "สินเชื่อนาโนไฟแนนซ์",
+        previousProcessorName: "ทรงพล รวยทรัพย์",
+        lastActionTime: "10/11/2569 10:00"
+    },
 ];
 
 export default function AllApplicationsPage() {
@@ -206,13 +252,17 @@ export default function AllApplicationsPage() {
     const tabs = devRole === 'branch-staff'
         ? [
             { label: "ทั้งหมด", value: "all" },
+            { label: "แบบร่าง", value: "Draft" },
             { label: "รอพิจารณา", value: "In Review" },
+            { label: "ส่งกลับ", value: "Sent Back" },
             { label: "อนุมัติ", value: "Approved" },
             { label: "ถูกปฎิเสธ", value: "Rejected" },
             { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
         ]
         : [
             { label: "ทั้งหมด", value: "all" },
+            { label: "แบบร่าง", value: "Draft" },
+            { label: "ส่งกลับ", value: "Sent Back" },
             { label: "อนุมัติ", value: "Approved" },
             { label: "ถูกปฎิเสธ", value: "Rejected" },
             { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
@@ -319,7 +369,7 @@ export default function AllApplicationsPage() {
                                     {currentTab === tab.value && (
                                         <motion.div
                                             layoutId="all-apps-active-tab-pill"
-                                            className="absolute inset-0 bg-white border border-chaiyo-blue rounded-lg shadow-sm"
+                                            className="absolute inset-0 bg-white rounded-lg shadow-sm"
                                             transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                                         />
                                     )}
@@ -394,6 +444,9 @@ export default function AllApplicationsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="all">ทั้งหมด</SelectItem>
+                                                <SelectItem value="Draft">แบบร่าง</SelectItem>
+                                                <SelectItem value="In Review">รอพิจารณา</SelectItem>
+                                                <SelectItem value="Sent Back">ส่งกลับ</SelectItem>
                                                 <SelectItem value="Approved">อนุมัติ</SelectItem>
                                                 <SelectItem value="Rejected">ถูกปฎิเสธ</SelectItem>
                                                 <SelectItem value="Cancelled">ยกเลิกใบสมัคร</SelectItem>
@@ -402,39 +455,21 @@ export default function AllApplicationsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label>ช่วงของวันเวลาสร้างใบสมัคร</Label>
-                                        <div className="flex items-center gap-2">
-                                            <DatePickerBE
-                                                value={filterStartDate}
-                                                onChange={setFilterStartDate}
-                                                placeholder="ตั้งแต่ (วว/ดด/ปปปป)"
-                                                inputClassName="h-12 rounded-xl flex-1"
-                                            />
-                                            <span className="text-muted-foreground">-</span>
-                                            <DatePickerBE
-                                                value={filterEndDate}
-                                                onChange={setFilterEndDate}
-                                                placeholder="ถึง (วว/ดด/ปปปป)"
-                                                inputClassName="h-12 rounded-xl flex-1"
-                                            />
-                                        </div>
+                                        <DateRangePickerBE
+                                            from={filterStartDate}
+                                            to={filterEndDate}
+                                            onRangeChange={(from, to) => { setFilterStartDate(from); setFilterEndDate(to); }}
+                                            placeholder="เลือกช่วงวันที่สร้างใบสมัคร"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>ช่วงของวันเวลาดำเนินการล่าสุด</Label>
-                                        <div className="flex items-center gap-2">
-                                            <DatePickerBE
-                                                value={filterLastActionStartDate}
-                                                onChange={setFilterLastActionStartDate}
-                                                placeholder="ตั้งแต่ (วว/ดด/ปปปป)"
-                                                inputClassName="h-12 rounded-xl flex-1"
-                                            />
-                                            <span className="text-muted-foreground">-</span>
-                                            <DatePickerBE
-                                                value={filterLastActionEndDate}
-                                                onChange={setFilterLastActionEndDate}
-                                                placeholder="ถึง (วว/ดด/ปปปป)"
-                                                inputClassName="h-12 rounded-xl flex-1"
-                                            />
-                                        </div>
+                                        <DateRangePickerBE
+                                            from={filterLastActionStartDate}
+                                            to={filterLastActionEndDate}
+                                            onRangeChange={(from, to) => { setFilterLastActionStartDate(from); setFilterLastActionEndDate(to); }}
+                                            placeholder="เลือกช่วงวันที่ดำเนินการ"
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>ผู้ดำเนินการก่อนหน้า</Label>
@@ -469,6 +504,45 @@ export default function AllApplicationsPage() {
                         </Dialog>
                     </div>
                 </div>
+
+                {/* Active Filter Badges */}
+                {hasActiveFilters && (() => {
+                    const statusLabelMap: Record<string, string> = { "Draft": "แบบร่าง", "In Review": "รอพิจารณา", "Sent Back": "ส่งกลับ", "Approved": "อนุมัติ", "Rejected": "ถูกปฎิเสธ", "Cancelled": "ยกเลิกใบสมัคร" };
+                    const badges: { label: string; value: string; onRemove: () => void }[] = [];
+                    if (filterName) badges.push({ label: "ผู้กู้", value: filterName, onRemove: () => setFilterName("") });
+                    if (filterProduct !== "all") badges.push({ label: "สินเชื่อ", value: filterProduct, onRemove: () => setFilterProduct("all") });
+                    if (filterStatus !== "all") badges.push({ label: "สถานะ", value: statusLabelMap[filterStatus] || filterStatus, onRemove: () => setFilterStatus("all") });
+                    if (filterStartDate || filterEndDate) badges.push({ label: "วันสร้าง", value: [filterStartDate, filterEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterStartDate(""); setFilterEndDate(""); } });
+                    if (filterLastActionStartDate || filterLastActionEndDate) badges.push({ label: "วันดำเนินการ", value: [filterLastActionStartDate, filterLastActionEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterLastActionStartDate(""); setFilterLastActionEndDate(""); } });
+                    if (filterPreviousProcessor) badges.push({ label: "ผู้ดำเนินการก่อนหน้า", value: filterPreviousProcessor, onRemove: () => setFilterPreviousProcessor("") });
+                    if (filterMaker) badges.push({ label: "ผู้สร้าง", value: filterMaker, onRemove: () => setFilterMaker("") });
+
+                    return (
+                        <div className="flex flex-wrap items-center gap-2">
+                            {badges.map((badge, i) => (
+                                <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-chaiyo-blue/10 text-chaiyo-blue text-xs font-medium"
+                                >
+                                    <span className="text-chaiyo-blue/60">{badge.label}:</span>
+                                    <span className="max-w-[120px] truncate">{badge.value}</span>
+                                    <button
+                                        onClick={() => { badge.onRemove(); setCurrentPage(1); }}
+                                        className="ml-0.5 rounded-full p-0.5 hover:bg-chaiyo-blue/20 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </span>
+                            ))}
+                            <button
+                                onClick={() => { clearFilters(); setCurrentPage(1); }}
+                                className="text-xs text-muted-foreground hover:text-red-500 transition-colors underline underline-offset-2"
+                            >
+                                ล้างตัวกรองทั้งหมด
+                            </button>
+                        </div>
+                    );
+                })()}
 
                 {/* Application List Table */}
                 <ApplicationTable

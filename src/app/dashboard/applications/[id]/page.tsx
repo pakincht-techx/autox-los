@@ -940,13 +940,7 @@ function SummaryCard({
                         )
                     )}
                 </div>
-                {isEmpty ? (
-                    <p className="text-sm font-normal text-gray-300 mt-1">-</p>
-                ) : (
-                    <>
-                        <div className={`text-sm font-medium text-foreground tracking-tight`}>{value}{unit && <span className="text-sm text-foreground ml-1">{unit}</span>}</div>
-                    </>
-                )}
+
             </div>
             {onEdit && (
                 <Button
