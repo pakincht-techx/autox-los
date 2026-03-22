@@ -2241,13 +2241,17 @@ function PreQuestionPageContent() {
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label>อายุผู้กู้ (ปี) <span className="text-red-500">*</span></Label>
-                                                <Input
-                                                    type="number"
-                                                    placeholder="เช่น 35"
-                                                    value={formData.borrowerAge || ''}
-                                                    onChange={(e) => setFormData({ ...formData, borrowerAge: e.target.value })}
-                                                />
+                                                <Label>อายุผู้กู้ <span className="text-red-500">*</span></Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="number"
+                                                        className="pr-12"
+                                                        placeholder="เช่น 35"
+                                                        value={formData.borrowerAge || ''}
+                                                        onChange={(e) => setFormData({ ...formData, borrowerAge: e.target.value })}
+                                                    />
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">ปี</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

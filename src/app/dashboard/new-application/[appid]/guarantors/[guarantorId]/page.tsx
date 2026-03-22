@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { User, Coins, FileText, Pencil, Plus, Check, Circle } from "lucide-react";
+import { User, Coins, FileText, Pencil, Plus, Check, Circle, Trash2 } from "lucide-react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function GuarantorDetailPage() {
     const router = useRouter();
@@ -18,6 +29,7 @@ export default function GuarantorDetailPage() {
     const { formData: applicationFormData } = useApplication();
     const searchParams = useSearchParams();
     const isReadonly = searchParams.get('state') === 'readonly';
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     useEffect(() => {
         const borrowerFirstName = applicationFormData?.firstName;
@@ -42,6 +54,19 @@ export default function GuarantorDetailPage() {
     const [, , yearBE] = birthDateBE.split("/").map(Number);
     const currentYearBE = new Date().getFullYear() + 543;
     const guarantorAge = currentYearBE - yearBE;
+
+    const guarantorName = "ดีใจ ไชโย";
+
+    const handleDeleteGuarantor = () => {
+        setDeleteDialogOpen(false);
+        toast.success("ลบผู้ค้ำประกันสำเร็จ", {
+            description: `ข้อมูลผู้ค้ำประกัน "${guarantorName}" ถูกลบเรียบร้อยแล้ว`,
+            duration: 2000,
+        });
+        setTimeout(() => {
+            router.push(`/dashboard/new-application/${appId}/guarantors`);
+        }, 500);
+    };
 
     const modules = [
         {
@@ -73,26 +98,66 @@ export default function GuarantorDetailPage() {
     ];
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold">ดีใจ ไชโย</h2>
+        <>
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold">{guarantorName}</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {modules.map((mod) => (
+                        <SummaryCard
+                            key={mod.title}
+                            title={mod.title}
+                            value={mod.value}
+                            unit={mod.unit}
+                            icon={mod.icon}
+                            isEmpty={mod.isEmpty}
+                            completionStatus={mod.completionStatus}
+                            onEdit={() => router.push(mod.href)}
+                        />
+                    ))}
+                </div>
+
+                {/* Delete Guarantor Button */}
+                {!isReadonly && (
+                    <div className="pt-4 border-t border-border-subtle">
+                        <Button
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-bold"
+                            onClick={() => setDeleteDialogOpen(true)}
+                        >
+                            <Trash2 className="w-4 h-4 mr-1.5" />
+                            ลบผู้ค้ำประกัน
+                        </Button>
+                    </div>
+                )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {modules.map((mod) => (
-                    <SummaryCard
-                        key={mod.title}
-                        title={mod.title}
-                        value={mod.value}
-                        unit={mod.unit}
-                        icon={mod.icon}
-                        isEmpty={mod.isEmpty}
-                        completionStatus={mod.completionStatus}
-                        onEdit={() => router.push(mod.href)}
-                    />
-                ))}
-            </div>
-        </div>
+            {/* Delete Guarantor Confirmation Dialog */}
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบผู้ค้ำประกัน</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลผู้ค้ำประกัน &quot;{guarantorName}&quot; ใช่หรือไม่?
+                            ข้อมูลทั้งหมดของผู้ค้ำประกันรายนี้จะถูกลบอย่างถาวร
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="min-w-[120px] font-bold">
+                            ยกเลิก
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteGuarantor}
+                            className="min-w-[120px] font-bold bg-red-600 hover:bg-red-700 shadow-none"
+                        >
+                            ลบข้อมูล
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, MapPin, Briefcase, ShieldCheck, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { StatusBanner } from "@/components/ui/StatusBanner";
 import {
     Select,
     SelectContent,
@@ -43,14 +44,13 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
         <div className="space-y-16 animate-in fade-in slide-in-from-bottom-2">
 
             {/* eKYC Status Banner */}
-            <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center gap-4 text-emerald-800 shadow-sm shadow-emerald-500/5">
-                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-                <div className="flex flex-col">
-                    <span className="text-sm font-bold">ผ่านการยืนยันตัวตน (eKYC) เรียบร้อยแล้ว</span>
-                    <span className="text-[10px] opacity-70">ข้อมูลถูกดึงมาจากระบบทะเบียนราษฎร์อัตโนมัติ</span>
-                </div>
-                <span className="ml-auto text-xs font-mono font-bold text-emerald-600/70">{new Date().toLocaleDateString('th-TH')}</span>
-            </div>
+            <StatusBanner
+                variant="success"
+                icon={CheckCircle}
+                title="ผ่านการยืนยันตัวตน (eKYC) เรียบร้อยแล้ว"
+                description="ข้อมูลถูกดึงมาจากระบบทะเบียนราษฎร์อัตโนมัติ"
+                action={<span className="text-xs font-mono font-bold text-emerald-600/70">{new Date().toLocaleDateString('th-TH')}</span>}
+            />
 
             {/* PRE-SCREENING SECTION (NEW) */}
             <Card className={cn("border-2 transition-all", screeningStatus === 'PASSED' ? "border-emerald-100 bg-emerald-50/30" : "border-chaiyo-blue/20 bg-blue-50/10")}>

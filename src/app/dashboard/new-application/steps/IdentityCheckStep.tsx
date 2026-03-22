@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { StatusBanner } from "@/components/ui/StatusBanner";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
 
 import { format } from "date-fns";
@@ -640,16 +641,13 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {/* OCR Camera View */}
                         {verificationMethod === 'MANUAL' && (stage === 'TAKING_ID_FRONT' || stage === 'TAKING_ID_BACK') && (
                             <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
-                                        <IdCard className="w-6 h-6 text-orange-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-orange-800 text-sm">{stage === 'TAKING_ID_FRONT' ? 'ขั้นตอนที่ 1: ถ่ายรูปด้านหน้าบัตร' : 'ขั้นตอนที่ 2: ถ่ายรูปด้านหลังบัตร'}</h4>
-                                        <p className="text-orange-700/70 text-xs">วางบัตรให้ตรงกับกรอบที่กำหนด และกดปุ่มถ่ายภาพ</p>
-                                    </div>
-                                    <Button variant="ghost" onClick={handleBackToSelection} className="text-orange-600 hover:text-orange-700 hover:bg-orange-100">ยกเลิก</Button>
-                                </div>
+                                <StatusBanner
+                                    variant="orange"
+                                    icon={IdCard}
+                                    title={stage === 'TAKING_ID_FRONT' ? 'ขั้นตอนที่ 1: ถ่ายรูปด้านหน้าบัตร' : 'ขั้นตอนที่ 2: ถ่ายรูปด้านหลังบัตร'}
+                                    description="วางบัตรให้ตรงกับกรอบที่กำหนด และกดปุ่มถ่ายภาพ"
+                                    action={<Button variant="ghost" onClick={handleBackToSelection} className="text-orange-600 hover:text-orange-700 hover:bg-orange-100">ยกเลิก</Button>}
+                                />
 
                                 <Card className="border-border-subtle bg-slate-900 overflow-hidden relative aspect-[3/2] rounded-3xl shadow-2xl">
                                     <CardContent className="flex flex-col items-center justify-center p-0 h-full relative">
@@ -758,19 +756,12 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {/* STAGE 3: FACE VERIFY */}
                         {(stage === 'FACE_VERIFY') && (
                             <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                                <div className="bg-chaiyo-blue/10 border border-chaiyo-blue/20 rounded-xl p-4 flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
-                                            <Camera className="w-6 h-6 text-chaiyo-blue" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-chaiyo-blue text-sm">ตรวจสอบใบหน้า (Liveness Check)</h4>
-                                            <p className="text-chaiyo-blue/70 text-xs">กรุณาวางใบหน้าให้อยู่ในกรอบ ระบบจะตรวจสอบอัตโนมัติ</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4">
-
+                                <StatusBanner
+                                    variant="info"
+                                    icon={Camera}
+                                    title="ตรวจสอบใบหน้า (Liveness Check)"
+                                    description="กรุณาวางใบหน้าให้อยู่ในกรอบ ระบบจะตรวจสอบอัตโนมัติ"
+                                    action={
                                         <Button
                                             variant="ghost"
                                             onClick={() => setShowNotContinueDialog(true)}
@@ -779,8 +770,8 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                             <XCircle className="w-5 h-5 mr-1" />
                                             ออกจากการทำรายการ
                                         </Button>
-                                    </div>
-                                </div>
+                                    }
+                                />
 
                                 <Card className="border-border-subtle bg-slate-900 overflow-hidden relative aspect-square md:aspect-video rounded-3xl shadow-2xl">
                                     <CardContent className="flex flex-col items-center justify-center p-0 h-full relative">
@@ -951,15 +942,14 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {(stage === 'CARD_SUCCESS') && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {/* Success Alert */}
-                                <Alert variant="success" className="rounded-xl border-emerald-200 shadow-none">
-                                    <CheckCircle className="h-4 w-4" />
-                                    <AlertTitle className="font-bold">อ่านข้อมูลสำเร็จ</AlertTitle>
-                                    <AlertDescription>
-                                        {verificationMethod === 'DIPCHIP'
-                                            ? "ดึงข้อมูลจากชิปการ์ดเรียบร้อยแล้ว ไม่สามารถแก้ไขข้อมูลได้"
-                                            : "ดึงข้อมูลจาก OCR เรียบร้อยแล้ว กรุณาตรวจสอบและแก้ไขหากจำเป็น"}
-                                    </AlertDescription>
-                                </Alert>
+                                <StatusBanner
+                                    variant="success"
+                                    icon={CheckCircle}
+                                    title="อ่านข้อมูลสำเร็จ"
+                                    description={verificationMethod === 'DIPCHIP'
+                                        ? "ดึงข้อมูลจากชิปการ์ดเรียบร้อยแล้ว ไม่สามารถแก้ไขข้อมูลได้"
+                                        : "ดึงข้อมูลจาก OCR เรียบร้อยแล้ว กรุณาตรวจสอบและแก้ไขหากจำเป็น"}
+                                />
 
                                 <Card className="border-border-subtle overflow-hidden shadow-none">
                                     <CardHeader className="bg-gray-50/50 border-b pb-4">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { User, MapPin, Info, Users, Plus, Phone, AlertTriangle, AlertCircle, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Home, Trash2, CheckCircle, Upload, Loader2, Mail, Pencil, UserPlus, Save, ShieldCheck, Smartphone, ClipboardList, Wallet, TrendingUp, CreditCard, Music2, ShoppingBag, ShoppingBasket, CarFront, Bike, MoreHorizontal, Camera } from "lucide-react";
+import { StatusBanner } from "@/components/ui/StatusBanner";
 import {
     InputOTP,
     InputOTPGroup,
@@ -1442,15 +1443,14 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว (คน)</Label>
-                                            <div className="h-12 rounded-xl flex items-center justify-between group transition-all duration-300 hover:bg-chaiyo-blue/[0.05] hover:border-chaiyo-blue/20">
-
-                                                <div className="flex items-baseline gap-1.5">
-                                                    <span className="text-2xl font-black text-chaiyo-blue tabular-nums">
+                                            <Label className="text-gray-500">รวมจำนวนสมาชิกในครอบครัว</Label>
+                                            <div className="relative">
+                                                <div className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 flex items-center">
+                                                    <span className="text-base text-chaiyo-blue font-semibold">
                                                         {(Number(formData.employedFamilyCount) || 0) + (Number(formData.unemployedFamilyCount) || 0)}
                                                     </span>
-                                                    <span className="text-[10px] font-bold text-chaiyo-blue/60 uppercase tracking-wider">คน</span>
                                                 </div>
+                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">คน</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1714,113 +1714,105 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                         </Button>
                                     )}
                                 </div>
-                                {isOtpVerified && (
-                                    <div className={cn(
-                                        "mt-3 p-4 rounded-xl animate-in fade-in slide-in-from-top-2 duration-500",
-                                        phoneOwnershipStatus === 'success' ? "bg-green-50 border border-green-200" : "bg-blue-50/50 border border-blue-100"
-                                    )}>
-                                        {phoneOwnershipStatus === 'success' ? (
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
-                                                        <ShieldCheck className="w-5 h-5 text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-green-800">ตรวจสอบเบอร์มือถือสำเร็จ</p>
-                                                        <p className="text-[11px] text-green-600 font-medium">ยืนยันความเป็นเจ้าของเบอร์เรียบร้อยแล้ว</p>
-                                                    </div>
+                                {isOtpVerified && phoneOwnershipStatus === 'success' && (
+                                    <StatusBanner
+                                        variant="success"
+                                        icon={ShieldCheck}
+                                        title="ตรวจสอบเบอร์มือถือสำเร็จ"
+                                        description="ยืนยันความเป็นเจ้าของเบอร์เรียบร้อยแล้ว"
+                                        className="mt-3 animate-in fade-in slide-in-from-top-2 duration-500"
+                                        action={
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 px-2 text-emerald-700 hover:bg-emerald-100/50 text-[10px] font-bold"
+                                                onClick={() => {
+                                                    handleChange("phoneOwnershipProof", null);
+                                                    setPhoneOwnershipStatus('idle');
+                                                }}
+                                            >
+                                                แก้ไขข้อมูล
+                                            </Button>
+                                        }
+                                    />
+                                )}
+                                {isOtpVerified && phoneOwnershipStatus !== 'success' && (
+                                    <div className="mt-3 p-4 rounded-xl animate-in fade-in slide-in-from-top-2 duration-500 bg-blue-50/50 border border-blue-100">
+                                        <div className="flex items-center gap-2 mb-3 text-chaiyo-blue font-bold">
+                                            <span className="text-sm">ตรวจสอบเบอร์มือถือ</span>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="bg-white border border-blue-100 p-3 rounded-lg">
+                                                <p className="text-xs text-gray-500 mb-2">ให้ลูกค้าดำเนินการบนมือถือตัวเองดังนี้</p>
+                                                <div className="bg-gray-50 p-2 rounded-md font-mono text-center text-sm font-bold text-chaiyo-blue tracking-wider border border-gray-100">
+                                                    กด &apos;*179* เลขบัตรประชาชน 13 หลัก #
+                                                    แล้วโทรออก
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 px-2 text-green-700 hover:bg-green-100/50 text-[10px] font-bold"
-                                                    onClick={() => {
-                                                        handleChange("phoneOwnershipProof", null);
-                                                        setPhoneOwnershipStatus('idle');
-                                                    }}
-                                                >
-                                                    แก้ไขข้อมูล
-                                                </Button>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <div className="flex items-center gap-2 mb-3 text-chaiyo-blue font-bold">
-                                                    <span className="text-sm">ตรวจสอบเบอร์มือถือ</span>
-                                                </div>
 
+                                            {formData.phoneOwnershipProof ? (
                                                 <div className="space-y-3">
-                                                    <div className="bg-white border border-blue-100 p-3 rounded-lg">
-                                                        <p className="text-xs text-gray-500 mb-2">ให้ลูกค้าดำเนินการบนมือถือตัวเองดังนี้</p>
-                                                        <div className="bg-gray-50 p-2 rounded-md font-mono text-center text-sm font-bold text-chaiyo-blue tracking-wider border border-gray-100">
-                                                            กด '*179* เลขบัตรประชาชน 13 หลัก #
-                                                            แล้วโทรออก
-                                                        </div>
+                                                    <div className="flex items-center justify-between bg-white border border-red-100 p-2.5 rounded-lg">
+                                                        <span className="truncate max-w-[200px] font-medium flex items-center gap-2 text-xs text-gray-700">
+                                                            <AlertCircle className="w-4 h-4 text-red-500" />
+                                                            {formData.phoneOwnershipProof.name}
+                                                        </span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                                                            onClick={() => {
+                                                                handleChange("phoneOwnershipProof", null);
+                                                                setPhoneOwnershipStatus('idle');
+                                                            }}
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </Button>
                                                     </div>
-
-                                                    {formData.phoneOwnershipProof ? (
-                                                        <div className="space-y-3">
-                                                            <div className="flex items-center justify-between bg-white border border-red-100 p-2.5 rounded-lg">
-                                                                <span className="truncate max-w-[200px] font-medium flex items-center gap-2 text-xs text-gray-700">
-                                                                    <AlertCircle className="w-4 h-4 text-red-500" />
-                                                                    {formData.phoneOwnershipProof.name}
-                                                                </span>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
-                                                                    onClick={() => {
-                                                                        handleChange("phoneOwnershipProof", null);
-                                                                        setPhoneOwnershipStatus('idle');
-                                                                    }}
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                            </div>
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={handleVerifyPhoneOwnership}
-                                                                disabled={!formData.phone || !formData.idNumber}
-                                                                className={cn(
-                                                                    "w-full h-11 rounded-xl transition-all duration-300 font-bold bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
-                                                                )}
-                                                            >
-                                                                <div className="flex items-center gap-2 justify-center">
-                                                                    <AlertCircle className="w-4 h-4 text-red-500" />
-                                                                    ข้อมูลไม่ตรงกัน - ตรวจสอบอีกครั้ง
-                                                                </div>
-                                                            </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={handleVerifyPhoneOwnership}
+                                                        disabled={!formData.phone || !formData.idNumber}
+                                                        className={cn(
+                                                            "w-full h-11 rounded-xl transition-all duration-300 font-bold bg-red-50 text-red-700 border-red-200 hover:bg-red-100 hover:text-red-800"
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center gap-2 justify-center">
+                                                            <AlertCircle className="w-4 h-4 text-red-500" />
+                                                            ข้อมูลไม่ตรงกัน - ตรวจสอบอีกครั้ง
                                                         </div>
-                                                    ) : (
-                                                        <div>
-                                                            <input
-                                                                type="file"
-                                                                id="phoneOwnershipProof"
-                                                                className="hidden"
-                                                                accept="image/*"
-                                                                capture="environment"
-                                                                onChange={(e) => {
-                                                                    const file = e.target.files?.[0];
-                                                                    if (file) {
-                                                                        handleChange("phoneOwnershipProof", file);
-                                                                        e.target.value = '';
-                                                                        handleVerifyPhoneOwnership();
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <Button
-                                                                variant="outline"
-                                                                className="w-full h-11 border-dashed border-chaiyo-blue/50 text-chaiyo-blue bg-white hover:bg-blue-50/50 rounded-xl"
-                                                                onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
-                                                            >
-                                                                <Camera className="w-4 h-4 mr-2" />
-                                                                ถ่ายรูปหน้าจอผลการตรวจสอบ
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                                    </Button>
                                                 </div>
-                                            </>
-                                        )}
+                                            ) : (
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        id="phoneOwnershipProof"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        capture="environment"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0];
+                                                            if (file) {
+                                                                handleChange("phoneOwnershipProof", file);
+                                                                e.target.value = '';
+                                                                handleVerifyPhoneOwnership();
+                                                            }
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        variant="outline"
+                                                        className="w-full h-11 border-dashed border-chaiyo-blue/50 text-chaiyo-blue bg-white hover:bg-blue-50/50 rounded-xl"
+                                                        onClick={() => document.getElementById('phoneOwnershipProof')?.click()}
+                                                    >
+                                                        <Camera className="w-4 h-4 mr-2" />
+                                                        ถ่ายรูปหน้าจอผลการตรวจสอบ
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 

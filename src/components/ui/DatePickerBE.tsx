@@ -148,7 +148,7 @@ export function DatePickerBE({
                     disabled={disabled}
                     readOnly={readOnly}
                     className={cn(
-                        "h-12 rounded-xl border-gray-200", // Match standard project height and border
+                        "h-11 rounded-xl border-gray-200", // Match standard project height and border
                         error && "border-red-500 ring-red-500/20",
                         displayValue && "font-medium",
                         (disabled || readOnly) && "bg-gray-200/50! border-gray-200! text-gray-500 cursor-not-allowed select-none pointer-events-none",

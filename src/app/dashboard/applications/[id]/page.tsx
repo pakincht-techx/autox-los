@@ -58,6 +58,7 @@ const BASE_MOCK_APP = {
     id: "1",
     applicationNo: "25680313ULCPL0001",
     applicantName: "สมชาย ใจดี",
+    applicantNickname: "ชาย",
     applicantInitials: "JS",
     status: "Draft" as ApplicationStatus,
     phone: "080-000-0000",
@@ -341,7 +342,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
                         <div>
                             <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                                {app.applicantName}
+                                {app.applicantName}{app.applicantNickname && <span className="text-gray-400 font-medium ml-1">({app.applicantNickname})</span>}
                             </h1>
                             <div className="flex items-center gap-3 mt-2">
                                 <Badge variant={getStatusBadgeVariant(currentStatus)}>

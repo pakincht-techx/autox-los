@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { CheckCircle, ShieldAlert, FileText, ChevronDown, XCircle, User } from "lucide-react";
+import { StatusBanner } from "@/components/ui/StatusBanner";
 import { cn } from "@/lib/utils";
 import {
     AlertDialog,
@@ -134,19 +135,14 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
         <div key={consentStep} className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             {/* Staff Instruction Banner */}
             {showStaffBanner && (
-                <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex items-center gap-4 shadow-sm -mt-2">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
-                            <User className="w-6 h-6 text-orange-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-orange-900 font-bold text-lg mb-0.5">พนักงานต้องยื่น iPad ให้ลูกค้า</h3>
-                            <p className="text-orange-700 text-sm">
-                                เพื่อให้ลูกค้าอ่านรายละเอียด และกดยอมรับด้วยตนเอง
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                <StatusBanner
+                    variant="orange"
+                    size="lg"
+                    icon={User}
+                    title="พนักงานต้องยื่น iPad ให้ลูกค้า"
+                    description="เพื่อให้ลูกค้าอ่านรายละเอียด และกดยอมรับด้วยตนเอง"
+                    className="-mt-2"
+                />
             )}
 
 
