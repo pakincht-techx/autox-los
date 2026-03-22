@@ -872,7 +872,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
 
                                 {/* Categorized Grid Layout */}
-                                <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+                                <div className={cn("grid gap-x-6 gap-y-8", formData.collateralType === 'car' ? 'grid-cols-4' : 'grid-cols-2')}>
                                     {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).map((guide) => {
                                         const photos = collateralPhotos[guide.id] || [];
                                         const hasPhotos = photos.length > 0;
