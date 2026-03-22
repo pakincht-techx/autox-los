@@ -6,7 +6,7 @@ import {
     Car, Bike, Truck, Tractor, Map, Sparkles, Upload, FileText,
     Loader2, Camera, Book, Trash2, X, Plus,
     ChevronLeft, ChevronRight, ChevronDown, Eye, UserCheck, Calculator, ShieldCheck,
-    CheckCircle2, AlertTriangle, FilePlus, Info, Check
+    CheckCircle2, AlertTriangle, FilePlus, Info, Check, ImagePlus
 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -25,6 +25,7 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/Dialog";
 import {
     Table,
@@ -153,6 +154,23 @@ const DEED_TYPES = [
     { value: "โฉนดตราจอง", label: "โฉนดตราจอง" },
     { value: "ตราจองที่ว่าได้ทำประโยชน์แล้ว", label: "ตราจองที่ว่าได้ทำประโยชน์แล้ว" },
 ];
+
+const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; demoUrl: string }>> = {
+    car: [
+        { id: "front", title: "ภาพด้านหน้า", icon: Camera, description: "ถ่ายรถจากด้านหน้า", demoUrl: "https://via.placeholder.com/400x300?text=Front+View" },
+        { id: "back", title: "ภาพด้านหลัง", icon: Camera, description: "ถ่ายรถจากด้านหลัง", demoUrl: "https://via.placeholder.com/400x300?text=Back+View" },
+        { id: "left", title: "ภาพด้านซ้าย", icon: Camera, description: "ถ่ายรถจากด้านซ้าย", demoUrl: "https://via.placeholder.com/400x300?text=Left+View" },
+        { id: "right", title: "ภาพด้านขวา", icon: Camera, description: "ถ่ายรถจากด้านขวา", demoUrl: "https://via.placeholder.com/400x300?text=Right+View" },
+        { id: "interior", title: "ภาพภายใน", icon: Camera, description: "ถ่ายภายในรถ", demoUrl: "https://via.placeholder.com/400x300?text=Interior" },
+        { id: "odometer", title: "มาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง", demoUrl: "https://via.placeholder.com/400x300?text=Odometer" },
+    ],
+    land: [
+        { id: "overall", title: "ภาพรวมของที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Overall+View" },
+        { id: "boundary", title: "ภาพเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดนของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Boundary" },
+        { id: "deed", title: "โฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Deed" },
+        { id: "surroundings", title: "ภาพบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณโดยรอบที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Surroundings" },
+    ],
+};
 
 const APPRAISAL_METHODS = [
     { value: "หนังสือรับรองจากสำนักงานที่ดิน", label: "หนังสือรับรองจากสำนักงานที่ดิน" },
@@ -523,6 +541,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     // New upload states
     const [uploadedPhotos, setUploadedPhotos] = useState<{ url: string, label: string }[]>([]);
     const [uploadedPaperDocs, setUploadedPaperDocs] = useState<{ url: string, label: string }[]>([]);
+    const [collateralPhotos, setCollateralPhotos] = useState<Record<string, string[]>>({});
     const [analyzedPhotoCount, setAnalyzedPhotoCount] = useState(0);
     const [analyzedPaperCount, setAnalyzedPaperCount] = useState(0);
     const [currentYear, setCurrentYear] = useState(2024);
@@ -531,12 +550,16 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const [searchAddress, setSearchAddress] = useState("");
     const [searchLat, setSearchLat] = useState("");
     const [searchLng, setSearchLng] = useState("");
+    const [itemToDelete, setItemToDelete] = useState<{ guideId: string; photoIndex: number } | null>(null);
+    const [examplePhotoDialog2, setExamplePhotoDialog2] = useState<{ open: boolean; title: string; demoUrl: string }>({ open: false, title: "", demoUrl: "" });
 
     // Refs
     const photoInputRef = useRef<HTMLInputElement>(null);
     const photoCameraRef = useRef<HTMLInputElement>(null);
     const paperInputRef = useRef<HTMLInputElement>(null);
     const paperCameraRef = useRef<HTMLInputElement>(null);
+    const categoryPhotoInputRef = useRef<HTMLInputElement>(null);
+    const [currentPhotoGuideId, setCurrentPhotoGuideId] = useState<string>("");
 
     // Set current year on client side to prevent hydration mismatch
     useEffect(() => {
@@ -710,6 +733,39 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
         }, 1500);
     };
 
+    const handleTriggerCategoryPhotoUpload = (guideId: string) => {
+        setCurrentPhotoGuideId(guideId);
+        categoryPhotoInputRef.current?.click();
+    };
+
+    const handleCategoryPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        const newUrls: string[] = [];
+        for (let i = 0; i < files.length; i++) {
+            const url = URL.createObjectURL(files[i]);
+            newUrls.push(url);
+        }
+
+        setCollateralPhotos(prev => ({
+            ...prev,
+            [currentPhotoGuideId]: [...(prev[currentPhotoGuideId] || []), ...newUrls]
+        }));
+
+        toast.success(`เพิ่มรูปสำเร็จ (${newUrls.length} รูป)`);
+        e.target.value = '';
+    };
+
+    const handleRemoveCategoryPhoto = (guideId: string, photoIndex: number) => {
+        const photo = collateralPhotos[guideId]?.[photoIndex];
+        if (photo) URL.revokeObjectURL(photo);
+        setCollateralPhotos(prev => ({
+            ...prev,
+            [guideId]: (prev[guideId] || []).filter((_, i) => i !== photoIndex)
+        }));
+    };
+
     const handleAnalyzeDocuments = () => {
         setIsAnalyzing(true);
         setAiDetectedFields([]);
@@ -803,196 +859,117 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
                             </div>
 
-                            {/* PHOTO UPLOAD SECTION - 2 COLUMN LAYOUT */}
+                            {/* PHOTO UPLOAD SECTION - CATEGORIZED GRID */}
                             <div className="p-6 space-y-4">
                                 {/* Header */}
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                        <Camera className="w-4 h-4 text-chaiyo-blue" />
-                                        รูปถ่ายหลักประกัน
-                                        <button
-                                            type="button"
-                                            onClick={() => setPhotoGuideDialogOpen(true)}
-                                            className="text-gray-400 hover:text-chaiyo-blue transition-colors"
-                                        >
-                                            <Info className="w-4 h-4" />
-                                        </button>
+                                <div className="flex items-center gap-3">
+                                    <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                                        <ImagePlus className="w-5 h-5 text-chaiyo-blue" />
+                                        อัพโหลดรูปหลักประกัน
                                     </h4>
-                                    <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full hidden">
-                                        {analyzedPhotoCount} / {getPhotoDocs(formData.collateralType).length} รูป
-                                    </span>
                                 </div>
 
-                                {/* 2-Column Layout: 60% Left (Images) + 40% Right (Checklist) */}
-                                <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
-                                    {/* LEFT: Photo Upload Area */}
-                                    <div className="space-y-3">
-                                        {/* Upload Buttons */}
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="file"
-                                                ref={photoInputRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                multiple
-                                                onChange={handlePhotoUpload}
-                                            />
-                                            <input
-                                                type="file"
-                                                ref={photoCameraRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                capture="environment"
-                                                onChange={handlePhotoUpload}
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => photoInputRef.current?.click()}
-                                                disabled={isAnalyzing}
-                                                size="sm"
-                                                className={formData.collateralType !== 'land' ? 'hidden' : ''}
-                                            >
-                                                <Upload className="w-4 h-4 mr-2" />
-                                                อัปโหลดเอกสาร
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => photoCameraRef.current?.click()}
-                                                disabled={isAnalyzing}
-                                                size="sm"
-                                            >
-                                                <Camera className="w-4 h-4 mr-2" />
-                                                เปิดกล้อง
-                                            </Button>
-                                        </div>
+                                {/* Categorized Grid Layout */}
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-8">
+                                    {COLLATERAL_PHOTO_GUIDES[formData.collateralType].map((guide) => {
+                                        const photos = collateralPhotos[guide.id] || [];
+                                        const hasPhotos = photos.length > 0;
 
-                                        {/* Photo Grid - Larger Images */}
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50/50 p-3 rounded-xl border border-dashed border-gray-200 min-h-[280px]">
-                                            {uploadedPhotos.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60 py-8">
-                                                    <FilePlus className="w-10 h-10" />
-                                                    <p className="text-sm font-medium italic">ยังไม่มีการอัพโหลดรูปถ่าย</p>
-                                                </div>
-                                            ) : (
-                                                uploadedPhotos.map((photoObj: any, idx) => {
-                                                    const url = typeof photoObj === 'string' ? photoObj : photoObj.url;
-                                                    const label = typeof photoObj === 'string' ? "อื่นๆ" : (photoObj.label || "อื่นๆ");
-
-                                                    return (
-                                                        <div key={idx} className="flex flex-col gap-2 relative bg-white p-2 border border-border-strong rounded-lg shadow-sm group">
-                                                            <div className="relative aspect-[3/4] rounded-[4px] overflow-hidden bg-gray-50 border border-border-subtle">
-                                                                <img src={url} alt={`photo-${idx}`} className="w-full h-full object-cover" />
-                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                                    <button
-                                                                        onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPhotos.map((p: any) => typeof p === 'string' ? p : p.url)); }}
-                                                                        className="p-1.5 bg-white/20 hover:bg-white/40 rounded-full border border-white/30 backdrop-blur-sm text-white"
-                                                                    >
-                                                                        <Eye className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleRemovePhoto(idx)}
-                                                                        className="p-1.5 bg-white/20 hover:bg-red-500 rounded-full border border-white/30 backdrop-blur-sm text-white"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </button>
-                                                                </div>
-                                                                {idx >= analyzedPhotoCount && isAnalyzing && (
-                                                                    <div className="absolute inset-0 bg-blue-500/10 flex items-center justify-center">
-                                                                        <Loader2 className="w-6 h-6 text-chaiyo-blue animate-spin" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <Select
-                                                                value={label}
-                                                                onValueChange={(val) => {
-                                                                    const newPhotos: any[] = [...uploadedPhotos];
-                                                                    if (typeof newPhotos[idx] === 'string') {
-                                                                        newPhotos[idx] = { url: newPhotos[idx], label: val };
-                                                                    } else {
-                                                                        newPhotos[idx] = { ...newPhotos[idx], label: val };
-                                                                    }
-                                                                    setUploadedPhotos(newPhotos);
-                                                                }}
-                                                            >
-                                                                <SelectTrigger className="h-9 text-[11px] bg-white border-gray-200">
-                                                                    <div className="truncate text-left pr-2"><SelectValue /></div>
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {getPhotoDocs(formData.collateralType).map((doc, dIdx) => (
-                                                                        <SelectItem key={dIdx} value={doc.label} className="text-[11px]">
-                                                                            {doc.label}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                    <SelectItem value="อื่นๆ" className="text-[11px]">อื่นๆ</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                    )
-                                                })
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* RIGHT: Required Photos Checklist - Auto-checked by AI */}
-                                    <div className="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-200">
-                                        <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wide">รายการรูปที่ต้องใช้</h5>
-                                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                                            {getPhotoDocs(formData.collateralType).map((doc, idx) => {
-                                                const isAnalyzed = idx < analyzedPhotoCount;
-
-                                                return (
-                                                    <div key={idx} className={cn(
-                                                        "flex items-start gap-2 p-2 rounded border transition-colors text-xs",
-                                                        isAnalyzed
-                                                            ? "bg-emerald-50 border-emerald-200"
-                                                            : "bg-white border-gray-200"
-                                                    )}>
-                                                        <div className={cn(
-                                                            "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
-                                                            isAnalyzed
-                                                                ? "bg-emerald-500 text-white"
-                                                                : "border-2 border-gray-300"
-                                                        )}>
-                                                            {isAnalyzed && (
-                                                                <Check className="w-3 h-3 font-bold" />
-                                                            )}
-                                                        </div>
-                                                        <p className={cn(
-                                                            "leading-tight flex-1",
-                                                            isAnalyzed ? "text-emerald-700 font-medium" : "text-gray-600"
-                                                        )}>
-                                                            {doc.label}
-                                                        </p>
-                                                        <div className="flex items-center gap-1 flex-shrink-0">
-                                                            {doc.guideline && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setPhotoInfoDialog({ open: true, label: doc.label, guideline: doc.guideline })}
-                                                                    className="p-1 text-gray-400 hover:text-chaiyo-blue transition-colors"
-                                                                    title="ดูรายละเอียด"
-                                                                >
-                                                                    <Info className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                            {doc.example && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setExamplePhotoDialog({ open: true, label: doc.label, example: doc.example })}
-                                                                    className="p-1 text-gray-400 hover:text-chaiyo-blue transition-colors"
-                                                                    title="ดูตัวอย่าง"
-                                                                >
-                                                                    <Eye className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                        {isAnalyzed && (
-                                                            <span className="text-[10px] text-emerald-600 font-semibold whitespace-nowrap">ยืนยันแล้ว</span>
+                                        return (
+                                            <div key={guide.id} className="space-y-3">
+                                                {/* 1. Label and Info Icon */}
+                                                <div className="flex items-center justify-between group">
+                                                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
+                                                        {guide.title}
+                                                        {hasPhotos && (
+                                                            <span className="ml-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                                                {photos.length}
+                                                            </span>
                                                         )}
+                                                    </Label>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
+                                                                title="ดูตัวอย่างภาพ"
+                                                            >
+                                                                <Info className="w-4 h-4" />
+                                                            </button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>{guide.title}</DialogTitle>
+                                                                <DialogDescription>{guide.description}</DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
+                                                                <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </div>
+
+                                                {/* 2. Photo Grid */}
+                                                {hasPhotos ? (
+                                                    <div className="space-y-2">
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {photos.map((photoUrl: string, pIdx: number) => (
+                                                                <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
+                                                                    <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
+                                                                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
+                                                                        <CheckCircle2 className="w-3 h-3" />
+                                                                    </div>
+                                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                setLightboxIndex(pIdx);
+                                                                                setUploadedDocs(photos);
+                                                                            }}
+                                                                            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all"
+                                                                        >
+                                                                            <Eye className="w-4 h-4" />
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleRemoveCategoryPhoto(guide.id, pIdx)}
+                                                                            className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                            {/* Add more photos button */}
+                                                            <div
+                                                                className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
+                                                                onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
+                                                            >
+                                                                <Plus className="w-6 h-6 text-gray-400" />
+                                                                <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
+                                                ) : (
+                                                    <div
+                                                        className="relative aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
+                                                        onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
+                                                    >
+                                                        <div className="flex flex-col items-center justify-center p-6 text-center gap-3">
+                                                            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 border border-gray-200">
+                                                                <guide.icon className="w-6 h-6" />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-bold leading-tight text-gray-600">แตะเพื่ออัพโหลด</p>
+                                                                <p className="text-[10px] text-muted-foreground">รองรับไฟล์ภาพ JPEG, PNG</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -4218,6 +4195,16 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Hidden file input for categorized photo uploads */}
+            <input
+                type="file"
+                ref={categoryPhotoInputRef}
+                className="hidden"
+                accept="image/*"
+                multiple
+                onChange={handleCategoryPhotoUpload}
+            />
         </div>
     );
 }
