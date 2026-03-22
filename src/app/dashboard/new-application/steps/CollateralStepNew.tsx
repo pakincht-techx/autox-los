@@ -561,6 +561,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const paperInputRef = useRef<HTMLInputElement>(null);
     const paperCameraRef = useRef<HTMLInputElement>(null);
     const categoryPhotoInputRef = useRef<HTMLInputElement>(null);
+    const categoryCameraRef = useRef<HTMLInputElement>(null);
     const [currentPhotoGuideId, setCurrentPhotoGuideId] = useState<string>("");
 
     // Set current year on client side to prevent hydration mismatch
@@ -737,7 +738,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
     const handleTriggerCategoryPhotoUpload = (guideId: string) => {
         setCurrentPhotoGuideId(guideId);
-        categoryPhotoInputRef.current?.click();
+        categoryCameraRef.current?.click();
     };
 
     const handleCategoryPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -948,8 +949,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                 className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
                                                                 onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
                                                             >
-                                                                <Plus className="w-6 h-6 text-gray-400" />
-                                                                <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
+                                                                <Camera className="w-6 h-6 text-gray-400" />
+                                                                <span className="text-[10px] text-muted-foreground mt-1">ถ่ายเพิ่มเติม</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -963,8 +964,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                 <guide.icon className="w-6 h-6" />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <p className="text-xs font-bold leading-tight text-gray-600">แตะเพื่ออัพโหลด</p>
-                                                                <p className="text-[10px] text-muted-foreground">รองรับไฟล์ภาพ JPEG, PNG</p>
+                                                                <p className="text-xs font-bold leading-tight text-gray-600">แตะเพื่อเปิดกล้อง</p>
+                                                                <p className="text-[10px] text-muted-foreground">ถ่ายรูปด้วยกล้องตรงนี้</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -4204,6 +4205,17 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 ref={categoryPhotoInputRef}
                 className="hidden"
                 accept="image/*"
+                multiple
+                onChange={handleCategoryPhotoUpload}
+            />
+
+            {/* Hidden camera input for collateral photo uploads */}
+            <input
+                type="file"
+                ref={categoryCameraRef}
+                className="hidden"
+                accept="image/*"
+                capture="environment"
                 multiple
                 onChange={handleCategoryPhotoUpload}
             />
