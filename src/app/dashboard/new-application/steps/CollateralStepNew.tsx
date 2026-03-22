@@ -155,20 +155,23 @@ const DEED_TYPES = [
     { value: "ตราจองที่ว่าได้ทำประโยชน์แล้ว", label: "ตราจองที่ว่าได้ทำประโยชน์แล้ว" },
 ];
 
-const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; demoUrl: string }>> = {
+const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; required: boolean; demoUrl: string }>> = {
     car: [
-        { id: "front", title: "ภาพด้านหน้า", icon: Camera, description: "ถ่ายรถจากด้านหน้า", demoUrl: "https://via.placeholder.com/400x300?text=Front+View" },
-        { id: "back", title: "ภาพด้านหลัง", icon: Camera, description: "ถ่ายรถจากด้านหลัง", demoUrl: "https://via.placeholder.com/400x300?text=Back+View" },
-        { id: "left", title: "ภาพด้านซ้าย", icon: Camera, description: "ถ่ายรถจากด้านซ้าย", demoUrl: "https://via.placeholder.com/400x300?text=Left+View" },
-        { id: "right", title: "ภาพด้านขวา", icon: Camera, description: "ถ่ายรถจากด้านขวา", demoUrl: "https://via.placeholder.com/400x300?text=Right+View" },
-        { id: "interior", title: "ภาพภายใน", icon: Camera, description: "ถ่ายภายในรถ", demoUrl: "https://via.placeholder.com/400x300?text=Interior" },
-        { id: "odometer", title: "มาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง", demoUrl: "https://via.placeholder.com/400x300?text=Odometer" },
+        { id: "front", title: "รูปด้านหน้า", icon: Camera, description: "ถ่ายรถจากด้านหน้า เห็นเบอร์ทะเบียนและสภาพหน้ารถชัดเจน", required: true, demoUrl: "/images/guidelines/car_front_demo.png" },
+        { id: "back", title: "รูปด้านหลัง", icon: Camera, description: "ถ่ายรถจากด้านหลัง เห็นเบอร์ทะเบียนด้านหลังและสภาพหลังรถ", required: true, demoUrl: "/images/guidelines/car_back_demo.png" },
+        { id: "left_side", title: "รูปด้านซ้าย", icon: Camera, description: "ถ่ายรถจากด้านข้างซ้าย เห็นสภาพแบบมุมกว้าง", required: true, demoUrl: "/images/guidelines/car_left_demo.png" },
+        { id: "right_side", title: "รูปด้านขวา", icon: Camera, description: "ถ่ายรถจากด้านข้างขวา เห็นสภาพแบบมุมกว้าง", required: true, demoUrl: "/images/guidelines/car_right_demo.png" },
+        { id: "interior", title: "รูปภายในรถ", icon: Camera, description: "ถ่ายภายในรถ เห็นภาพโดยรวม พื้นที่นั่ง และด้านหลัง", required: true, demoUrl: "/images/guidelines/car_interior_demo.png" },
+        { id: "odometer", title: "รูปมาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง (Odometer) และแดชบอร์ดให้ชัดเจน", required: true, demoUrl: "/images/guidelines/car_odometer_demo.png" },
+        { id: "license_plate", title: "รูปเบอร์ทะเบียน", icon: Camera, description: "ถ่ายเบอร์ทะเบียนรถให้ชัดเจน สามารถอ่านได้ทั้งหมด", required: true, demoUrl: "/images/guidelines/car_plate_demo.png" },
+        { id: "overall_condition", title: "รูปสภาพโดยรวม", icon: Camera, description: "ถ่ายรถจากระยะหนึ่งเพื่อให้เห็นสภาพโดยรวมของรถ", required: false, demoUrl: "/images/guidelines/car_overall_demo.png" },
     ],
     land: [
-        { id: "overall", title: "ภาพรวมของที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Overall+View" },
-        { id: "boundary", title: "ภาพเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดนของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Boundary" },
-        { id: "deed", title: "โฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Deed" },
-        { id: "surroundings", title: "ภาพบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณโดยรอบที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Surroundings" },
+        { id: "overall_view", title: "รูปมุมกว้างที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน เห็นพื้นที่ทั้งหมด และบริเวณข้างเคียง", required: true, demoUrl: "/images/guidelines/land_overall_demo.png" },
+        { id: "boundary_markers", title: "รูปเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดน เส้นกั้น หรือรั้วของที่ดิน เห็นมุมต่างๆ ชัดเจน", required: true, demoUrl: "/images/guidelines/land_boundary_demo.png" },
+        { id: "deed_document", title: "รูปโฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน ให้เห็นเลขที่ เนื้อที่ และหมายเหตุสำคัญชัดเจน", required: true, demoUrl: "/images/guidelines/land_deed_demo.png" },
+        { id: "address_sign", title: "รูปเลขที่ตั้งที่ดิน", icon: Camera, description: "ถ่ายเลขที่ตั้งที่ดิน หรือป้ายบอกตำแหน่งให้ชัดเจน", required: true, demoUrl: "/images/guidelines/land_address_demo.png" },
+        { id: "surroundings", title: "รูปบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณข้างเคียง สถานที่ใกล้เคียง หรือจุดสังเกตุหลัก", required: false, demoUrl: "/images/guidelines/land_surroundings_demo.png" },
     ],
 };
 
@@ -881,6 +884,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 <div className="flex items-center justify-between group">
                                                     <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
                                                         {guide.title}
+                                                        {guide.required && <span className="text-red-500 ml-0.5">*</span>}
                                                         {hasPhotos && (
                                                             <span className="ml-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
                                                                 {photos.length}
