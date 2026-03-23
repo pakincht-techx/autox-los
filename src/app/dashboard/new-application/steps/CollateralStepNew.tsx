@@ -166,11 +166,37 @@ const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string;
         { id: "interior_console_gear", title: "รูปภายในรถ + เห็นคอนโซล + เกียร์รถ", icon: Camera, description: "ถ่ายภายในรถให้เห็นคอนโซล เกียร์ สถานะเบาะและภาพโดยรวมภายใน", demoUrl: "/images/guidelines/car_interior_console_gear_demo.png" },
         { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถัง (VIN Number) บริเวณประตูคนขับหรือพื้นรถให้ชัดเจน", demoUrl: "/images/guidelines/car_vin_chassis_demo.png" },
     ],
+    moto: [
+        { id: "front_plate_engine", title: "รูปหน้ารถจักรยานยนต์ เห็นป้ายทะเบียน", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียนและหน้ารถชัดเจน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/moto_front_demo.png" },
+        { id: "back_plate_selfie", title: "รูปหลังรถจักรยานยนต์ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/moto_back_selfie_demo.png" },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_left_45_demo.png" },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_right_45_demo.png" },
+        { id: "odometer", title: "รูปมาตรวัดระยะ / แดชบอร์ด", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง (Odometer) ให้ชัดเจน", demoUrl: "/images/guidelines/moto_odometer_demo.png" },
+        { id: "vin_chassis", title: "รูปเลขตัวถัง / หมายเลขเครื่องยนต์", icon: Camera, description: "ถ่ายเลขตัวถังหรือเลขเครื่องยนต์ให้ชัดเจน", demoUrl: "/images/guidelines/moto_vin_demo.png" },
+    ],
+    truck: [
+        { id: "front_plate_engine", title: "รูปหน้ารถบรรทุก เห็นป้ายทะเบียน / เปิดกระโปงหน้า", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/truck_front_demo.png" },
+        { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่", demoUrl: "/images/guidelines/truck_back_selfie_demo.png" },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_left_45_demo.png" },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_right_45_demo.png" },
+        { id: "interior_cabin", title: "รูปห้องโดยสาร / คณะผู้บริหาร", icon: Camera, description: "ถ่ายภายในห้องโดยสารและแดชบอร์ด", demoUrl: "/images/guidelines/truck_interior_demo.png" },
+        { id: "odometer", title: "รูปมาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทางให้ชัดเจน", demoUrl: "/images/guidelines/truck_odometer_demo.png" },
+        { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถังให้ชัดเจน", demoUrl: "/images/guidelines/truck_vin_demo.png" },
+    ],
+    agri: [
+        { id: "front_view", title: "รูปหน้าของเครื่องจักร", icon: Camera, description: "ถ่ายหน้าเครื่องจักรเห็นโครงสร้างหลักชัดเจน", demoUrl: "/images/guidelines/agri_front_demo.png" },
+        { id: "back_view", title: "รูปหลังของเครื่องจักร", icon: Camera, description: "ถ่ายหลังเครื่องจักรเห็นสภาพทั่วไปชัดเจน", demoUrl: "/images/guidelines/agri_back_demo.png" },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_left_45_demo.png" },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_right_45_demo.png" },
+        { id: "engine_motor", title: "รูปเครื่องยนต์ / มอเตอร์", icon: Camera, description: "ถ่ายเครื่องยนต์หรือมอเตอร์ให้ชัดเจน", demoUrl: "/images/guidelines/agri_engine_demo.png" },
+        { id: "serial_badge", title: "รูปหมายเลขประจำตัว / ป้ายเครื่องหมาย", icon: Camera, description: "ถ่ายหมายเลขประจำตัวหรือป้ายเครื่องหมายให้ชัดเจน", demoUrl: "/images/guidelines/agri_serial_demo.png" },
+    ],
     land: [
-        { id: "overall", title: "ภาพรวมของที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Overall+View" },
-        { id: "boundary", title: "ภาพเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดนของที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Boundary" },
-        { id: "deed", title: "โฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Deed" },
-        { id: "surroundings", title: "ภาพบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณโดยรอบที่ดิน", demoUrl: "https://via.placeholder.com/400x300?text=Surroundings" },
+        { id: "overall_view", title: "รูปมุมกว้างที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน เห็นพื้นที่ทั้งหมด และบริเวณข้างเคียง", demoUrl: "/images/guidelines/land_overall_demo.png" },
+        { id: "boundary_markers", title: "รูปเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดน เส้นกั้น หรือรั้วของที่ดิน เห็นมุมต่างๆ ชัดเจน", demoUrl: "/images/guidelines/land_boundary_demo.png" },
+        { id: "deed_document", title: "รูปโฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน ให้เห็นเลขที่ เนื้อที่ และหมายเหตุสำคัญชัดเจน", demoUrl: "/images/guidelines/land_deed_demo.png" },
+        { id: "address_sign", title: "รูปเลขที่ตั้งที่ดิน", icon: Camera, description: "ถ่ายเลขที่ตั้งที่ดิน หรือป้ายบอกตำแหน่งให้ชัดเจน", demoUrl: "/images/guidelines/land_address_demo.png" },
+        { id: "surroundings", title: "รูปบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณข้างเคียง สถานที่ใกล้เคียง หรือจุดสังเกตุหลัก", demoUrl: "/images/guidelines/land_surroundings_demo.png" },
     ],
 };
 
@@ -185,7 +211,7 @@ const generateId = () => {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 };
 
-const createDefaultBlock = () => ({ id: generateId(), width: "", length: "", area: "" });
+const createDefaultBlock = () => ({ id: generateId(), width: "", length: "", area: "", zoneDetails: "" });
 const createDefaultFloor = () => ({ id: generateId(), blocks: [createDefaultBlock()], totalArea: "" });
 const createDefaultOwner = () => ({ id: generateId(), isBorrower: false, name: "", lastName: "", relationship: "" });
 const createDefaultBuilding = () => ({
@@ -549,7 +575,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const [currentYear, setCurrentYear] = useState(2024);
     const [deleteOwnerConfirm, setDeleteOwnerConfirm] = useState<{ type: 'land' | 'building'; ownerIdx: number; buildingIdx?: number; name: string } | null>(null);
     const [coordinateModalOpen, setCoordinateModalOpen] = useState(false);
-    const [searchAddress, setSearchAddress] = useState("");
     const [searchLat, setSearchLat] = useState("");
     const [searchLng, setSearchLng] = useState("");
     const [itemToDelete, setItemToDelete] = useState<{ guideId: string; photoIndex: number } | null>(null);
@@ -873,7 +898,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
 
                                 {/* Categorized Grid Layout */}
-                                <div className={cn("grid gap-x-6 gap-y-8", formData.collateralType === 'car' ? 'grid-cols-4' : 'grid-cols-2')}>
+                                <div className="grid grid-cols-4 gap-x-6 gap-y-8">
                                     {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).map((guide) => {
                                         const photos = collateralPhotos[guide.id] || [];
                                         const hasPhotos = photos.length > 0;
@@ -1532,13 +1557,23 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                                 <div className="p-3 bg-white border-t border-gray-100 space-y-3">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">พิกัดสถานที่ที่ดิน</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">พิกัดสถานที่ที่ดิน</span>
+                                                            <a
+                                                                href="https://landsmaps.dol.go.th/"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-1 text-[10px] text-chaiyo-blue hover:text-chaiyo-blue/70 font-semibold"
+                                                            >
+                                                                Landmap Thailand
+                                                                <ExternalLink className="w-2.5 h-2.5" />
+                                                            </a>
+                                                        </div>
                                                         <div className="flex gap-2">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() => {
-                                                                    setSearchAddress("");
                                                                     setSearchLat(formData.landLat || "");
                                                                     setSearchLng(formData.landLng || "");
                                                                     setCoordinateModalOpen(true);
@@ -1564,7 +1599,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                                     {formData.landLat && formData.landLng ? (
                                                         <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100 cursor-pointer hover:bg-blue-100/50 transition-colors" onClick={() => {
-                                                            setSearchAddress("");
                                                             setSearchLat(formData.landLat || "");
                                                             setSearchLng(formData.landLng || "");
                                                             setCoordinateModalOpen(true);
@@ -1585,7 +1619,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         </div>
                                                     ) : (
                                                         <p className="text-[10px] text-muted-foreground cursor-pointer hover:text-gray-700" onClick={() => {
-                                                            setSearchAddress("");
                                                             setSearchLat("");
                                                             setSearchLng("");
                                                             setCoordinateModalOpen(true);
@@ -2720,17 +2753,19 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                     </div>
                                                                 </div>
 
-                                                                {/* Cost Approach checkbox */}
-                                                                <div className="flex items-center gap-3">
-                                                                    <Checkbox
-                                                                        checked={methodData.hasCostApproachLand || false}
-                                                                        onCheckedChange={(checked) => updateMethodData('hasCostApproachLand', checked)}
-                                                                    />
-                                                                    <Label className="text-sm font-medium cursor-pointer">มีราคาประเมินแบบคิดต้นทุน (Cost Approach)</Label>
-                                                                </div>
+                                                                {/* Cost Approach checkbox - only for non-land collaterals */}
+                                                                {formData.collateralType !== 'land' && (
+                                                                    <div className="flex items-center gap-3">
+                                                                        <Checkbox
+                                                                            checked={methodData.hasCostApproachLand || false}
+                                                                            onCheckedChange={(checked) => updateMethodData('hasCostApproachLand', checked)}
+                                                                        />
+                                                                        <Label className="text-sm font-medium cursor-pointer">มีราคาประเมินแบบคิดต้นทุน (Cost Approach)</Label>
+                                                                    </div>
+                                                                )}
 
-                                                                {/* Cost Approach section */}
-                                                                {methodData.hasCostApproachLand && (
+                                                                {/* Cost Approach section - always visible for land, conditional for others */}
+                                                                {(formData.collateralType === 'land' || methodData.hasCostApproachLand) && (
                                                                     <div className="space-y-3">
                                                                         <Label className="text-sm font-semibold text-gray-700">คิดต้นทุน (Cost Approach)</Label>
                                                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
@@ -2908,47 +2943,49 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         </AccordionTrigger>
                                                         <AccordionContent className="px-6 py-6 bg-white">
                                                             <div className="space-y-4">
-                                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                                                    <div className="space-y-1">
-                                                                        <Label className="text-[13px] text-gray-600 ml-1">ชื่อหมู่บ้านจัดสรร (ถ้ามี)</Label>
-                                                                        <Select
-                                                                            value={methodData.subdivisionName || ""}
-                                                                            onValueChange={(val) => updateMethodData('subdivisionName', val)}
-                                                                        >
-                                                                            <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20">
-                                                                                <SelectValue placeholder="เลือกหมู่บ้าน..." />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent>
-                                                                                {SUBDIVISIONS.map((subdivision) => (
-                                                                                    <SelectItem key={subdivision.value} value={subdivision.value}>
-                                                                                        {subdivision.label}
-                                                                                    </SelectItem>
-                                                                                ))}
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                    {methodData.subdivisionName === "อื่นๆ" && (
+                                                                {formData.landDeedType !== "อ.ช. 2" && (
+                                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                                                         <div className="space-y-1">
-                                                                            <Label className="text-[13px] text-gray-600 ml-1">ระบุชื่อหมู่บ้าน</Label>
-                                                                            <Input
-                                                                                value={methodData.subdivisionNameOther || ""}
-                                                                                onChange={(e) => updateMethodData('subdivisionNameOther', e.target.value)}
-                                                                                className="h-10 rounded-xl bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
-                                                                                placeholder="โปรดระบุ"
-                                                                            />
+                                                                            <Label className="text-[13px] text-gray-600 ml-1">ชื่อหมู่บ้านจัดสรร (ถ้ามี)</Label>
+                                                                            <Select
+                                                                                value={methodData.subdivisionName || ""}
+                                                                                onValueChange={(val) => updateMethodData('subdivisionName', val)}
+                                                                            >
+                                                                                <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20">
+                                                                                    <SelectValue placeholder="เลือกหมู่บ้าน..." />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    {SUBDIVISIONS.map((subdivision) => (
+                                                                                        <SelectItem key={subdivision.value} value={subdivision.value}>
+                                                                                            {subdivision.label}
+                                                                                        </SelectItem>
+                                                                                    ))}
+                                                                                </SelectContent>
+                                                                            </Select>
                                                                         </div>
-                                                                    )}
-                                                                    {methodData.subdivisionName !== "อื่นๆ" && (
-                                                                        <div></div>
-                                                                    )}
-                                                                </div>
+                                                                        {methodData.subdivisionName === "อื่นๆ" && (
+                                                                            <div className="space-y-1">
+                                                                                <Label className="text-[13px] text-gray-600 ml-1">ระบุชื่อหมู่บ้าน</Label>
+                                                                                <Input
+                                                                                    value={methodData.subdivisionNameOther || ""}
+                                                                                    onChange={(e) => updateMethodData('subdivisionNameOther', e.target.value)}
+                                                                                    className="h-10 rounded-xl bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-chaiyo-blue/20"
+                                                                                    placeholder="โปรดระบุ"
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                        {methodData.subdivisionName !== "อื่นๆ" && (
+                                                                            <div></div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
 
                                                                 <div className="flex items-center justify-between">
                                                                     <h5 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                                                                         <Plus className="w-4 h-4 text-emerald-500" />
                                                                         สิ่งปลูกสร้าง​ {(methodData.buildings || []).length}
                                                                     </h5>
-                                                                    {(methodData.buildings || []).length < 20 && (
+                                                                    {(methodData.buildings || []).length < (formData.landDeedType === "อ.ช. 2" ? 1 : 20) && (
                                                                         <Button
                                                                             type="button"
                                                                             variant="outline"
@@ -2964,7 +3001,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             }}
                                                                             className="text-xs gap-1 h-7"
                                                                         >
-                                                                            <Plus className="w-3 h-3" /> เพิ่มสิ่งปลูกสร้าง ({(methodData.buildings || []).length}/20)
+                                                                            <Plus className="w-3 h-3" /> เพิ่มสิ่งปลูกสร้าง ({(methodData.buildings || []).length}/{formData.landDeedType === "อ.ช. 2" ? 1 : 20})
                                                                         </Button>
                                                                     )}
                                                                 </div>
@@ -3196,17 +3233,19 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             {/* Cost Approach and Market Approach for external appraisal */}
                                                                             {methodKey === "ใบประเมินราคาจากบริษัทภายนอก" && (
                                                                                 <div className="space-y-4 mt-4 pt-4 border-t border-gray-200">
-                                                                                    {/* Cost Approach checkbox */}
-                                                                                    <div className="flex items-center gap-3">
-                                                                                        <Checkbox
-                                                                                            checked={building.hasCostApproach || false}
-                                                                                            onCheckedChange={(checked) => updateBuilding('hasCostApproach', checked)}
-                                                                                        />
-                                                                                        <Label className="text-sm font-medium cursor-pointer">มีราคาประเมินแบบคิดต้นทุน (Cost Approach)</Label>
-                                                                                    </div>
+                                                                                    {/* Cost Approach checkbox - only for non-land collaterals */}
+                                                                                    {formData.collateralType !== 'land' && (
+                                                                                        <div className="flex items-center gap-3">
+                                                                                            <Checkbox
+                                                                                                checked={building.hasCostApproach || false}
+                                                                                                onCheckedChange={(checked) => updateBuilding('hasCostApproach', checked)}
+                                                                                            />
+                                                                                            <Label className="text-sm font-medium cursor-pointer">มีราคาประเมินแบบคิดต้นทุน (Cost Approach)</Label>
+                                                                                        </div>
+                                                                                    )}
 
-                                                                                    {/* Cost Approach section */}
-                                                                                    {building.hasCostApproach && (
+                                                                                    {/* Cost Approach section - always visible for land, conditional for others */}
+                                                                                    {(formData.collateralType === 'land' || building.hasCostApproach) && (
                                                                                         <div className="space-y-2">
                                                                                             <Label className="text-sm font-semibold text-gray-700">คิดต้นทุน (Cost Approach)</Label>
                                                                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
@@ -3315,7 +3354,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             <div className="space-y-3 mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50/50">
                                                                                 <div className="flex items-center justify-between">
                                                                                     <span className="text-sm font-semibold text-gray-900">จำนวนชั้น: {(building.floors || []).length}</span>
-                                                                                    {(building.floors || []).length < 10 && (
+                                                                                    {(building.floors || []).length < (formData.landDeedType === "อ.ช. 2" ? 3 : 10) && (
                                                                                         <Button
                                                                                             type="button"
                                                                                             variant="outline"
@@ -3323,7 +3362,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                             onClick={() => updateFloors([...(building.floors || []), createDefaultFloor()])}
                                                                                             className="text-xs gap-1 h-7"
                                                                                         >
-                                                                                            <Plus className="w-3 h-3" /> เพิ่มชั้น ({(building.floors || []).length}/10)
+                                                                                            <Plus className="w-3 h-3" /> เพิ่มชั้น ({(building.floors || []).length}/{formData.landDeedType === "อ.ช. 2" ? 3 : 10})
                                                                                         </Button>
                                                                                     )}
                                                                                 </div>
@@ -3379,6 +3418,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                                     <TableHeader className="bg-gray-50/80">
                                                                                                         <TableRow>
                                                                                                             <TableHead className="w-[80px] text-center text-xs">บล็อก</TableHead>
+                                                                                                            <TableHead className="text-xs">รายละเอียดโซน</TableHead>
                                                                                                             <TableHead className="text-xs">Width (ม.) <span className="text-red-500">*</span></TableHead>
                                                                                                             <TableHead className="text-xs">Length (ม.) <span className="text-red-500">*</span></TableHead>
                                                                                                             <TableHead className="w-[100px] text-xs">Area (ตร.ม.)</TableHead>
@@ -3388,7 +3428,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                                     <TableBody>
                                                                                                         {(floor.blocks || []).length === 0 ? (
                                                                                                             <TableRow>
-                                                                                                                <TableCell colSpan={5} className="text-center py-6 text-gray-400 text-sm">
+                                                                                                                <TableCell colSpan={6} className="text-center py-6 text-gray-400 text-sm">
                                                                                                                     คลิก "เพิ่มบล็อก" เพื่อเพิ่มข้อมูล
                                                                                                                 </TableCell>
                                                                                                             </TableRow>
@@ -3412,6 +3452,15 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                                                     <TableRow key={_block.id || blkIdx} className="hover:bg-transparent">
                                                                                                                         <TableCell className="text-center align-middle text-xs font-medium">
                                                                                                                             {blkIdx + 1}
+                                                                                                                        </TableCell>
+                                                                                                                        <TableCell className="align-top">
+                                                                                                                            <Input
+                                                                                                                                type="text"
+                                                                                                                                value={_block.zoneDetails || ""}
+                                                                                                                                onChange={(e) => updateBlock('zoneDetails', e.target.value)}
+                                                                                                                                className="h-9 rounded-lg text-sm bg-white"
+                                                                                                                                placeholder="เช่น ห้อง A"
+                                                                                                                            />
                                                                                                                         </TableCell>
                                                                                                                         <TableCell className="align-top">
                                                                                                                             <Input
@@ -4105,55 +4154,29 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <DialogHeader className="pb-4">
                         <DialogTitle>ตั้งตำแหน่งที่ดิน</DialogTitle>
                         <DialogDescription>
-                            ค้นหาพิกัดจากที่อยู่หรือป้อนพิกัด lat/longitude โดยตรง
+                            ป้อนพิกัด lat, long โดยตรง
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        {/* Search by Address */}
+                        {/* Merged Coordinates Input */}
                         <div className="space-y-2">
-                            <Label className="text-sm font-medium">ค้นหาจากที่อยู่ (บ้านเลขที่)</Label>
+                            <Label className="text-sm font-medium">พิกัด (ละติจูด, ลองจิจูด)</Label>
                             <Input
-                                placeholder="เช่น 123 ม.1 ต.สมเด็จ อ.เมืองพระนครศรีอยุธยา"
-                                value={searchAddress}
-                                onChange={(e) => setSearchAddress(e.target.value)}
+                                placeholder="เช่น 14.352519, 100.562641"
+                                value={searchLat && searchLng ? `${searchLat}, ${searchLng}` : ""}
+                                onChange={(e) => {
+                                    const coords = e.target.value.split(",").map(c => c.trim());
+                                    if (coords.length === 2) {
+                                        setSearchLat(coords[0]);
+                                        setSearchLng(coords[1]);
+                                    } else if (coords.length === 1) {
+                                        setSearchLat(coords[0]);
+                                        setSearchLng("");
+                                    }
+                                }}
                                 className="h-10 border-gray-200"
                             />
-                            <p className="text-xs text-gray-500">กรุณาระบุที่อยู่ให้ชัดเจนเพื่อค้นหาพิกัดได้ถูกต้อง</p>
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-gray-200"></span>
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-2 text-gray-500">หรือ</span>
-                            </div>
-                        </div>
-
-                        {/* Paste Coordinates */}
-                        <div className="space-y-3">
-                            <Label className="text-sm font-medium">ป้อนพิกัด โดยตรง</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <Label className="text-xs text-gray-600">ละติจูด (Latitude)</Label>
-                                    <Input
-                                        placeholder="เช่น 14.352519"
-                                        value={searchLat}
-                                        onChange={(e) => setSearchLat(e.target.value)}
-                                        className="h-9 text-xs border-gray-200"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs text-gray-600">ลองจิจูด (Longitude)</Label>
-                                    <Input
-                                        placeholder="เช่น 100.562641"
-                                        value={searchLng}
-                                        onChange={(e) => setSearchLng(e.target.value)}
-                                        className="h-9 text-xs border-gray-200"
-                                    />
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500">สามารถคัดลอก lat/lng จาก Google Maps ได้</p>
+                            <p className="text-xs text-gray-500">สามารถคัดลอก lat, lng จาก Google Maps ได้ (แยกด้วยเครื่องหมายจุลภาค)</p>
                         </div>
                     </div>
 
@@ -4183,12 +4206,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     } else {
                                         toast.error("พิกัดไม่ถูกต้อง กรุณาตรวจสอบค่า lat/lng");
                                     }
-                                } else if (searchAddress) {
-                                    toast.info("กำลังค้นหาพิกัด...");
-                                    // In the future, you can integrate with Google Geocoding API here
-                                    toast.error("ฟีเจอร์ค้นหาจากที่อยู่กำลังพัฒนา กรุณาป้อนพิกัด lat/lng โดยตรง");
                                 } else {
-                                    toast.error("กรุณาป้อนที่อยู่หรือพิกัด");
+                                    toast.error("กรุณาป้อนพิกัด lat, lng");
                                 }
                             }}
                             className="h-9 text-sm bg-chaiyo-blue hover:bg-chaiyo-blue/90"
