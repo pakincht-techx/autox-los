@@ -105,7 +105,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
         if (isApplicationStarted && appId) {
             const firstName = formData?.firstName;
-            const displayAppId = appId.length > 8 ? `...${appId.slice(-6)}` : appId;
+            const displayAppId = appId.length > 8 ? appId.slice(8) : appId;
             const appLabel = firstName ? `${displayAppId} (${firstName})` : displayAppId;
 
             items.push({
@@ -179,8 +179,16 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
 
 
+    const isGuarantorDetailPage = pathname.includes('/guarantors/') && !pathname.endsWith('/guarantors') && !pathname.endsWith('/add');
+
     return (
         <div className="h-full bg-sidebar">
+            {/* Guarantor detail page gets its own full-width layout (like application detail) */}
+            {isApplicationPhase && isGuarantorDetailPage ? (
+                <div className="h-full animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    {children}
+                </div>
+            ) : (
             <div className="max-w-7xl mx-auto space-y-6 p-6 lg:px-6 lg:py-6 pb-32">
 
 
@@ -218,6 +226,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     </div>
                 )}
             </div>
+            )}
 
             {/* ── Confirm Leave Dialog ──────────────────────────────────── */}
             <AlertDialog open={confirmLeaveDialog} onOpenChange={setConfirmLeaveDialog}>

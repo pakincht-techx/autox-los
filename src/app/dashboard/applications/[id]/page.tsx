@@ -5,7 +5,7 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -295,34 +295,11 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
         setBreadcrumbs([
             { label: source.label, href: source.href },
-            { label: `...${app.applicationNo.slice(-6)} (${firstName})`, isActive: true }
+            { label: `${app.applicationNo.slice(8)} (${firstName})`, isActive: true }
         ]);
 
-        if (canEdit) {
-            setRightContent(
-                <Button
-                    variant="default"
-                    onClick={() => setIsSubmitDialogOpen(true)}
-                >
-                    <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
-                </Button>
-            );
-        } else if (viewMode === 'approver' && currentStatus !== 'Sent Back') {
-            // Approver (legal team): single review submission button — only when still In Review
-            setRightContent(
-                <div className="flex items-center gap-2">
-                    <Button
-                        className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                        onClick={() => setReviewDialogOpen(true)}
-                    >
-                        <MessageSquare className="w-4 h-4 mr-1.5" /> ให้ความเห็น
-                    </Button>
-                </div>
-            );
-        } else {
-            // Readonly or Sent Back: no actions
-            setRightContent(null);
-        }
+        // No right content in the top bar — action buttons are in the header section
+        setRightContent(null);
 
         return () => {
             setBreadcrumbs([]);
@@ -332,45 +309,49 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
-            <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
-
-                {/* ═══════════════════════════════════════════════════════════
-                    SECTION 1: APP HEADER
-                ═══════════════════════════════════════════════════════════ */}
-                <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-
+            {/* ═══════════════════════════════════════════════════════════
+                SECTION 1: APP HEADER (full-width border bottom)
+            ═══════════════════════════════════════════════════════════ */}
+            <div className="border-b border-gray-200 bg-sidebar">
+                <div className="max-w-6xl mx-auto px-6 lg:px-8 py-6">
+                    <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                            <h1 className="text-3xl font-bold text-foreground tracking-tight">
                                 {app.applicantName}{app.applicantNickname && <span className="text-gray-400 font-medium ml-1">({app.applicantNickname})</span>}
                             </h1>
-                            <div className="flex items-center gap-3 mt-2">
+                            <div className="flex items-center gap-2.5 mt-2">
                                 <Badge variant={getStatusBadgeVariant(currentStatus)}>
                                     {getStatusLabel(currentStatus)}
                                 </Badge>
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <span className="text-gray-300">•</span>
-                                    <span className="font-medium tracking-wide">{app.applicationNo}</span>
-                                    <span className="text-gray-300">•</span>
-                                    <span>ดำเนินการล่าสุด: {app.lastActionTime}</span>
-                                </div>
+                                <span className="text-gray-300">•</span>
+                                <span className="text-sm font-semibold tracking-wide text-gray-700">{app.applicationNo}</span>
+                                <span className="text-gray-300">•</span>
+                                <span className="text-sm text-gray-500">{app.loanProductName}</span>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2.5">
-                        <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="text-xs text-gray-400">เบอร์โทร</span>
-                            <span className="text-sm text-gray-700 font-semibold">{app.phone}</span>
-                        </div>
-                        <div className="w-px h-4 bg-gray-200"></div>
-                        <div className="flex items-center gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="text-xs text-gray-400">LINEID</span>
-                            <span className="text-sm text-gray-700 font-semibold">-</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {canEdit && (
+                                <Button
+                                    variant="default"
+                                    onClick={() => setIsSubmitDialogOpen(true)}
+                                >
+                                    <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
+                                </Button>
+                            )}
+                            {viewMode === 'approver' && currentStatus !== 'Sent Back' && (
+                                <Button
+                                    className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                                    onClick={() => setReviewDialogOpen(true)}
+                                >
+                                    <MessageSquare className="w-4 h-4 mr-1.5" /> ให้ความเห็น
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
 
                 {/* ═══════════════════════════════════════════════════════════
                     SOFTBLOCK ALERT BANNER (Legal Team / Approver)
@@ -405,107 +386,145 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                 {/* ═══════════════════════════════════════════════════════════
                     SECTION 2: APP DETAIL
                 ═══════════════════════════════════════════════════════════ */}
-                <div className="space-y-5">
-                    {/* ── Group 1: 2-column grid ── */}
-                    <div className="grid grid-cols-2 gap-2 auto-rows-[1fr]">
-                        <SummaryCard
-                            title="ข้อมูลผู้กู้"
-                            value={`${app.applicantAge} ปี`}
-                            isEmpty={!app.customerType}
-                            icon={<User className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.customerInfo ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="อาชีพและรายได้"
-                            value={`${app.incomePerMonth.toLocaleString()}`}
-                            unit="บาท/เดือน"
-                            isEmpty={app.incomePerMonth === 0}
-                            icon={<Coins className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.income ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="หลักประกัน"
-                            value={app.collateralType}
-                            isBold
-                            isEmpty={!app.collateralType}
-                            icon={<Car className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.collateral ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="ภาระหนี้"
-                            value={`${app.debtPerMonth.toLocaleString()}`}
-                            unit="บาท/เดือน"
-                            isEmpty={app.debtPerMonth === 0 || app.debtPerMonth === null}
-                            icon={<Wallet className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.debt ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="ผู้ค้ำประกัน"
-                            value={`${app.guarantorCount} คน`}
-                            isEmpty={app.guarantorCount === 0}
-                            icon={<Users className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.guarantor ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=readonly`) : undefined}
-                        />
-                        <SummaryCard
-                            title="รีไฟแนนซ์"
-                            value={`${app.refinanceCount} รายการ`}
-                            isEmpty={app.refinanceCount === 0}
-                            icon={<RefreshCw className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.refinance ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=readonly`) : undefined}
-                        />
-                    </div>
-
-                    {/* ── Group 2: รายละเอียดสินเชื่อ (full-width / 2-col span) ── */}
-                    <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดสินเชื่อ</p>
-                        <SummaryCard
-                            title="รายละเอียดสินเชื่อและประกันภัย"
-                            value={app.loanProductName}
-                            isBold
-                            isEmpty={false}
-                            icon={<FileText className="w-24 h-24" />}
-                            completionStatus={app.moduleStatus.loanDetail ? 'completed' : 'incomplete'}
-                            onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=draft`) : undefined}
-                            onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=readonly`) : undefined}
-                        />
-                    </div>
-
-                    {/* ── Group 3: เอกสารและสัญญา ── */}
-                    <div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">เอกสารและสัญญา</p>
-                        <div className="grid grid-cols-2 gap-2 auto-rows-[1fr]">
-                            <SummaryCard
-                                title="อัพโหลดเอกสาร"
-                                value={`${app.uploadedDocCount} ไฟล์`}
-                                isEmpty={app.uploadedDocCount === 0}
-                                icon={<Upload className="w-24 h-24" />}
-                                completionStatus={app.moduleStatus.documents ? 'completed' : 'incomplete'}
-                                onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=draft`) : undefined}
-                                onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=readonly`) : undefined}
-                            />
-                            {(consentCompleted || (app.acceptedConsentCount > 0 && mockCase !== '3')) && (
-                                <SummaryCard
-                                    title="T&C Consent"
-                                    value={consentCompleted ? '3 รายการ' : `${app.acceptedConsentCount} รายการ`}
-                                    isEmpty={false}
-                                    icon={<ClipboardCheck className="w-24 h-24" />}
-                                    completionStatus={'completed'}
-                                    onView={() => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`)}
+                <div className="flex gap-8 items-start">
+                    {/* ── Left column: Module list ── */}
+                    <div className="flex-1 min-w-0 space-y-5">
+                        {/* Group 1: รายละเอียดใบสมัคร */}
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดใบสมัคร</p>
+                            <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
+                                <ModuleRow
+                                    title="ข้อมูลผู้กู้"
+                                    icon={<User className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.customerInfo ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/customer-info?state=readonly`) : undefined}
                                 />
-                            )}
+                                <ModuleRow
+                                    title="อาชีพและรายได้"
+                                    icon={<Coins className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.income ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/income?state=readonly`) : undefined}
+                                />
+                                <ModuleRow
+                                    title="หลักประกัน"
+                                    icon={<Car className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.collateral ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/collateral-info?state=readonly`) : undefined}
+                                />
+                                <ModuleRow
+                                    title="ภาระหนี้"
+                                    icon={<Wallet className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.debt ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/debt?state=readonly`) : undefined}
+                                />
+                                <ModuleRow
+                                    title="ผู้ค้ำประกัน"
+                                    icon={<Users className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.guarantor ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/guarantors?state=readonly`) : undefined}
+                                />
+                                <ModuleRow
+                                    title="รีไฟแนนซ์"
+                                    icon={<RefreshCw className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.refinance ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=readonly`) : undefined}
+                                />
+                            </div>
                         </div>
+
+                        {/* Group 2: รายละเอียดสินเชื่อ */}
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดสินเชื่อ</p>
+                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <ModuleRow
+                                    title="รายละเอียดสินเชื่อ"
+                                    icon={<FileText className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.loanDetail ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=readonly`) : undefined}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Group 3: เอกสารและการยินยอม */}
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">เอกสารและการยินยอม</p>
+                            <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
+                                <ModuleRow
+                                    title="อัพโหลดเอกสาร"
+                                    icon={<Upload className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.documents ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=readonly`) : undefined}
+                                />
+                                {(consentCompleted || (app.acceptedConsentCount > 0 && mockCase !== '3')) && (
+                                    <ModuleRow
+                                        title="การยอมรับ"
+                                        icon={<ClipboardCheck className="w-4 h-4" />}
+                                        completionStatus={'completed'}
+                                        onView={() => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`)}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Right column: Contact info ── */}
+                    <div className="w-[280px] shrink-0 space-y-5">
+                        {/* Branch staff contact */}
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">ข้อมูลติดต่อสาขา</p>
+                            <div className="bg-white border border-gray-200 rounded-xl p-4">
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">พนักงาน</span>
+                                        <span className="text-xs font-semibold text-gray-800">สมหญิง จริงใจ - 108001</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">สาขา</span>
+                                        <span className="text-xs font-semibold text-gray-800">ลาดพร้าว</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">เบอร์มือถือ</span>
+                                        <span className="text-xs font-semibold text-gray-800">080-000-0000</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Customer contact */}
+                        <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">ข้อมูลติดต่อลูกค้า</p>
+                            <div className="bg-white border border-gray-200 rounded-xl p-4">
+                                <div className="space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">LINEID</span>
+                                        <span className="text-xs font-semibold text-gray-800">@LINEID</span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-500">เบอร์มือถือ</span>
+                                        <span className="text-xs font-semibold text-gray-800">{app.phone}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cancel application */}
+                        {canEdit && (
+                            <Button
+                                variant="outline"
+                                className="w-full text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                                onClick={() => setCancelDialogOpen(true)}
+                            >
+                                {currentStatus === 'Sent Back' ? 'ยกเลิกใบสมัคร' : 'ยกเลิกแบบร่าง'}
+                            </Button>
+                        )}
                     </div>
                 </div>
 
@@ -513,8 +532,8 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                     SECTION 3: HISTORY LOG
                 ═══════════════════════════════════════════════════════════ */}
                 <div className="pt-4">
-                    <h2 className="text-xl font-bold text-foreground mb-6">ประวัติการดำเนินการ</h2>
-                    <div className="bg-white rounded-xl border border-gray-200 px-6 divide-y divide-gray-100">
+                    <h2 className="text-xl font-bold text-foreground mb-2">ประวัติการดำเนินการ</h2>
+                    <div className="bg-white rounded-xl divide-y divide-gray-100">
                         {historyLog.map((entry, index) => (
                             <div key={index} className="flex items-start gap-6 py-5">
                                 <div className="w-28 shrink-0 pt-0.5">
@@ -567,31 +586,6 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                     </div>
                 </div>
 
-                {/* ═══════════════════════════════════════════════════════════
-                    SECTION 4: OTHER (Maker only)
-                ═══════════════════════════════════════════════════════════ */}
-                {canEdit && (
-                    <div>
-                        <h2 className="text-xl font-bold text-foreground mb-4">อื่นๆ</h2>
-                        <div className="border border-gray-200 rounded-xl bg-white p-5 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-semibold text-foreground">
-                                    {currentStatus === 'Sent Back' ? 'ยกเลิกใบสมัคร' : 'ยกเลิกแบบร่าง'}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                    {currentStatus === 'Sent Back' ? 'ใบสมัครที่ถูกส่งกลับจากทีมตรวจสอบ' : 'โดยพนักงานสาขา'}
-                                </p>
-                            </div>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => setCancelDialogOpen(true)}
-                            >
-                                ยกเลิกแบบร่าง
-                            </Button>
-                        </div>
-                    </div>
-                )}
 
                 {/* ═══════════════════════════════════════════════════════════
                     DIALOGS
@@ -674,42 +668,28 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             </DialogDescription>
                         </DialogHeader>
                         <DialogBody>
-                            <div className="border border-gray-200 rounded-xl overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[120px]"></th>
-                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600">รายละเอียด</th>
-                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[80px]">รหัส</th>
-                                            <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[200px]">ประเภท</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock').map((item, i) => (
-                                            <tr key={i} className="bg-white hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-4 py-2.5">
-                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200">
-                                                        {item.module}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-2.5">
-                                                    {item.personName && (
-                                                        <p className="text-xs font-semibold text-gray-900">{item.personName}</p>
-                                                    )}
-                                                    <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>
-                                                </td>
-                                                <td className="px-4 py-2.5">
-                                                    {item.code && (
-                                                        <Badge variant="warning">{item.code}</Badge>
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-2.5 text-xs text-gray-600 font-medium">
-                                                    {item.code && BLOCK_CODE_MAP[item.code] ? BLOCK_CODE_MAP[item.code] : '-'}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div className="space-y-4">
+                                {/* Group by module */}
+                                {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
+                                    const items = MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock' && b.module === moduleName);
+                                    if (items.length === 0) return null;
+                                    return (
+                                        <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
+                                            <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
+                                                <p className="text-xs font-bold text-gray-600">{moduleName}</p>
+                                            </div>
+                                            <div className="divide-y divide-gray-100">
+                                                {items.map((item, i) => (
+                                                    <div key={i} className="px-4 py-2.5 bg-white">
+                                                        <p className="text-xs font-semibold text-gray-900">
+                                                            {item.personName || item.collateralType}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </DialogBody>
                         <DialogFooter>
@@ -972,6 +952,58 @@ function SummaryCard({
     );
 }
 
+function ModuleRow({
+    title,
+    icon,
+    completionStatus,
+    onEdit,
+    onView,
+}: {
+    title: string;
+    icon?: React.ReactNode;
+    completionStatus?: 'completed' | 'incomplete';
+    onEdit?: () => void;
+    onView?: () => void;
+}) {
+    return (
+        <div className="flex items-center justify-between px-4 py-3.5 group">
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-400">
+                    {icon ?? <User className="w-4 h-4" />}
+                </div>
+                <span className="text-base font-semibold text-gray-800">{title}</span>
+            </div>
+            <div className="flex items-center gap-2">
+                {completionStatus === 'completed' && (
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                    </div>
+                )}
+                {onEdit && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onEdit}
+                        className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
+                    >
+                        <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                )}
+                {onView && !onEdit && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onView}
+                        className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
+                    >
+                        <Eye className="w-3.5 h-3.5" />
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function LoanDetailRow({ label, value }: { label: string; value: string }) {
     return (
         <div className="bg-white/80 rounded-xl px-4 py-3 flex items-center justify-between border border-blue-100/50">
@@ -996,11 +1028,12 @@ interface BlockItem {
     code?: string;
     description: string;
     personName?: string;
+    collateralType?: string;
 }
 
 // Mock block data across 3 modules
 const MOCK_BLOCK_ITEMS: BlockItem[] = [
-    // Customer Info — softblocks
+    // Customer Info
     {
         module: 'ข้อมูลผู้กู้',
         type: 'softblock',
@@ -1008,21 +1041,15 @@ const MOCK_BLOCK_ITEMS: BlockItem[] = [
         description: 'ผู้กู้ สมชาย ใจดี ถูกพบในรายชื่อเฝ้าระวังทุจริต',
         personName: 'สมชาย ใจดี',
     },
-    // Collateral — hardblock
+    // Collateral
     {
         module: 'หลักประกัน',
         type: 'hardblock',
         code: '01',
         description: 'หลักประกันมีสถานะติดจำนอง ไม่สามารถใช้เป็นหลักประกันได้',
+        collateralType: 'รถมอเตอร์ไซต์',
     },
-    // Guarantors — softblocks
-    {
-        module: 'ผู้ค้ำประกัน',
-        type: 'softblock',
-        code: '02',
-        description: 'ผู้ค้ำ สมบูรณ์ ใจดี ข้อมูลไม่สมบูรณ์',
-        personName: 'สมบูรณ์ ใจดี',
-    },
+    // Guarantors
     {
         module: 'ผู้ค้ำประกัน',
         type: 'softblock',
@@ -1030,13 +1057,12 @@ const MOCK_BLOCK_ITEMS: BlockItem[] = [
         description: 'ผู้ค้ำ สมศักดิ์ มั่งมี ถูกพบในรายชื่อ OFAC',
         personName: 'สมศักดิ์ มั่งมี',
     },
-    // Guarantors — hardblock
     {
         module: 'ผู้ค้ำประกัน',
-        type: 'hardblock',
-        code: '01',
-        description: 'ผู้ค้ำ สมศักดิ์ มั่งมี อยู่ใน Blacklist ไม่สามารถเป็นผู้ค้ำประกันได้',
-        personName: 'สมศักดิ์ มั่งมี',
+        type: 'softblock',
+        code: '02',
+        description: 'ผู้ค้ำ สมบูรณ์ ใจดี ข้อมูลไม่สมบูรณ์',
+        personName: 'สมบูรณ์ ใจดี',
     },
 ];
 
@@ -1166,58 +1192,42 @@ function SubmitApplicationDialog({
                                                     ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
                                                 </p>
                                                 <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
-                                                    เนื่องจากมีรายการ Softblock ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
+                                                    เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
                                                     หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
                                                 </p>
                                             </div>
                                         </div>
                                     )}
-                                    <div className="border border-gray-200 rounded-xl overflow-hidden">
-                                        <table className="w-full text-sm">
-                                            <thead>
-                                                <tr className="bg-gray-50 border-b border-gray-200">
-                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[120px]"></th>
-                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600">รายละเอียด</th>
-                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[80px]">รหัส</th>
-                                                    <th className="text-left px-4 py-2.5 text-xs font-bold text-gray-600 w-[200px]">ประเภท</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-100">
-                                                {MOCK_BLOCK_ITEMS.map((item, i) => {
-                                                    const isHardblock = item.type === 'hardblock';
-                                                    return (
-                                                        <tr key={i} className="bg-white hover:bg-gray-50/50 transition-colors">
-                                                            <td className="px-4 py-2.5">
-                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 border border-gray-200">
-                                                                    {item.module}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-4 py-2.5">
-                                                                {item.personName && (
-                                                                    <p className="text-xs font-semibold text-gray-900">{item.personName}</p>
-                                                                )}
-                                                                <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>
-                                                            </td>
-                                                            <td className="px-4 py-2.5">
-                                                                {item.code && (
-                                                                    <span className={cn(
-                                                                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
-                                                                        isHardblock
-                                                                            ? "bg-red-100 text-red-700 border-red-200"
-                                                                            : "bg-amber-100 text-amber-700 border-amber-200"
-                                                                    )}>
-                                                                        {item.code}
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                            <td className="px-4 py-2.5 text-xs text-gray-600 font-medium">
-                                                                {item.code && BLOCK_CODE_MAP[item.code] ? BLOCK_CODE_MAP[item.code] : '-'}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
+                                    <div className="space-y-4">
+                                        {/* Group by module */}
+                                        {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
+                                            const items = MOCK_BLOCK_ITEMS.filter(b => b.module === moduleName);
+                                            if (items.length === 0) return null;
+                                            // Deduplicate by personName or collateralType
+                                            const seen = new Set<string>();
+                                            const uniqueItems = items.filter(item => {
+                                                const key = item.personName || item.collateralType || item.description;
+                                                if (seen.has(key)) return false;
+                                                seen.add(key);
+                                                return true;
+                                            });
+                                            return (
+                                                <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
+                                                    <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
+                                                        <p className="text-xs font-bold text-gray-600">{moduleName}</p>
+                                                    </div>
+                                                    <div className="divide-y divide-gray-100">
+                                                        {uniqueItems.map((item, i) => (
+                                                            <div key={i} className="px-4 py-2.5 bg-white">
+                                                                <p className="text-xs font-semibold text-gray-900">
+                                                                    {item.personName || item.collateralType}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </>
                             )}

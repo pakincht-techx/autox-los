@@ -146,14 +146,14 @@ function MockupContent() {
                 <Button
                     variant="outline"
                     className="font-bold"
-                    onClick={() => {}}
+                    onClick={() => { }}
                     disabled
                 >
                     บันทึกและกลับ
                 </Button>
                 <Button
                     className="font-bold bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                    onClick={() => {}}
+                    onClick={() => { }}
                     disabled
                 >
                     ส่งพิจารณา
@@ -247,8 +247,8 @@ function MockupContent() {
                             }
                             isEmpty={!app.customerType}
                             icon={<User className="w-24 h-24" />}
-                            onEdit={canEdit ? () => {} : undefined}
-                            onView={!canEdit && app.customerType ? () => {} : undefined}
+                            onEdit={canEdit ? () => { } : undefined}
+                            onView={!canEdit && app.customerType ? () => { } : undefined}
                         />
                         <SummaryCard
                             title="หลักประกัน"
@@ -256,8 +256,8 @@ function MockupContent() {
                             isBold
                             isEmpty={!app.collateralType}
                             icon={<Car className="w-24 h-24" />}
-                            onEdit={canEdit ? () => {} : undefined}
-                            onView={!canEdit && app.collateralType ? () => {} : undefined}
+                            onEdit={canEdit ? () => { } : undefined}
+                            onView={!canEdit && app.collateralType ? () => { } : undefined}
                         />
                         <SummaryCard
                             title="อาชีพและรายได้"
@@ -265,8 +265,8 @@ function MockupContent() {
                             unit="บาท/เดือน"
                             isEmpty={app.incomePerMonth === 0}
                             icon={<Coins className="w-24 h-24" />}
-                            onEdit={canEdit ? () => {} : undefined}
-                            onView={!canEdit && app.incomePerMonth > 0 ? () => {} : undefined}
+                            onEdit={canEdit ? () => { } : undefined}
+                            onView={!canEdit && app.incomePerMonth > 0 ? () => { } : undefined}
                         />
                         <SummaryCard
                             title="หนี้สิน"
@@ -274,16 +274,16 @@ function MockupContent() {
                             unit="บาท/เดือน"
                             isEmpty={app.debtPerMonth === 0}
                             icon={<Wallet className="w-24 h-24" />}
-                            onEdit={canEdit ? () => {} : undefined}
-                            onView={!canEdit && app.debtPerMonth > 0 ? () => {} : undefined}
+                            onEdit={canEdit ? () => { } : undefined}
+                            onView={!canEdit && app.debtPerMonth > 0 ? () => { } : undefined}
                         />
                         <SummaryCard
                             title="ผู้ค้ำประกัน"
                             value={`${app.guarantorCount} คน`}
                             isEmpty={app.guarantorCount === 0}
                             icon={<Users className="w-24 h-24" />}
-                            onEdit={canEdit ? () => {} : undefined}
-                            onView={!canEdit && app.guarantorCount > 0 ? () => {} : undefined}
+                            onEdit={canEdit ? () => { } : undefined}
+                            onView={!canEdit && app.guarantorCount > 0 ? () => { } : undefined}
                         />
                     </div>
 
@@ -402,7 +402,7 @@ function MockupContent() {
                     SECTION 3: HISTORY LOG
                 ═══════════════════════════════════════════════════════════ */}
                 <div className="pt-4">
-                    <h2 className="text-xl font-bold text-foreground mb-6">ประวัติการดำเนินการ</h2>
+                    <h2 className="text-xl font-bold text-foreground mb-2">ประวัติการดำเนินการ</h2>
                     <div className="bg-white rounded-xl border border-gray-200 px-6 divide-y divide-gray-100">
                         {app.historyLog.map((entry, index) => (
                             <div key={index} className="flex items-start gap-6 py-5">

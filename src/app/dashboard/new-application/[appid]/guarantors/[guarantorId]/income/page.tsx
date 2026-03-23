@@ -61,7 +61,7 @@ export default function GuarantorIncomePage() {
 
     useEffect(() => {
         const borrowerFirstName = applicationFormData?.firstName;
-        const displayAppId = appId.length > 8 ? `...${appId.slice(-6)}` : appId;
+        const displayAppId = appId.length > 8 ? appId.slice(8) : appId;
         const appLabel = borrowerFirstName ? `${displayAppId} (${borrowerFirstName})` : displayAppId;
         const displayName = "ดีใจ";
 

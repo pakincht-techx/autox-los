@@ -191,6 +191,15 @@ export interface IncomeOccupation {
     residenceLivingWith?: string;
     residenceLivingWithRelationships?: string[];
     remarks?: string;
+
+    // Payslip month count (for SA income tabs)
+    payslipMonthCount?: number;
+
+    // Workplace Assessor (per occupation)
+    sameAssessorAsMain?: boolean;
+    workplaceAssessorId?: string;
+    workplaceAssessorPhone?: string;
+    workplaceAssessmentDate?: string;
 }
 
 export interface Child {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock, ChevronUp, ChevronDown } from "lucide-react";
+import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock, GripVertical } from "lucide-react";
 import { BahtSign } from "@/components/icons/BahtSign";
 import { cn } from "@/lib/utils";
 import {
@@ -132,6 +132,13 @@ const OCCUPATIONS = [
 
 
 // Mock staff list — replace with API data in production
+const MOCK_STAFF_LIST = [
+    { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
+    { id: "S002", code: "S002", name: "สุดา รักงาน", phone: "089-876-5432" },
+    { id: "S003", code: "S003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
+    { id: "S004", code: "S004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
+    { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
+];
 
 export function IncomeStep({ formData, setFormData, isExistingCustomer = false }: IncomeStepProps) {
     const handleChange = <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
@@ -188,6 +195,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const [currentDocContext, setCurrentDocContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
     const [viewFilesContext, setViewFilesContext] = useState<{ occId: string, docType: string, label: string } | null>(null);
     const [uploadSessionDocIds, setUploadSessionDocIds] = useState<Set<string>>(new Set());
+    const [dragOverDocIdx, setDragOverDocIdx] = useState<number | null>(null);
     const [currentPhotoCategory, setCurrentPhotoCategory] = useState<string | null>(null);
 
 
@@ -1135,6 +1143,28 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
         handleOccupationChange(occId, 'incomeDocuments', docs);
     };
 
+    const handleDragReorderIncomeDocument = (occId: string, fromIndex: number, toIndex: number, filteredIds: string[]) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ || fromIndex === toIndex) return;
+        const docs = [...(occ.incomeDocuments || [])];
+        // Map filteredIds positions to actual docs array positions and reorder
+        const filteredDocs = filteredIds.map(id => docs.find(d => d.id === id)!).filter(Boolean);
+        const [moved] = filteredDocs.splice(fromIndex, 1);
+        filteredDocs.splice(toIndex, 0, moved);
+        // Rebuild full docs array: replace filtered docs in their original slots, preserving others
+        const filteredSet = new Set(filteredIds);
+        const result: typeof docs = [];
+        let filteredIdx = 0;
+        for (const doc of docs) {
+            if (filteredSet.has(doc.id)) {
+                result.push(filteredDocs[filteredIdx++]);
+            } else {
+                result.push(doc);
+            }
+        }
+        handleOccupationChange(occId, 'incomeDocuments', result);
+    };
+
     const THAI_BANKS = [
         { label: "ธนาคารกสิกรไทย", value: "KBANK", logo: "/bank-logo/Type=KBank.svg" },
         { label: "ธนาคารไทยพาณิชย์", value: "SCB", logo: "/bank-logo/Type=SCB.svg" },
@@ -1773,8 +1803,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                             label: `รายการเดินบัญชี - ${bankLabel}${account.accountNo ? ` (${account.accountNo})` : ''}`,
                                                                                         });
                                                                                     });
-                                                                                } else {
-                                                                                    dynamicDocTypes.push(docType);
                                                                                 }
                                                                             } else {
                                                                                 dynamicDocTypes.push(docType);
@@ -2033,7 +2061,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             type="text"
                                                                             className="h-12 bg-white text-center rounded-xl pr-10"
                                                                             placeholder="0"
-                                                                            value={occ.prevTenureYear || ""}
+                                                                            value={occ.prevTenureYear ?? "0"}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "prevTenureYear", e.target.value.replace(/\D/g, ''))}
                                                                         />
                                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">ปี</span>
@@ -2043,7 +2071,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             type="text"
                                                                             className="h-12 bg-white text-center rounded-xl pr-14"
                                                                             placeholder="0"
-                                                                            value={occ.prevTenureMonth || ""}
+                                                                            value={occ.prevTenureMonth ?? "0"}
                                                                             onChange={(e) => handleOccupationChange(occ.id, "prevTenureMonth", e.target.value.replace(/\D/g, ''))}
                                                                         />
                                                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">เดือน</span>
@@ -2084,27 +2112,45 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 title: string,
                                                                 sourceKey: string | undefined,
                                                                 incomes: (SAIncome & { originalIndex: number })[],
-                                                                showAddButton: boolean = true
+                                                                showAddButton: boolean = true,
+                                                                sourceDocs?: IncomeDocument[]
                                                             ) => {
                                                                 const sourceTotal = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+                                                                const sourceDoc = sourceDocs && sourceDocs.length > 0 ? sourceDocs[0] : undefined;
+                                                                const displayTitle = sourceDoc
+                                                                    ? `${title.split(' - ')[0]} - ${sourceDoc.originalName || sourceDoc.name}`
+                                                                    : title;
 
                                                                 return (
                                                                     <div key={sourceKey || 'other'} className="space-y-3">
                                                                         <div className="flex items-center justify-between pl-1 pr-1">
-                                                                            <Label className="text-xs font-semibold text-gray-600">
-                                                                                {title}
+                                                                            <Label className="text-xs font-semibold text-gray-600 truncate mr-2">
+                                                                                {displayTitle}
                                                                             </Label>
-                                                                            {showAddButton && (
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="outline"
-                                                                                    size="sm"
-                                                                                    onClick={() => handleAddSAIncomeRow(occ.id, sourceKey)}
-                                                                                    className="h-8 text-xs font-medium bg-white"
-                                                                                >
-                                                                                    <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการรายได้
-                                                                                </Button>
-                                                                            )}
+                                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                                {sourceDoc && (
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        onClick={() => window.open(sourceDoc.url, '_blank')}
+                                                                                        className="h-8 text-xs font-medium text-chaiyo-blue hover:text-chaiyo-blue/80"
+                                                                                    >
+                                                                                        <Eye className="w-3.5 h-3.5 mr-1" /> ดูเอกสารต้นฉบับ
+                                                                                    </Button>
+                                                                                )}
+                                                                                {showAddButton && (
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={() => handleAddSAIncomeRow(occ.id, sourceKey)}
+                                                                                        className="h-8 text-xs font-medium bg-white"
+                                                                                    >
+                                                                                        <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการรายได้
+                                                                                    </Button>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
 
                                                                         <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -2235,35 +2281,97 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             customDocTypes.forEach(ct => dynamicDocTypes.push(ct));
 
                                                             // Separate doc types into payslip, statement, and other categories
-                                                            const payslipUploaded = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
+                                                            const payslipMonthCount = occ.payslipMonthCount ?? 0;
+                                                            const payslipDocUploaded = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
+                                                            // Use the max of explicit month count and uploaded doc count
+                                                            const totalPayslipMonths = Math.max(payslipMonthCount, payslipDocUploaded.length);
+                                                            const payslipKeys = Array.from({ length: totalPayslipMonths }, (_, i) => `payslip_${i}`);
                                                             const statementUploaded = uploadedDocTypes.filter(dt => dt.startsWith('statement_'));
                                                             const otherUploaded = uploadedDocTypes.filter(dt => !dt.startsWith('payslip_') && !dt.startsWith('statement_'));
 
                                                             return (
                                                                 <>
                                                                     {/* Payslip Section - Tabbed by Month */}
-                                                                    {payslipUploaded.length > 0 && (
-                                                                        <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
-                                                                            <div className="flex items-center gap-2 pb-2.5 border-b border-border-color">
+                                                                    <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                        <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                                                            <div className="flex items-center gap-2">
                                                                                 <FileText className="w-4 h-4 text-emerald-600" />
                                                                                 <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: สลิปเงินเดือน (Payslip)</span>
                                                                             </div>
-                                                                            <Tabs defaultValue={payslipUploaded[0]} className="w-full">
-                                                                                <TabsList className="w-full justify-start bg-gray-100/80 rounded-lg p-1 h-auto flex-wrap gap-1">
-                                                                                    {payslipUploaded.map((dt, idx) => (
-                                                                                        <TabsTrigger key={dt} value={dt} className="text-xs px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">
-                                                                                            {THAI_MONTHS_SHORT[idx % 12]}
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => handleOccupationChange(occ.id, 'payslipMonthCount', totalPayslipMonths + 1)}
+                                                                                className="h-8 text-xs font-medium"
+                                                                            >
+                                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มเดือน
+                                                                            </Button>
+                                                                        </div>
+                                                                        {totalPayslipMonths > 0 ? (
+                                                                            <Tabs defaultValue={payslipKeys[0]} className="w-full">
+                                                                                <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl justify-start flex-wrap gap-0">
+                                                                                    {payslipKeys.map((dt, idx) => (
+                                                                                        <TabsTrigger key={dt} value={dt} className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm group">
+                                                                                            <span>{THAI_MONTHS_SHORT[idx % 12]}</span>
+                                                                                            {totalPayslipMonths > 1 && (
+                                                                                                <button
+                                                                                                    type="button"
+                                                                                                    className="ml-1.5 w-4 h-4 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                    onClick={(e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        // Remove incomes linked to this payslip month
+                                                                                                        const updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => inc.sourceDocType !== dt);
+                                                                                                        // Re-index: shift payslip_N keys down for months after removed one
+                                                                                                        const reindexedIncomes = updatedIncomes.map((inc: SAIncome) => {
+                                                                                                            if (inc.sourceDocType?.startsWith('payslip_')) {
+                                                                                                                const incIdx = Number(inc.sourceDocType.replace('payslip_', ''));
+                                                                                                                if (incIdx > idx) {
+                                                                                                                    return { ...inc, sourceDocType: `payslip_${incIdx - 1}` };
+                                                                                                                }
+                                                                                                            }
+                                                                                                            return inc;
+                                                                                                        });
+                                                                                                        // Also re-index documents
+                                                                                                        const updatedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type !== dt);
+                                                                                                        const reindexedDocs = updatedDocs.map((d: IncomeDocument) => {
+                                                                                                            if (d.type?.startsWith('payslip_')) {
+                                                                                                                const dIdx = Number(d.type.replace('payslip_', ''));
+                                                                                                                if (dIdx > idx) {
+                                                                                                                    return { ...d, type: `payslip_${dIdx - 1}` };
+                                                                                                                }
+                                                                                                            }
+                                                                                                            return d;
+                                                                                                        });
+                                                                                                        handleOccupationChange(occ.id, {
+                                                                                                            payslipMonthCount: totalPayslipMonths - 1,
+                                                                                                            saIncomes: reindexedIncomes,
+                                                                                                            incomeDocuments: reindexedDocs,
+                                                                                                        });
+                                                                                                    }}
+                                                                                                    title="ลบเดือนนี้"
+                                                                                                >
+                                                                                                    <X className="w-3 h-3" />
+                                                                                                </button>
+                                                                                            )}
                                                                                         </TabsTrigger>
                                                                                     ))}
                                                                                 </TabsList>
-                                                                                {payslipUploaded.map((dt, idx) => (
-                                                                                    <TabsContent key={dt} value={dt} className="mt-3">
-                                                                                        {renderIncomeTable(`สลิปเงินเดือน - ${THAI_MONTHS_SHORT[idx % 12]}`, dt, incomesBySource[dt] || [])}
-                                                                                    </TabsContent>
-                                                                                ))}
+                                                                                {payslipKeys.map((dt, idx) => {
+                                                                                    const payslipDocs = allDocs.filter((d: IncomeDocument) => d.type === dt);
+                                                                                    return (
+                                                                                        <TabsContent key={dt} value={dt} className="mt-3">
+                                                                                            {renderIncomeTable(`สลิปเงินเดือน - ${THAI_MONTHS_SHORT[idx % 12]}`, dt, incomesBySource[dt] || [], true, payslipDocs)}
+                                                                                        </TabsContent>
+                                                                                    );
+                                                                                })}
                                                                             </Tabs>
-                                                                        </div>
-                                                                    )}
+                                                                        ) : (
+                                                                            <div className="text-center py-8 text-muted-foreground text-sm italic">
+                                                                                ยังไม่มีเดือน กรุณากดเพิ่มเดือน
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
 
                                                                     {/* Statement Section - Tabbed by Bank */}
                                                                     {statementUploaded.length > 0 && (
@@ -2273,21 +2381,32 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: รายการเดินบัญชี (Statement)</span>
                                                                             </div>
                                                                             <Tabs defaultValue={statementUploaded[0]} className="w-full">
-                                                                                <TabsList className="w-full justify-start bg-gray-100/80 rounded-lg p-1 h-auto flex-wrap gap-1">
+                                                                                <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl justify-start flex-wrap gap-0">
                                                                                     {statementUploaded.map((dt) => {
-                                                                                        const bankLabel = dynamicDocTypes.find(d => d.id === dt)?.label?.replace('รายการเดินบัญชี - ', '') || dt;
+                                                                                        const accIdx = Number(dt.replace('statement_', ''));
+                                                                                        const account = bankAccounts[accIdx];
+                                                                                        const bankInfo = account ? THAI_BANKS.find(b => b.value === account.bankName) : undefined;
+                                                                                        const bankLabel = bankInfo?.label || `บัญชีที่ ${accIdx + 1}`;
+                                                                                        const accountNo = account?.accountNo || '';
                                                                                         return (
-                                                                                            <TabsTrigger key={dt} value={dt} className="text-xs px-4 py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">
-                                                                                                {bankLabel}
+                                                                                            <TabsTrigger key={dt} value={dt} className="relative px-4 py-2 text-xs font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm">
+                                                                                                <div className="flex items-center gap-2">
+                                                                                                    {bankInfo?.logo && <img src={bankInfo.logo} alt={bankLabel} className="w-5 h-5 object-contain shrink-0" />}
+                                                                                                    <div className="flex flex-col items-start gap-0.5">
+                                                                                                        <span>{bankLabel}</span>
+                                                                                                        {accountNo && <span className="text-[10px] text-muted-foreground font-mono">{accountNo}</span>}
+                                                                                                    </div>
+                                                                                                </div>
                                                                                             </TabsTrigger>
                                                                                         );
                                                                                     })}
                                                                                 </TabsList>
                                                                                 {statementUploaded.map((dt) => {
                                                                                     const label = dynamicDocTypes.find(d => d.id === dt)?.label || dt;
+                                                                                    const stmtDocs = allDocs.filter((d: IncomeDocument) => d.type === dt);
                                                                                     return (
                                                                                         <TabsContent key={dt} value={dt} className="mt-3">
-                                                                                            {renderIncomeTable(label, dt, incomesBySource[dt] || [])}
+                                                                                            {renderIncomeTable(`รายการเดินบัญชี`, dt, incomesBySource[dt] || [], true, stmtDocs)}
                                                                                         </TabsContent>
                                                                                     );
                                                                                 })}
@@ -2299,12 +2418,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                     {otherUploaded.map(docType => {
                                                                         const label = dynamicDocTypes.find(d => d.id === docType)?.label || docType;
                                                                         const sourceIncomes = incomesBySource[docType] || [];
-                                                                        return renderIncomeTable(`รายการรายได้จาก: ${label}`, docType, sourceIncomes);
+                                                                        const otherDocs = allDocs.filter((d: IncomeDocument) => d.type === docType);
+                                                                        return renderIncomeTable(`รายการรายได้จาก: ${label}`, docType, sourceIncomes, true, otherDocs);
                                                                     })}
 
                                                                     {/* Cash Income Table (if selected) */}
                                                                     {(occ.incomeChannels || []).includes('cash') && (
-                                                                        renderIncomeTable('รายการรายได้รับเป็นเงินสด', 'cash', incomesBySource['cash'] || [])
+                                                                        renderIncomeTable('รายการรายได้จากการสอบถาม', 'cash', incomesBySource['cash'] || [])
                                                                     )}
 
                                                                     {/* Always show "Other Incomes" table as the fallback/manual entry ground */}
@@ -3325,7 +3445,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             </div>
 
                                                             <div className="space-y-2">
-                                                                <Label>จำนวนรอบใน 1 ปี <span className="text-red-500">*</span> <span className="text-muted-foreground text-[10px] font-normal">(สูงสุด 12 รอบ)</span></Label>
+                                                                <Label>จำนวนรอบการขายใน 1 ปี <span className="text-red-500">*</span> <span className="text-muted-foreground text-[10px] font-normal">(สูงสุด 12 รอบ)</span></Label>
                                                                 <div className="relative">
                                                                     <Input
                                                                         type="text"
@@ -3366,7 +3486,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                                             {occ.farmingType === 'self' && (
                                                                 <div className="space-y-2 animate-in fade-in slide-in-from-left-4 duration-300">
-                                                                    <Label>หน่วย <span className="text-red-500">*</span></Label>
+                                                                    <Label>หน่วยการขาย <span className="text-red-500">*</span></Label>
                                                                     <Select
                                                                         value={occ.livestockUnit || ""}
                                                                         onValueChange={(val) => handleOccupationChange(occ.id, "livestockUnit", val)}
@@ -3375,8 +3495,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             <SelectValue placeholder="เลือกหน่วย" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            <SelectItem value="head">ตัว</SelectItem>
-                                                                            <SelectItem value="cycle">รอบ</SelectItem>
+                                                                            <SelectItem value="head">ขายเป็นตัว</SelectItem>
+                                                                            <SelectItem value="cycle">ขายเป็นรอบ</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                 </div>
@@ -3439,11 +3559,11 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                             <div className="bg-gray-50/80 border-b border-border-subtle p-4 flex items-center justify-between">
                                                                                 <div className="flex items-center gap-3">
                                                                                     <div className="flex h-8 items-center justify-center rounded-lg bg-chaiyo-blue text-white font-bold text-sm shadow-sm px-3 gap-1">
-                                                                                        <span className="text-[10px] font-medium text-white/70">รอบที่</span> {cycle.cycleNo}
+                                                                                        รอบที่ {cycle.cycleNo}
                                                                                     </div>
-                                                                                    {occ.farmingType !== 'contract' && (
+                                                                                    {occ.farmingType !== 'contract' && occ.livestockUnit !== 'cycle' && (
                                                                                         <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-border-subtle">
-                                                                                            <Label className="text-[11px] font-bold text-gray-700">{occ.livestockUnit === 'cycle' ? 'จำนวนรอบ' : 'จำนวนตัว'}</Label>
+                                                                                            <Label className="text-[11px] font-bold text-gray-700">จำนวนตัว</Label>
                                                                                             <div className="relative w-28">
                                                                                                 <Input
                                                                                                     type="text"
@@ -3452,7 +3572,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                                     className="h-8 text-right font-mono text-xs pr-7 bg-white"
                                                                                                     placeholder="0"
                                                                                                 />
-                                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold">{occ.livestockUnit === 'cycle' ? 'รอบ' : 'ตัว'}</span>
+                                                                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold">ตัว</span>
                                                                                             </div>
                                                                                         </div>
                                                                                     )}
@@ -3792,8 +3912,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                             )}
                                         </>
                                     )}
-                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab) ===== */}
-                                    {occ.isMain && (
+                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed) ===== */}
+                                    {occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <Users className="w-5 h-5 text-chaiyo-blue" /> บุคคลอ้างอิง
@@ -3825,15 +3945,16 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                         <TableHeader className="bg-gray-50/50">
                                                             <TableRow className="hover:bg-transparent border-none">
                                                                 <TableHead className="w-[8%] text-center text-xs">ลำดับ</TableHead>
-                                                                <TableHead className="w-[37%] text-xs">ชื่อ-นามสกุล <span className="text-red-500">*</span></TableHead>
-                                                                <TableHead className="w-[35%] text-xs">ความเกี่ยวข้อง <span className="text-red-500">*</span></TableHead>
+                                                                <TableHead className="w-[27%] text-xs">ชื่อ-นามสกุล <span className="text-red-500">*</span></TableHead>
+                                                                <TableHead className="w-[25%] text-xs">เบอร์ติดต่อ <span className="text-red-500">*</span></TableHead>
+                                                                <TableHead className="w-[30%] text-xs">ความเกี่ยวข้อง <span className="text-red-500">*</span></TableHead>
                                                                 <TableHead className="w-[10%] text-xs text-center">จัดการ</TableHead>
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody>
                                                             {(!formData.referencePersons || formData.referencePersons.length === 0) ? (
                                                                 <TableRow className="hover:bg-transparent border-none">
-                                                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground italic text-xs">
+                                                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground italic text-xs">
                                                                         ยังไม่มีข้อมูลบุคคลอ้างอิง — กรุณากดปุ่มเพิ่มเพื่อระบุข้อมูล
                                                                     </TableCell>
                                                                 </TableRow>
@@ -3849,6 +3970,15 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 onChange={(e) => handleUpdateReference(index, "name", e.target.value)}
                                                                                 placeholder="ระบุชื่อ-นามสกุล"
                                                                                 className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20"
+                                                                            />
+                                                                        </TableCell>
+                                                                        <TableCell className="py-2">
+                                                                            <Input
+                                                                                value={ref.phone || ""}
+                                                                                onChange={(e) => handleUpdateReference(index, "phone", e.target.value)}
+                                                                                placeholder="ระบุเบอร์ติดต่อ"
+                                                                                className="h-9 text-sm bg-gray-50/30 border-gray-200 focus:ring-chaiyo-blue/20"
+                                                                                maxLength={20}
                                                                             />
                                                                         </TableCell>
                                                                         <TableCell className="py-2">
@@ -4043,6 +4173,179 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                         </div>
 
                                     )}
+
+                                    {/* ===== ผู้ประเมินสถานที่ทำงาน ===== */}
+                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
+                                        <div className="flex items-center justify-between pb-2 border-b border-border-color">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                                                <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" /> ผู้ประเมินสถานที่ทำงาน
+                                            </h4>
+                                            {/* Checkbox for secondary occupations */}
+                                            {!occ.isMain && (
+                                                <div className="flex items-center gap-2">
+                                                    <Checkbox
+                                                        id={`same-assessor-${occ.id}`}
+                                                        checked={occ.sameAssessorAsMain !== false}
+                                                        onCheckedChange={(checked) =>
+                                                            handleOccupationChange(occ.id, "sameAssessorAsMain", !!checked)
+                                                        }
+                                                        className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
+                                                    />
+                                                    <Label htmlFor={`same-assessor-${occ.id}`} className="text-sm text-gray-700 cursor-pointer select-none font-medium">
+                                                        ใช้ผู้ประเมินเดียวกับอาชีพหลัก
+                                                    </Label>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Main occupation — always editable via formData */}
+                                        {occ.isMain && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="md:col-span-2 space-y-2">
+                                                    <Label className="flex items-center gap-1.5">
+                                                        <span>พนักงาน</span>
+                                                        <span className="text-red-500">*</span>
+                                                        <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
+                                                    </Label>
+                                                    <Combobox
+                                                        options={MOCK_STAFF_LIST.map(s => ({
+                                                            value: s.id,
+                                                            label: `${s.code} — ${s.name}`,
+                                                        }))}
+                                                        value={formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id}
+                                                        onValueChange={(val) => {
+                                                            const staff = MOCK_STAFF_LIST.find(s => s.id === val);
+                                                            handleChange("workplaceAssessorId", val);
+                                                            if (staff) handleChange("workplaceAssessorPhone", staff.phone);
+                                                        }}
+                                                        placeholder="ค้นหาพนักงาน..."
+                                                        className="h-12 rounded-xl"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="flex items-center gap-1.5">
+                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        เบอร์ติดต่อพนักงาน
+                                                    </Label>
+                                                    <Input
+                                                        value={formData.workplaceAssessorPhone ?? (() => {
+                                                            const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                            return staff?.phone ?? "";
+                                                        })()}
+                                                        onChange={(e) => handleChange("workplaceAssessorPhone", e.target.value)}
+                                                        placeholder="0XX-XXX-XXXX"
+                                                        className="h-12 rounded-xl font-mono"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="flex items-center gap-1.5">
+                                                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        วันที่ประเมิน
+                                                    </Label>
+                                                    <DatePickerBE
+                                                        value={formData.workplaceAssessmentDate ?? ""}
+                                                        onChange={(val) => handleChange("workplaceAssessmentDate", val)}
+                                                        inputClassName="h-12 rounded-xl"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Secondary occupation — checkbox controls same-as-main */}
+                                        {!occ.isMain && (
+                                            <>
+                                                {/* Same as main: read-only display */}
+                                                {occ.sameAssessorAsMain !== false && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60 pointer-events-none">
+                                                        <div className="md:col-span-2 space-y-2">
+                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                <span>พนักงาน</span>
+                                                            </Label>
+                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-medium">
+                                                                {(() => {
+                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                                    return staff ? `${staff.code} — ${staff.name}` : "—";
+                                                                })()}
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                <Phone className="w-3.5 h-3.5" />
+                                                                เบอร์ติดต่อพนักงาน
+                                                            </Label>
+                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-mono">
+                                                                {formData.workplaceAssessorPhone ?? (() => {
+                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                                    return staff?.phone ?? "—";
+                                                                })()}
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                <Calendar className="w-3.5 h-3.5" />
+                                                                วันที่ประเมิน
+                                                            </Label>
+                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600">
+                                                                {formData.workplaceAssessmentDate || "—"}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Different assessor: per-occupation editable fields */}
+                                                {occ.sameAssessorAsMain === false && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        <div className="md:col-span-2 space-y-2">
+                                                            <Label className="flex items-center gap-1.5">
+                                                                <span>พนักงาน</span>
+                                                                <span className="text-red-500">*</span>
+                                                                <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
+                                                            </Label>
+                                                            <Combobox
+                                                                options={MOCK_STAFF_LIST.map(s => ({
+                                                                    value: s.id,
+                                                                    label: `${s.code} — ${s.name}`,
+                                                                }))}
+                                                                value={occ.workplaceAssessorId ?? ""}
+                                                                onValueChange={(val) => {
+                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === val);
+                                                                    handleOccupationChange(occ.id, {
+                                                                        workplaceAssessorId: val,
+                                                                        workplaceAssessorPhone: staff?.phone ?? occ.workplaceAssessorPhone ?? "",
+                                                                    });
+                                                                }}
+                                                                placeholder="ค้นหาพนักงาน..."
+                                                                className="h-12 rounded-xl"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="flex items-center gap-1.5">
+                                                                <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                เบอร์ติดต่อพนักงาน
+                                                            </Label>
+                                                            <Input
+                                                                value={occ.workplaceAssessorPhone ?? ""}
+                                                                onChange={(e) => handleOccupationChange(occ.id, "workplaceAssessorPhone", e.target.value)}
+                                                                placeholder="0XX-XXX-XXXX"
+                                                                className="h-12 rounded-xl font-mono"
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="flex items-center gap-1.5">
+                                                                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                วันที่ประเมิน
+                                                            </Label>
+                                                            <DatePickerBE
+                                                                value={occ.workplaceAssessmentDate ?? ""}
+                                                                onChange={(val) => handleOccupationChange(occ.id, "workplaceAssessmentDate", val)}
+                                                                inputClassName="h-12 rounded-xl"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
 
                                     {/* หมายเหตุ per occupation */}
                                     <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
@@ -4282,31 +4585,30 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                     <TableHead className="w-[80px] text-right text-xs">จัดการ</TableHead>
                                                 </TableRow>
                                             </TableHeader>
-                                            <TableBody>
+                                            <TableBody className="divide-y divide-gray-100">
                                                 {fileList.map((doc: IncomeDocument, idx: number) => (
-                                                    <TableRow key={doc.id} className="hover:bg-transparent">
+                                                    <TableRow
+                                                        key={doc.id}
+                                                        className={cn(
+                                                            "transition-all duration-150",
+                                                            dragOverDocIdx === idx
+                                                                ? "border-t-2 border-chaiyo-blue"
+                                                                : "hover:bg-transparent"
+                                                        )}
+                                                        draggable
+                                                        onDragStart={(e) => { e.dataTransfer.setData('text/plain', String(idx)); e.dataTransfer.effectAllowed = 'move'; }}
+                                                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverDocIdx(idx); }}
+                                                        onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverDocIdx(null); }}
+                                                        onDrop={(e) => { e.preventDefault(); setDragOverDocIdx(null); const from = Number(e.dataTransfer.getData('text/plain')); handleDragReorderIncomeDocument(occ.id, from, idx, fileList.map((d: IncomeDocument) => d.id)); }}
+                                                        onDragEnd={() => setDragOverDocIdx(null)}
+                                                    >
                                                         <TableCell className="py-3 px-2">
-                                                            <div className="flex items-center gap-0.5">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'up')}
-                                                                    disabled={idx === 0}
-                                                                    className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
-                                                                    title="เลื่อนขึ้น"
-                                                                >
-                                                                    <ChevronUp className="w-4 h-4" />
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'down')}
-                                                                    disabled={idx === fileList.length - 1}
-                                                                    className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
-                                                                    title="เลื่อนลง"
-                                                                >
-                                                                    <ChevronDown className="w-4 h-4" />
-                                                                </Button>
+                                                            <div
+                                                                className="flex items-center gap-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+                                                                title="ลากเพื่อเรียงลำดับ"
+                                                            >
+                                                                <GripVertical className="w-4 h-4 shrink-0" />
+                                                                <span className="text-xs font-mono font-semibold text-gray-500 w-4 text-center">{idx + 1}</span>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="py-3 align-top">
@@ -4457,31 +4759,30 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                         <TableHead className="w-[80px] text-right text-xs">จัดการ</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
-                                                <TableBody>
+                                                <TableBody className="divide-y divide-gray-100">
                                                     {currentFileList.map((doc: IncomeDocument, idx: number) => (
-                                                        <TableRow key={doc.id} className="hover:bg-transparent">
+                                                        <TableRow
+                                                            key={doc.id}
+                                                            className={cn(
+                                                                "transition-all duration-150",
+                                                                dragOverDocIdx === idx
+                                                                    ? "border-t-2 border-chaiyo-blue"
+                                                                    : "hover:bg-transparent"
+                                                            )}
+                                                            draggable
+                                                            onDragStart={(e) => { e.dataTransfer.setData('text/plain', String(idx)); e.dataTransfer.effectAllowed = 'move'; }}
+                                                            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverDocIdx(idx); }}
+                                                            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverDocIdx(null); }}
+                                                            onDrop={(e) => { e.preventDefault(); setDragOverDocIdx(null); const from = Number(e.dataTransfer.getData('text/plain')); handleDragReorderIncomeDocument(occ.id, from, idx, currentFileList.map((d: IncomeDocument) => d.id)); }}
+                                                            onDragEnd={() => setDragOverDocIdx(null)}
+                                                        >
                                                             <TableCell className="py-3 px-2">
-                                                                <div className="flex items-center gap-0.5">
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'up')}
-                                                                        disabled={idx === 0}
-                                                                        className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
-                                                                        title="เลื่อนขึ้น"
-                                                                    >
-                                                                        <ChevronUp className="w-4 h-4" />
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="sm"
-                                                                        onClick={() => handleReorderIncomeDocument(occ.id, doc.id, 'down')}
-                                                                        disabled={idx === currentFileList.length - 1}
-                                                                        className="h-8 w-8 p-0 rounded-full bg-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-200 disabled:opacity-30"
-                                                                        title="เลื่อนลง"
-                                                                    >
-                                                                        <ChevronDown className="w-4 h-4" />
-                                                                    </Button>
+                                                                <div
+                                                                    className="flex items-center gap-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+                                                                    title="ลากเพื่อเรียงลำดับ"
+                                                                >
+                                                                    <GripVertical className="w-4 h-4 shrink-0" />
+                                                                    <span className="text-xs font-mono font-semibold text-gray-500 w-4 text-center">{idx + 1}</span>
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell className="py-3 align-top">

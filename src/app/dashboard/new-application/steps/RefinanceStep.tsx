@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/Label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
 import {
     Table,
@@ -79,6 +80,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
     const [feeAmount, setFeeAmount] = useState("");
 
     // สินเชื่ออื่นๆ
+    const [hasOtherLoans, setHasOtherLoans] = useState<boolean | null>(null);
     const [otherLoans, setOtherLoans] = useState<{ id: number; name: string }[]>([]);
 
     // วิธีชำระหนี้ปิดบัญชี
@@ -496,82 +498,114 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                     <hr className="border-gray-100" />
 
                     {/* ── สินเชื่ออื่นๆ ที่ผูกกับรถคันนี้ ────────────── */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-gray-700">
-                                มีสินเชื่ออื่นๆ ที่ผูกกับรถคันนี้
-                            </h4>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs"
-                                onClick={() => {
-                                    setOtherLoans((prev) => [
-                                        ...prev,
-                                        { id: Date.now(), name: "" },
-                                    ]);
-                                }}
-                            >
-                                <Plus className="w-3.5 h-3.5 mr-1" />
-                                เพิ่มรายการ
-                            </Button>
-                        </div>
+                    <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-gray-700">
+                            มีสินเชื่ออื่นๆ ที่ผูกกับรถคันนี้
+                        </h4>
 
-                        {otherLoans.length > 0 ? (
-                            <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="w-[60px] text-center">ลำดับ</TableHead>
-                                            <TableHead>ชื่อสินเชื่อ</TableHead>
-                                            <TableHead className="w-[60px] text-center">จัดการ</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {otherLoans.map((loan, index) => (
-                                            <TableRow key={loan.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <TableCell className="text-center text-sm text-gray-500 font-medium">
-                                                    {index + 1}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        value={loan.name}
-                                                        onChange={(e) => {
-                                                            setOtherLoans((prev) =>
-                                                                prev.map((l) =>
-                                                                    l.id === loan.id
-                                                                        ? { ...l, name: e.target.value }
-                                                                        : l
-                                                                )
-                                                            );
-                                                        }}
-                                                        placeholder="ระบุชื่อสินเชื่อ"
-                                                        className="h-9 bg-white border-gray-200"
-                                                    />
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <button
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                                        onClick={() => {
-                                                            setOtherLoans((prev) =>
-                                                                prev.filter((l) => l.id !== loan.id)
-                                                            );
-                                                        }}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                        <RadioGroup
+                            value={hasOtherLoans === true ? "yes" : hasOtherLoans === false ? "no" : ""}
+                            onValueChange={(val) => {
+                                const isYes = val === "yes";
+                                setHasOtherLoans(isYes);
+                                if (!isYes) setOtherLoans([]);
+                            }}
+                            className="flex items-center gap-6 pl-1"
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <RadioGroupItem value="yes" id="otherLoansYes" />
+                                <Label htmlFor="otherLoansYes" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    มี
+                                </Label>
                             </div>
-                        ) : (
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex items-center justify-center">
-                                <p className="text-sm text-gray-400">
-                                    ยังไม่มีรายการสินเชื่ออื่นๆ
-                                </p>
+                            <div className="flex items-center gap-2.5">
+                                <RadioGroupItem value="no" id="otherLoansNo" />
+                                <Label htmlFor="otherLoansNo" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    ไม่มี
+                                </Label>
+                            </div>
+                        </RadioGroup>
+
+                        <p className="text-xs text-red-500 leading-relaxed pl-1">
+                            * หากผู้กู้มีสินเชื่อหลายประเภทกับ Finance เดิม เช่น ผู้กู้มีสินเชื่อจำนำเล่มทะเบียน และมีสินเชื่ออื่นที่ผูกกับรถที่นำมาขอสินเชื่อ Refinance (สินเชื่อหมุนเวียน, สินเชื่อบุคคล) <span className="font-bold">ห้ามรับทำสินเชื่อ</span>
+                        </p>
+
+                        {hasOtherLoans === true && (
+                            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <div className="flex items-center justify-end">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-xs"
+                                        onClick={() => {
+                                            setOtherLoans((prev) => [
+                                                ...prev,
+                                                { id: Date.now(), name: "" },
+                                            ]);
+                                        }}
+                                    >
+                                        <Plus className="w-3.5 h-3.5 mr-1" />
+                                        เพิ่มรายการ
+                                    </Button>
+                                </div>
+
+                                {otherLoans.length > 0 ? (
+                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="w-[60px] text-center">ลำดับ</TableHead>
+                                                    <TableHead>ชื่อสินเชื่อ</TableHead>
+                                                    <TableHead className="w-[60px] text-center">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {otherLoans.map((loan, index) => (
+                                                    <TableRow key={loan.id} className="hover:bg-gray-50/50 transition-colors">
+                                                        <TableCell className="text-center text-sm text-gray-500 font-medium">
+                                                            {index + 1}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Input
+                                                                value={loan.name}
+                                                                onChange={(e) => {
+                                                                    setOtherLoans((prev) =>
+                                                                        prev.map((l) =>
+                                                                            l.id === loan.id
+                                                                                ? { ...l, name: e.target.value }
+                                                                                : l
+                                                                        )
+                                                                    );
+                                                                }}
+                                                                placeholder="ระบุชื่อสินเชื่อ"
+                                                                className="h-9 bg-white border-gray-200"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <button
+                                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                                onClick={() => {
+                                                                    setOtherLoans((prev) =>
+                                                                        prev.filter((l) => l.id !== loan.id)
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                ) : (
+                                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex items-center justify-center">
+                                        <p className="text-sm text-gray-400">
+                                            ยังไม่มีรายการสินเชื่ออื่นๆ — กดปุ่ม &quot;เพิ่มรายการ&quot; เพื่อเพิ่ม
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

@@ -28,7 +28,7 @@ export default function ConsentListPage() {
             {/* Header */}
             <div>
                 <h2 className="text-xl font-bold text-foreground">
-                    T&C Consent
+                    การยอมรับ
                 </h2>
                 <p className="text-sm text-gray-400 mt-1">
                     รายการความยินยอมทั้งหมดสำหรับใบสมัครนี้

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { User, Coins, FileText, Pencil, Plus, Check, Circle, Trash2 } from "lucide-react";
+import { User, Coins, FileText, Pencil, Check, Trash2, Eye, CircleCheck } from "lucide-react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/Badge";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,7 +33,7 @@ export default function GuarantorDetailPage() {
 
     useEffect(() => {
         const borrowerFirstName = applicationFormData?.firstName;
-        const displayAppId = appId.length > 8 ? `...${appId.slice(-6)}` : appId;
+        const displayAppId = appId.length > 8 ? appId.slice(8) : appId;
         const appLabel = borrowerFirstName ? `${displayAppId} (${borrowerFirstName})` : displayAppId;
         const displayName = "ดีใจ";
 
@@ -56,6 +56,7 @@ export default function GuarantorDetailPage() {
     const guarantorAge = currentYearBE - yearBE;
 
     const guarantorName = "ดีใจ ไชโย";
+    const canEdit = !isReadonly;
 
     const handleDeleteGuarantor = () => {
         setDeleteDialogOpen(false);
@@ -68,70 +69,106 @@ export default function GuarantorDetailPage() {
         }, 500);
     };
 
-    const modules = [
-        {
-            title: "ข้อมูลผู้ค้ำ",
-            value: `${guarantorAge} ปี`,
-            icon: <User className="w-24 h-24" />,
-            isEmpty: false,
-            completionStatus: 'incomplete' as const,
-            href: `${basePath}/info`,
-        },
-        {
-            title: "อาชีพและรายได้",
-            value: "-",
-            unit: "บาท/เดือน",
-            icon: <Coins className="w-24 h-24" />,
-            isEmpty: true,
-            completionStatus: 'incomplete' as const,
-            href: `${basePath}/income`,
-        },
-        {
-            title: "ภาระหนี้สิน",
-            value: "-",
-            unit: "บาท/เดือน",
-            icon: <FileText className="w-24 h-24" />,
-            isEmpty: true,
-            completionStatus: 'incomplete' as const,
-            href: `${basePath}/debt`,
-        },
-    ];
-
     return (
         <>
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold">{guarantorName}</h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {modules.map((mod) => (
-                        <SummaryCard
-                            key={mod.title}
-                            title={mod.title}
-                            value={mod.value}
-                            unit={mod.unit}
-                            icon={mod.icon}
-                            isEmpty={mod.isEmpty}
-                            completionStatus={mod.completionStatus}
-                            onEdit={() => router.push(mod.href)}
-                        />
-                    ))}
-                </div>
-
-                {/* Delete Guarantor Button */}
-                {!isReadonly && (
-                    <div className="pt-4 border-t border-border-subtle">
-                        <Button
-                            variant="ghost"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-bold"
-                            onClick={() => setDeleteDialogOpen(true)}
-                        >
-                            <Trash2 className="w-4 h-4 mr-1.5" />
-                            ลบผู้ค้ำประกัน
-                        </Button>
+            <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
+                {/* ═══════════════════════════════════════════════════════════
+                    SECTION 1: GUARANTOR HEADER (full-width border bottom)
+                ═══════════════════════════════════════════════════════════ */}
+                <div className="bg-sidebar">
+                    <div className="max-w-6xl mx-auto px-6 lg:px-8 py-3">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                                    {guarantorName}
+                                </h1>
+                            </div>
+                        </div>
                     </div>
-                )}
+                </div>
+
+                {/* ═══════════════════════════════════════════════════════════
+                    SECTION 2: GUARANTOR DETAIL
+                ═══════════════════════════════════════════════════════════ */}
+                <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
+                    <div className="flex gap-8 items-start">
+                        {/* ── Left column: Module list ── */}
+                        <div className="flex-1 min-w-0 space-y-5">
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดผู้ค้ำประกัน</p>
+                                <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
+                                    <ModuleRow
+                                        title="ข้อมูลผู้ค้ำ"
+                                        icon={<User className="w-4 h-4" />}
+                                        completionStatus={'completed'}
+                                        onEdit={canEdit ? () => router.push(`${basePath}/info`) : undefined}
+                                        onView={!canEdit ? () => router.push(`${basePath}/info?state=readonly`) : undefined}
+                                    />
+                                    <ModuleRow
+                                        title="อาชีพและรายได้"
+                                        icon={<Coins className="w-4 h-4" />}
+                                        completionStatus={'completed'}
+                                        onEdit={canEdit ? () => router.push(`${basePath}/income`) : undefined}
+                                        onView={!canEdit ? () => router.push(`${basePath}/income?state=readonly`) : undefined}
+                                    />
+                                    <ModuleRow
+                                        title="ภาระหนี้สิน"
+                                        icon={<FileText className="w-4 h-4" />}
+                                        completionStatus={'completed'}
+                                        onEdit={canEdit ? () => router.push(`${basePath}/debt`) : undefined}
+                                        onView={!canEdit ? () => router.push(`${basePath}/debt?state=readonly`) : undefined}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── Right column ── */}
+                        <div className="w-[280px] shrink-0 space-y-5">
+                            {/* Guarantor info */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">ข้อมูลผู้ค้ำ</p>
+                                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                                    <div className="space-y-2.5">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">อายุ</span>
+                                            <span className="text-xs font-semibold text-gray-800">{guarantorAge} ปี</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">ความสัมพันธ์</span>
+                                            <span className="text-xs font-semibold text-gray-800">พี่น้อง</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">รวมรายได้กับผู้กู้</span>
+                                            <Badge variant="success" className="gap-1.5">
+                                                <CircleCheck className="w-3.5 h-3.5" />
+                                                ใช่
+                                            </Badge>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">เจ้าของกรรมสิทธิ์ร่วม</span>
+                                            <Badge variant="success" className="gap-1.5">
+                                                <CircleCheck className="w-3.5 h-3.5" />
+                                                ใช่
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Delete guarantor */}
+                            {canEdit && (
+                                <Button
+                                    variant="outline"
+                                    className="w-full text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
+                                    <Trash2 className="w-4 h-4 mr-1.5" />
+                                    ลบผู้ค้ำประกัน
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Delete Guarantor Confirmation Dialog */}
@@ -161,80 +198,58 @@ export default function GuarantorDetailPage() {
     );
 }
 
-function SummaryCard({
+// ─── ModuleRow (same pattern as application detail) ─────────────────────────
+
+function ModuleRow({
     title,
-    value,
-    unit,
     icon,
-    isEmpty = false,
     completionStatus,
     onEdit,
+    onView,
 }: {
     title: string;
-    value: React.ReactNode;
-    unit?: string;
     icon?: React.ReactNode;
-    isEmpty?: boolean;
     completionStatus?: 'completed' | 'incomplete';
     onEdit?: () => void;
+    onView?: () => void;
 }) {
-    return (
-        <div className={cn(
-            "rounded-2xl p-5 flex flex-col justify-between min-h-[140px] group relative overflow-hidden transition-all duration-300 cursor-pointer",
-            isEmpty
-                ? (onEdit ? "bg-white border-2 border-dashed border-gray-300 hover:border-chaiyo-blue/50" : "bg-gray-50/50 border border-border-subtle")
-                : completionStatus === 'completed'
-                    ? "bg-blue-50/40 border border-blue-100/60 hover:border-blue-200"
-                    : "bg-gray-50/80 border border-gray-200 hover:border-gray-300"
-        )}
-        onClick={onEdit}
-        >
-            {icon && (
-                <div className={cn(
-                    "absolute -bottom-4 -right-4 transition-colors duration-300 pointer-events-none",
-                    isEmpty ? "text-gray-100/60 group-hover:text-gray-200/80" : "text-gray-200/50 group-hover:text-gray-200"
-                )}>
-                    {icon}
-                </div>
-            )}
+    const isEmpty = !onEdit && !onView;
 
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-2">
-                    <p className={cn("text-base font-semibold", isEmpty ? "text-gray-400" : "text-gray-700")}>{title}</p>
-                    {completionStatus && (
-                        completionStatus === 'completed' ? (
-                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-                                <Check className="w-3 h-3 text-white" strokeWidth={3} />
-                            </div>
-                        ) : (
-                            <Circle className="w-4.5 h-4.5 text-gray-300 shrink-0" strokeWidth={2} />
-                        )
-                    )}
+    return (
+        <div className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50/50 transition-colors">
+            <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-400">
+                    {icon ?? <User className="w-4 h-4" />}
                 </div>
-                {isEmpty ? (
-                    <p className="text-sm font-normal text-gray-300 mt-1">-</p>
-                ) : (
-                    <div className="text-sm font-medium text-foreground tracking-tight">
-                        {value}
-                        {unit && <span className="text-sm text-foreground ml-1">{unit}</span>}
+                <span className="text-base font-semibold text-gray-800">{title}</span>
+            </div>
+            <div className="flex items-center gap-2">
+                {completionStatus === 'completed' && (
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
                     </div>
                 )}
+                {onEdit && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-400 hover:text-chaiyo-blue"
+                        onClick={onEdit}
+                    >
+                        <Pencil className="w-4 h-4" />
+                    </Button>
+                )}
+                {onView && !onEdit && !isEmpty && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-gray-400 hover:text-chaiyo-blue"
+                        onClick={onView}
+                    >
+                        <Eye className="w-4 h-4" />
+                    </Button>
+                )}
             </div>
-            {onEdit && (
-                <Button
-                    variant={isEmpty ? "default" : "outline"}
-                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                    className={cn(
-                        "relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5",
-                        isEmpty
-                            ? "bg-chaiyo-blue text-white"
-                            : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-chaiyo-blue"
-                    )}
-                >
-                    {isEmpty ? <Plus className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
-                    {isEmpty ? "เพิ่มข้อมูล" : "แก้ไข"}
-                </Button>
-            )}
         </div>
     );
 }

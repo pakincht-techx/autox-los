@@ -55,7 +55,13 @@ const getCompletionStatus = (g: Guarantor): {
 
 // ─── Mock Guarantors ─────────────────────────────────────────────────────────
 
-const MOCK_GUARANTORS: Guarantor[] = [
+// Extended mock data with income and co-owner info
+interface GuarantorWithExtras extends Guarantor {
+    combineIncome?: boolean;
+    isCoOwner?: boolean;
+}
+
+const MOCK_GUARANTORS: GuarantorWithExtras[] = [
     {
         relationship: "พี่น้อง",
         idNumber: "1-1234-56789-01-2",
@@ -65,6 +71,8 @@ const MOCK_GUARANTORS: Guarantor[] = [
         birthDate: "15/06/2530",
         phone: "089-123-4567",
         verificationStatus: "PASSED",
+        combineIncome: true,
+        isCoOwner: true,
     },
     {
         relationship: "คู่สมรส",
@@ -76,6 +84,8 @@ const MOCK_GUARANTORS: Guarantor[] = [
         phone: "081-987-6543",
         verificationStatus: "WATCHLIST",
         watchlistReasons: ["01", "06"],
+        combineIncome: true,
+        isCoOwner: false,
     },
     {
         relationship: "บิดา",
@@ -87,6 +97,8 @@ const MOCK_GUARANTORS: Guarantor[] = [
         phone: undefined,
         verificationStatus: "WATCHLIST",
         watchlistReasons: ["02"],
+        combineIncome: false,
+        isCoOwner: false,
     },
 ];
 
@@ -168,6 +180,8 @@ export default function GuarantorsPage() {
                                     <TableHead className="w-[60px] text-center">ลำดับ</TableHead>
                                     <TableHead>ชื่อ-นามสกุล</TableHead>
                                     <TableHead>ความสัมพันธ์</TableHead>
+                                    <TableHead>รวมรายได้</TableHead>
+                                    <TableHead>เจ้าของกรรมสิทธิ์ร่วม</TableHead>
                                     <TableHead>สถานะข้อมูล</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -194,6 +208,26 @@ export default function GuarantorsPage() {
                                                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                                                     {g.relationship || "-"}
                                                 </span>
+                                            </TableCell>
+                                            <TableCell>
+                                                {(g as GuarantorWithExtras).combineIncome ? (
+                                                    <Badge variant="success" className="gap-1.5">
+                                                        <CircleCheck className="w-3.5 h-3.5" />
+                                                        ใช่
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-sm text-gray-400">-</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {(g as GuarantorWithExtras).isCoOwner ? (
+                                                    <Badge variant="success" className="gap-1.5">
+                                                        <CircleCheck className="w-3.5 h-3.5" />
+                                                        ใช่
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-sm text-gray-400">-</span>
+                                                )}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant={completionStatus.variant} className="gap-1.5">

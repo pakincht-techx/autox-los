@@ -55,7 +55,7 @@ export default function AddGuarantorPage() {
     // Breadcrumbs management
     useEffect(() => {
         const borrowerFirstName = applicationFormData?.firstName;
-        const displayAppId = appId.length > 8 ? `...${appId.slice(-6)}` : appId;
+        const displayAppId = appId.length > 8 ? appId.slice(8) : appId;
         const appLabel = borrowerFirstName ? `${displayAppId} (${borrowerFirstName})` : displayAppId;
 
         setBreadcrumbs([
@@ -310,7 +310,7 @@ export default function AddGuarantorPage() {
     const handleCreateProfile = async () => {
         setStage('COMPLETE');
         await new Promise(resolve => setTimeout(resolve, 500));
-        router.push(`/dashboard/new-application/${appId}/guarantors/G-D${Date.now()}`); // Navigate to new placeholder detail page
+        router.push(`/dashboard/new-application/${appId}/guarantors/G-D${Date.now()}/info`); // Navigate to guarantor info page
     };
 
     return (
