@@ -51,10 +51,10 @@ function DashboardLayoutContent({
                                 <DashboardPageHeader
                                     breadcrumbs={breadcrumbs}
                                     rightContent={rightContent}
+                                    className="pl-4"
                                     hideNavButtons={hideNavButtons}
                                     hideSaveDraftButton={hideSaveDraftButton}
                                     onBack={onBack || undefined}
-                                    className="pl-4"
                                 />
                             )}
 

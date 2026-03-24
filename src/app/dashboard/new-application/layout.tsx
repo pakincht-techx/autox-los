@@ -42,7 +42,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const isReadonly = searchParams.get('state') === 'readonly';
-    const { setBreadcrumbs, setRightContent } = useSidebar();
+    const { setBreadcrumbs, setRightContent, setHideSaveDraftButton } = useSidebar();
     const {
         appId,
         isApplicationStarted,
@@ -66,6 +66,11 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     // Determine if we're in the application phase
     // applicationStepIndex covers standard stepper steps; also check ALL_FLOW_STEPS phase for extra pages like guarantors
     const isApplicationPhase = applicationStepIndex >= 0 || (!isScreeningPhase && currentFlowIndex >= 0);
+
+    // ── Hide save draft button during screening phase ──────────────────────
+    useEffect(() => {
+        setHideSaveDraftButton(isScreeningPhase);
+    }, [isScreeningPhase, setHideSaveDraftButton]);
 
     // Borrower name from formData
     const borrowerDisplayName = [

@@ -240,7 +240,7 @@ function getMockApp(mockCase: string | null) {
 
 export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { setBreadcrumbs, setRightContent, setHideSaveDraftButton, devRole } = useSidebar();
+    const { setBreadcrumbs, setRightContent, devRole, setHideNavButtons, setHideSaveDraftButton } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [consentCompleted, setConsentCompleted] = useState(false);
@@ -294,15 +294,17 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         // No right content in the top bar — action buttons are in the header section
         setRightContent(null);
 
-        // Hide save draft button on applications page
+        // Hide nav buttons and save draft button on applications detail page
+        setHideNavButtons(true);
         setHideSaveDraftButton(true);
 
         return () => {
             setBreadcrumbs([]);
             setRightContent(null);
+            setHideNavButtons(false);
             setHideSaveDraftButton(false);
         };
-    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, setHideSaveDraftButton, viewMode, canEdit, currentStatus, statusParam]);
+    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, viewMode, canEdit, currentStatus, statusParam, setHideNavButtons, setHideSaveDraftButton]);
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">

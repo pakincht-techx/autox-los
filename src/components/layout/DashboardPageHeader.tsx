@@ -104,7 +104,7 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
                 <div className="flex-1 flex items-center justify-end gap-3">
                     {!hideNavButtons && !hideSaveDraftButton && (
                         <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
-                            {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
                             {isSaving ? "กำลังบันทึก..." : "บันทึกแบบร่าง"}
                         </Button>
                     )}

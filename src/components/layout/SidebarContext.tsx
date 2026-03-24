@@ -21,9 +21,9 @@ interface SidebarContextType {
     setRightContent: (content: React.ReactNode) => void;
     devRole: DevRole;
     setDevRole: (role: DevRole) => void;
-    hideNavButtons?: boolean;
+    hideNavButtons: boolean;
     setHideNavButtons: (hide: boolean) => void;
-    hideSaveDraftButton?: boolean;
+    hideSaveDraftButton: boolean;
     setHideSaveDraftButton: (hide: boolean) => void;
     onBack: (() => void) | null;
     setOnBack: (cb: (() => void) | null) => void;
