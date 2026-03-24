@@ -1,20 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 
 // Policy row types
-type PolicyResult = "ผ่าน" | "ไม่ผ่าน" | null;
+type PolicyResult = "ผ่าน" | "ไม่ผ่าน" | "ขออนุโลมได้" | null;
 
 interface PolicyRow {
     id: string;
     policy: string;
     customerInfo: string | string[];
     result: PolicyResult;
+    badge?: string;
 }
 
 interface PolicySection {
@@ -37,7 +39,7 @@ const BORROWER_ROWS: PolicyRow[] = [
         id: "borrower_age",
         policy: "อายุผู้กู้",
         customerInfo: "22 ปี",
-        result: "ไม่ผ่าน",
+        result: "ขออนุโลมได้",
     },
     {
         id: "borrower_age_with_term",
@@ -61,25 +63,25 @@ const BORROWER_ROWS: PolicyRow[] = [
         id: "borrower_residual_income",
         policy: "เงินคงเหลือสุทธิ (Residual Income)",
         customerInfo: "20,000 บาท",
-        result: null,
+        result: "ผ่าน",
     },
     {
         id: "borrower_iir",
         policy: "IIR",
         customerInfo: "2.4 เท่า",
-        result: null,
+        result: "ผ่าน",
     },
     {
         id: "borrower_dsr",
         policy: "DSR",
         customerInfo: "70.00 %",
-        result: null,
+        result: "ผ่าน",
     },
     {
         id: "borrower_service_area",
         policy: "พื้นที่การให้บริการ",
         customerInfo: "48.00 กิโลเมตร",
-        result: null,
+        result: "ผ่าน",
     },
 ];
 
@@ -150,7 +152,7 @@ const GUARANTORS: Guarantor[] = [
             {
                 id: "g2_guarantor_type",
                 policy: "ประเภทผู้ค้ำประกัน",
-                customerInfo: "บุคคลทั่วไป",
+                customerInfo: "ไม่ใช่เจ้าของกรรมสิทธิ์ร่วม",
                 result: "ผ่าน",
             },
             {
@@ -242,25 +244,14 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
                 policy: "LTV",
                 customerInfo: "65 %",
                 result: "ผ่าน",
+                badge: "test program",
             },
         ],
     },
     {
         id: "loan",
-        label: "ข้อมูลสินเชื่อ",
+        label: "ข้อมูลสินเชื่อเดิม (กรณีรีไฟแนนซ์)",
         rows: [
-            {
-                id: "loan_objective",
-                policy: "วัตถุประสงค์การขอสินเชื่อ",
-                customerInfo: "เพื่อประกอบอาชีพ",
-                result: "ผ่าน",
-            },
-            {
-                id: "loan_amount",
-                policy: "วงเงินกู้",
-                customerInfo: "200,000 บาท",
-                result: "ผ่าน",
-            },
             {
                 id: "loan_account_status",
                 policy: "สถานะบัญชี ณ วันขอสินเชื่อ",
@@ -269,7 +260,7 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
             },
             {
                 id: "loan_installment",
-                policy: "ค่างวด",
+                policy: "ค่างวดกับไฟแนนซ์เดิม",
                 customerInfo: "1,500 บาท",
                 result: "ผ่าน",
             },
@@ -281,8 +272,9 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
 
 function ResultBadge({ result }: { result: PolicyResult }) {
     if (result === null) return <span className="text-xs text-gray-400">-</span>;
+    const variant = result === "ผ่าน" ? "success" : result === "ขออนุโลมได้" ? "warning" : "danger";
     return (
-        <Badge variant={result === "ผ่าน" ? "success" : "danger"}>
+        <Badge variant={variant}>
             {result}
         </Badge>
     );
@@ -300,6 +292,7 @@ function PolicyRows({ rows }: { rows: PolicyRow[] }) {
                             {row.policy}
                         </TableCell>
                         <TableCell className="px-4 py-3 text-sm text-gray-900 font-semibold">
+                            <div className="flex items-center gap-2">
                             {Array.isArray(row.customerInfo) ? (
                                 <div className="flex flex-col gap-1">
                                     {row.customerInfo.map((line, i) => {
@@ -320,6 +313,12 @@ function PolicyRows({ rows }: { rows: PolicyRow[] }) {
                             ) : (
                                 row.customerInfo
                             )}
+                            {row.badge && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">
+                                    {row.badge}
+                                </span>
+                            )}
+                            </div>
                         </TableCell>
                         <TableCell className="px-4 py-3 text-center">
                             <ResultBadge result={row.result} />
@@ -361,30 +360,40 @@ function PlaceholderRow() {
 
 export function PolicyChecklist() {
 
-    // Compute passed / total
+    // Compute overall status
     const allRows: PolicyRow[] = [
         ...STANDARD_SECTIONS.flatMap(s => s.rows),
         ...GUARANTORS.flatMap(g => g.rows),
         ...AFTER_GUARANTOR_SECTIONS.flatMap(s => s.rows),
     ];
     const rowsWithResult = allRows.filter(r => r.result !== null);
-    const passedCount = rowsWithResult.filter(r => r.result === "ผ่าน").length;
-    const totalCount = rowsWithResult.length;
-    const allPassed = passedCount === totalCount;
+    const hasNotPassed = rowsWithResult.some(r => r.result === "ไม่ผ่าน");
+    const hasException = rowsWithResult.some(r => r.result === "ขออนุโลมได้");
+    const overallStatus = hasNotPassed ? "ไม่ผ่าน" : hasException ? "ขออนุโลมได้" : "ผ่าน";
+    const overallVariant = hasNotPassed ? "danger" : hasException ? "warning" : "success";
+
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
             <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
-                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                <CardHeader
+                    className="bg-blue-50/50 border-b border-border-strong pb-4 cursor-pointer select-none"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
                             <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" />
                             Policy Checklist
                         </CardTitle>
-                        <Badge variant={allPassed ? "success" : "danger"}>
-                            ผ่าน {passedCount}/{totalCount}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            <Badge variant={overallVariant}>
+                                {overallStatus}
+                            </Badge>
+                            <ChevronDown className={cn("w-5 h-5 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} />
+                        </div>
                     </div>
                 </CardHeader>
+                {isOpen && (
                 <CardContent className="p-0">
                     <div className="overflow-hidden bg-white ">
                         <Table>
@@ -434,6 +443,7 @@ export function PolicyChecklist() {
                         </Table>
                     </div>
                 </CardContent>
+                )}
             </Card>
     );
 }

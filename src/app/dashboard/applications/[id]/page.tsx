@@ -461,7 +461,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">เอกสารและการยินยอม</p>
                             <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100 overflow-hidden">
                                 <ModuleRow
-                                    title="อัพโหลดเอกสาร"
+                                    title="เอกสารแนบ"
                                     icon={<Upload className="w-4 h-4" />}
                                     completionStatus={app.moduleStatus.documents ? 'completed' : 'incomplete'}
                                     onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/documents?state=draft`) : undefined}
@@ -1184,56 +1184,21 @@ function SubmitApplicationDialog({
                     {dialogStep === 1 && (
                         <div className="space-y-5">
                             {/* Block flow (existing) */}
-                            {!allPassed && hasBlocks && (
-                                <>
-                                    {hasSoftblocks && (
-                                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
-                                            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                                                <Send className="w-3 h-3 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-bold text-blue-800">
-                                                    ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
-                                                </p>
-                                                <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
-                                                    เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
-                                                    หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="space-y-4">
-                                        {/* Group by module */}
-                                        {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
-                                            const items = MOCK_BLOCK_ITEMS.filter(b => b.module === moduleName);
-                                            if (items.length === 0) return null;
-                                            // Deduplicate by personName or collateralType
-                                            const seen = new Set<string>();
-                                            const uniqueItems = items.filter(item => {
-                                                const key = item.personName || item.collateralType || item.description;
-                                                if (seen.has(key)) return false;
-                                                seen.add(key);
-                                                return true;
-                                            });
-                                            return (
-                                                <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
-                                                    <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
-                                                        <p className="text-xs font-bold text-gray-600">{moduleName}</p>
-                                                    </div>
-                                                    <div className="divide-y divide-gray-100">
-                                                        {uniqueItems.map((item, i) => (
-                                                            <div key={i} className="px-4 py-2.5 bg-white">
-                                                                <p className="text-xs font-semibold text-gray-900">
-                                                                    {item.personName || item.collateralType}
-                                                                </p>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                            {!allPassed && hasBlocks && hasSoftblocks && (
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                                        <Send className="w-3 h-3 text-blue-600" />
                                     </div>
-                                </>
+                                    <div>
+                                        <p className="text-xs font-bold text-blue-800">
+                                            ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
+                                        </p>
+                                        <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
+                                            เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
+                                            หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
+                                        </p>
+                                    </div>
+                                </div>
                             )}
 
                             {/* All-passed flow */}

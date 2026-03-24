@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, Plus, Trash2, Home, CreditCard, Building, PieChart, TrendingUp, TrendingDown, Pencil, Users, ImagePlus, X, Eye, Link, FileText, UploadCloud, CheckCircle2, Info, HelpCircle, Globe, ClipboardCheck, Phone, Calendar, MapPin, MessageSquare, RotateCcw, Camera, Lock, Unlock, GripVertical } from "lucide-react";
 import { BahtSign } from "@/components/icons/BahtSign";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ interface IncomeStepProps {
     formData: CustomerFormData;
     setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
     isExistingCustomer?: boolean;
+    isGuarantor?: boolean;
 }
 
 const OCCUPATIONS = [
@@ -140,7 +142,7 @@ const MOCK_STAFF_LIST = [
     { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
-export function IncomeStep({ formData, setFormData, isExistingCustomer = false }: IncomeStepProps) {
+export function IncomeStep({ formData, setFormData, isExistingCustomer = false, isGuarantor = false }: IncomeStepProps) {
     const handleChange = <K extends keyof CustomerFormData>(field: K, value: CustomerFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -197,6 +199,18 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const [uploadSessionDocIds, setUploadSessionDocIds] = useState<Set<string>>(new Set());
     const [dragOverDocIdx, setDragOverDocIdx] = useState<number | null>(null);
     const [currentPhotoCategory, setCurrentPhotoCategory] = useState<string | null>(null);
+
+    // Statement month dialog state
+    const [statementMonthDialogOpen, setStatementMonthDialogOpen] = useState(false);
+    const [statementMonthDialogBank, setStatementMonthDialogBank] = useState<{ occId: string, bankIdx: number } | null>(null);
+    const [selectedMonthForDialog, setSelectedMonthForDialog] = useState<string>('');
+    const [pendingDeleteMonth, setPendingDeleteMonth] = useState<{ occId: string, bankIdx: number, monthLabel: string } | null>(null);
+
+    // Payslip month dialog state
+    const [payslipMonthDialogOpen, setPayslipMonthDialogOpen] = useState(false);
+    const [payslipMonthDialogOccId, setPayslipMonthDialogOccId] = useState<string | null>(null);
+    const [selectedPayslipMonth, setSelectedPayslipMonth] = useState<string>('');
+    const [pendingDeletePayslipMonth, setPendingDeletePayslipMonth] = useState<{ occId: string, monthLabel: string } | null>(null);
 
 
     // Debt Row Handlers
@@ -454,6 +468,209 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
             ? current.filter((c: string) => c !== channel)
             : [...current, channel];
         handleOccupationChange(occId, 'incomeChannels', updated);
+    };
+
+    // Statement Month Handlers
+    const handleOpenAddMonthDialog = (occId: string, bankIdx: number) => {
+        setStatementMonthDialogBank({ occId, bankIdx });
+        setSelectedMonthForDialog('');
+        setStatementMonthDialogOpen(true);
+    };
+
+    const handleConfirmAddMonth = () => {
+        if (!statementMonthDialogBank || !selectedMonthForDialog) return;
+        const { occId, bankIdx } = statementMonthDialogBank;
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const bankKey = String(bankIdx);
+        const currentMonths = { ...(occ.statementMonths || {}) };
+        const bankMonths = currentMonths[bankKey] || [];
+        // Don't add duplicate months
+        if (bankMonths.includes(selectedMonthForDialog)) {
+            setStatementMonthDialogOpen(false);
+            return;
+        }
+        const newMonths = [...bankMonths, selectedMonthForDialog];
+        // Sort by calendar order
+        newMonths.sort((a, b) => THAI_MONTHS_SHORT.indexOf(a) - THAI_MONTHS_SHORT.indexOf(b));
+        currentMonths[bankKey] = newMonths;
+        handleOccupationChange(occId, 'statementMonths', currentMonths);
+        setStatementMonthDialogOpen(false);
+    };
+
+    const handleRemoveStatementMonth = (occId: string, bankIdx: number, monthLabel: string) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const bankKey = String(bankIdx);
+        const currentMonths = { ...(occ.statementMonths || {}) };
+        const bankMonths = currentMonths[bankKey] || [];
+        const monthIdx = bankMonths.indexOf(monthLabel);
+        if (monthIdx === -1) return;
+
+        // Remove the month
+        currentMonths[bankKey] = bankMonths.filter((m: string) => m !== monthLabel);
+
+        // Clean up income rows linked to this month
+        const sourceKey = `statement_${bankIdx}_month_${monthIdx}`;
+        const updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => inc.sourceDocType !== sourceKey);
+        // Re-index remaining months' income keys
+        const reindexedIncomes = updatedIncomes.map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith(`statement_${bankIdx}_month_`)) {
+                const incMonthIdx = Number(inc.sourceDocType.replace(`statement_${bankIdx}_month_`, ''));
+                if (incMonthIdx > monthIdx) {
+                    return { ...inc, sourceDocType: `statement_${bankIdx}_month_${incMonthIdx - 1}` };
+                }
+            }
+            return inc;
+        });
+
+        handleOccupationChange(occId, {
+            statementMonths: currentMonths,
+            saIncomes: reindexedIncomes,
+        });
+    };
+
+    // Payslip Month & Slip Handlers
+    const handleOpenAddPayslipMonthDialog = (occId: string) => {
+        setPayslipMonthDialogOccId(occId);
+        setSelectedPayslipMonth('');
+        setPayslipMonthDialogOpen(true);
+    };
+
+    const handleConfirmAddPayslipMonth = () => {
+        if (!payslipMonthDialogOccId || !selectedPayslipMonth) return;
+        const occ = occupations.find((o: IncomeOccupation) => o.id === payslipMonthDialogOccId);
+        if (!occ) return;
+        const currentMonths: string[] = occ.payslipMonths || [];
+        if (currentMonths.includes(selectedPayslipMonth)) {
+            setPayslipMonthDialogOpen(false);
+            return;
+        }
+        const newMonths = [...currentMonths, selectedPayslipMonth];
+        newMonths.sort((a, b) => THAI_MONTHS_SHORT.indexOf(a) - THAI_MONTHS_SHORT.indexOf(b));
+        // Initialize 1 slip for the new month
+        const monthIdx = newMonths.indexOf(selectedPayslipMonth);
+        const currentSlipCounts = { ...(occ.payslipSlipCounts || {}) };
+        // Re-index slip counts for months that shifted
+        const reindexedSlipCounts: Record<string, number> = {};
+        newMonths.forEach((m, i) => {
+            const oldIdx = currentMonths.indexOf(m);
+            if (oldIdx !== -1) {
+                reindexedSlipCounts[String(i)] = currentSlipCounts[String(oldIdx)] || 1;
+            } else {
+                reindexedSlipCounts[String(i)] = 1; // new month starts with 1 slip
+            }
+        });
+        // Re-index income sourceDocType keys
+        const reindexedIncomes = (occ.saIncomes || []).map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('payslip_')) {
+                const match = inc.sourceDocType.match(/^payslip_(\d+)_slip_(\d+)$/);
+                if (match) {
+                    const oldMonthIdx = Number(match[1]);
+                    const slipIdx = match[2];
+                    const oldMonthLabel = currentMonths[oldMonthIdx];
+                    const newMonthIdx = newMonths.indexOf(oldMonthLabel);
+                    if (newMonthIdx !== -1) {
+                        return { ...inc, sourceDocType: `payslip_${newMonthIdx}_slip_${slipIdx}` };
+                    }
+                }
+            }
+            return inc;
+        });
+        handleOccupationChange(payslipMonthDialogOccId, {
+            payslipMonths: newMonths,
+            payslipSlipCounts: reindexedSlipCounts,
+            saIncomes: reindexedIncomes,
+        });
+        setPayslipMonthDialogOpen(false);
+    };
+
+    const handleRemovePayslipMonth = (occId: string, monthLabel: string) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentMonths: string[] = occ.payslipMonths || [];
+        const monthIdx = currentMonths.indexOf(monthLabel);
+        if (monthIdx === -1) return;
+
+        const newMonths = currentMonths.filter((m: string) => m !== monthLabel);
+        const currentSlipCounts = { ...(occ.payslipSlipCounts || {}) };
+        const slipCount = currentSlipCounts[String(monthIdx)] || 0;
+
+        // Remove all income rows for this month (all slips)
+        let updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('payslip_')) {
+                const match = inc.sourceDocType.match(/^payslip_(\d+)_slip_(\d+)$/);
+                if (match && Number(match[1]) === monthIdx) return false;
+            }
+            return true;
+        });
+
+        // Re-index remaining months
+        const reindexedSlipCounts: Record<string, number> = {};
+        newMonths.forEach((m, i) => {
+            const oldIdx = currentMonths.indexOf(m);
+            reindexedSlipCounts[String(i)] = currentSlipCounts[String(oldIdx)] || 1;
+        });
+
+        updatedIncomes = updatedIncomes.map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('payslip_')) {
+                const match = inc.sourceDocType.match(/^payslip_(\d+)_slip_(\d+)$/);
+                if (match) {
+                    const oldMonthIdx = Number(match[1]);
+                    if (oldMonthIdx > monthIdx) {
+                        return { ...inc, sourceDocType: `payslip_${oldMonthIdx - 1}_slip_${match[2]}` };
+                    }
+                }
+            }
+            return inc;
+        });
+
+        handleOccupationChange(occId, {
+            payslipMonths: newMonths,
+            payslipSlipCounts: reindexedSlipCounts,
+            saIncomes: updatedIncomes,
+        });
+    };
+
+    const handleAddPayslipSlip = (occId: string, monthIdx: number) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentSlipCounts = { ...(occ.payslipSlipCounts || {}) };
+        const current = currentSlipCounts[String(monthIdx)] || 0;
+        currentSlipCounts[String(monthIdx)] = current + 1;
+        handleOccupationChange(occId, 'payslipSlipCounts', currentSlipCounts);
+    };
+
+    const handleRemovePayslipSlip = (occId: string, monthIdx: number, slipIdx: number) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentSlipCounts = { ...(occ.payslipSlipCounts || {}) };
+        const current = currentSlipCounts[String(monthIdx)] || 0;
+        if (current <= 0) return;
+        currentSlipCounts[String(monthIdx)] = current - 1;
+
+        // Remove income rows for this slip
+        const sourceKey = `payslip_${monthIdx}_slip_${slipIdx}`;
+        let updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => inc.sourceDocType !== sourceKey);
+
+        // Re-index remaining slips
+        updatedIncomes = updatedIncomes.map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith(`payslip_${monthIdx}_slip_`)) {
+                const match = inc.sourceDocType.match(/^payslip_\d+_slip_(\d+)$/);
+                if (match) {
+                    const incSlipIdx = Number(match[1]);
+                    if (incSlipIdx > slipIdx) {
+                        return { ...inc, sourceDocType: `payslip_${monthIdx}_slip_${incSlipIdx - 1}` };
+                    }
+                }
+            }
+            return inc;
+        });
+
+        handleOccupationChange(occId, {
+            payslipSlipCounts: currentSlipCounts,
+            saIncomes: updatedIncomes,
+        });
     };
 
     const handleAddBankAccount = (occId: string) => {
@@ -775,7 +992,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     ];
 
     const FARM_STAGES = [
-        "เตรียมดินก่อนเพาะปลุก",
+        "เตรียมดินก่อนเพาะปลูก",
         "เพาะปลูก",
         "ระยะโต",
         "เก็บเกี่ยวผลผลิต"
@@ -784,6 +1001,11 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
     const THAI_MONTHS_SHORT = [
         "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
         "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+    ];
+
+    const THAI_MONTHS_FULL = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
     ];
 
     const FARMER_PRODUCE_LIST = [
@@ -2113,7 +2335,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 sourceKey: string | undefined,
                                                                 incomes: (SAIncome & { originalIndex: number })[],
                                                                 showAddButton: boolean = true,
-                                                                sourceDocs?: IncomeDocument[]
+                                                                sourceDocs?: IncomeDocument[],
+                                                                onRemove?: () => void
                                                             ) => {
                                                                 const sourceTotal = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
                                                                 const sourceDoc = sourceDocs && sourceDocs.length > 0 ? sourceDocs[0] : undefined;
@@ -2124,7 +2347,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                 return (
                                                                     <div key={sourceKey || 'other'} className="space-y-3">
                                                                         <div className="flex items-center justify-between pl-1 pr-1">
-                                                                            <Label className="text-xs font-semibold text-gray-600 truncate mr-2">
+                                                                            <Label className="text-sm font-bold text-gray-700 truncate mr-2">
                                                                                 {displayTitle}
                                                                             </Label>
                                                                             <div className="flex items-center gap-2 shrink-0">
@@ -2137,6 +2360,18 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                         className="h-8 text-xs font-medium text-chaiyo-blue hover:text-chaiyo-blue/80"
                                                                                     >
                                                                                         <Eye className="w-3.5 h-3.5 mr-1" /> ดูเอกสารต้นฉบับ
+                                                                                    </Button>
+                                                                                )}
+                                                                                {onRemove && (
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={onRemove}
+                                                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                        title="ลบเดือนนี้"
+                                                                                    >
+                                                                                        <Trash2 className="w-4 h-4" />
                                                                                     </Button>
                                                                                 )}
                                                                                 {showAddButton && (
@@ -2281,17 +2516,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                             customDocTypes.forEach(ct => dynamicDocTypes.push(ct));
 
                                                             // Separate doc types into payslip, statement, and other categories
-                                                            const payslipMonthCount = occ.payslipMonthCount ?? 0;
-                                                            const payslipDocUploaded = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
-                                                            // Use the max of explicit month count and uploaded doc count
-                                                            const totalPayslipMonths = Math.max(payslipMonthCount, payslipDocUploaded.length);
-                                                            const payslipKeys = Array.from({ length: totalPayslipMonths }, (_, i) => `payslip_${i}`);
+                                                            const payslipMonths: string[] = occ.payslipMonths || [];
+                                                            const payslipSlipCounts: Record<string, number> = occ.payslipSlipCounts || {};
                                                             const statementUploaded = uploadedDocTypes.filter(dt => dt.startsWith('statement_'));
                                                             const otherUploaded = uploadedDocTypes.filter(dt => !dt.startsWith('payslip_') && !dt.startsWith('statement_'));
 
                                                             return (
                                                                 <>
-                                                                    {/* Payslip Section - Tabbed by Month */}
+                                                                    {/* Payslip Section - Multi-Slip per Month */}
                                                                     <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
                                                                         <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
                                                                             <div className="flex items-center gap-2">
@@ -2302,66 +2534,220 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                                 type="button"
                                                                                 variant="outline"
                                                                                 size="sm"
-                                                                                onClick={() => handleOccupationChange(occ.id, 'payslipMonthCount', totalPayslipMonths + 1)}
+                                                                                onClick={() => handleOpenAddPayslipMonthDialog(occ.id)}
                                                                                 className="h-8 text-xs font-medium"
                                                                             >
                                                                                 <Plus className="w-3 h-3 mr-1" /> เพิ่มเดือน
                                                                             </Button>
                                                                         </div>
-                                                                        {totalPayslipMonths > 0 ? (
-                                                                            <Tabs defaultValue={payslipKeys[0]} className="w-full">
-                                                                                <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl justify-start flex-wrap gap-0">
-                                                                                    {payslipKeys.map((dt, idx) => (
-                                                                                        <TabsTrigger key={dt} value={dt} className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm group">
-                                                                                            <span>{THAI_MONTHS_SHORT[idx % 12]}</span>
-                                                                                            {totalPayslipMonths > 1 && (
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    className="ml-1.5 w-4 h-4 rounded-full inline-flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                                    onClick={(e) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        // Remove incomes linked to this payslip month
-                                                                                                        const updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => inc.sourceDocType !== dt);
-                                                                                                        // Re-index: shift payslip_N keys down for months after removed one
-                                                                                                        const reindexedIncomes = updatedIncomes.map((inc: SAIncome) => {
-                                                                                                            if (inc.sourceDocType?.startsWith('payslip_')) {
-                                                                                                                const incIdx = Number(inc.sourceDocType.replace('payslip_', ''));
-                                                                                                                if (incIdx > idx) {
-                                                                                                                    return { ...inc, sourceDocType: `payslip_${incIdx - 1}` };
-                                                                                                                }
-                                                                                                            }
-                                                                                                            return inc;
-                                                                                                        });
-                                                                                                        // Also re-index documents
-                                                                                                        const updatedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) => d.type !== dt);
-                                                                                                        const reindexedDocs = updatedDocs.map((d: IncomeDocument) => {
-                                                                                                            if (d.type?.startsWith('payslip_')) {
-                                                                                                                const dIdx = Number(d.type.replace('payslip_', ''));
-                                                                                                                if (dIdx > idx) {
-                                                                                                                    return { ...d, type: `payslip_${dIdx - 1}` };
-                                                                                                                }
-                                                                                                            }
-                                                                                                            return d;
-                                                                                                        });
-                                                                                                        handleOccupationChange(occ.id, {
-                                                                                                            payslipMonthCount: totalPayslipMonths - 1,
-                                                                                                            saIncomes: reindexedIncomes,
-                                                                                                            incomeDocuments: reindexedDocs,
-                                                                                                        });
-                                                                                                    }}
-                                                                                                    title="ลบเดือนนี้"
-                                                                                                >
-                                                                                                    <X className="w-3 h-3" />
-                                                                                                </button>
-                                                                                            )}
+                                                                        {payslipMonths.length > 0 ? (
+                                                                            <Tabs defaultValue={`payslip_month_0`} className="w-full">
+                                                                                <TabsList className="w-full h-auto p-0 bg-transparent border-b border-border-subtle justify-start flex-wrap gap-0 rounded-none">
+                                                                                    {payslipMonths.map((monthLabel: string, mIdx: number) => (
+                                                                                        <TabsTrigger
+                                                                                            key={`payslip_month_${mIdx}`}
+                                                                                            value={`payslip_month_${mIdx}`}
+                                                                                            className="relative px-4 py-2 text-xs font-bold rounded-none border-b-2 border-transparent data-[state=active]:border-chaiyo-blue data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none text-gray-500 hover:text-gray-700 bg-transparent shadow-none transition-all"
+                                                                                        >
+                                                                                            <span>{monthLabel}</span>
                                                                                         </TabsTrigger>
                                                                                     ))}
                                                                                 </TabsList>
-                                                                                {payslipKeys.map((dt, idx) => {
-                                                                                    const payslipDocs = allDocs.filter((d: IncomeDocument) => d.type === dt);
+                                                                                {payslipMonths.map((monthLabel: string, mIdx: number) => {
+                                                                                    const monthFullName = THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(monthLabel)] || monthLabel;
+                                                                                    const slipCount = payslipSlipCounts[String(mIdx)] || 0;
                                                                                     return (
-                                                                                        <TabsContent key={dt} value={dt} className="mt-3">
-                                                                                            {renderIncomeTable(`สลิปเงินเดือน - ${THAI_MONTHS_SHORT[idx % 12]}`, dt, incomesBySource[dt] || [], true, payslipDocs)}
+                                                                                        <TabsContent key={`payslip_month_${mIdx}`} value={`payslip_month_${mIdx}`} className="mt-3">
+                                                                                            <motion.div
+                                                                                                initial={{ opacity: 0, y: 6 }}
+                                                                                                animate={{ opacity: 1, y: 0 }}
+                                                                                                transition={{ duration: 0.2, ease: 'easeOut' }}
+                                                                                                className="space-y-4"
+                                                                                            >
+                                                                                                {/* Month Header */}
+                                                                                                <div className="flex items-center justify-between">
+                                                                                                    <Label className="text-sm font-bold text-gray-700">{monthFullName}</Label>
+                                                                                                    <div className="flex items-center gap-2">
+                                                                                                        <Button
+                                                                                                            type="button"
+                                                                                                            variant="outline"
+                                                                                                            size="sm"
+                                                                                                            onClick={() => setPendingDeletePayslipMonth({ occId: occ.id, monthLabel })}
+                                                                                                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                                            title="ลบเดือนนี้"
+                                                                                                        >
+                                                                                                            <Trash2 className="w-4 h-4" />
+                                                                                                        </Button>
+                                                                                                        <Button
+                                                                                                            type="button"
+                                                                                                            variant="outline"
+                                                                                                            size="sm"
+                                                                                                            onClick={() => handleAddPayslipSlip(occ.id, mIdx)}
+                                                                                                            className="h-8 text-xs font-medium"
+                                                                                                        >
+                                                                                                            <Plus className="w-3 h-3 mr-1" /> เพิ่ม Slip
+                                                                                                        </Button>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                {/* Slips */}
+                                                                                                {slipCount > 0 ? (
+                                                                                                    <div className="border border-border-subtle rounded-xl bg-white overflow-hidden divide-y divide-border-subtle">
+                                                                                                        {Array.from({ length: slipCount }, (_, sIdx) => {
+                                                                                                            const slipSourceKey = `payslip_${mIdx}_slip_${sIdx}`;
+                                                                                                            const slipIncomes = incomesBySource[slipSourceKey] || [];
+                                                                                                            const slipDefaultLabel = `Payslip ${String(sIdx + 1).padStart(2, '0')}`;
+                                                                                                            const payslipDocs = allDocs.filter((d: IncomeDocument) => d.type === slipSourceKey || d.type === `payslip_${mIdx}` || d.type === `payslip_${sIdx}`);
+                                                                                                            const sourceDoc = payslipDocs.length > 0 ? payslipDocs[0] : undefined;
+                                                                                                            const slipLabel = sourceDoc
+                                                                                                                ? (sourceDoc.name || sourceDoc.originalName || slipDefaultLabel)
+                                                                                                                : slipDefaultLabel;
+
+                                                                                                            return (
+                                                                                                                <div key={slipSourceKey} className="p-4 space-y-3">
+                                                                                                                    {/* Slip Header */}
+                                                                                                                    <div className="flex items-center justify-between">
+                                                                                                                        <div className="flex items-center gap-2">
+                                                                                                                            <Label className="text-sm font-bold text-gray-700">{slipLabel}</Label>
+                                                                                                                            {sourceDoc && (
+                                                                                                                                <Button
+                                                                                                                                    type="button"
+                                                                                                                                    variant="ghost"
+                                                                                                                                    size="sm"
+                                                                                                                                    onClick={() => window.open(sourceDoc.url, '_blank')}
+                                                                                                                                    className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                                                                                    title="ดูเอกสารต้นฉบับ"
+                                                                                                                                >
+                                                                                                                                    <Eye className="w-4 h-4" />
+                                                                                                                                </Button>
+                                                                                                                            )}
+                                                                                                                        </div>
+                                                                                                                        <div className="flex items-center gap-2">
+                                                                                                                            {slipCount > 1 && (
+                                                                                                                                <Button
+                                                                                                                                    type="button"
+                                                                                                                                    variant="outline"
+                                                                                                                                    size="sm"
+                                                                                                                                    onClick={() => handleRemovePayslipSlip(occ.id, mIdx, sIdx)}
+                                                                                                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                                                                    title="ลบ Slip นี้"
+                                                                                                                                >
+                                                                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                                                                </Button>
+                                                                                                                            )}
+                                                                                                                            <Button
+                                                                                                                                type="button"
+                                                                                                                                variant="outline"
+                                                                                                                                size="sm"
+                                                                                                                                onClick={() => handleAddSAIncomeRow(occ.id, slipSourceKey)}
+                                                                                                                                className="h-8 text-xs font-medium bg-white"
+                                                                                                                            >
+                                                                                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการ
+                                                                                                                            </Button>
+                                                                                                                        </div>
+                                                                                                                    </div>
+
+                                                                                                                    {/* Slip Income Table */}
+                                                                                                                    <div className="border border-border-strong rounded-lg overflow-hidden bg-white">
+                                                                                                                        <Table>
+                                                                                                                            <TableHeader className="bg-gray-50/50">
+                                                                                                                                <TableRow>
+                                                                                                                                    <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้ <span className="text-red-500">*</span></TableHead>
+                                                                                                                                    <TableHead className="w-[40%] text-xs py-3">รายละเอียดรายได้</TableHead>
+                                                                                                                                    <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท) <span className="text-red-500">*</span></TableHead>
+                                                                                                                                    <TableHead className="w-[10%] text-center text-xs py-3">จัดการ</TableHead>
+                                                                                                                                </TableRow>
+                                                                                                                            </TableHeader>
+                                                                                                                            <TableBody>
+                                                                                                                                {slipIncomes.length === 0 ? (
+                                                                                                                                    <TableRow>
+                                                                                                                                        <TableCell colSpan={4} className="h-16 text-center text-muted-foreground italic text-xs">
+                                                                                                                                            ยังไม่มีรายการรายได้ กรุณากดเพิ่มรายการ
+                                                                                                                                        </TableCell>
+                                                                                                                                    </TableRow>
+                                                                                                                                ) : (
+                                                                                                                                    slipIncomes.map((item) => {
+                                                                                                                                        const originalIdx = item.originalIndex;
+                                                                                                                                        return (
+                                                                                                                                            <TableRow key={originalIdx} className="group transition-colors hover:bg-gray-50/50">
+                                                                                                                                                <TableCell className="py-2.5">
+                                                                                                                                                    <Select
+                                                                                                                                                        value={item.type || ""}
+                                                                                                                                                        onValueChange={(val) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'type', val)}
+                                                                                                                                                    >
+                                                                                                                                                        <SelectTrigger className="h-9 text-sm bg-gray-50/30">
+                                                                                                                                                            <SelectValue placeholder="ระบุประเภทรายได้" />
+                                                                                                                                                        </SelectTrigger>
+                                                                                                                                                        <SelectContent>
+                                                                                                                                                            {SA_INCOME_TYPES.map(type => (
+                                                                                                                                                                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                                                                                                                                                            ))}
+                                                                                                                                                        </SelectContent>
+                                                                                                                                                    </Select>
+                                                                                                                                                </TableCell>
+                                                                                                                                                <TableCell className="py-2.5">
+                                                                                                                                                    <Input
+                                                                                                                                                        value={item.detail || ""}
+                                                                                                                                                        onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'detail', e.target.value)}
+                                                                                                                                                        placeholder="รายละเอียด"
+                                                                                                                                                        className="h-9 text-sm bg-gray-50/30"
+                                                                                                                                                    />
+                                                                                                                                                </TableCell>
+                                                                                                                                                <TableCell className="py-2.5">
+                                                                                                                                                    <Input
+                                                                                                                                                        type="text"
+                                                                                                                                                        value={formatNumberWithCommas(item.amount ?? '')}
+                                                                                                                                                        onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'amount', e.target.value)}
+                                                                                                                                                        placeholder="จำนวน"
+                                                                                                                                                        className="h-9 text-sm bg-gray-50/30 text-right font-mono"
+                                                                                                                                                    />
+                                                                                                                                                </TableCell>
+                                                                                                                                                <TableCell className="py-2.5 text-center">
+                                                                                                                                                    <Button
+                                                                                                                                                        variant="ghost"
+                                                                                                                                                        size="sm"
+                                                                                                                                                        className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                                                                                                        onClick={() => setItemToDelete({
+                                                                                                                                                            index: originalIdx,
+                                                                                                                                                            occId: occ.id,
+                                                                                                                                                            name: item.detail || (SA_INCOME_TYPES.find(t => t.value === item.type)?.label) || `รายการที่ ${originalIdx + 1}`,
+                                                                                                                                                            type: 'saIncomeRow'
+                                                                                                                                                        })}
+                                                                                                                                                    >
+                                                                                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                                                                                    </Button>
+                                                                                                                                                </TableCell>
+                                                                                                                                            </TableRow>
+                                                                                                                                        );
+                                                                                                                                    })
+                                                                                                                                )}
+                                                                                                                            </TableBody>
+                                                                                                                            {slipIncomes.length > 0 && (
+                                                                                                                                <TableFooter>
+                                                                                                                                    <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
+                                                                                                                                        <TableCell colSpan={2} className="text-right font-bold py-3 text-xs text-gray-700">
+                                                                                                                                            รวมยอดจาก Slip นี้:
+                                                                                                                                        </TableCell>
+                                                                                                                                        <TableCell colSpan={2} className="text-right pr-[4.5rem] py-3">
+                                                                                                                                            <div className="text-sm font-semibold font-mono text-gray-700">
+                                                                                                                                                {formatNumberWithCommas(slipIncomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0))}
+                                                                                                                                            </div>
+                                                                                                                                        </TableCell>
+                                                                                                                                    </TableRow>
+                                                                                                                                </TableFooter>
+                                                                                                                            )}
+                                                                                                                        </Table>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            );
+                                                                                                        })}
+                                                                                                    </div>
+                                                                                                ) : (
+                                                                                                    <div className="text-center py-6 text-muted-foreground text-sm italic">
+                                                                                                        ยังไม่มี Slip กรุณากดเพิ่ม Slip
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </motion.div>
                                                                                         </TabsContent>
                                                                                     );
                                                                                 })}
@@ -2373,46 +2759,91 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                                                         )}
                                                                     </div>
 
-                                                                    {/* Statement Section - Tabbed by Bank */}
-                                                                    {statementUploaded.length > 0 && (
-                                                                        <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
-                                                                            <div className="flex items-center gap-2 pb-2.5 border-b border-border-color">
-                                                                                <FileText className="w-4 h-4 text-emerald-600" />
-                                                                                <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: รายการเดินบัญชี (Statement)</span>
+
+                                                                    {/* Statement Section - Separate Card per Bank, Month Tabs Inside */}
+                                                                    {statementUploaded.map((dt) => {
+                                                                        const accIdx = Number(dt.replace('statement_', ''));
+                                                                        const account = bankAccounts[accIdx];
+                                                                        const bankInfo = account ? THAI_BANKS.find(b => b.value === account.bankName) : undefined;
+                                                                        const bankLabel = bankInfo?.label || `บัญชีที่ ${accIdx + 1}`;
+                                                                        const accountNo = account?.accountNo || '';
+                                                                        const stmtDocs = allDocs.filter((d: IncomeDocument) => d.type === dt);
+                                                                        const bankKey = String(accIdx);
+                                                                        const monthsForBank = (occ.statementMonths || {})[bankKey] || [];
+
+                                                                        return (
+                                                                            <div key={dt} className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                                {/* Bank Header */}
+                                                                                <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                                                                    <div className="flex items-center gap-2.5">
+                                                                                        {bankInfo?.logo && <img src={bankInfo.logo} alt={bankLabel} className="w-6 h-6 object-contain shrink-0" />}
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <span className="text-sm font-bold text-gray-800">{bankLabel}</span>
+                                                                                            {accountNo && <span className="text-sm font-bold text-gray-800">({accountNo})</span>}
+                                                                                        </div>
+                                                                                        {stmtDocs.length > 0 && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                onClick={() => window.open(stmtDocs[0].url, '_blank')}
+                                                                                                className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                                                title="ดูเอกสารต้นฉบับ"
+                                                                                            >
+                                                                                                <Eye className="w-4 h-4" />
+                                                                                            </Button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={() => handleOpenAddMonthDialog(occ.id, accIdx)}
+                                                                                        className="h-8 text-xs font-medium"
+                                                                                    >
+                                                                                        <Plus className="w-3 h-3 mr-1" /> เพิ่มเดือน
+                                                                                    </Button>
+                                                                                </div>
+
+                                                                                {/* Month Tabs */}
+                                                                                {monthsForBank.length > 0 ? (
+                                                                                    <Tabs defaultValue={`stmt_${accIdx}_month_0`} className="w-full">
+                                                                                        <TabsList className="w-full h-auto p-0 bg-transparent border-b border-border-subtle justify-start flex-wrap gap-0 rounded-none">
+                                                                                            {monthsForBank.map((monthLabel: string, mIdx: number) => (
+                                                                                                <TabsTrigger
+                                                                                                    key={`stmt_${accIdx}_month_${mIdx}`}
+                                                                                                    value={`stmt_${accIdx}_month_${mIdx}`}
+                                                                                                    className="relative px-4 py-2 text-xs font-bold rounded-none border-b-2 border-transparent data-[state=active]:border-chaiyo-blue data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none text-gray-500 hover:text-gray-700 bg-transparent shadow-none transition-all"
+                                                                                                >
+                                                                                                    <span>{monthLabel}</span>
+                                                                                                </TabsTrigger>
+                                                                                            ))}
+                                                                                        </TabsList>
+                                                                                        {monthsForBank.map((monthLabel: string, mIdx: number) => {
+                                                                                            const monthSourceKey = `statement_${accIdx}_month_${mIdx}`;
+                                                                                            const monthIncomes = incomesBySource[monthSourceKey] || [];
+                                                                                            const monthFullName = THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(monthLabel)] || monthLabel;
+                                                                                            return (
+                                                                                                <TabsContent key={`stmt_${accIdx}_month_${mIdx}`} value={`stmt_${accIdx}_month_${mIdx}`} className="mt-3">
+                                                                                                    <motion.div
+                                                                                                        initial={{ opacity: 0, y: 6 }}
+                                                                                                        animate={{ opacity: 1, y: 0 }}
+                                                                                                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                                                                                                    >
+                                                                                                        {renderIncomeTable(monthFullName, monthSourceKey, monthIncomes, true, undefined, () => setPendingDeleteMonth({ occId: occ.id, bankIdx: accIdx, monthLabel }))}
+                                                                                                    </motion.div>
+                                                                                                </TabsContent>
+                                                                                            );
+                                                                                        })}
+                                                                                    </Tabs>
+                                                                                ) : (
+                                                                                    <div className="text-center py-8 text-muted-foreground text-sm italic">
+                                                                                        ยังไม่มีเดือน กรุณากดเพิ่มเดือน
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                            <Tabs defaultValue={statementUploaded[0]} className="w-full">
-                                                                                <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl justify-start flex-wrap gap-0">
-                                                                                    {statementUploaded.map((dt) => {
-                                                                                        const accIdx = Number(dt.replace('statement_', ''));
-                                                                                        const account = bankAccounts[accIdx];
-                                                                                        const bankInfo = account ? THAI_BANKS.find(b => b.value === account.bankName) : undefined;
-                                                                                        const bankLabel = bankInfo?.label || `บัญชีที่ ${accIdx + 1}`;
-                                                                                        const accountNo = account?.accountNo || '';
-                                                                                        return (
-                                                                                            <TabsTrigger key={dt} value={dt} className="relative px-4 py-2 text-xs font-bold rounded-lg data-[state=active]:bg-white data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-sm">
-                                                                                                <div className="flex items-center gap-2">
-                                                                                                    {bankInfo?.logo && <img src={bankInfo.logo} alt={bankLabel} className="w-5 h-5 object-contain shrink-0" />}
-                                                                                                    <div className="flex flex-col items-start gap-0.5">
-                                                                                                        <span>{bankLabel}</span>
-                                                                                                        {accountNo && <span className="text-[10px] text-muted-foreground font-mono">{accountNo}</span>}
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </TabsTrigger>
-                                                                                        );
-                                                                                    })}
-                                                                                </TabsList>
-                                                                                {statementUploaded.map((dt) => {
-                                                                                    const label = dynamicDocTypes.find(d => d.id === dt)?.label || dt;
-                                                                                    const stmtDocs = allDocs.filter((d: IncomeDocument) => d.type === dt);
-                                                                                    return (
-                                                                                        <TabsContent key={dt} value={dt} className="mt-3">
-                                                                                            {renderIncomeTable(`รายการเดินบัญชี`, dt, incomesBySource[dt] || [], true, stmtDocs)}
-                                                                                        </TabsContent>
-                                                                                    );
-                                                                                })}
-                                                                            </Tabs>
-                                                                        </div>
-                                                                    )}
+                                                                        );
+                                                                    })}
 
                                                                     {/* Other Doc Types - Flat (ทวิ 50, หนังสือรับรองเงินเดือน, custom, etc.) */}
                                                                     {otherUploaded.map(docType => {
@@ -3912,8 +4343,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                                             )}
                                         </>
                                     )}
-                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed) ===== */}
-                                    {occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
+                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed, hide for guarantor) ===== */}
+                                    {!isGuarantor && occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <Users className="w-5 h-5 text-chaiyo-blue" /> บุคคลอ้างอิง
@@ -4174,178 +4605,180 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
 
                                     )}
 
-                                    {/* ===== ผู้ประเมินสถานที่ทำงาน ===== */}
-                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
-                                        <div className="flex items-center justify-between pb-2 border-b border-border-color">
-                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                                                <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" /> ผู้ประเมินสถานที่ทำงาน
-                                            </h4>
-                                            {/* Checkbox for secondary occupations */}
-                                            {!occ.isMain && (
-                                                <div className="flex items-center gap-2">
-                                                    <Checkbox
-                                                        id={`same-assessor-${occ.id}`}
-                                                        checked={occ.sameAssessorAsMain !== false}
-                                                        onCheckedChange={(checked) =>
-                                                            handleOccupationChange(occ.id, "sameAssessorAsMain", !!checked)
-                                                        }
-                                                        className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
-                                                    />
-                                                    <Label htmlFor={`same-assessor-${occ.id}`} className="text-sm text-gray-700 cursor-pointer select-none font-medium">
-                                                        ใช้ผู้ประเมินเดียวกับอาชีพหลัก
-                                                    </Label>
+                                    {/* ===== ผู้ประเมินสถานที่ทำงาน (hide for guarantor) ===== */}
+                                    {!isGuarantor && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
+                                            <div className="flex items-center justify-between pb-2 border-b border-border-color">
+                                                <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                                                    <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" /> ผู้ประเมินสถานที่ทำงาน
+                                                </h4>
+                                                {/* Checkbox for secondary occupations */}
+                                                {!occ.isMain && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Checkbox
+                                                            id={`same-assessor-${occ.id}`}
+                                                            checked={occ.sameAssessorAsMain !== false}
+                                                            onCheckedChange={(checked) =>
+                                                                handleOccupationChange(occ.id, "sameAssessorAsMain", !!checked)
+                                                            }
+                                                            className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
+                                                        />
+                                                        <Label htmlFor={`same-assessor-${occ.id}`} className="text-sm text-gray-700 cursor-pointer select-none font-medium">
+                                                            ใช้ผู้ประเมินเดียวกับอาชีพหลัก
+                                                        </Label>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Main occupation — always editable via formData */}
+                                            {occ.isMain && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <div className="md:col-span-2 space-y-2">
+                                                        <Label className="flex items-center gap-1.5">
+                                                            <span>พนักงาน</span>
+                                                            <span className="text-red-500">*</span>
+                                                            <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
+                                                        </Label>
+                                                        <Combobox
+                                                            options={MOCK_STAFF_LIST.map(s => ({
+                                                                value: s.id,
+                                                                label: `${s.code} — ${s.name}`,
+                                                            }))}
+                                                            value={formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id}
+                                                            onValueChange={(val) => {
+                                                                const staff = MOCK_STAFF_LIST.find(s => s.id === val);
+                                                                handleChange("workplaceAssessorId", val);
+                                                                if (staff) handleChange("workplaceAssessorPhone", staff.phone);
+                                                            }}
+                                                            placeholder="ค้นหาพนักงาน..."
+                                                            className="h-12 rounded-xl"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="flex items-center gap-1.5">
+                                                            <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                            เบอร์ติดต่อพนักงาน
+                                                        </Label>
+                                                        <Input
+                                                            value={formData.workplaceAssessorPhone ?? (() => {
+                                                                const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                                return staff?.phone ?? "";
+                                                            })()}
+                                                            onChange={(e) => handleChange("workplaceAssessorPhone", e.target.value)}
+                                                            placeholder="0XX-XXX-XXXX"
+                                                            className="h-12 rounded-xl font-mono"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="flex items-center gap-1.5">
+                                                            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                            วันที่ประเมิน
+                                                        </Label>
+                                                        <DatePickerBE
+                                                            value={formData.workplaceAssessmentDate ?? ""}
+                                                            onChange={(val) => handleChange("workplaceAssessmentDate", val)}
+                                                            inputClassName="h-12 rounded-xl"
+                                                        />
+                                                    </div>
                                                 </div>
                                             )}
+
+                                            {/* Secondary occupation — checkbox controls same-as-main */}
+                                            {!occ.isMain && (
+                                                <>
+                                                    {/* Same as main: read-only display */}
+                                                    {occ.sameAssessorAsMain !== false && (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60 pointer-events-none">
+                                                            <div className="md:col-span-2 space-y-2">
+                                                                <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                    <span>พนักงาน</span>
+                                                                </Label>
+                                                                <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-medium">
+                                                                    {(() => {
+                                                                        const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                                        return staff ? `${staff.code} — ${staff.name}` : "—";
+                                                                    })()}
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                    <Phone className="w-3.5 h-3.5" />
+                                                                    เบอร์ติดต่อพนักงาน
+                                                                </Label>
+                                                                <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-mono">
+                                                                    {formData.workplaceAssessorPhone ?? (() => {
+                                                                        const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
+                                                                        return staff?.phone ?? "—";
+                                                                    })()}
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="flex items-center gap-1.5 text-muted-foreground">
+                                                                    <Calendar className="w-3.5 h-3.5" />
+                                                                    วันที่ประเมิน
+                                                                </Label>
+                                                                <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600">
+                                                                    {formData.workplaceAssessmentDate || "—"}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Different assessor: per-occupation editable fields */}
+                                                    {occ.sameAssessorAsMain === false && (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                            <div className="md:col-span-2 space-y-2">
+                                                                <Label className="flex items-center gap-1.5">
+                                                                    <span>พนักงาน</span>
+                                                                    <span className="text-red-500">*</span>
+                                                                    <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
+                                                                </Label>
+                                                                <Combobox
+                                                                    options={MOCK_STAFF_LIST.map(s => ({
+                                                                        value: s.id,
+                                                                        label: `${s.code} — ${s.name}`,
+                                                                    }))}
+                                                                    value={occ.workplaceAssessorId ?? ""}
+                                                                    onValueChange={(val) => {
+                                                                        const staff = MOCK_STAFF_LIST.find(s => s.id === val);
+                                                                        handleOccupationChange(occ.id, {
+                                                                            workplaceAssessorId: val,
+                                                                            workplaceAssessorPhone: staff?.phone ?? occ.workplaceAssessorPhone ?? "",
+                                                                        });
+                                                                    }}
+                                                                    placeholder="ค้นหาพนักงาน..."
+                                                                    className="h-12 rounded-xl"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="flex items-center gap-1.5">
+                                                                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                    เบอร์ติดต่อพนักงาน
+                                                                </Label>
+                                                                <Input
+                                                                    value={occ.workplaceAssessorPhone ?? ""}
+                                                                    onChange={(e) => handleOccupationChange(occ.id, "workplaceAssessorPhone", e.target.value)}
+                                                                    placeholder="0XX-XXX-XXXX"
+                                                                    className="h-12 rounded-xl font-mono"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="flex items-center gap-1.5">
+                                                                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                    วันที่ประเมิน
+                                                                </Label>
+                                                                <DatePickerBE
+                                                                    value={occ.workplaceAssessmentDate ?? ""}
+                                                                    onChange={(val) => handleOccupationChange(occ.id, "workplaceAssessmentDate", val)}
+                                                                    inputClassName="h-12 rounded-xl"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
-
-                                        {/* Main occupation — always editable via formData */}
-                                        {occ.isMain && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="md:col-span-2 space-y-2">
-                                                    <Label className="flex items-center gap-1.5">
-                                                        <span>พนักงาน</span>
-                                                        <span className="text-red-500">*</span>
-                                                        <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
-                                                    </Label>
-                                                    <Combobox
-                                                        options={MOCK_STAFF_LIST.map(s => ({
-                                                            value: s.id,
-                                                            label: `${s.code} — ${s.name}`,
-                                                        }))}
-                                                        value={formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id}
-                                                        onValueChange={(val) => {
-                                                            const staff = MOCK_STAFF_LIST.find(s => s.id === val);
-                                                            handleChange("workplaceAssessorId", val);
-                                                            if (staff) handleChange("workplaceAssessorPhone", staff.phone);
-                                                        }}
-                                                        placeholder="ค้นหาพนักงาน..."
-                                                        className="h-12 rounded-xl"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="flex items-center gap-1.5">
-                                                        <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                                                        เบอร์ติดต่อพนักงาน
-                                                    </Label>
-                                                    <Input
-                                                        value={formData.workplaceAssessorPhone ?? (() => {
-                                                            const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
-                                                            return staff?.phone ?? "";
-                                                        })()}
-                                                        onChange={(e) => handleChange("workplaceAssessorPhone", e.target.value)}
-                                                        placeholder="0XX-XXX-XXXX"
-                                                        className="h-12 rounded-xl font-mono"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="flex items-center gap-1.5">
-                                                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                                        วันที่ประเมิน
-                                                    </Label>
-                                                    <DatePickerBE
-                                                        value={formData.workplaceAssessmentDate ?? ""}
-                                                        onChange={(val) => handleChange("workplaceAssessmentDate", val)}
-                                                        inputClassName="h-12 rounded-xl"
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Secondary occupation — checkbox controls same-as-main */}
-                                        {!occ.isMain && (
-                                            <>
-                                                {/* Same as main: read-only display */}
-                                                {occ.sameAssessorAsMain !== false && (
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60 pointer-events-none">
-                                                        <div className="md:col-span-2 space-y-2">
-                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
-                                                                <span>พนักงาน</span>
-                                                            </Label>
-                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-medium">
-                                                                {(() => {
-                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
-                                                                    return staff ? `${staff.code} — ${staff.name}` : "—";
-                                                                })()}
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
-                                                                <Phone className="w-3.5 h-3.5" />
-                                                                เบอร์ติดต่อพนักงาน
-                                                            </Label>
-                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-mono">
-                                                                {formData.workplaceAssessorPhone ?? (() => {
-                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === (formData.workplaceAssessorId ?? MOCK_STAFF_LIST[0].id));
-                                                                    return staff?.phone ?? "—";
-                                                                })()}
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="flex items-center gap-1.5 text-muted-foreground">
-                                                                <Calendar className="w-3.5 h-3.5" />
-                                                                วันที่ประเมิน
-                                                            </Label>
-                                                            <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600">
-                                                                {formData.workplaceAssessmentDate || "—"}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Different assessor: per-occupation editable fields */}
-                                                {occ.sameAssessorAsMain === false && (
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-200">
-                                                        <div className="md:col-span-2 space-y-2">
-                                                            <Label className="flex items-center gap-1.5">
-                                                                <span>พนักงาน</span>
-                                                                <span className="text-red-500">*</span>
-                                                                <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
-                                                            </Label>
-                                                            <Combobox
-                                                                options={MOCK_STAFF_LIST.map(s => ({
-                                                                    value: s.id,
-                                                                    label: `${s.code} — ${s.name}`,
-                                                                }))}
-                                                                value={occ.workplaceAssessorId ?? ""}
-                                                                onValueChange={(val) => {
-                                                                    const staff = MOCK_STAFF_LIST.find(s => s.id === val);
-                                                                    handleOccupationChange(occ.id, {
-                                                                        workplaceAssessorId: val,
-                                                                        workplaceAssessorPhone: staff?.phone ?? occ.workplaceAssessorPhone ?? "",
-                                                                    });
-                                                                }}
-                                                                placeholder="ค้นหาพนักงาน..."
-                                                                className="h-12 rounded-xl"
-                                                            />
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="flex items-center gap-1.5">
-                                                                <Phone className="w-3.5 h-3.5 text-muted-foreground" />
-                                                                เบอร์ติดต่อพนักงาน
-                                                            </Label>
-                                                            <Input
-                                                                value={occ.workplaceAssessorPhone ?? ""}
-                                                                onChange={(e) => handleOccupationChange(occ.id, "workplaceAssessorPhone", e.target.value)}
-                                                                placeholder="0XX-XXX-XXXX"
-                                                                className="h-12 rounded-xl font-mono"
-                                                            />
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="flex items-center gap-1.5">
-                                                                <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                                                                วันที่ประเมิน
-                                                            </Label>
-                                                            <DatePickerBE
-                                                                value={occ.workplaceAssessmentDate ?? ""}
-                                                                onChange={(val) => handleOccupationChange(occ.id, "workplaceAssessmentDate", val)}
-                                                                inputClassName="h-12 rounded-xl"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
+                                    )}
 
                                     {/* หมายเหตุ per occupation */}
                                     <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
@@ -4456,6 +4889,148 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false }
                         <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={confirmDelete}
+                            className="bg-status-rejected hover:bg-status-rejected/90"
+                        >
+                            ยืนยันการลบ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Add Statement Month Dialog */}
+            <Dialog open={statementMonthDialogOpen} onOpenChange={setStatementMonthDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>เพิ่มเดือน</DialogTitle>
+                        <DialogDescription>
+                            เลือกเดือนที่ต้องการเพิ่มรายการรายได้จากรายการเดินบัญชี
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogBody>
+                        <div className="space-y-3">
+                            <Label>เดือน <span className="text-red-500">*</span></Label>
+                            <Select value={selectedMonthForDialog} onValueChange={setSelectedMonthForDialog}>
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกเดือน..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {THAI_MONTHS_SHORT.map((month, idx) => {
+                                        // Check if already added for this bank
+                                        const bankKey = statementMonthDialogBank ? String(statementMonthDialogBank.bankIdx) : '';
+                                        const existingMonths = statementMonthDialogBank
+                                            ? ((occupations.find(o => o.id === statementMonthDialogBank.occId)?.statementMonths || {})[bankKey] || [])
+                                            : [];
+                                        const isAlreadyAdded = existingMonths.includes(month);
+                                        const fullName = THAI_MONTHS_FULL[idx];
+                                        return (
+                                            <SelectItem key={month} value={month} disabled={isAlreadyAdded}>
+                                                {fullName} {isAlreadyAdded ? '(เพิ่มแล้ว)' : ''}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setStatementMonthDialogOpen(false)} className="min-w-[104px]">
+                            ยกเลิก
+                        </Button>
+                        <Button onClick={handleConfirmAddMonth} disabled={!selectedMonthForDialog} className="min-w-[104px]">
+                            ยืนยัน
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Statement Month Confirmation */}
+            <AlertDialog open={pendingDeleteMonth !== null} onOpenChange={(open) => !open && setPendingDeleteMonth(null)}>
+                <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบเดือน</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลเดือน &quot;{pendingDeleteMonth ? (THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(pendingDeleteMonth.monthLabel)] || pendingDeleteMonth.monthLabel) : ''}&quot; ใช่หรือไม่?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (pendingDeleteMonth) {
+                                    handleRemoveStatementMonth(pendingDeleteMonth.occId, pendingDeleteMonth.bankIdx, pendingDeleteMonth.monthLabel);
+                                }
+                                setPendingDeleteMonth(null);
+                            }}
+                            className="bg-status-rejected hover:bg-status-rejected/90"
+                        >
+                            ยืนยันการลบ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Payslip Month Add Dialog */}
+            <Dialog open={payslipMonthDialogOpen} onOpenChange={setPayslipMonthDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>เพิ่มเดือน (สลิปเงินเดือน)</DialogTitle>
+                        <DialogDescription>
+                            เลือกเดือนที่ต้องการเพิ่มรายการรายได้จากสลิปเงินเดือน
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogBody>
+                        <div className="space-y-3">
+                            <Label>เดือน <span className="text-red-500">*</span></Label>
+                            <Select value={selectedPayslipMonth} onValueChange={setSelectedPayslipMonth}>
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกเดือน..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {THAI_MONTHS_SHORT.map((month, idx) => {
+                                        const existingMonths = payslipMonthDialogOccId
+                                            ? (occupations.find(o => o.id === payslipMonthDialogOccId)?.payslipMonths || [])
+                                            : [];
+                                        const isAlreadyAdded = existingMonths.includes(month);
+                                        const fullName = THAI_MONTHS_FULL[idx];
+                                        return (
+                                            <SelectItem key={month} value={month} disabled={isAlreadyAdded}>
+                                                {fullName} {isAlreadyAdded ? '(เพิ่มแล้ว)' : ''}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setPayslipMonthDialogOpen(false)} className="min-w-[104px]">
+                            ยกเลิก
+                        </Button>
+                        <Button onClick={handleConfirmAddPayslipMonth} disabled={!selectedPayslipMonth} className="min-w-[104px]">
+                            ยืนยัน
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Payslip Month Confirmation */}
+            <AlertDialog open={pendingDeletePayslipMonth !== null} onOpenChange={(open) => !open && setPendingDeletePayslipMonth(null)}>
+                <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบเดือน (สลิปเงินเดือน)</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลเดือน &quot;{pendingDeletePayslipMonth ? (THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(pendingDeletePayslipMonth.monthLabel)] || pendingDeletePayslipMonth.monthLabel) : ''}&quot; และ Slip ทั้งหมดภายในเดือนนี้ ใช่หรือไม่?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (pendingDeletePayslipMonth) {
+                                    handleRemovePayslipMonth(pendingDeletePayslipMonth.occId, pendingDeletePayslipMonth.monthLabel);
+                                }
+                                setPendingDeletePayslipMonth(null);
+                            }}
                             className="bg-status-rejected hover:bg-status-rejected/90"
                         >
                             ยืนยันการลบ

@@ -71,7 +71,7 @@ const MOCK_GUARANTORS: GuarantorWithExtras[] = [
         birthDate: "15/06/2530",
         phone: "089-123-4567",
         verificationStatus: "PASSED",
-        combineIncome: true,
+        combineIncome: false,
         isCoOwner: true,
     },
     {

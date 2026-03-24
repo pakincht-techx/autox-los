@@ -179,7 +179,9 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
 
 
-    const isGuarantorDetailPage = pathname.includes('/guarantors/') && !pathname.endsWith('/guarantors') && !pathname.endsWith('/add');
+    // Only match the exact guarantor detail page (/guarantors/[id]), not sub-pages like /guarantors/[id]/documents
+    const guarantorSegments = pathname.split('/guarantors/')[1]?.split('/').filter(Boolean) || [];
+    const isGuarantorDetailPage = pathname.includes('/guarantors/') && !pathname.endsWith('/guarantors') && !pathname.endsWith('/add') && guarantorSegments.length === 1;
 
     return (
         <div className="h-full bg-sidebar">

@@ -803,7 +803,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
     ];
 
     const FARM_STAGES = [
-        "เตรียมดินก่อนเพาะปลุก",
+        "เตรียมดินก่อนเพาะปลูก",
         "เพาะปลูก",
         "ระยะโต",
         "เก็บเกี่ยวผลผลิต"
@@ -1071,17 +1071,15 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                                     <h5 className="font-bold text-gray-700 flex items-center gap-2">
                                         <span>{isGuarantor ? "ภาระหนี้อื่นๆ (ไม่รวมเงินไชโย)" : "ภาระหนี้นอกระบบ"}</span>
                                     </h5>
-                                    {!isGuarantor && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleAddDebtRow}
-                                            className="h-8 text-[11px] font-medium"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการหนี้
-                                        </Button>
-                                    )}
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleAddDebtRow}
+                                        className="h-8 text-[11px] font-medium"
+                                    >
+                                        <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการหนี้
+                                    </Button>
                                 </div>
 
                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">

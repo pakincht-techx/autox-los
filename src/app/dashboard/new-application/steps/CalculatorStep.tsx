@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Verify if available, otherwise use custom or standard input
-import { Badge } from "@/components/ui/Badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
@@ -47,7 +47,9 @@ interface CalculatorStepProps {
 }
 
 export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavigation, readOnlyProduct, paymentMethod = 'installment' }: CalculatorStepProps) {
-    const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 100000);
+    const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 600000);
+    const SYSTEM_MAX_AMOUNT = 700000;
+    const [interestRateInput, setInterestRateInput] = useState<string>("23.99");
     const [months, setMonths] = useState<number>(formData?.requestedDuration || 24);
     const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
     const [totalInterest, setTotalInterest] = useState<number>(0);
@@ -55,6 +57,11 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
     // Local Payment Method State
     const [localPaymentMethod, setLocalPaymentMethod] = useState<'installment' | 'bullet'>(formData?.paymentMethod || paymentMethod || 'installment');
+
+    // Seasonal payment (ผ่อนรายฤดูกาล)
+    const [seasonalPeriods, setSeasonalPeriods] = useState<string>("2");
+    const [seasonalPayments, setSeasonalPayments] = useState<string>("6");
+    const [seasonalStartMonth, setSeasonalStartMonth] = useState<string>("5");
 
     // New State for Max Loan Logic
     const [maxLoanAmount, setMaxLoanAmount] = useState<number>(1000000);
@@ -369,8 +376,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto w-full">
                 {/* Left Column - Input Sections */}
                 <div className="flex-1 space-y-6 min-w-0">
-                    {/* Policy Checklist - First Section */}
-                    <PolicyChecklist />
 
                     {/* Product Selection */}
                     {!(readOnlyProduct || (formData && formData.collateralType)) && (
@@ -411,102 +416,259 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                         </CardHeader>
                         <CardContent className="space-y-6 px-6 pb-6 pt-5">
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-baseline">
-                                        <Label className="text-sm">สินเชื่อที่ต้องการ</Label>
-                                        {formData && (
-                                            <Popover open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                                                <PopoverTrigger asChild>
-                                                    <div
-                                                        className={cn(
-                                                            "inline-flex items-center px-2 py-0.5 gap-1 rounded-full text-[9px] font-bold cursor-pointer transition-colors hover:bg-blue-100",
-                                                            maxLoanAmount <= 0 ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"
-                                                        )}
-                                                    >
-                                                        <Info className="w-2.5 h-2.5" />
-                                                        วงเงินสูงสุด: {maxLoanAmount.toLocaleString()}
-                                                    </div>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="bg-white border-blue-100 text-blue-900 shadow-xl p-3 rounded-xl relative w-auto max-w-[280px]">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setIsTooltipOpen(false);
-                                                        }}
-                                                        className="absolute top-3 right-3 text-blue-300 hover:text-blue-500 transition-colors cursor-pointer"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                    <div className="space-y-1 pr-6">
-                                                        <p className="font-bold text-xs mb-2">ที่มาของวงเงินสูงสุด</p>
-                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                                                            <span className="text-muted-foreground">ราคาประเมินกลาง:</span>
-                                                            <span className="text-right font-medium">{(Number(formData?.appraisalPrice) || 0).toLocaleString()}</span>
-
-                                                            <span className="text-muted-foreground">LTV (อัตราส่วน):</span>
-                                                            <span className="text-right font-medium">{(selectedProduct === 'land' ? 0.70 : 0.90) * 100}%</span>
-
-                                                            <span className="text-muted-foreground">หัก ภาระหนี้เดิม:</span>
-                                                            <span className="text-right text-red-500 font-medium">-{(Number(formData?.existingDebt) || 0).toLocaleString()}</span>
-
-                                                            <div className="col-span-2 h-px bg-blue-100 my-1"></div>
-
-                                                            <span className="font-bold text-blue-700">วงเงินสูงสุดสุทธิ:</span>
-                                                            <span className="text-right font-bold text-blue-700">{maxLoanAmount.toLocaleString()}</span>
-                                                        </div>
-                                                    </div>
-                                                </PopoverContent>
-                                            </Popover>
-                                        )}
-                                    </div>
-
-                                    {maxLoanAmount <= 0 ? (
-                                        <div className="p-4 bg-red-50 border border-red-100 rounded-xl space-y-2">
-                                            <p className="text-red-700 text-sm font-bold">ไม่สามารถกู้เพิ่มได้ (Negative Equity)</p>
-                                            <p className="text-red-600 text-[11px]">ยอดหนี้คงเหลือสูงกว่าราคาประเมินทรัพย์สิน กรุณาติดต่อเจ้าหน้าที่เพื่อขอคำปรึกษาเพิ่มเติม</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="relative">
-                                                <Input
-                                                    type="text"
-                                                    value={amount.toLocaleString()}
-                                                    onChange={(e) => {
-                                                        const numericValue = Number(e.target.value.replace(/,/g, ''));
-                                                        if (!isNaN(numericValue) && numericValue <= maxLoanAmount) setAmount(numericValue);
-                                                    }}
-                                                    className="pl-9 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-right"
-                                                />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">บาท</span>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-
-
-
-                                <div className="flex flex-col justify-end space-y-2">
-                                    <div className="flex items-baseline min-h-[20px]">
-                                        <Label className="text-sm">ระยะเวลาผ่อนชำระ</Label>
-                                    </div>
+                                {/* Loan Objective */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">วัตถุประสงค์การขอสินเชื่อ</Label>
                                     <Select
-                                        disabled={maxLoanAmount <= 0}
-                                        value={months.toString()}
-                                        onValueChange={(val) => setMonths(Number(val))}
+                                        value={formData?.loanObjective || ''}
+                                        onValueChange={(val) => setFormData?.({ ...formData, loanObjective: val })}
                                     >
-                                        <SelectTrigger className="w-full h-12 rounded-xl bg-white text-sm border-gray-200">
-                                            <SelectValue placeholder="-- เลือกจำนวนงวด --">
-                                                {months ? `${months} เดือน` : "-- เลือกจำนวนงวด --"}
-                                            </SelectValue>
+                                        <SelectTrigger className="w-full h-12 rounded-xl bg-white border-gray-200 text-sm">
+                                            <SelectValue placeholder="-- เลือกวัตถุประสงค์ --" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {(localPaymentMethod === 'bullet' ? [1, 2, 3, 4, 5, 6] : COMPARISON_DURATIONS).map((m) => (
-                                                <SelectItem key={m} value={m.toString()}>
-                                                    {m} เดือน
+                                            {LOAN_OBJECTIVES.map(objective => (
+                                                <SelectItem key={objective.value} value={objective.value}>
+                                                    {objective.label}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                </div>
+
+                                {/* Recommended + Requested Amount (same row) */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* System Recommended Amount (read-only) */}
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm">วงเงินที่ระบบแนะนำ</Label>
+                                        <div className="relative">
+                                            <Input
+                                                type="text"
+                                                value={(600000).toLocaleString()}
+                                                readOnly
+                                                disabled
+                                                className="pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-gray-50 border-gray-200 text-left cursor-not-allowed"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">บาท</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm">วงเงินที่ขออนุมัติ</Label>
+
+                                        {maxLoanAmount <= 0 ? (
+                                            <div className="p-4 bg-red-50 border border-red-100 rounded-xl space-y-2">
+                                                <p className="text-red-700 text-sm font-bold">ไม่สามารถกู้เพิ่มได้ (Negative Equity)</p>
+                                                <p className="text-red-600 text-[11px]">ยอดหนี้คงเหลือสูงกว่าราคาประเมินทรัพย์สิน กรุณาติดต่อเจ้าหน้าที่เพื่อขอคำปรึกษาเพิ่มเติม</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="relative">
+                                                    <Input
+                                                        type="text"
+                                                        value={amount.toLocaleString()}
+                                                        onChange={(e) => {
+                                                            const numericValue = Number(e.target.value.replace(/,/g, ''));
+                                                            if (!isNaN(numericValue)) setAmount(numericValue);
+                                                        }}
+                                                        className={cn(
+                                                            "pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-left",
+                                                            amount > SYSTEM_MAX_AMOUNT && "border-red-400 focus:border-red-400 focus:ring-red-200"
+                                                        )}
+                                                    />
+                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">บาท</span>
+                                                </div>
+                                                {amount > SYSTEM_MAX_AMOUNT && (
+                                                    <p className="text-xs text-red-500 mt-1">วงเงินที่ขออนุมัติต้องไม่เกิน {SYSTEM_MAX_AMOUNT.toLocaleString()} บาท</p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Interest Rate + Installment Period (same row) */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm">ดอกเบี้ย</Label>
+                                        <div className="relative">
+                                            <Input
+                                                type="text"
+                                                value={interestRateInput}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (/^\d*\.?\d*$/.test(val)) setInterestRateInput(val);
+                                                }}
+                                                className="pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-left"
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">%</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <Label className="text-sm">ระยะเวลาผ่อนชำระ</Label>
+                                        <Select
+                                            disabled={maxLoanAmount <= 0}
+                                            value={months.toString()}
+                                            onValueChange={(val) => setMonths(Number(val))}
+                                        >
+                                            <SelectTrigger className="w-full h-12 rounded-xl bg-white text-sm border-gray-200">
+                                                <SelectValue placeholder="-- เลือกจำนวนงวด --">
+                                                    {months ? `${months} เดือน` : "-- เลือกจำนวนงวด --"}
+                                                </SelectValue>
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {(localPaymentMethod === 'bullet' ? [1, 2, 3, 4, 5, 6] : COMPARISON_DURATIONS).map((m) => (
+                                                    <SelectItem key={m} value={m.toString()}>
+                                                        {m} เดือน
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                {/* Program Name (read-only) */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">ชื่อโครงการ</Label>
+                                    <Input
+                                        type="text"
+                                        value="test program"
+                                        readOnly
+                                        disabled
+                                        className="pl-4 h-12 bg-gray-50 border-gray-200 text-sm cursor-not-allowed"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Seasonal Payment Section */}
+                            <div className="pt-2 space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <h4 className="text-sm font-bold text-gray-700">รูปแบบการผ่อน</h4>
+                                    <Badge variant="default" className="text-[10px]">ผ่อนรายฤดูกาล</Badge>
+                                </div>
+
+                                <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm">จำนวนช่วงการจ่าย</Label>
+                                            <Select value={seasonalPeriods} onValueChange={setSeasonalPeriods}>
+                                                <SelectTrigger className="w-full h-12 rounded-xl bg-white text-sm border-gray-200">
+                                                    <SelectValue placeholder="-- เลือก --" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {[1, 2, 3, 4].map((n) => (
+                                                        <SelectItem key={n} value={n.toString()}>
+                                                            {n} ช่วง
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm">จำนวนครั้งที่จ่าย</Label>
+                                            <Select value={seasonalPayments} onValueChange={setSeasonalPayments}>
+                                                <SelectTrigger className="w-full h-12 rounded-xl bg-white text-sm border-gray-200">
+                                                    <SelectValue placeholder="-- เลือก --" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                                                        <SelectItem key={n} value={n.toString()}>
+                                                            {n} ครั้ง
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <Label className="text-sm">เดือนที่เริ่มต้น</Label>
+                                            <Select
+                                                value={seasonalStartMonth}
+                                                onValueChange={setSeasonalStartMonth}
+                                            >
+                                                <SelectTrigger className="w-full h-12 rounded-xl bg-white text-sm border-gray-200">
+                                                    <SelectValue placeholder="-- เลือกเดือน --" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {[
+                                                        { value: "1", label: "มกราคม" },
+                                                        { value: "2", label: "กุมภาพันธ์" },
+                                                        { value: "3", label: "มีนาคม" },
+                                                        { value: "4", label: "เมษายน" },
+                                                        { value: "5", label: "พฤษภาคม" },
+                                                        { value: "6", label: "มิถุนายน" },
+                                                        { value: "7", label: "กรกฎาคม" },
+                                                        { value: "8", label: "สิงหาคม" },
+                                                        { value: "9", label: "กันยายน" },
+                                                        { value: "10", label: "ตุลาคม" },
+                                                        { value: "11", label: "พฤศจิกายน" },
+                                                        { value: "12", label: "ธันวาคม" },
+                                                    ].map((m) => (
+                                                        <SelectItem key={m.value} value={m.value}>
+                                                            {m.label}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    {/* Seasonal Payment Visualization */}
+                                    {(() => {
+                                        const THAI_MONTHS_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+                                        const intervals = Number(seasonalPeriods) || 1;
+                                        const times = Number(seasonalPayments) || 1;
+                                        const startIdx = (Number(seasonalStartMonth) - 1) || 0;
+                                        const timesPerInterval = Math.ceil(times / intervals);
+                                        const monthsPerInterval = Math.floor(12 / intervals);
+
+                                        // Build a set of payment month indices (0-11, relative to calendar)
+                                        const paymentMonths = new Set<number>();
+                                        for (let i = 0; i < intervals; i++) {
+                                            for (let j = 0; j < timesPerInterval; j++) {
+                                                const monthIdx = (startIdx + i * monthsPerInterval + j) % 12;
+                                                paymentMonths.add(monthIdx);
+                                            }
+                                        }
+
+                                        // Build ordered month columns starting from startIdx
+                                        const orderedMonths = Array.from({ length: 12 }, (_, i) => (startIdx + i) % 12);
+
+                                        return (
+                                            <div className="mt-2">
+                                                <p className="text-xs text-gray-500 mb-2">ตารางการจ่ายรายเดือน</p>
+                                                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                                                    <table className="w-full text-center text-xs">
+                                                        <thead>
+                                                            <tr className="bg-gray-50">
+                                                                {orderedMonths.map((mIdx, i) => (
+                                                                    <th key={i} className={cn(
+                                                                        "px-1 py-2 font-medium border-r border-gray-100 last:border-r-0",
+                                                                        paymentMonths.has(mIdx) ? "bg-blue-100 text-blue-700" : "text-gray-400"
+                                                                    )}>
+                                                                        {THAI_MONTHS_SHORT[mIdx]}
+                                                                    </th>
+                                                                ))}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                {orderedMonths.map((mIdx, i) => (
+                                                                    <td key={i} className={cn(
+                                                                        "px-1 py-2.5 border-r border-gray-100 last:border-r-0 font-bold",
+                                                                        paymentMonths.has(mIdx) ? "bg-blue-50 text-blue-600" : "text-gray-200"
+                                                                    )}>
+                                                                        {paymentMonths.has(mIdx) ? "✕" : "—"}
+                                                                    </td>
+                                                                ))}
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
@@ -621,9 +783,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                     <SelectValue />
                                                                 </SelectTrigger>
                                                                 <SelectContent className="max-h-[200px] overflow-y-auto">
-                                                                    {Array.from({ length: months }, (_, i) => i + 1).map((m) => (
+                                                                    {Array.from({ length: Math.floor(months / 12) || 1 }, (_, i) => (i + 1) * 12).map((m) => (
                                                                         <SelectItem key={m} value={m.toString()}>
-                                                                            {m} เดือน
+                                                                            {m / 12} ปี
                                                                         </SelectItem>
                                                                     ))}
                                                                 </SelectContent>
@@ -970,38 +1132,16 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 />
                             </div>
 
-                            {/* Loan Objective Sub-section */}
-                            <div className="pt-2 space-y-4">
 
-                                {/* Select Loan Objective */}
-                                <div className="space-y-1.5">
-                                    <Label className="text-sm">วัตถุประสงค์การขอสินเชื่อ</Label>
-                                    <Select
-                                        value={formData?.loanObjective || ''}
-                                        onValueChange={(val) => setFormData?.({ ...formData, loanObjective: val })}
-                                    >
-                                        <SelectTrigger className="w-full h-12 rounded-xl bg-white border-gray-200 text-sm">
-                                            <SelectValue placeholder="-- เลือกวัตถุประสงค์ --" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {LOAN_OBJECTIVES.map(objective => (
-                                                <SelectItem key={objective.value} value={objective.value}>
-                                                    {objective.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
                         </CardContent>
                     </Card>
 
 
-                    {/* Disclaimer & Navigation */}
+                    {/* Policy Checklist - Last Section */}
+                    <PolicyChecklist />
+
+                    {/* Navigation */}
                     <div className="w-full space-y-4 pt-3">
-                        <p className="text-[10px] text-gray-400 italic text-center">
-                            *คำนวณจากอัตราดอกเบี้ยเบื้องต้น {((INTEREST_RATES[selectedProduct] || 0.2399) * 100).toFixed(2)}% ต่อปี ดอกเบี้ยจริงขึ้นอยู่กับการพิจารณาของบริษัท
-                        </p>
                         {!hideNavigation && (
                             <div className="flex gap-4">
                                 {onBack && (

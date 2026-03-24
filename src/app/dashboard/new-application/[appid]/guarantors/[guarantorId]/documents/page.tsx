@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../../context/ApplicationContext";
 import { Button } from "@/components/ui/Button";
-import { IncomeStep } from "../../../../steps/IncomeStep";
+import { DocumentUploadStep } from "../../../../steps/DocumentUploadStep";
 import { MandatoryFieldWarningDialog } from "../../../../components/MandatoryFieldWarningDialog";
 import { CustomerFormData } from "@/types/application";
 
-export default function GuarantorIncomePage() {
+export default function GuarantorDocumentsPage() {
     const router = useRouter();
     const params = useParams();
     const appId = params.appid as string;
@@ -70,7 +70,7 @@ export default function GuarantorIncomePage() {
             { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId}`) },
             { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: displayName, onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors/${guarantorId}`) },
-            { label: "อาชีพและรายได้", isActive: true }
+            { label: "เอกสารแนบ", isActive: true }
         ]);
 
         if (!isReadonly) {
@@ -92,10 +92,9 @@ export default function GuarantorIncomePage() {
     return (
         <>
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <IncomeStep
+                <DocumentUploadStep
                     formData={guarantorFormData}
                     setFormData={setGuarantorFormData}
-                    isGuarantor={true}
                 />
             </div>
 

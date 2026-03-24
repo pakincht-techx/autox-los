@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { User, Coins, FileText, Pencil, Check, Trash2, Eye, CircleCheck } from "lucide-react";
+import { User, Coins, FileText, Pencil, Check, Trash2, Eye, CircleCheck, Upload } from "lucide-react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
 import { Button } from "@/components/ui/Button";
@@ -61,7 +61,7 @@ export default function GuarantorDetailPage() {
     const handleDeleteGuarantor = () => {
         setDeleteDialogOpen(false);
         toast.success("ลบผู้ค้ำประกันสำเร็จ", {
-            description: `ข้อมูลผู้ค้ำประกัน "${guarantorName}" ถูกลบเรียบร้อยแล้ว`,
+            description: "ข้อมูลผู้ค้ำประกันถูกลบเรียบร้อยแล้ว",
             duration: 2000,
         });
         setTimeout(() => {
@@ -76,7 +76,7 @@ export default function GuarantorDetailPage() {
                     SECTION 1: GUARANTOR HEADER (full-width border bottom)
                 ═══════════════════════════════════════════════════════════ */}
                 <div className="bg-sidebar">
-                    <div className="max-w-6xl mx-auto px-6 lg:px-8 py-3">
+                    <div className="max-w-6xl mx-auto px-6 lg:px-8 pt-6 pb-3">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <h1 className="text-3xl font-bold text-foreground tracking-tight">
@@ -117,6 +117,20 @@ export default function GuarantorDetailPage() {
                                         completionStatus={'completed'}
                                         onEdit={canEdit ? () => router.push(`${basePath}/debt`) : undefined}
                                         onView={!canEdit ? () => router.push(`${basePath}/debt?state=readonly`) : undefined}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Group 2: เอกสารแนบ */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">เอกสารแนบ</p>
+                                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    <ModuleRow
+                                        title="เอกสารแนบ"
+                                        icon={<Upload className="w-4 h-4" />}
+                                        completionStatus={'completed'}
+                                        onEdit={canEdit ? () => router.push(`${basePath}/documents`) : undefined}
+                                        onView={!canEdit ? () => router.push(`${basePath}/documents?state=readonly`) : undefined}
                                     />
                                 </div>
                             </div>
@@ -177,7 +191,7 @@ export default function GuarantorDetailPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบผู้ค้ำประกัน</AlertDialogTitle>
                         <AlertDialogDescription>
-                            คุณต้องการลบข้อมูลผู้ค้ำประกัน &quot;{guarantorName}&quot; ใช่หรือไม่?
+                            คุณต้องการลบข้อมูลผู้ค้ำประกันรายนี้ใช่หรือไม่?
                             ข้อมูลทั้งหมดของผู้ค้ำประกันรายนี้จะถูกลบอย่างถาวร
                         </AlertDialogDescription>
                     </AlertDialogHeader>

@@ -194,6 +194,14 @@ export interface IncomeOccupation {
 
     // Payslip month count (for SA income tabs)
     payslipMonthCount?: number;
+    // Payslip months (named, like statements)
+    payslipMonths?: string[];
+    // Slip count per payslip month: key = month index, value = number of slips
+    payslipSlipCounts?: Record<string, number>;
+
+    // Statement month tracking per bank account
+    // Key: bank account index (e.g. "0", "1"), Value: array of month labels (e.g. ["ม.ค.", "ก.พ."])
+    statementMonths?: Record<string, string[]>;
 
     // Workplace Assessor (per occupation)
     sameAssessorAsMain?: boolean;
