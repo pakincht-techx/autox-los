@@ -21,10 +21,9 @@ export interface DashboardPageHeaderProps {
     className?: string;
     onBack?: () => void;
     onSaveDraft?: () => void | Promise<void>;
-    hideNavButtons?: boolean;
 }
 
-export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBack, onSaveDraft, hideNavButtons }: DashboardPageHeaderProps) {
+export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBack, onSaveDraft }: DashboardPageHeaderProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = React.useState(false);
 
@@ -38,14 +37,14 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
 
     const handleSaveDraft = async () => {
         setIsSaving(true);
-        const toastId = toast.loading("กำลังบันทึกร่าง...");
+        const toastId = toast.loading("กำลังบันทึกแบบร่าง...");
 
         try {
             if (onSaveDraft) {
                 await onSaveDraft();
             }
 
-            toast.success("บันทึกร่างสำเร็จ", { id: toastId });
+            toast.success("บันทึกแบบร่างสำเร็จ", { id: toastId });
 
             setTimeout(() => {
                 if (onBack) {
@@ -55,7 +54,7 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
                 }
             }, 500);
         } catch (error) {
-            toast.error("บันทึกร่างล้มเหลว", {
+            toast.error("บันทึกแบบร่างล้มเหลว", {
                 id: toastId,
                 description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการบันทึก",
             });
@@ -98,18 +97,14 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
 
                 {/* RIGHT: Depend Container */}
                 <div className="flex items-center justify-end gap-3">
-                    {!hideNavButtons && (
-                        <>
-                            <Button variant="outline" size="sm" onClick={handleBack}>
-                                <ChevronLeft className="w-4 h-4 mr-2" />
-                                ย้อนกลับ
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
-                                <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
-                                {isSaving ? "กำลังบันทึก..." : "บันทึกร่าง"}
-                            </Button>
-                        </>
-                    )}
+                    <Button variant="outline" size="sm" onClick={handleBack}>
+                        <ChevronLeft className="w-4 h-4 mr-2" />
+                        ย้อนกลับ
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
+                        <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
+                        {isSaving ? "กำลังบันทึก..." : "บันทึกแบบร่าง"}
+                    </Button>
                     {rightContent}
                 </div>
             </div>
