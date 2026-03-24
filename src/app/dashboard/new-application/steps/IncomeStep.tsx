@@ -199,6 +199,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
     const [uploadSessionDocIds, setUploadSessionDocIds] = useState<Set<string>>(new Set());
     const [dragOverDocIdx, setDragOverDocIdx] = useState<number | null>(null);
     const [currentPhotoCategory, setCurrentPhotoCategory] = useState<string | null>(null);
+    const [managingPhotoGuideId, setManagingPhotoGuideId] = useState<string | null>(null);
 
     // Statement month dialog state
     const [statementMonthDialogOpen, setStatementMonthDialogOpen] = useState(false);
@@ -4475,131 +4476,238 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
 
 
 
-                                            <div className="grid grid-cols-2 gap-x-6 gap-y-8">
-                                                {PHOTO_GUIDES.map((guide) => {
-                                                    const raw = formData.incomePhotos?.[guide.id];
-                                                    const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
-                                                    const hasPhotos = photos.length > 0;
-                                                    return (
-                                                        <div key={guide.id} className="space-y-3">
-                                                            {/* 1. Label and Info Icon for Guidelines */}
-                                                            <div className="flex items-center justify-between group">
-                                                                <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
-                                                                    {guide.title}
-                                                                    {guide.required && <span className="text-red-500 ml-0.5">*</span>}
-                                                                    {hasPhotos && (
-                                                                        <span className="ml-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
-                                                                            {photos.length}
-                                                                        </span>
-                                                                    )}
-                                                                </Label>
-                                                                <Dialog>
-                                                                    <DialogTrigger asChild>
-                                                                        <button
-                                                                            onClick={(e) => e.stopPropagation()}
-                                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
-                                                                            title="ดูคำแนะนำการถ่ายภาพ"
-                                                                        >
-                                                                            <Info className="w-4 h-4" />
-                                                                        </button>
-                                                                    </DialogTrigger>
-                                                                    <DialogContent>
-                                                                        <DialogHeader>
-                                                                            <DialogTitle>
-                                                                                {guide.title}
-                                                                            </DialogTitle>
-                                                                            <DialogDescription>
-                                                                                {guide.description}
-                                                                            </DialogDescription>
-                                                                        </DialogHeader>
-                                                                        <DialogBody>
-                                                                            <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
-                                                                                <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
-                                                                                <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
-                                                                            </div>
-                                                                        </DialogBody>
-                                                                        <DialogFooter>
-                                                                            <DialogClose asChild>
-                                                                                <Button variant="outline" className="min-w-[104px]">ปิด</Button>
-                                                                            </DialogClose>
-                                                                        </DialogFooter>
-                                                                    </DialogContent>
-                                                                </Dialog>
-                                                            </div>
+                                            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                                                {/* Mandatory Documents Table */}
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <Label className="text-sm font-bold text-gray-700">เอกสารบังคับ</Label>
+                                                    </div>
+                                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                        <Table>
+                                                            <TableHeader className="bg-gray-50/50">
+                                                                <TableRow className="hover:bg-transparent">
+                                                                    <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ <span className="text-red-500 text-sm">*</span></TableHead>
+                                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                                    <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {PHOTO_GUIDES.filter(g => g.required).map((guide) => {
+                                                                    const raw = formData.incomePhotos?.[guide.id];
+                                                                    const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+                                                                    const hasPhotos = photos.length > 0;
+                                                                    return (
+                                                                        <TableRow key={guide.id} className="hover:bg-transparent">
+                                                                            <TableCell className="py-4">
+                                                                                <div className="flex items-center gap-3">
+                                                                                    <div className={cn(
+                                                                                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                                        hasPhotos ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                                    )}>
+                                                                                        {hasPhotos ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{guide.title}</span>
+                                                                                        <Dialog>
+                                                                                            <DialogTrigger asChild>
+                                                                                                <button
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all shrink-0"
+                                                                                                    title="ดูคำแนะนำการถ่ายภาพ"
+                                                                                                >
+                                                                                                    <Info className="w-4 h-4" />
+                                                                                                </button>
+                                                                                            </DialogTrigger>
+                                                                                            <DialogContent className="sm:max-w-md">
+                                                                                                <DialogHeader>
+                                                                                                    <DialogTitle>{guide.title}</DialogTitle>
+                                                                                                    <DialogDescription className="text-sm">{guide.description}</DialogDescription>
+                                                                                                </DialogHeader>
+                                                                                                <DialogBody>
+                                                                                                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
+                                                                                                        <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                                                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                                                    </div>
+                                                                                                </DialogBody>
+                                                                                                <DialogFooter>
+                                                                                                    <DialogClose asChild>
+                                                                                                        <Button variant="outline" className="min-w-[104px]">ปิด</Button>
+                                                                                                    </DialogClose>
+                                                                                                </DialogFooter>
+                                                                                            </DialogContent>
+                                                                                        </Dialog>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {hasPhotos ? (
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                const allPhotos = Object.values(formData.incomePhotos || {}).flat();
+                                                                                                const flatIdx = allPhotos.indexOf(photos[0]);
+                                                                                                if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                            }}
+                                                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4" />
+                                                                                            {photos.length} รูปภาพ
+                                                                                        </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                setManagingPhotoGuideId(guide.id);
+                                                                                            }}
+                                                                                            className="flex items-center justify-center w-7 h-7 text-gray-600 hover:text-chaiyo-blue hover:bg-gray-100 rounded-md border border-gray-200 transition-colors bg-white"
+                                                                                            title="จัดการ"
+                                                                                        >
+                                                                                            <Pencil className="w-3.5 h-3.5" />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                                )}
+                                                                            </TableCell>
+                                                                            <TableCell className="text-right">
+                                                                                <div className="flex items-center justify-end gap-1">
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                                    >
+                                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                                        เพิ่มเอกสาร
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </div>
+                                                </div>
 
-                                                            {/* 2. Photo Upload Area */}
-                                                            {hasPhotos ? (
-                                                                <div className="space-y-2">
-                                                                    <div className="grid grid-cols-2 gap-2">
-                                                                        {photos.map((photoUrl: string, pIdx: number) => (
-                                                                            <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
-                                                                                <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
-                                                                                <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
-                                                                                    <CheckCircle2 className="w-3 h-3" />
+                                                {/* Optional Documents Table */}
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <Label className="text-sm font-bold text-gray-700">เอกสารเพิ่มเติม</Label>
+                                                    </div>
+                                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                        <Table>
+                                                            <TableHeader className="bg-gray-50/50">
+                                                                <TableRow className="hover:bg-transparent">
+                                                                    <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ</TableHead>
+                                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                                    <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {PHOTO_GUIDES.filter(g => !g.required).map((guide) => {
+                                                                    const raw = formData.incomePhotos?.[guide.id];
+                                                                    const photos: string[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+                                                                    const hasPhotos = photos.length > 0;
+                                                                    return (
+                                                                        <TableRow key={guide.id} className="hover:bg-transparent">
+                                                                            <TableCell className="py-4">
+                                                                                <div className="flex items-center gap-3">
+                                                                                    <div className={cn(
+                                                                                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                                        hasPhotos ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                                    )}>
+                                                                                        {hasPhotos ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-1.5">
+                                                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{guide.title}</span>
+                                                                                        <Dialog>
+                                                                                            <DialogTrigger asChild>
+                                                                                                <button
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all shrink-0"
+                                                                                                    title="ดูคำแนะนำการถ่ายภาพ"
+                                                                                                >
+                                                                                                    <Info className="w-4 h-4" />
+                                                                                                </button>
+                                                                                            </DialogTrigger>
+                                                                                            <DialogContent className="sm:max-w-md">
+                                                                                                <DialogHeader>
+                                                                                                    <DialogTitle>{guide.title}</DialogTitle>
+                                                                                                    <DialogDescription className="text-sm">{guide.description}</DialogDescription>
+                                                                                                </DialogHeader>
+                                                                                                <DialogBody>
+                                                                                                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
+                                                                                                        <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                                                        <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                                                    </div>
+                                                                                                </DialogBody>
+                                                                                                <DialogFooter>
+                                                                                                    <DialogClose asChild>
+                                                                                                        <Button variant="outline" className="min-w-[104px]">ปิด</Button>
+                                                                                                    </DialogClose>
+                                                                                                </DialogFooter>
+                                                                                            </DialogContent>
+                                                                                        </Dialog>
+                                                                                    </div>
                                                                                 </div>
-                                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
-                                                                                    <button
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            // Flatten all photos for lightbox
-                                                                                            const allPhotos = Object.values(formData.incomePhotos || {}).flat();
-                                                                                            const flatIdx = allPhotos.indexOf(photoUrl);
-                                                                                            if (flatIdx !== -1) setLightboxIndex(flatIdx);
-                                                                                        }}
-                                                                                        className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all transform hover:scale-110 active:scale-95 shadow-xl"
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {hasPhotos ? (
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                const allPhotos = Object.values(formData.incomePhotos || {}).flat();
+                                                                                                const flatIdx = allPhotos.indexOf(photos[0]);
+                                                                                                if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                            }}
+                                                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                                        >
+                                                                                            <FileText className="w-4 h-4" />
+                                                                                            {photos.length} รูปภาพ
+                                                                                        </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                setManagingPhotoGuideId(guide.id);
+                                                                                            }}
+                                                                                            className="flex items-center justify-center w-7 h-7 text-gray-600 hover:text-chaiyo-blue hover:bg-gray-100 rounded-md border border-gray-200 transition-colors bg-white"
+                                                                                            title="จัดการ"
+                                                                                        >
+                                                                                            <Pencil className="w-3.5 h-3.5" />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                                )}
+                                                                            </TableCell>
+                                                                            <TableCell className="text-right">
+                                                                                <div className="flex items-center justify-end gap-1">
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        onClick={() => handleTriggerPhotoUpload(guide.id)}
+                                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
                                                                                     >
-                                                                                        <Eye className="w-4 h-4" />
-                                                                                    </button>
-                                                                                    <button
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            setItemToDelete({
-                                                                                                categoryId: guide.id,
-                                                                                                photoIndex: pIdx,
-                                                                                                name: `${guide.title} (รูปที่ ${pIdx + 1})`,
-                                                                                                type: 'categorizedPhoto'
-                                                                                            });
-                                                                                        }}
-                                                                                        className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all transform hover:scale-110 active:scale-95 shadow-xl"
-                                                                                    >
-                                                                                        <Trash2 className="w-4 h-4" />
-                                                                                    </button>
+                                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                                        เพิ่มเอกสาร
+                                                                                    </Button>
                                                                                 </div>
-                                                                            </div>
-                                                                        ))}
-                                                                        {/* Add more photos button */}
-                                                                        <div
-                                                                            className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
-                                                                            onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                                        >
-                                                                            <Plus className="w-6 h-6 text-gray-400" />
-                                                                            <span className="text-[10px] text-muted-foreground mt-1">เพิ่มรูป</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div
-                                                                    className="relative aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer group-photo overflow-hidden"
-                                                                    onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                                >
-                                                                    <div className="flex flex-col items-center justify-center p-6 text-center gap-3 animate-in fade-in zoom-in-95 duration-300">
-                                                                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 transform group-hover:scale-110 bg-gray-100 text-gray-400 border border-gray-200">
-                                                                            <guide.icon className="w-7 h-7" />
-                                                                        </div>
-                                                                        <div className="space-y-1">
-                                                                            <p className="text-xs font-bold leading-tight text-gray-600">
-                                                                                แตะเพื่ออัพโหลด
-                                                                            </p>
-                                                                            <p className="text-[10px] text-muted-foreground">
-                                                                                รองรับไฟล์ภาพ JPEG, PNG (เลือกได้หลายรูป)
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    );
+                                                                })}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -4968,6 +5076,96 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Manage Photo Documents Dialog */}
+            <Dialog open={managingPhotoGuideId !== null} onOpenChange={(open) => !open && setManagingPhotoGuideId(null)}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>ไฟล์ที่อัพโหลด — {PHOTO_GUIDES.find(g => g.id === managingPhotoGuideId)?.title}</DialogTitle>
+                    </DialogHeader>
+                    <DialogBody className="max-h-[60vh] overflow-y-auto">
+                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                            <Table>
+                                <TableHeader className="bg-gray-50/50">
+                                    <TableRow>
+                                        <TableHead className="w-16 text-center text-xs">ลำดับ</TableHead>
+                                        <TableHead className="text-xs">ชื่อไฟล์</TableHead>
+                                        <TableHead className="w-48 text-center text-xs">รหัสผ่าน</TableHead>
+                                        <TableHead className="w-24 text-center text-xs">จัดการ</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {managingPhotoGuideId && (() => {
+                                        const raw = formData.incomePhotos?.[managingPhotoGuideId];
+                                        const photos = Array.isArray(raw) ? raw : raw ? [raw] : [];
+                                        if (photos.length === 0) {
+                                            return (
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                                                        ไม่มีไฟล์ในรายการนี้
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        }
+                                        return photos.map((photoUrl, pIdx) => (
+                                            <TableRow key={pIdx}>
+                                                <TableCell className="text-center font-medium text-gray-500">
+                                                    {pIdx + 1}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm text-gray-700">{photoUrl.split('/').pop() || `Photo_${pIdx + 1}.jpg`}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <span className="text-gray-400">-</span>
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const allPhotos = Object.values(formData.incomePhotos || {}).flat();
+                                                                const flatIdx = allPhotos.indexOf(photoUrl);
+                                                                if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                            }}
+                                                            className="w-8 h-8 rounded-full text-chaiyo-blue hover:bg-blue-50 border border-transparent hover:border-blue-100 flex items-center justify-center transition-all bg-white"
+                                                            title="ดูรูปภาพ"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const guide = PHOTO_GUIDES.find(g => g.id === managingPhotoGuideId);
+                                                                setItemToDelete({
+                                                                    categoryId: managingPhotoGuideId,
+                                                                    photoIndex: pIdx,
+                                                                    name: `${guide?.title} (รูปที่ ${pIdx + 1})`,
+                                                                    type: 'categorizedPhoto'
+                                                                });
+                                                            }}
+                                                            className="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 flex items-center justify-center transition-all bg-white"
+                                                            title="ลบ"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ));
+                                    })()}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setManagingPhotoGuideId(null)} className="min-w-[104px]">
+                            ปิด
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Payslip Month Add Dialog */}
             <Dialog open={payslipMonthDialogOpen} onOpenChange={setPayslipMonthDialogOpen}>

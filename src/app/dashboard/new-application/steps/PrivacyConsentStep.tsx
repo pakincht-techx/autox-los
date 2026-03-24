@@ -7,6 +7,7 @@ import { StatusBanner } from "@/components/ui/StatusBanner";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Printer } from "lucide-react";
 import { privacyNoticeHtml } from "@/data/privacy-notice-content";
+import { useSidebar } from "@/components/layout/SidebarContext";
 
 interface PrivacyConsentStepProps {
     onAccept: () => void;
@@ -18,6 +19,7 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
     const [isPrivacyAccepted, setIsPrivacyAccepted] = useState(false);
     const [hasReadConsent, setHasReadConsent] = useState(false);
     const [showStaffBanner, setShowStaffBanner] = useState(true);
+    const { setHideSaveDraftButton } = useSidebar();
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,8 +35,14 @@ export const PrivacyConsentStep = ({ onAccept, onBack, collateralType }: Privacy
     useEffect(() => {
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
-        return () => window.removeEventListener('resize', checkScrollable);
-    }, []);
+        
+        setHideSaveDraftButton(true);
+
+        return () => {
+            window.removeEventListener('resize', checkScrollable);
+            setHideSaveDraftButton(false);
+        };
+    }, [setHideSaveDraftButton]);
 
     const handleScroll = () => {
         if (scrollRef.current) {

@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { FileText, User, X, ChevronRight, Printer } from "lucide-react";
 import { StatusBanner } from "@/components/ui/StatusBanner";
 import { useApplication } from "../context/ApplicationContext";
+import { useSidebar } from "@/components/layout/SidebarContext";
+import { useEffect } from "react";
 
 const PdfViewer = dynamic(
     () => import('@/components/ui/PdfViewer').then((mod) => mod.PdfViewer),
@@ -18,7 +20,13 @@ const PdfViewer = dynamic(
 export default function SalesheetPage() {
     const router = useRouter();
     const { formData, setFormData, appId } = useApplication();
+    const { setHideSaveDraftButton } = useSidebar();
     const [showStaffBanner, setShowStaffBanner] = useState(true);
+
+    useEffect(() => {
+        setHideSaveDraftButton(true);
+        return () => setHideSaveDraftButton(false);
+    }, [setHideSaveDraftButton]);
 
     let pdfPath = "/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf";
     let pdfRotation = 90;

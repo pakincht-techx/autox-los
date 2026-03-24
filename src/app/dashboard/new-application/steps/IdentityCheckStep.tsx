@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { StatusBanner } from "@/components/ui/StatusBanner";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
+import { useSidebar } from "@/components/layout/SidebarContext";
 
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/Textarea";
@@ -41,12 +42,19 @@ interface IdentityCheckStepProps {
 type KYCStage = 'INIT' | 'READING_CARD' | 'CHECKING_MEMBER' | 'CARD_SUCCESS' | 'TAKING_ID_FRONT' | 'TAKING_ID_BACK' | 'FACE_VERIFY' | 'FACE_SUCCESS' | 'FACE_FAILED' | 'COMPLETE';
 
 export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityCheckStepProps) {
+    const { setHideSaveDraftButton } = useSidebar();
     const [stage, setStage] = useState<KYCStage>('INIT');
     const [verificationMethod, setVerificationMethod] = useState<'DIPCHIP' | 'MANUAL' | null>('DIPCHIP');
     const [isMockCamera, setIsMockCamera] = useState(true); // Toggle this for real camera
 
 
     const [livenessAttempts, setLivenessAttempts] = useState(0);
+
+    // Hide save draft button specifically for this step
+    useEffect(() => {
+        setHideSaveDraftButton(true);
+        return () => setHideSaveDraftButton(false);
+    }, [setHideSaveDraftButton]);
 
     const [isExistingMember, setIsExistingMember] = useState<boolean>(false);
     const [existingProfile, setExistingProfile] = useState<any>(null);

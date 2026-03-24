@@ -240,7 +240,7 @@ function getMockApp(mockCase: string | null) {
 
 export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { setBreadcrumbs, setRightContent, setHideNavButtons, devRole } = useSidebar();
+    const { setBreadcrumbs, setRightContent, setHideSaveDraftButton, devRole } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [consentCompleted, setConsentCompleted] = useState(false);
@@ -287,29 +287,22 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         }
 
         const firstName = app.applicantName.split(' ')[0];
-        const breadcrumbMap: Record<string, { label: string; href: string }> = {
-            all: { label: "รายการใบสมัครทั้งหมด", href: "/dashboard/all-applications" },
-            my: { label: "รายการใบสมัครของฉัน", href: "/dashboard/applications" },
-        };
-        const source = breadcrumbMap[from || 'my'] || breadcrumbMap.my;
-
         setBreadcrumbs([
-            { label: source.label, href: source.href },
             { label: `${app.applicationNo.slice(8)} (${firstName})`, isActive: true }
         ]);
 
         // No right content in the top bar — action buttons are in the header section
         setRightContent(null);
 
-        // Hide navigation buttons (back & save draft) on applications page
-        setHideNavButtons(true);
+        // Hide save draft button on applications page
+        setHideSaveDraftButton(true);
 
         return () => {
             setBreadcrumbs([]);
             setRightContent(null);
-            setHideNavButtons(false);
+            setHideSaveDraftButton(false);
         };
-    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, setHideNavButtons, viewMode, canEdit, currentStatus, statusParam]);
+    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, setHideSaveDraftButton, viewMode, canEdit, currentStatus, statusParam]);
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
@@ -895,7 +888,7 @@ function SummaryCard({
 }) {
     return (
         <div className={cn(
-            "rounded-2xl p-5 flex flex-col justify-between min-h-[140px] group relative overflow-hidden transition-all duration-300",
+            "rounded-2xl p-5 flex flex-col justify-between min-h-[140px] group relative overflow-hidden",
             isEmpty
                 ? (onEdit ? "bg-white border-2 border-dashed border-gray-300" : "bg-gray-50/50 border border-border-subtle")
                 : completionStatus === 'completed'
@@ -905,7 +898,7 @@ function SummaryCard({
             {/* Background Icon Watermark */}
             {icon && (
                 <div className={cn(
-                    "absolute -bottom-4 -right-4 transition-colors duration-300 pointer-events-none",
+                    "absolute -bottom-4 -right-4 pointer-events-none",
                     isEmpty ? "text-gray-100/60 group-hover:text-gray-200/80" : "text-gray-200/50 group-hover:text-gray-200"
                 )}>
                     {icon}
@@ -932,7 +925,7 @@ function SummaryCard({
                     variant={isEmpty ? "default" : "outline"}
                     onClick={onEdit}
                     className={cn(
-                        "relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5",
+                        "relative z-10 rounded-lg h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5",
                         isEmpty
                             ? "bg-chaiyo-blue text-white"
                             : "bg-white hover:bg-gray-50 border-gray-200 text-gray-600 hover:text-chaiyo-blue"
@@ -946,7 +939,7 @@ function SummaryCard({
                 <Button
                     variant="outline"
                     onClick={onView}
-                    className="relative z-10 rounded-full h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5 bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-chaiyo-blue"
+                    className="relative z-10 rounded-lg h-8 px-4 text-xs font-bold mt-4 self-start flex items-center gap-1.5 bg-white hover:bg-gray-50 border-gray-200 text-gray-500 hover:text-chaiyo-blue"
                 >
                     <Eye className="w-3.5 h-3.5" />
                     ดูรายละเอียด
@@ -988,7 +981,7 @@ function ModuleRow({
                         variant="ghost"
                         size="sm"
                         onClick={onEdit}
-                        className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
+                        className="h-8 w-8 p-0 rounded-lg text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
                     >
                         <Pencil className="w-3.5 h-3.5" />
                     </Button>
@@ -998,7 +991,7 @@ function ModuleRow({
                         variant="ghost"
                         size="sm"
                         onClick={onView}
-                        className="h-8 w-8 p-0 rounded-full text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
+                        className="h-8 w-8 p-0 rounded-lg text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
                     >
                         <Eye className="w-3.5 h-3.5" />
                     </Button>

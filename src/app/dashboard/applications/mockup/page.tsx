@@ -145,6 +145,7 @@ function MockupContent() {
             <div className="flex items-center gap-2">
                 <Button
                     variant="outline"
+                    size="sm"
                     className="font-bold"
                     onClick={() => { }}
                     disabled
@@ -152,6 +153,7 @@ function MockupContent() {
                     บันทึกและกลับ
                 </Button>
                 <Button
+                    size="sm"
                     className="font-bold bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                     onClick={() => { }}
                     disabled

@@ -59,7 +59,6 @@ export default function AddGuarantorPage() {
         const appLabel = borrowerFirstName ? `${displayAppId} (${borrowerFirstName})` : displayAppId;
 
         setBreadcrumbs([
-            { label: "รายการใบสมัคร", onClick: () => router.push("/dashboard/applications") },
             { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId}`) },
             { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: "เพิ่มผู้ค้ำประกัน", isActive: true }

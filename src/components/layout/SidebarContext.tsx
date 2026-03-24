@@ -23,6 +23,8 @@ interface SidebarContextType {
     setDevRole: (role: DevRole) => void;
     hideNavButtons?: boolean;
     setHideNavButtons: (hide: boolean) => void;
+    hideSaveDraftButton?: boolean;
+    setHideSaveDraftButton: (hide: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType>({
@@ -37,6 +39,8 @@ const SidebarContext = createContext<SidebarContextType>({
     setDevRole: () => { },
     hideNavButtons: false,
     setHideNavButtons: () => { },
+    hideSaveDraftButton: false,
+    setHideSaveDraftButton: () => { },
 });
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
@@ -45,6 +49,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     const [rightContent, setRightContent] = useState<React.ReactNode>(null);
     const [devRole, setDevRole] = useState<DevRole>('branch-staff');
     const [hideNavButtons, setHideNavButtons] = useState(false);
+    const [hideSaveDraftButton, setHideSaveDraftButton] = useState(false);
 
     const toggleCollapsed = () => setIsCollapsed(prev => !prev);
 
@@ -60,7 +65,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
             devRole,
             setDevRole,
             hideNavButtons,
-            setHideNavButtons
+            setHideNavButtons,
+            hideSaveDraftButton,
+            setHideSaveDraftButton
         }}>
             {children}
         </SidebarContext.Provider>

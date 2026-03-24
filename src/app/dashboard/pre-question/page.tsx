@@ -726,10 +726,13 @@ function PreQuestionPageContent() {
     const [isIncomeDebtExpanded, setIsIncomeDebtExpanded] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [showProducts, setShowProducts] = useState(false);
+    const { setHideSaveDraftButton } = useSidebar();
 
     useEffect(() => {
         setIsMounted(true);
-    }, []);
+        setHideSaveDraftButton(true);
+        return () => setHideSaveDraftButton(false);
+    }, [setHideSaveDraftButton]);
 
     // --- REFINED LAND APPRAISAL CALCULATION ---
     const calculatedLandResult = useMemo(() => {
@@ -1340,7 +1343,6 @@ function PreQuestionPageContent() {
 
     useEffect(() => {
         setBreadcrumbs([
-            { label: "รายการใบสมัคร", href: "/dashboard/applications" },
             { label: "สร้างใบสมัครใหม่", isActive: true }
         ]);
         return () => {

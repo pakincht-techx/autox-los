@@ -190,7 +190,6 @@ export default function ApplicationsPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filterName, setFilterName] = useState("");
     const [filterProduct, setFilterProduct] = useState("all");
-    const [filterStatus, setFilterStatus] = useState("all");
     const [filterStartDate, setFilterStartDate] = useState("");
     const [filterEndDate, setFilterEndDate] = useState("");
     const [filterPreviousProcessor, setFilterPreviousProcessor] = useState("");
@@ -201,7 +200,6 @@ export default function ApplicationsPage() {
     const clearFilters = () => {
         setFilterName("");
         setFilterProduct("all");
-        setFilterStatus("all");
         setFilterStartDate("");
         setFilterEndDate("");
         setFilterPreviousProcessor("");
@@ -210,7 +208,7 @@ export default function ApplicationsPage() {
         setFilterMaker("");
     };
 
-    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "" || filterMaker !== "";
+    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "" || filterMaker !== "";
 
     // Generate unique options for Comboboxes
     const applicantNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.applicantName))).map(name => ({ label: name, value: name }));
@@ -243,7 +241,6 @@ export default function ApplicationsPage() {
         // Dialog Filters
         const matchesName = filterName ? app.applicantName.toLowerCase().includes(filterName.toLowerCase()) : true;
         const matchesProduct = filterProduct !== "all" ? app.productType === filterProduct : true;
-        const matchesStatus = filterStatus !== "all" ? app.status === filterStatus : true;
         const matchesMaker = filterMaker ? app.makerName.toLowerCase().includes(filterMaker.toLowerCase()) : true;
         const matchesPreviousProcessor = filterPreviousProcessor ? (app.previousProcessorName?.toLowerCase().includes(filterPreviousProcessor.toLowerCase()) ?? false) : true;
 
@@ -270,7 +267,7 @@ export default function ApplicationsPage() {
             if (filterLastActionEndDate && actionDatePath > filterLastActionEndDate) matchesLastActionDate = false;
         }
 
-        return matchesTab && matchesSearch && matchesName && matchesProduct && matchesStatus && matchesDate && matchesMaker && matchesPreviousProcessor && matchesLastActionDate;
+        return matchesTab && matchesSearch && matchesName && matchesProduct && matchesDate && matchesMaker && matchesPreviousProcessor && matchesLastActionDate;
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
@@ -403,23 +400,6 @@ export default function ApplicationsPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>สถานะใบสมัคร</Label>
-                                        <Select
-                                            value={filterStatus === "all" ? "" : filterStatus}
-                                            onValueChange={(v) => setFilterStatus(v || "all")}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="ทั้งหมด" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">ทั้งหมด</SelectItem>
-                                                <SelectItem value="Draft">แบบร่าง</SelectItem>
-
-                                                <SelectItem value="Sent Back">ส่งกลับ</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
                                         <Label>ช่วงของวันเวลาสร้างใบสมัคร</Label>
                                         <DateRangePickerBE
                                             from={filterStartDate}
@@ -476,7 +456,6 @@ export default function ApplicationsPage() {
                     const badges: { label: string; value: string; onRemove: () => void }[] = [];
                     if (filterName) badges.push({ label: "ผู้กู้", value: filterName, onRemove: () => setFilterName("") });
                     if (filterProduct !== "all") badges.push({ label: "สินเชื่อ", value: filterProduct, onRemove: () => setFilterProduct("all") });
-                    if (filterStatus !== "all") badges.push({ label: "สถานะ", value: filterStatus === "Draft" ? "แบบร่าง" : filterStatus === "Sent Back" ? "ส่งกลับ" : filterStatus, onRemove: () => setFilterStatus("all") });
                     if (filterStartDate || filterEndDate) badges.push({ label: "วันสร้าง", value: [filterStartDate, filterEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterStartDate(""); setFilterEndDate(""); } });
                     if (filterLastActionStartDate || filterLastActionEndDate) badges.push({ label: "วันดำเนินการ", value: [filterLastActionStartDate, filterLastActionEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterLastActionStartDate(""); setFilterLastActionEndDate(""); } });
                     if (filterPreviousProcessor) badges.push({ label: "ผู้ดำเนินการก่อนหน้า", value: filterPreviousProcessor, onRemove: () => setFilterPreviousProcessor("") });

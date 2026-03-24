@@ -19,13 +19,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-export default function GuarantorDetailPage() {
+export default function GuarantorDetailPage({ params }: { params: { appid: string, guarantorId: string } }) {
     const router = useRouter();
-    const params = useParams();
     const appId = params.appid as string;
     const guarantorId = params.guarantorId as string;
 
-    const { setBreadcrumbs, setRightContent } = useSidebar();
+    const { setBreadcrumbs, setRightContent, setHideSaveDraftButton } = useSidebar();
     const { formData: applicationFormData } = useApplication();
     const searchParams = useSearchParams();
     const isReadonly = searchParams.get('state') === 'readonly';
@@ -38,14 +37,19 @@ export default function GuarantorDetailPage() {
         const displayName = "ดีใจ";
 
         setBreadcrumbs([
-            { label: "รายการใบสมัคร", onClick: () => router.push("/dashboard/applications") },
             { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId}`) },
             { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: displayName, isActive: true }
         ]);
 
         setRightContent(null);
-    }, [appId, setBreadcrumbs, applicationFormData?.firstName, router, isReadonly, setRightContent]);
+        setHideSaveDraftButton(true);
+
+        return () => {
+            setBreadcrumbs([]);
+            setHideSaveDraftButton(false);
+        };
+    }, [appId, guarantorId, setBreadcrumbs, applicationFormData?.firstName, router, isReadonly, setRightContent, setHideSaveDraftButton]);
 
     const basePath = `/dashboard/new-application/${appId}/guarantors/${guarantorId}`;
 
@@ -230,7 +234,7 @@ function ModuleRow({
     const isEmpty = !onEdit && !onView;
 
     return (
-        <div className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50/50 transition-colors">
+        <div className="flex items-center justify-between px-4 py-3.5 group">
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-400">
                     {icon ?? <User className="w-4 h-4" />}

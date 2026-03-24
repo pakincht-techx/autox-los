@@ -221,7 +221,6 @@ export default function AllApplicationsPage() {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filterName, setFilterName] = useState("");
     const [filterProduct, setFilterProduct] = useState("all");
-    const [filterStatus, setFilterStatus] = useState("all");
     const [filterStartDate, setFilterStartDate] = useState("");
     const [filterEndDate, setFilterEndDate] = useState("");
     const [filterMaker, setFilterMaker] = useState("");
@@ -232,7 +231,6 @@ export default function AllApplicationsPage() {
     const clearFilters = () => {
         setFilterName("");
         setFilterProduct("all");
-        setFilterStatus("all");
         setFilterStartDate("");
         setFilterEndDate("");
         setFilterMaker("");
@@ -241,7 +239,7 @@ export default function AllApplicationsPage() {
         setFilterLastActionEndDate("");
     };
 
-    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStatus !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterMaker !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "";
+    const hasActiveFilters = filterName !== "" || filterProduct !== "all" || filterStartDate !== "" || filterEndDate !== "" || filterMaker !== "" || filterPreviousProcessor !== "" || filterLastActionStartDate !== "" || filterLastActionEndDate !== "";
 
     // Generate unique options for Comboboxes
     const applicantNameOptions = Array.from(new Set(MOCK_DATA.map(app => app.applicantName))).map(name => ({ label: name, value: name }));
@@ -281,7 +279,6 @@ export default function AllApplicationsPage() {
         const matchesName = filterName ? app.applicantName.toLowerCase().includes(filterName.toLowerCase()) : true;
         const matchesMaker = filterMaker ? app.makerName.toLowerCase().includes(filterMaker.toLowerCase()) : true;
         const matchesProduct = filterProduct !== "all" ? app.productType === filterProduct : true;
-        const matchesStatus = filterStatus !== "all" ? app.status === filterStatus : true;
         const matchesPreviousProcessor = filterPreviousProcessor ? (app.previousProcessorName?.toLowerCase().includes(filterPreviousProcessor.toLowerCase()) ?? false) : true;
 
         // Date Filter (simple string comparison since it's mock DD/MM/YYYY HH:MM vs ISO YYYY-MM-DD from DatePicker)
@@ -308,7 +305,7 @@ export default function AllApplicationsPage() {
             if (filterLastActionEndDate && actionDatePath > filterLastActionEndDate) matchesLastActionDate = false;
         }
 
-        return matchesTab && matchesSearch && matchesName && matchesMaker && matchesProduct && matchesStatus && matchesDate && matchesPreviousProcessor && matchesLastActionDate;
+        return matchesTab && matchesSearch && matchesName && matchesMaker && matchesProduct && matchesDate && matchesPreviousProcessor && matchesLastActionDate;
     });
 
     const sortedData = [...filteredData].sort((a, b) => {
@@ -434,26 +431,6 @@ export default function AllApplicationsPage() {
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>สถานะใบสมัคร</Label>
-                                        <Select
-                                            value={filterStatus === "all" ? "" : filterStatus}
-                                            onValueChange={(v) => setFilterStatus(v || "all")}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="ทั้งหมด" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">ทั้งหมด</SelectItem>
-                                                <SelectItem value="Draft">แบบร่าง</SelectItem>
-                                                <SelectItem value="In Review">รอพิจารณา</SelectItem>
-                                                <SelectItem value="Sent Back">ส่งกลับ</SelectItem>
-                                                <SelectItem value="Approved">อนุมัติ</SelectItem>
-                                                <SelectItem value="Rejected">ถูกปฎิเสธ</SelectItem>
-                                                <SelectItem value="Cancelled">ยกเลิกใบสมัคร</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
                                         <Label>ช่วงของวันเวลาสร้างใบสมัคร</Label>
                                         <DateRangePickerBE
                                             from={filterStartDate}
@@ -507,11 +484,9 @@ export default function AllApplicationsPage() {
 
                 {/* Active Filter Badges */}
                 {hasActiveFilters && (() => {
-                    const statusLabelMap: Record<string, string> = { "Draft": "แบบร่าง", "In Review": "รอพิจารณา", "Sent Back": "ส่งกลับ", "Approved": "อนุมัติ", "Rejected": "ถูกปฎิเสธ", "Cancelled": "ยกเลิกใบสมัคร" };
                     const badges: { label: string; value: string; onRemove: () => void }[] = [];
                     if (filterName) badges.push({ label: "ผู้กู้", value: filterName, onRemove: () => setFilterName("") });
                     if (filterProduct !== "all") badges.push({ label: "สินเชื่อ", value: filterProduct, onRemove: () => setFilterProduct("all") });
-                    if (filterStatus !== "all") badges.push({ label: "สถานะ", value: statusLabelMap[filterStatus] || filterStatus, onRemove: () => setFilterStatus("all") });
                     if (filterStartDate || filterEndDate) badges.push({ label: "วันสร้าง", value: [filterStartDate, filterEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterStartDate(""); setFilterEndDate(""); } });
                     if (filterLastActionStartDate || filterLastActionEndDate) badges.push({ label: "วันดำเนินการ", value: [filterLastActionStartDate, filterLastActionEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterLastActionStartDate(""); setFilterLastActionEndDate(""); } });
                     if (filterPreviousProcessor) badges.push({ label: "ผู้ดำเนินการก่อนหน้า", value: filterPreviousProcessor, onRemove: () => setFilterPreviousProcessor("") });

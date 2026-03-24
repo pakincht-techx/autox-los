@@ -16,6 +16,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { useSidebar } from "@/components/layout/SidebarContext";
 
 interface SensitiveDataConsentStepProps {
     onAccept: () => void;
@@ -30,6 +31,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
     const [isConsentAccepted, setIsConsentAccepted] = useState(false);
     const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
     const [showStaffBanner, setShowStaffBanner] = useState(true);
+    const { setHideSaveDraftButton } = useSidebar();
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,8 +47,14 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
     useEffect(() => {
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
-        return () => window.removeEventListener('resize', checkScrollable);
-    }, [consentStep]);
+        
+        setHideSaveDraftButton(true);
+
+        return () => {
+            window.removeEventListener('resize', checkScrollable);
+            setHideSaveDraftButton(false);
+        };
+    }, [consentStep, setHideSaveDraftButton]);
 
     const handleScroll = () => {
         if (scrollRef.current) {

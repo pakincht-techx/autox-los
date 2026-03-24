@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { useApplication } from "../../context/ApplicationContext";
+import { useSidebar } from "@/components/layout/SidebarContext";
 
 import { Button } from "@/components/ui/Button";
 import {
@@ -106,6 +108,7 @@ const MOCK_GUARANTORS: GuarantorWithExtras[] = [
 
 export default function GuarantorsPage() {
     const router = useRouter();
+    const { setHideSaveDraftButton } = useSidebar();
     const { formData, appId, setSaveOverride } = useApplication();
     const [softBlockDialogOpen, setSoftBlockDialogOpen] = useState(false);
     const [softBlockGuarantors, setSoftBlockGuarantors] = useState<Guarantor[]>([]);
@@ -146,6 +149,11 @@ export default function GuarantorsPage() {
         return () => setSaveOverride(null);
     }, [setSaveOverride, guarantors]);
 
+    useEffect(() => {
+        setHideSaveDraftButton(true);
+        return () => setHideSaveDraftButton(false);
+    }, [setHideSaveDraftButton]);
+
     return (
         <>
             <div className="space-y-6">
@@ -160,7 +168,6 @@ export default function GuarantorsPage() {
                         </p>
                     </div>
                     <Button
-
                         variant="outline"
                         onClick={() => {
                             router.push(`/dashboard/new-application/${appId}/guarantors/add`);

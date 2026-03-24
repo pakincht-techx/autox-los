@@ -66,7 +66,6 @@ export default function GuarantorDebtPage() {
         const displayName = "ดีใจ";
 
         setBreadcrumbs([
-            { label: "รายการใบสมัคร", onClick: () => router.push("/dashboard/applications") },
             { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId}`) },
             { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: displayName, onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors/${guarantorId}`) },
@@ -78,6 +77,7 @@ export default function GuarantorDebtPage() {
                 <div className="flex items-center gap-3">
                     <Button
                         variant="default"
+                        size="sm"
                         onClick={() => {
                             mandatoryWarningRef.current(true);
                         }}

@@ -13,7 +13,7 @@ function DashboardLayoutContent({
 }: {
     children: React.ReactNode;
 }) {
-    const { breadcrumbs, rightContent, hideNavButtons, isCollapsed, toggleCollapsed } = useSidebar();
+    const { breadcrumbs, rightContent, hideNavButtons, hideSaveDraftButton, isCollapsed, toggleCollapsed } = useSidebar();
 
     return (
         <div className="flex flex-col h-screen bg-background overflow-hidden font-sans text-gray-900">
@@ -52,6 +52,7 @@ function DashboardLayoutContent({
                                     breadcrumbs={breadcrumbs}
                                     rightContent={rightContent}
                                     hideNavButtons={hideNavButtons}
+                                    hideSaveDraftButton={hideSaveDraftButton}
                                     className="pl-4"
                                 />
                             )}

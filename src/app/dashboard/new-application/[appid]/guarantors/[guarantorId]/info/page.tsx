@@ -74,9 +74,8 @@ export default function GuarantorInfoPage() {
         const displayName = "ดีใจ";
 
         setBreadcrumbs([
-            { label: "รายการใบสมัคร", onClick: () => router.push("/dashboard/applications") },
-            { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId}`) },
-            { label: "ผู้ค้ำ", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
+            { label: appLabel, onClick: () => router.push(`/dashboard/applications/${appId || 'draft'}`) },
+            { label: "ผู้ค้ำประกัน", onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors`) },
             { label: displayName, onClick: () => router.push(`/dashboard/new-application/${appId}/guarantors/${guarantorId}`) },
             { label: "ข้อมูลผู้ค้ำ", isActive: true }
         ]);
@@ -86,6 +85,7 @@ export default function GuarantorInfoPage() {
                 <div className="flex items-center gap-3">
                     <Button
                         variant="default"
+                        size="sm"
                         onClick={() => {
                             // Always show mandatory warning — in real app, check actual fields
                             mandatoryWarningRef.current(true);

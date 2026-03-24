@@ -96,12 +96,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             ? APPLICATION_STEPS[applicationStepIndex]?.title
             : EXTRA_BREADCRUMB_TITLES[pathSlug] || null;
 
-        const items: { label: string; onClick?: () => void; isActive?: boolean }[] = [
-            {
-                label: "รายการใบสมัคร",
-                onClick: () => handleNavigateAway("/dashboard/applications")
-            }
-        ];
+        const items: { label: string; onClick?: () => void; isActive?: boolean }[] = [];
 
         if (isApplicationStarted && appId) {
             const firstName = formData?.firstName;
@@ -135,6 +130,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             setRightContent(
                 <Button
                     variant="default"
+                    size="sm"
                     className=""
                     onClick={() => {
                         // If the current page has a custom save handler, use it
