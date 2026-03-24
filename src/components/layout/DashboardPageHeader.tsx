@@ -4,6 +4,7 @@ import React from 'react';
 import { ChevronRight, ChevronLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 
@@ -36,17 +37,28 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
 
     const handleSaveDraft = async () => {
         setIsSaving(true);
+        const toastId = toast.loading("กำลังบันทึกร่าง...");
+
         try {
             if (onSaveDraft) {
                 await onSaveDraft();
             }
-        } finally {
+
+            toast.success("บันทึกร่างสำเร็จ", { id: toastId });
+
+            setTimeout(() => {
+                if (onBack) {
+                    onBack();
+                } else {
+                    router.back();
+                }
+            }, 500);
+        } catch (error) {
+            toast.error("บันทึกร่างล้มเหลว", {
+                id: toastId,
+                description: error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการบันทึก",
+            });
             setIsSaving(false);
-            if (onBack) {
-                onBack();
-            } else {
-                router.back();
-            }
         }
     };
 
