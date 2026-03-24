@@ -3,6 +3,7 @@
 import React from 'react';
 import { ChevronRight, ChevronLeft, Save } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 
@@ -17,9 +18,38 @@ export interface DashboardPageHeaderProps {
     breadcrumbs: BreadcrumbItem[];
     rightContent?: React.ReactNode;
     className?: string;
+    onBack?: () => void;
+    onSaveDraft?: () => void | Promise<void>;
 }
 
-export function DashboardPageHeader({ breadcrumbs, rightContent, className }: DashboardPageHeaderProps) {
+export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBack, onSaveDraft }: DashboardPageHeaderProps) {
+    const router = useRouter();
+    const [isSaving, setIsSaving] = React.useState(false);
+
+    const handleBack = () => {
+        if (onBack) {
+            onBack();
+        } else {
+            router.back();
+        }
+    };
+
+    const handleSaveDraft = async () => {
+        setIsSaving(true);
+        try {
+            if (onSaveDraft) {
+                await onSaveDraft();
+            }
+        } finally {
+            setIsSaving(false);
+            if (onBack) {
+                onBack();
+            } else {
+                router.back();
+            }
+        }
+    };
+
     return (
         <div className={cn("w-full border-b border-gray-100 bg-white relative h-12 shrink-0 z-10", className)}>
             <div className="flex items-center justify-between w-full h-full pr-6">
@@ -55,13 +85,13 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className }: Da
 
                 {/* RIGHT: Depend Container */}
                 <div className="flex items-center justify-end gap-3">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleBack}>
                         <ChevronLeft className="w-4 h-4 mr-2" />
                         ย้อนกลับ
                     </Button>
-                    <Button variant="outline" size="sm">
-                        <Save className="w-4 h-4 mr-2" />
-                        บันทึกร่าง
+                    <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
+                        <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
+                        {isSaving ? "กำลังบันทึก..." : "บันทึกร่าง"}
                     </Button>
                     {rightContent}
                 </div>
