@@ -21,9 +21,10 @@ export interface DashboardPageHeaderProps {
     className?: string;
     onBack?: () => void;
     onSaveDraft?: () => void | Promise<void>;
+    hideNavButtons?: boolean;
 }
 
-export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBack, onSaveDraft }: DashboardPageHeaderProps) {
+export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBack, onSaveDraft, hideNavButtons }: DashboardPageHeaderProps) {
     const router = useRouter();
     const [isSaving, setIsSaving] = React.useState(false);
 
@@ -97,14 +98,18 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
 
                 {/* RIGHT: Depend Container */}
                 <div className="flex items-center justify-end gap-3">
-                    <Button variant="outline" size="sm" onClick={handleBack}>
-                        <ChevronLeft className="w-4 h-4 mr-2" />
-                        ย้อนกลับ
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
-                        <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
-                        {isSaving ? "กำลังบันทึก..." : "บันทึกร่าง"}
-                    </Button>
+                    {!hideNavButtons && (
+                        <>
+                            <Button variant="outline" size="sm" onClick={handleBack}>
+                                <ChevronLeft className="w-4 h-4 mr-2" />
+                                ย้อนกลับ
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={handleSaveDraft} disabled={isSaving}>
+                                <Save className={cn("w-4 h-4 mr-2", isSaving && "animate-spin")} />
+                                {isSaving ? "กำลังบันทึก..." : "บันทึกร่าง"}
+                            </Button>
+                        </>
+                    )}
                     {rightContent}
                 </div>
             </div>
