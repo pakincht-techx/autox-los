@@ -1,9 +1,10 @@
 "use client";
 
 import React from 'react';
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
 
 export interface BreadcrumbItem {
     label: string;
@@ -54,6 +55,14 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className }: Da
 
                 {/* RIGHT: Depend Container */}
                 <div className="flex items-center justify-end gap-3">
+                    <Button variant="outline" size="sm">
+                        <ChevronLeft className="w-4 h-4 mr-2" />
+                        ย้อนกลับ
+                    </Button>
+                    <Button variant="outline" size="sm">
+                        <Save className="w-4 h-4 mr-2" />
+                        บันทึกร่าง
+                    </Button>
                     {rightContent}
                 </div>
             </div>
