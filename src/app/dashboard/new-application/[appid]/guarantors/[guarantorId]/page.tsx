@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { User, Coins, FileText, Pencil, Check, Trash2, Eye, CircleCheck, Upload } from "lucide-react";
 import { useSidebar } from "@/components/layout/SidebarContext";
@@ -19,10 +19,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-export default function GuarantorDetailPage({ params }: { params: { appid: string, guarantorId: string } }) {
+export default function GuarantorDetailPage({ params }: { params: Promise<{ appid: string, guarantorId: string }> }) {
+    const { appid, guarantorId } = use(params);
     const router = useRouter();
-    const appId = params.appid as string;
-    const guarantorId = params.guarantorId as string;
+    const appId = appid as string;
 
     const { setBreadcrumbs, setRightContent, setHideSaveDraftButton } = useSidebar();
     const { formData: applicationFormData } = useApplication();
