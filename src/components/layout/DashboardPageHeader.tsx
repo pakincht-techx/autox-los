@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ChevronRight, ChevronLeft, Save, Loader2 } from "lucide-react";
+import { ChevronLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -93,7 +93,7 @@ export function DashboardPageHeader({ breadcrumbs, rightContent, className, onBa
                                             <span className="truncate">{bc.label}</span>
                                         </div>
                                     )}
-                                    {!isLast && <ChevronRight className="h-3.5 w-3.5 text-gray-400 shrink-0" />}
+                                    {!isLast && <span className="text-gray-400 shrink-0">/</span>}
                                 </React.Fragment>
                             )
                         })}
