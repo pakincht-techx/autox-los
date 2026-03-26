@@ -26,6 +26,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
+    DialogClose,
+    DialogBody,
 } from "@/components/ui/Dialog";
 import {
     Table,
@@ -159,48 +162,48 @@ const DEED_TYPES = [
     { value: "ตราจองที่ว่าได้ทำประโยชน์แล้ว", label: "ตราจองที่ว่าได้ทำประโยชน์แล้ว" },
 ];
 
-const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; demoUrl: string }>> = {
+const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; demoUrl: string; required: boolean }>> = {
     car: [
-        { id: "front_plate_engine", title: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้า และเครื่องยนต์ชัดเจน", demoUrl: "/images/guidelines/car_front_engine_demo.png" },
-        { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/car_back_selfie_demo.png" },
-        { id: "front_left_45", title: "รูปหน้ารถ - เฉียงซ้าย 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ซ้าย 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_left_45_demo.png" },
-        { id: "front_right_45", title: "รูปหน้ารถ - เฉียงขวา 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ขวา 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_right_45_demo.png" },
-        { id: "back_left_45", title: "รูปหลังรถ - เฉียงซ้าย 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหลัง-ซ้าย 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_back_left_45_demo.png" },
-        { id: "back_right_45", title: "รูปหลังรถ - เฉียงขวา 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหลัง-ขวา 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_back_right_45_demo.png" },
-        { id: "interior_console_gear", title: "รูปภายในรถ + เห็นคอนโซล + เกียร์รถ", icon: Camera, description: "ถ่ายภายในรถให้เห็นคอนโซล เกียร์ สถานะเบาะและภาพโดยรวมภายใน", demoUrl: "/images/guidelines/car_interior_console_gear_demo.png" },
-        { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถัง (VIN Number) บริเวณประตูคนขับหรือพื้นรถให้ชัดเจน", demoUrl: "/images/guidelines/car_vin_chassis_demo.png" },
+        { id: "front_plate_engine", title: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้า และเครื่องยนต์ชัดเจน", demoUrl: "/images/guidelines/car_front_engine_demo.png", required: true },
+        { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/car_back_selfie_demo.png", required: true },
+        { id: "front_left_45", title: "รูปหน้ารถ - เฉียงซ้าย 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ซ้าย 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_left_45_demo.png", required: true },
+        { id: "front_right_45", title: "รูปหน้ารถ - เฉียงขวา 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ขวา 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_right_45_demo.png", required: true },
+        { id: "back_left_45", title: "รูปหลังรถ - เฉียงซ้าย 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหลัง-ซ้าย 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_back_left_45_demo.png", required: true },
+        { id: "back_right_45", title: "รูปหลังรถ - เฉียงขวา 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหลัง-ขวา 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_back_right_45_demo.png", required: true },
+        { id: "interior_console_gear", title: "รูปภายในรถ + เห็นคอนโซล + เกียร์รถ", icon: Camera, description: "ถ่ายภายในรถให้เห็นคอนโซล เกียร์ สถานะเบาะและภาพโดยรวมภายใน", demoUrl: "/images/guidelines/car_interior_console_gear_demo.png", required: true },
+        { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถัง (VIN Number) บริเวณประตูคนขับหรือพื้นรถให้ชัดเจน", demoUrl: "/images/guidelines/car_vin_chassis_demo.png", required: true },
     ],
     moto: [
-        { id: "front_plate_engine", title: "รูปหน้ารถจักรยานยนต์ เห็นป้ายทะเบียน", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียนและหน้ารถชัดเจน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/moto_front_demo.png" },
-        { id: "back_plate_selfie", title: "รูปหลังรถจักรยานยนต์ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/moto_back_selfie_demo.png" },
-        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_left_45_demo.png" },
-        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_right_45_demo.png" },
-        { id: "odometer", title: "รูปมาตรวัดระยะ / แดชบอร์ด", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง (Odometer) ให้ชัดเจน", demoUrl: "/images/guidelines/moto_odometer_demo.png" },
-        { id: "vin_chassis", title: "รูปเลขตัวถัง / หมายเลขเครื่องยนต์", icon: Camera, description: "ถ่ายเลขตัวถังหรือเลขเครื่องยนต์ให้ชัดเจน", demoUrl: "/images/guidelines/moto_vin_demo.png" },
+        { id: "front_plate_engine", title: "รูปหน้ารถจักรยานยนต์ เห็นป้ายทะเบียน", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียนและหน้ารถชัดเจน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/moto_front_demo.png", required: true },
+        { id: "back_plate_selfie", title: "รูปหลังรถจักรยานยนต์ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/moto_back_selfie_demo.png", required: true },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_left_45_demo.png", required: true },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_right_45_demo.png", required: true },
+        { id: "odometer", title: "รูปมาตรวัดระยะ / แดชบอร์ด", icon: Camera, description: "ถ่ายมาตรวัดระยะทาง (Odometer) ให้ชัดเจน", demoUrl: "/images/guidelines/moto_odometer_demo.png", required: true },
+        { id: "vin_chassis", title: "รูปเลขตัวถัง / หมายเลขเครื่องยนต์", icon: Camera, description: "ถ่ายเลขตัวถังหรือเลขเครื่องยนต์ให้ชัดเจน", demoUrl: "/images/guidelines/moto_vin_demo.png", required: true },
     ],
     truck: [
-        { id: "front_plate_engine", title: "รูปหน้ารถบรรทุก เห็นป้ายทะเบียน / เปิดกระโปงหน้า", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/truck_front_demo.png" },
-        { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่", demoUrl: "/images/guidelines/truck_back_selfie_demo.png" },
-        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_left_45_demo.png" },
-        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_right_45_demo.png" },
-        { id: "interior_cabin", title: "รูปห้องโดยสาร / คณะผู้บริหาร", icon: Camera, description: "ถ่ายภายในห้องโดยสารและแดชบอร์ด", demoUrl: "/images/guidelines/truck_interior_demo.png" },
-        { id: "odometer", title: "รูปมาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทางให้ชัดเจน", demoUrl: "/images/guidelines/truck_odometer_demo.png" },
-        { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถังให้ชัดเจน", demoUrl: "/images/guidelines/truck_vin_demo.png" },
+        { id: "front_plate_engine", title: "รูปหน้ารถบรรทุก เห็นป้ายทะเบียน / เปิดกระโปงหน้า", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/truck_front_demo.png", required: true },
+        { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่", demoUrl: "/images/guidelines/truck_back_selfie_demo.png", required: true },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_left_45_demo.png", required: true },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_right_45_demo.png", required: true },
+        { id: "interior_cabin", title: "รูปห้องโดยสาร / คณะผู้บริหาร", icon: Camera, description: "ถ่ายภายในห้องโดยสารและแดชบอร์ด", demoUrl: "/images/guidelines/truck_interior_demo.png", required: true },
+        { id: "odometer", title: "รูปมาตรวัดระยะ", icon: Camera, description: "ถ่ายมาตรวัดระยะทางให้ชัดเจน", demoUrl: "/images/guidelines/truck_odometer_demo.png", required: true },
+        { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถังให้ชัดเจน", demoUrl: "/images/guidelines/truck_vin_demo.png", required: true },
     ],
     agri: [
-        { id: "front_view", title: "รูปหน้าของเครื่องจักร", icon: Camera, description: "ถ่ายหน้าเครื่องจักรเห็นโครงสร้างหลักชัดเจน", demoUrl: "/images/guidelines/agri_front_demo.png" },
-        { id: "back_view", title: "รูปหลังของเครื่องจักร", icon: Camera, description: "ถ่ายหลังเครื่องจักรเห็นสภาพทั่วไปชัดเจน", demoUrl: "/images/guidelines/agri_back_demo.png" },
-        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_left_45_demo.png" },
-        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_right_45_demo.png" },
-        { id: "engine_motor", title: "รูปเครื่องยนต์ / มอเตอร์", icon: Camera, description: "ถ่ายเครื่องยนต์หรือมอเตอร์ให้ชัดเจน", demoUrl: "/images/guidelines/agri_engine_demo.png" },
-        { id: "serial_badge", title: "รูปหมายเลขประจำตัว / ป้ายเครื่องหมาย", icon: Camera, description: "ถ่ายหมายเลขประจำตัวหรือป้ายเครื่องหมายให้ชัดเจน", demoUrl: "/images/guidelines/agri_serial_demo.png" },
+        { id: "front_view", title: "รูปหน้าของเครื่องจักร", icon: Camera, description: "ถ่ายหน้าเครื่องจักรเห็นโครงสร้างหลักชัดเจน", demoUrl: "/images/guidelines/agri_front_demo.png", required: true },
+        { id: "back_view", title: "รูปหลังของเครื่องจักร", icon: Camera, description: "ถ่ายหลังเครื่องจักรเห็นสภาพทั่วไปชัดเจน", demoUrl: "/images/guidelines/agri_back_demo.png", required: true },
+        { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_left_45_demo.png", required: true },
+        { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพเครื่องจักร", demoUrl: "/images/guidelines/agri_right_45_demo.png", required: true },
+        { id: "engine_motor", title: "รูปเครื่องยนต์ / มอเตอร์", icon: Camera, description: "ถ่ายเครื่องยนต์หรือมอเตอร์ให้ชัดเจน", demoUrl: "/images/guidelines/agri_engine_demo.png", required: true },
+        { id: "serial_badge", title: "รูปหมายเลขประจำตัว / ป้ายเครื่องหมาย", icon: Camera, description: "ถ่ายหมายเลขประจำตัวหรือป้ายเครื่องหมายให้ชัดเจน", demoUrl: "/images/guidelines/agri_serial_demo.png", required: true },
     ],
     land: [
-        { id: "overall_view", title: "รูปมุมกว้างที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน เห็นพื้นที่ทั้งหมด และบริเวณข้างเคียง", demoUrl: "/images/guidelines/land_overall_demo.png" },
-        { id: "boundary_markers", title: "รูปเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดน เส้นกั้น หรือรั้วของที่ดิน เห็นมุมต่างๆ ชัดเจน", demoUrl: "/images/guidelines/land_boundary_demo.png" },
-        { id: "deed_document", title: "รูปโฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน ให้เห็นเลขที่ เนื้อที่ และหมายเหตุสำคัญชัดเจน", demoUrl: "/images/guidelines/land_deed_demo.png" },
-        { id: "address_sign", title: "รูปเลขที่ตั้งที่ดิน", icon: Camera, description: "ถ่ายเลขที่ตั้งที่ดิน หรือป้ายบอกตำแหน่งให้ชัดเจน", demoUrl: "/images/guidelines/land_address_demo.png" },
-        { id: "surroundings", title: "รูปบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณข้างเคียง สถานที่ใกล้เคียง หรือจุดสังเกตุหลัก", demoUrl: "/images/guidelines/land_surroundings_demo.png" },
+        { id: "overall_view", title: "รูปมุมกว้างที่ดิน", icon: Camera, description: "ถ่ายภาพรวมของที่ดิน เห็นพื้นที่ทั้งหมด และบริเวณข้างเคียง", demoUrl: "/images/guidelines/land_overall_demo.png", required: true },
+        { id: "boundary_markers", title: "รูปเขตแดนที่ดิน", icon: Camera, description: "ถ่ายเขตแดน เส้นกั้น หรือรั้วของที่ดิน เห็นมุมต่างๆ ชัดเจน", demoUrl: "/images/guidelines/land_boundary_demo.png", required: true },
+        { id: "deed_document", title: "รูปโฉนดที่ดิน", icon: Camera, description: "ถ่ายโฉนดที่ดิน ให้เห็นเลขที่ เนื้อที่ และหมายเหตุสำคัญชัดเจน", demoUrl: "/images/guidelines/land_deed_demo.png", required: true },
+        { id: "address_sign", title: "รูปเลขที่ตั้งที่ดิน", icon: Camera, description: "ถ่ายเลขที่ตั้งที่ดิน หรือป้ายบอกตำแหน่งให้ชัดเจน", demoUrl: "/images/guidelines/land_address_demo.png", required: true },
+        { id: "surroundings", title: "รูปบริเวณโดยรอบ", icon: Camera, description: "ถ่ายบริเวณข้างเคียง สถานที่ใกล้เคียง หรือจุดสังเกตุหลัก", demoUrl: "/images/guidelines/land_surroundings_demo.png", required: false },
     ],
 };
 
@@ -590,6 +593,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const [searchLng, setSearchLng] = useState("");
     const [itemToDelete, setItemToDelete] = useState<{ guideId: string; photoIndex: number } | null>(null);
     const [examplePhotoDialog2, setExamplePhotoDialog2] = useState<{ open: boolean; title: string; demoUrl: string }>({ open: false, title: "", demoUrl: "" });
+    const [managingPhotoGuideId, setManagingPhotoGuideId] = useState<string>("");
 
     // Refs
     const photoInputRef = useRef<HTMLInputElement>(null);
@@ -899,8 +903,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 </div>
                             </div>
 
-                            {/* PHOTO UPLOAD SECTION - CATEGORIZED GRID */}
-                            <div className="p-6 space-y-4">
+                            {/* PHOTO UPLOAD SECTION - TABLE-BASED LAYOUT */}
+                            <div className="p-6 space-y-6">
                                 {/* Header */}
                                 <div className="flex items-center gap-3">
                                     <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -909,109 +913,294 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     </h4>
                                 </div>
 
-                                {/* Categorized Grid Layout */}
-                                <div className="grid grid-cols-4 gap-x-6 gap-y-8">
-                                    {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).map((guide) => {
-                                        const photos = collateralPhotos[guide.id] || [];
-                                        const hasPhotos = photos.length > 0;
-
-                                        return (
-                                            <div key={guide.id} className="space-y-3">
-                                                {/* 1. Label and Info Icon */}
-                                                <div className="flex items-center justify-between group">
-                                                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-1.5 cursor-default truncate">
-                                                        {guide.title}
-                                                        {hasPhotos && (
-                                                            <span className="ml-1.5 text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded-full">
-                                                                {photos.length}
-                                                            </span>
-                                                        )}
-                                                    </Label>
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all opacity-100 lg:opacity-60 group-hover:opacity-100 shrink-0"
-                                                                title="ดูตัวอย่างภาพ"
-                                                            >
-                                                                <Info className="w-4 h-4" />
-                                                            </button>
-                                                        </DialogTrigger>
-                                                        <DialogContent>
-                                                            <DialogHeader>
-                                                                <DialogTitle>{guide.title}</DialogTitle>
-                                                                <DialogDescription>{guide.description}</DialogDescription>
-                                                            </DialogHeader>
-                                                            <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50">
-                                                                <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
-                                                            </div>
-                                                        </DialogContent>
-                                                    </Dialog>
-                                                </div>
-
-                                                {/* 2. Photo Grid */}
-                                                {hasPhotos ? (
-                                                    <div className="space-y-2">
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            {photos.map((photoUrl: string, pIdx: number) => (
-                                                                <div key={pIdx} className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-100 bg-emerald-50/10 shadow-sm group">
-                                                                    <img src={photoUrl} alt={`${guide.title} ${pIdx + 1}`} className="w-full h-full object-cover" />
-                                                                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow border border-white z-20">
-                                                                        <CheckCircle2 className="w-3 h-3" />
+                                <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                                    {/* Mandatory Documents Table */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Label className="text-sm font-bold text-gray-700">เอกสารบังคับ</Label>
+                                        </div>
+                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                            <Table>
+                                                <TableHeader className="bg-gray-50/50">
+                                                    <TableRow className="hover:bg-transparent">
+                                                        <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ <span className="text-red-500 text-sm">*</span></TableHead>
+                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                        <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).filter(g => g.required).map((guide) => {
+                                                        const photos = collateralPhotos[guide.id] || [];
+                                                        const hasPhotos = photos.length > 0;
+                                                        return (
+                                                            <TableRow key={guide.id} className="hover:bg-transparent">
+                                                                <TableCell className="py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className={cn(
+                                                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                            hasPhotos ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                        )}>
+                                                                            {hasPhotos ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{guide.title}</span>
+                                                                            <Dialog>
+                                                                                <DialogTrigger asChild>
+                                                                                    <button
+                                                                                        onClick={(e) => e.stopPropagation()}
+                                                                                        className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all shrink-0"
+                                                                                        title="ดูคำแนะนำการถ่ายภาพ"
+                                                                                    >
+                                                                                        <Info className="w-4 h-4" />
+                                                                                    </button>
+                                                                                </DialogTrigger>
+                                                                                <DialogContent className="sm:max-w-md">
+                                                                                    <DialogHeader>
+                                                                                        <DialogTitle>{guide.title}</DialogTitle>
+                                                                                        <DialogDescription className="text-sm">{guide.description}</DialogDescription>
+                                                                                    </DialogHeader>
+                                                                                    <DialogBody>
+                                                                                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
+                                                                                            <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                                        </div>
+                                                                                    </DialogBody>
+                                                                                    <DialogFooter>
+                                                                                        <DialogClose asChild>
+                                                                                            <Button variant="outline" className="min-w-[104px]">ปิด</Button>
+                                                                                        </DialogClose>
+                                                                                    </DialogFooter>
+                                                                                </DialogContent>
+                                                                            </Dialog>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
-                                                                        <button
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {hasPhotos ? (
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setLightboxIndex(0);
+                                                                                    setUploadedDocs(photos);
+                                                                                }}
+                                                                                className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                            >
+                                                                                <FileText className="w-4 h-4" />
+                                                                                {photos.length} รูปภาพ
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <div className="flex items-center justify-end gap-1">
+                                                                        <Button
                                                                             type="button"
-                                                                            onClick={() => {
-                                                                                setLightboxIndex(pIdx);
-                                                                                setUploadedDocs(photos);
-                                                                            }}
-                                                                            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
+                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
                                                                         >
-                                                                            <Eye className="w-4 h-4" />
-                                                                        </button>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => handleRemoveCategoryPhoto(guide.id, pIdx)}
-                                                                            className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all"
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        </button>
+                                                                            <Plus className="w-3.5 h-3.5" />
+                                                                            เพิ่มเอกสาร
+                                                                        </Button>
                                                                     </div>
-                                                                </div>
-                                                            ))}
-                                                            {/* Add more photos button */}
-                                                            <div
-                                                                className="aspect-[4/3] rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
-                                                                onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
-                                                            >
-                                                                <Camera className="w-6 h-6 text-gray-400" />
-                                                                <span className="text-[10px] text-muted-foreground mt-1">ถ่ายเพิ่มเติม</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div
-                                                        className="relative aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 transition-all flex flex-col items-center justify-center cursor-pointer"
-                                                        onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
-                                                    >
-                                                        <div className="flex flex-col items-center justify-center p-6 text-center gap-3">
-                                                            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100 text-gray-400 border border-gray-200">
-                                                                <guide.icon className="w-6 h-6" />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <p className="text-xs font-bold leading-tight text-gray-600">แตะเพื่อเปิดกล้อง</p>
-                                                                <p className="text-[10px] text-muted-foreground">ถ่ายรูปด้วยกล้องตรงนี้</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+
+                                    {/* Optional Documents Table */}
+                                    {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).some(g => !g.required) && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <Label className="text-sm font-bold text-gray-700">เอกสารเพิ่มเติม</Label>
                                             </div>
-                                        );
-                                    })}
+                                            <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                <Table>
+                                                    <TableHeader className="bg-gray-50/50">
+                                                        <TableRow className="hover:bg-transparent">
+                                                            <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ</TableHead>
+                                                            <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                            <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {(COLLATERAL_PHOTO_GUIDES[formData.collateralType] || []).filter(g => !g.required).map((guide) => {
+                                                            const photos = collateralPhotos[guide.id] || [];
+                                                            const hasPhotos = photos.length > 0;
+                                                            return (
+                                                                <TableRow key={guide.id} className="hover:bg-transparent">
+                                                                    <TableCell className="py-4">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className={cn(
+                                                                                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                                hasPhotos ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                            )}>
+                                                                                {hasPhotos ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{guide.title}</span>
+                                                                                <Dialog>
+                                                                                    <DialogTrigger asChild>
+                                                                                        <button
+                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                            className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50 transition-all shrink-0"
+                                                                                            title="ดูคำแนะนำการถ่ายภาพ"
+                                                                                        >
+                                                                                            <Info className="w-4 h-4" />
+                                                                                        </button>
+                                                                                    </DialogTrigger>
+                                                                                    <DialogContent className="sm:max-w-md">
+                                                                                        <DialogHeader>
+                                                                                            <DialogTitle>{guide.title}</DialogTitle>
+                                                                                            <DialogDescription className="text-sm">{guide.description}</DialogDescription>
+                                                                                        </DialogHeader>
+                                                                                        <DialogBody>
+                                                                                            <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 relative">
+                                                                                                <img src={guide.demoUrl} alt={guide.title} className="w-full h-full object-cover" />
+                                                                                                <div className="absolute top-2 left-2 px-2 py-0.5 bg-chaiyo-blue text-[10px] text-white rounded font-bold uppercase tracking-wider">ตัวอย่างภาพ</div>
+                                                                                            </div>
+                                                                                        </DialogBody>
+                                                                                        <DialogFooter>
+                                                                                            <DialogClose asChild>
+                                                                                                <Button variant="outline" className="min-w-[104px]">ปิด</Button>
+                                                                                            </DialogClose>
+                                                                                        </DialogFooter>
+                                                                                    </DialogContent>
+                                                                                </Dialog>
+                                                                            </div>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {hasPhotos ? (
+                                                                            <div className="flex items-center gap-3">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setLightboxIndex(0);
+                                                                                        setUploadedDocs(photos);
+                                                                                    }}
+                                                                                    className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                                >
+                                                                                    <FileText className="w-4 h-4" />
+                                                                                    {photos.length} รูปภาพ
+                                                                                </button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                        )}
+                                                                    </TableCell>
+                                                                    <TableCell className="text-right">
+                                                                        <div className="flex items-center justify-end gap-1">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
+                                                                                className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                            >
+                                                                                <Plus className="w-3.5 h-3.5" />
+                                                                                เพิ่มเอกสาร
+                                                                            </Button>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
+                            {/* PHOTO MANAGEMENT MODAL */}
+                            {managingPhotoGuideId && (
+                                <Dialog open={!!managingPhotoGuideId} onOpenChange={() => setManagingPhotoGuideId("")}>
+                                    <DialogContent className="sm:max-w-2xl">
+                                        <DialogHeader>
+                                            <DialogTitle>{COLLATERAL_PHOTO_GUIDES[formData.collateralType]?.find(g => g.id === managingPhotoGuideId)?.title || 'จัดการรูปภาพ'}</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                                            {(collateralPhotos[managingPhotoGuideId] || []).length > 0 ? (
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    {(collateralPhotos[managingPhotoGuideId] || []).map((photoUrl, idx) => (
+                                                        <div key={idx} className="relative aspect-[4/3] rounded-lg overflow-hidden border border-gray-200 group">
+                                                            <img src={photoUrl} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 z-30 backdrop-blur-[1px]">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setLightboxIndex(idx);
+                                                                        setUploadedDocs(collateralPhotos[managingPhotoGuideId] || []);
+                                                                    }}
+                                                                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 border border-white/30 flex items-center justify-center text-white transition-all"
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleRemoveCategoryPhoto(managingPhotoGuideId, idx)}
+                                                                    className="w-8 h-8 rounded-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/40 flex items-center justify-center text-red-100 transition-all"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="py-8 text-center">
+                                                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                                                    <p className="text-sm text-muted-foreground">ยังไม่มีรูปภาพ</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <DialogFooter className="gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => handleTriggerCategoryPhotoUpload(managingPhotoGuideId)}
+                                            >
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                เพิ่มรูปภาพ
+                                            </Button>
+                                            <DialogClose asChild>
+                                                <Button variant="outline">ปิด</Button>
+                                            </DialogClose>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
+
+                            {/* Category Photo Upload Input */}
+                            <input
+                                type="file"
+                                ref={categoryPhotoInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                multiple
+                                onChange={handleCategoryPhotoUpload}
+                            />
+                            <input
+                                type="file"
+                                ref={categoryCameraRef}
+                                className="hidden"
+                                accept="image/*"
+                                capture="environment"
+                                multiple
+                                onChange={handleCategoryPhotoUpload}
+                            />
 
                             {/* PAPER DOCS UPLOAD SECTION - 2 COLUMN LAYOUT */}
                             <div className="p-6 space-y-4">
@@ -1593,7 +1782,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                 className="text-xs font-bold shadow-none"
                                                             >
                                                                 <MapPin className="w-3 h-3 mr-1" />
-                                                                {formData.landLat && formData.landLng ? "เปลี่ยนตำแหน่ง" : "ตั้งตำแหน่ง"}
+                                                                {formData.landLat && formData.landLng ? "เปลี่ยนตำแหน่ง" : "ระบุพิกัดที่ดิน"}
                                                             </Button>
                                                             {formData.landLat && formData.landLng && (
                                                                 <Button
