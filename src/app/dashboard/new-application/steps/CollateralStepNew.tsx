@@ -833,7 +833,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
             setAnalyzedPaperCount(getPaperDocs(formData.collateralType, formData).length);
             setAiDetectedFields(fields);
             setIsAnalyzing(false);
-            toast.success("ตรวจสอบสำเร็จ! ระบบได้อัพเดทข้อมูลเบื้องต้นให้แล้ว", {
+            toast.success("ตรวจสอบสำเร็จ! ระบบได้อัปเดทข้อมูลเบื้องต้นให้แล้ว", {
                 icon: <Sparkles className="w-4 h-4 text-emerald-500" />
             });
         }, 2000);
@@ -842,12 +842,12 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     return (
         <div className="w-full animate-in slide-in-from-right-8 duration-300 pb-20">
             <div className="space-y-6">
-                {/* SECTION: อัพโหลดเอกสารหลักประกัน */}
+                {/* SECTION: อัปโหลดเอกสารหลักประกัน */}
                 <Card className="border-border-strong overflow-hidden mb-6">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
                             <Upload className="w-5 h-5" />
-                            อัพโหลดเอกสารหลักประกัน
+                            อัปโหลดเอกสารหลักประกัน
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -905,7 +905,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 <div className="flex items-center gap-3">
                                     <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
                                         <ImagePlus className="w-5 h-5 text-chaiyo-blue" />
-                                        อัพโหลดรูปหลักประกัน
+                                        อัปโหลดรูปหลักประกัน
                                     </h4>
                                 </div>
 
@@ -1080,7 +1080,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             {uploadedPaperDocs.length === 0 ? (
                                                 <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60 py-8">
                                                     <FilePlus className="w-10 h-10" />
-                                                    <p className="text-sm font-medium italic">ยังไม่มีการอัพโหลดเอกสาร</p>
+                                                    <p className="text-sm font-medium italic">ยังไม่มีการอัปโหลดเอกสาร</p>
                                                 </div>
                                             ) : (
                                                 uploadedPaperDocs.map((docObj: any, idx) => {
@@ -2203,305 +2203,301 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <CardContent className="p-6">
                         <div className="space-y-6">
                             {/* Group: ข้อมูลผู้ถือครอง/กรรมสิทธิ์ */}
-                            <div className="pt-4 border-t border-gray-100 space-y-6">
-                                {/* Land Owner Section */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                            <UserCheck className="w-4 h-4 text-blue-600" />
-                                            {formData.collateralType === 'land' ? 'ข้อมูลผู้ถือครอง/กรรมสิทธิ์ที่ดิน' : 'ข้อมูลผู้ถือครอง/กรรมสิทธิ์'} <span className="text-red-500">*</span>
-                                        </h4>
-                                        {(formData.landOwners || []).length < 5 && (
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setFormData({ ...formData, landOwners: [...(formData.landOwners || []), createDefaultOwner()] })}
-                                                className="text-xs gap-1"
-                                            >
-                                                <Plus className="w-3 h-3" /> เพิ่ม ({(formData.landOwners || []).length}/5)
-                                            </Button>
-                                        )}
-                                    </div>
 
-                                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                        <Table>
-                                            <TableHeader className="bg-gray-50/80">
-                                                <TableRow>
-                                                    <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
-                                                    <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
-                                                    <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
-                                                    <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
-
-                                                    <TableHead className="w-[50px]"></TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {(formData.landOwners || []).length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={5} className="text-center py-6 text-gray-400 text-sm">
-                                                            คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลผู้ถือครอง
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    (formData.landOwners || []).map((owner: any, oIdx: number) => (
-                                                        <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
-                                                            <TableCell className="text-center align-middle">
-                                                                <Checkbox
-                                                                    checked={owner.isBorrower || false}
-                                                                    onCheckedChange={(checked) => {
-                                                                        const newOwners = [...(formData.landOwners || [])];
-                                                                        if (checked) {
-                                                                            newOwners.forEach(o => o.isBorrower = false);
-                                                                        }
-                                                                        newOwners[oIdx] = { ...newOwners[oIdx], isBorrower: Boolean(checked) };
-                                                                        setFormData({ ...formData, landOwners: newOwners });
-                                                                    }}
-                                                                    className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell className="align-top">
-                                                                <Select
-                                                                    value={owner.title || ""}
-                                                                    onValueChange={(value) => {
-                                                                        const newOwners = [...(formData.landOwners || [])];
-                                                                        newOwners[oIdx] = { ...newOwners[oIdx], title: value };
-                                                                        setFormData({ ...formData, landOwners: newOwners });
-                                                                    }}
-                                                                    disabled={owner.isBorrower}
-                                                                >
-                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                        <SelectValue placeholder="เลือก" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="นาย">นาย (Mr.)</SelectItem>
-                                                                        <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
-                                                                        <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
-                                                                        <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
-                                                                        <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
-                                                                        <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
-                                                                        <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
-                                                                        <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
-                                                                        <SelectItem value="อ.">อ. (Khun)</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </TableCell>
-                                                            <TableCell className="align-top">
-                                                                <Input
-                                                                    value={owner.name || ""}
-                                                                    onChange={(e) => {
-                                                                        const newOwners = [...(formData.landOwners || [])];
-                                                                        newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
-                                                                        setFormData({ ...formData, landOwners: newOwners });
-                                                                    }}
-                                                                    placeholder="ชื่อ"
-                                                                    className="h-9 rounded-lg text-sm"
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell className="align-top">
-                                                                <Input
-                                                                    value={owner.lastName || ""}
-                                                                    onChange={(e) => {
-                                                                        const newOwners = [...(formData.landOwners || [])];
-                                                                        newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
-                                                                        setFormData({ ...formData, landOwners: newOwners });
-                                                                    }}
-                                                                    placeholder="นามสกุล"
-                                                                    className="h-9 rounded-lg text-sm"
-                                                                />
-                                                            </TableCell>
-
-                                                            <TableCell className="text-right align-middle">
-                                                                {(formData.landOwners || []).length > 1 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        onClick={() => {
-                                                                            const owner = (formData.landOwners || [])[oIdx];
-                                                                            const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
-                                                                            setDeleteOwnerConfirm({ type: 'land', ownerIdx: oIdx, name });
-                                                                        }}
-                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
+                            {/* Land Owner Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                        {formData.collateralType === 'land' ? 'ข้อมูลผู้ถือกรรมสิทธิ์ที่ดิน' : 'ข้อมูลผู้ถือครอง/กรรมสิทธิ์'} <span className="text-red-500">*</span>
+                                    </h4>
+                                    {(formData.landOwners || []).length < 5 && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setFormData({ ...formData, landOwners: [...(formData.landOwners || []), createDefaultOwner()] })}
+                                            className="text-xs gap-1"
+                                        >
+                                            <Plus className="w-3 h-3" /> เพิ่ม ({(formData.landOwners || []).length}/5)
+                                        </Button>
+                                    )}
                                 </div>
 
-                                {/* Building Owner Sections - Show when buildingCount is set */}
-                                {(formData.buildingCount && formData.buildingCount > 0) && (
-                                    Array.from({ length: formData.buildingCount }).map((_, bIdx) => (
-                                        <div key={`building-owners-${bIdx}`} className="space-y-4 pt-4 border-t border-gray-100">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                                    <UserCheck className="w-4 h-4 text-blue-600" />
-                                                    ข้อมูลผู้ถือครอง/กรรมสิทธิ์สิ่งปลูกสร้าง {bIdx + 1}
-                                                </h4>
-                                                {((formData.buildingOwners?.[bIdx] || []).length < 5) && (
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                            if (!newBuildingOwners[bIdx]) newBuildingOwners[bIdx] = [];
-                                                            newBuildingOwners[bIdx] = [...newBuildingOwners[bIdx], createDefaultOwner()];
-                                                            setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                        }}
-                                                        className="text-xs gap-1"
-                                                    >
-                                                        <Plus className="w-3 h-3" /> เพิ่ม ({(formData.buildingOwners?.[bIdx] || []).length}/5)
-                                                    </Button>
-                                                )}
-                                            </div>
+                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                    <Table>
+                                        <TableHeader className="bg-gray-50/80">
+                                            <TableRow>
+                                                <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
+                                                <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
+                                                <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
+                                                <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
 
-                                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                                                <Table>
-                                                    <TableHeader className="bg-gray-50/80">
-                                                        <TableRow>
-                                                            <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
-                                                            <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
-                                                            <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
-                                                            <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
+                                                <TableHead className="w-[50px]"></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {(formData.landOwners || []).length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={5} className="text-center py-6 text-gray-400 text-sm">
+                                                        คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลผู้ถือครอง
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                (formData.landOwners || []).map((owner: any, oIdx: number) => (
+                                                    <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
+                                                        <TableCell className="text-center align-middle">
+                                                            <Checkbox
+                                                                checked={owner.isBorrower || false}
+                                                                onCheckedChange={(checked) => {
+                                                                    const newOwners = [...(formData.landOwners || [])];
+                                                                    if (checked) {
+                                                                        newOwners.forEach(o => o.isBorrower = false);
+                                                                    }
+                                                                    newOwners[oIdx] = { ...newOwners[oIdx], isBorrower: Boolean(checked) };
+                                                                    setFormData({ ...formData, landOwners: newOwners });
+                                                                }}
+                                                                className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="align-top">
+                                                            <Select
+                                                                value={owner.title || ""}
+                                                                onValueChange={(value) => {
+                                                                    const newOwners = [...(formData.landOwners || [])];
+                                                                    newOwners[oIdx] = { ...newOwners[oIdx], title: value };
+                                                                    setFormData({ ...formData, landOwners: newOwners });
+                                                                }}
+                                                                disabled={owner.isBorrower}
+                                                            >
+                                                                <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                    <SelectValue placeholder="เลือก" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="นาย">นาย (Mr.)</SelectItem>
+                                                                    <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
+                                                                    <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
+                                                                    <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
+                                                                    <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
+                                                                    <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
+                                                                    <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
+                                                                    <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
+                                                                    <SelectItem value="อ.">อ. (Khun)</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </TableCell>
+                                                        <TableCell className="align-top">
+                                                            <Input
+                                                                value={owner.name || ""}
+                                                                onChange={(e) => {
+                                                                    const newOwners = [...(formData.landOwners || [])];
+                                                                    newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
+                                                                    setFormData({ ...formData, landOwners: newOwners });
+                                                                }}
+                                                                placeholder="ชื่อ"
+                                                                className="h-9 rounded-lg text-sm"
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="align-top">
+                                                            <Input
+                                                                value={owner.lastName || ""}
+                                                                onChange={(e) => {
+                                                                    const newOwners = [...(formData.landOwners || [])];
+                                                                    newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
+                                                                    setFormData({ ...formData, landOwners: newOwners });
+                                                                }}
+                                                                placeholder="นามสกุล"
+                                                                className="h-9 rounded-lg text-sm"
+                                                            />
+                                                        </TableCell>
 
-                                                            <TableHead className="w-[50px]"></TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {((formData.buildingOwners?.[bIdx] || []).length > 0 ? formData.buildingOwners[bIdx] : [createDefaultOwner()]).map((owner: any, oIdx: number) => {
-                                                            const isDefaultAndEmpty = (formData.buildingOwners?.[bIdx] || []).length === 0;
-                                                            return (
-                                                                <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
-                                                                    <TableCell className="text-center align-middle">
-                                                                        <Checkbox
-                                                                            checked={owner.isBorrower || false}
-                                                                            onCheckedChange={(checked) => {
-                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                                let currentBuildingOwners = newBuildingOwners[bIdx] || [];
-                                                                                if (currentBuildingOwners.length === 0) {
-                                                                                    currentBuildingOwners = [{ ...owner }];
-                                                                                } else {
-                                                                                    currentBuildingOwners = [...currentBuildingOwners];
-                                                                                }
-
-                                                                                if (checked) {
-                                                                                    currentBuildingOwners.forEach((o: any) => o.isBorrower = false);
-                                                                                }
-                                                                                currentBuildingOwners[oIdx] = { ...currentBuildingOwners[oIdx], isBorrower: Boolean(checked) };
-                                                                                newBuildingOwners[bIdx] = currentBuildingOwners;
-                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                            }}
-                                                                            className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell className="align-top">
-                                                                        <Select
-                                                                            value={owner.title || ""}
-                                                                            onValueChange={(value) => {
-                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                                    newBuildingOwners[bIdx] = [{ ...owner, title: value }];
-                                                                                } else {
-                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], title: value };
-                                                                                    newBuildingOwners[bIdx] = newOwners;
-                                                                                }
-                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                            }}
-                                                                            disabled={owner.isBorrower}
-                                                                        >
-                                                                            <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                                <SelectValue placeholder="เลือก" />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent>
-                                                                                <SelectItem value="นาย">นาย (Mr.)</SelectItem>
-                                                                                <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
-                                                                                <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
-                                                                                <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
-                                                                                <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
-                                                                                <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
-                                                                                <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
-                                                                                <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
-                                                                                <SelectItem value="อ.">อ. (Khun)</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </TableCell>
-                                                                    <TableCell className="align-top">
-                                                                        <Input
-                                                                            value={owner.name || ""}
-                                                                            onChange={(e) => {
-                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                                    newBuildingOwners[bIdx] = [{ ...owner, name: e.target.value }];
-                                                                                } else {
-                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
-                                                                                    newBuildingOwners[bIdx] = newOwners;
-                                                                                }
-                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                            }}
-                                                                            placeholder="ชื่อ"
-                                                                            className="h-9 rounded-lg text-sm"
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell className="align-top">
-                                                                        <Input
-                                                                            value={owner.lastName || ""}
-                                                                            onChange={(e) => {
-                                                                                const newBuildingOwners = [...(formData.buildingOwners || [])];
-                                                                                if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
-                                                                                    newBuildingOwners[bIdx] = [{ ...owner, lastName: e.target.value }];
-                                                                                } else {
-                                                                                    const newOwners = [...(newBuildingOwners[bIdx] || [])];
-                                                                                    newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
-                                                                                    newBuildingOwners[bIdx] = newOwners;
-                                                                                }
-                                                                                setFormData({ ...formData, buildingOwners: newBuildingOwners });
-                                                                            }}
-                                                                            placeholder="นามสกุล"
-                                                                            className="h-9 rounded-lg text-sm"
-                                                                        />
-                                                                    </TableCell>
-
-                                                                    <TableCell className="text-right align-middle">
-                                                                        {!isDefaultAndEmpty && (formData.buildingOwners?.[bIdx] || []).length > 1 && (
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                onClick={() => {
-                                                                                    const owner = (formData.buildingOwners?.[bIdx] || [])[oIdx];
-                                                                                    const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
-                                                                                    setDeleteOwnerConfirm({ type: 'building', ownerIdx: oIdx, buildingIdx: bIdx, name });
-                                                                                }}
-                                                                                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
-                                                                            >
-                                                                                <Trash2 className="w-4 h-4" />
-                                                                            </Button>
-                                                                        )}
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            );
-                                                        })}
-                                                    </TableBody>
-                                                </Table>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                                                        <TableCell className="text-right align-middle">
+                                                            {(formData.landOwners || []).length > 1 && (
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => {
+                                                                        const owner = (formData.landOwners || [])[oIdx];
+                                                                        const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
+                                                                        setDeleteOwnerConfirm({ type: 'land', ownerIdx: oIdx, name });
+                                                                    }}
+                                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
                             </div>
+
+                            {/* Building Owner Sections - Show when buildingCount is set */}
+                            {(formData.buildingCount && formData.buildingCount > 0) && (
+                                Array.from({ length: formData.buildingCount }).map((_, bIdx) => (
+                                    <div key={`building-owners-${bIdx}`} className="space-y-4 pt-4 border-t border-gray-100">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                                ข้อมูลผู้ถือครอง/กรรมสิทธิ์สิ่งปลูกสร้าง {bIdx + 1}
+                                            </h4>
+                                            {((formData.buildingOwners?.[bIdx] || []).length < 5) && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                        if (!newBuildingOwners[bIdx]) newBuildingOwners[bIdx] = [];
+                                                        newBuildingOwners[bIdx] = [...newBuildingOwners[bIdx], createDefaultOwner()];
+                                                        setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                    }}
+                                                    className="text-xs gap-1"
+                                                >
+                                                    <Plus className="w-3 h-3" /> เพิ่ม ({(formData.buildingOwners?.[bIdx] || []).length}/5)
+                                                </Button>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                            <Table>
+                                                <TableHeader className="bg-gray-50/80">
+                                                    <TableRow>
+                                                        <TableHead className="w-[80px] text-center text-xs">เป็นผู้กู้</TableHead>
+                                                        <TableHead className="w-[120px] text-xs">คำนำหน้า <span className="text-red-500">*</span></TableHead>
+                                                        <TableHead className="text-xs">ชื่อ <span className="text-red-500">*</span></TableHead>
+                                                        <TableHead className="text-xs">นามสกุล <span className="text-red-500">*</span></TableHead>
+
+                                                        <TableHead className="w-[50px]"></TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {((formData.buildingOwners?.[bIdx] || []).length > 0 ? formData.buildingOwners[bIdx] : [createDefaultOwner()]).map((owner: any, oIdx: number) => {
+                                                        const isDefaultAndEmpty = (formData.buildingOwners?.[bIdx] || []).length === 0;
+                                                        return (
+                                                            <TableRow key={owner.id || oIdx} className="hover:bg-transparent">
+                                                                <TableCell className="text-center align-middle">
+                                                                    <Checkbox
+                                                                        checked={owner.isBorrower || false}
+                                                                        onCheckedChange={(checked) => {
+                                                                            const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                            let currentBuildingOwners = newBuildingOwners[bIdx] || [];
+                                                                            if (currentBuildingOwners.length === 0) {
+                                                                                currentBuildingOwners = [{ ...owner }];
+                                                                            } else {
+                                                                                currentBuildingOwners = [...currentBuildingOwners];
+                                                                            }
+
+                                                                            if (checked) {
+                                                                                currentBuildingOwners.forEach((o: any) => o.isBorrower = false);
+                                                                            }
+                                                                            currentBuildingOwners[oIdx] = { ...currentBuildingOwners[oIdx], isBorrower: Boolean(checked) };
+                                                                            newBuildingOwners[bIdx] = currentBuildingOwners;
+                                                                            setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                        }}
+                                                                        className="w-4 h-4 mx-auto block rounded border-gray-300 text-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white cursor-pointer"
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell className="align-top">
+                                                                    <Select
+                                                                        value={owner.title || ""}
+                                                                        onValueChange={(value) => {
+                                                                            const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                            if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                newBuildingOwners[bIdx] = [{ ...owner, title: value }];
+                                                                            } else {
+                                                                                const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                newOwners[oIdx] = { ...newOwners[oIdx], title: value };
+                                                                                newBuildingOwners[bIdx] = newOwners;
+                                                                            }
+                                                                            setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                        }}
+                                                                        disabled={owner.isBorrower}
+                                                                    >
+                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                            <SelectValue placeholder="เลือก" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="นาย">นาย (Mr.)</SelectItem>
+                                                                            <SelectItem value="นาง">นาง (Mrs.)</SelectItem>
+                                                                            <SelectItem value="นางสาว">นางสาว (Ms.)</SelectItem>
+                                                                            <SelectItem value="ดร.">ดร. (Dr.)</SelectItem>
+                                                                            <SelectItem value="ศ.">ศ. (Prof.)</SelectItem>
+                                                                            <SelectItem value="รศ.">รศ. (Assoc. Prof.)</SelectItem>
+                                                                            <SelectItem value="ผศ.">ผศ. (Asst. Prof.)</SelectItem>
+                                                                            <SelectItem value="พอ.">พอ. (Commander)</SelectItem>
+                                                                            <SelectItem value="อ.">อ. (Khun)</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </TableCell>
+                                                                <TableCell className="align-top">
+                                                                    <Input
+                                                                        value={owner.name || ""}
+                                                                        onChange={(e) => {
+                                                                            const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                            if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                newBuildingOwners[bIdx] = [{ ...owner, name: e.target.value }];
+                                                                            } else {
+                                                                                const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                newOwners[oIdx] = { ...newOwners[oIdx], name: e.target.value };
+                                                                                newBuildingOwners[bIdx] = newOwners;
+                                                                            }
+                                                                            setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                        }}
+                                                                        placeholder="ชื่อ"
+                                                                        className="h-9 rounded-lg text-sm"
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell className="align-top">
+                                                                    <Input
+                                                                        value={owner.lastName || ""}
+                                                                        onChange={(e) => {
+                                                                            const newBuildingOwners = [...(formData.buildingOwners || [])];
+                                                                            if (!newBuildingOwners[bIdx] || newBuildingOwners[bIdx].length === 0) {
+                                                                                newBuildingOwners[bIdx] = [{ ...owner, lastName: e.target.value }];
+                                                                            } else {
+                                                                                const newOwners = [...(newBuildingOwners[bIdx] || [])];
+                                                                                newOwners[oIdx] = { ...newOwners[oIdx], lastName: e.target.value };
+                                                                                newBuildingOwners[bIdx] = newOwners;
+                                                                            }
+                                                                            setFormData({ ...formData, buildingOwners: newBuildingOwners });
+                                                                        }}
+                                                                        placeholder="นามสกุล"
+                                                                        className="h-9 rounded-lg text-sm"
+                                                                    />
+                                                                </TableCell>
+
+                                                                <TableCell className="text-right align-middle">
+                                                                    {!isDefaultAndEmpty && (formData.buildingOwners?.[bIdx] || []).length > 1 && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            onClick={() => {
+                                                                                const owner = (formData.buildingOwners?.[bIdx] || [])[oIdx];
+                                                                                const name = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || `แถวที่ ${oIdx + 1}`;
+                                                                                setDeleteOwnerConfirm({ type: 'building', ownerIdx: oIdx, buildingIdx: bIdx, name });
+                                                                            }}
+                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                             {/* Group: ระยะเวลาการถือกรรมสิทธิ์ */}
                             <div className="pt-4 border-t border-gray-100">
                                 <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 text-chaiyo-gold" />
                                     {formData.collateralType === 'land' ? 'ข้อมูลการโอนกรรมสิทธิ์' : 'ระยะเวลาการถือกรรมสิทธิ์'}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2529,7 +2525,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             {/* Group: ข้อมูลเจ้าของเดิม - Moved First */}
                             <div className="pt-4 border-t border-gray-100 -mt-6 pt-0 border-t-0">
                                 <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Book className="w-4 h-4 text-blue-500" />
                                     ข้อมูลเจ้าของเดิม
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3686,6 +3681,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         <TableHead className="w-[60px] text-center text-xs">คันที่</TableHead>
                                                         <TableHead className="text-xs">ประเภทรถ</TableHead>
                                                         <TableHead className="text-xs">ยี่ห้อรถ</TableHead>
+                                                        <TableHead className="text-xs">รถใช้สำหรับ</TableHead>
                                                         <TableHead className="text-xs">สถานะสินทรัพย์</TableHead>
                                                         <TableHead className="w-[50px]"></TableHead>
                                                     </TableRow>
@@ -3693,7 +3689,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 <TableBody>
                                                     {(formData.otherVehicles || []).length === 0 ? (
                                                         <TableRow>
-                                                            <TableCell colSpan={5} className="text-center py-6 text-gray-400 text-sm">
+                                                            <TableCell colSpan={6} className="text-center py-6 text-gray-400 text-sm">
                                                                 คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลรถยนต์
                                                             </TableCell>
                                                         </TableRow>
@@ -3742,6 +3738,25 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                     {brand.label}
                                                                                 </SelectItem>
                                                                             ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </TableCell>
+                                                                <TableCell className="align-top">
+                                                                    <Select
+                                                                        value={vehicle.usageType || ""}
+                                                                        onValueChange={(value) => {
+                                                                            const newVehicles = [...(formData.otherVehicles || [])];
+                                                                            newVehicles[idx] = { ...newVehicles[idx], usageType: value };
+                                                                            setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                        }}
+                                                                    >
+                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                            <SelectValue placeholder="เลือก" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="ประกอบอาชีพ">ประกอบอาชีพ</SelectItem>
+                                                                            <SelectItem value="ใช้เพื่อการเดินทาง">ใช้เพื่อการเดินทาง</SelectItem>
+                                                                            <SelectItem value="ปฏิเสธการให้ข้อมูล">ปฏิเสธการให้ข้อมูล</SelectItem>
                                                                         </SelectContent>
                                                                     </Select>
                                                                 </TableCell>
