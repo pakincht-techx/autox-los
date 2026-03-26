@@ -20,10 +20,9 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 
 interface SensitiveDataConsentStepProps {
     onAccept: () => void;
-    onBack?: () => void;
 }
 
-export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataConsentStepProps) => {
+export const SensitiveDataConsentStep = ({ onAccept }: SensitiveDataConsentStepProps) => {
     const router = useRouter();
     // Track which consent step we're on: 1 = first consent, 2 = second consent
     const [consentStep, setConsentStep] = useState<1 | 2>(1);
@@ -81,19 +80,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
         }
     };
 
-    const handleBack = () => {
-        if (consentStep === 2) {
-            // Go back to first consent
-            setConsentStep(1);
-            setHasReadConsent(false);
-            setIsConsentAccepted(false);
-            if (scrollRef.current) {
-                scrollRef.current.scrollTop = 0;
-            }
-        } else if (onBack) {
-            onBack();
-        }
-    };
+
 
     // ─── Consent 1: Biometric / Face Recognition ───
     const consent1 = {
@@ -208,16 +195,7 @@ export const SensitiveDataConsentStep = ({ onAccept, onBack }: SensitiveDataCons
                 </label>
             </div>
 
-            <div className={cn("flex pt-4 flex-col sm:flex-row gap-4", (onBack || consentStep === 2) ? "justify-between" : "justify-end")}>
-                {(onBack || consentStep === 2) && (
-                    <Button
-                        variant="outline"
-                        onClick={handleBack}
-                        className="min-w-[200px] h-12 rounded-xl text-gray-500 hover:text-gray-900 border-gray-300 bg-white font-bold"
-                    >
-                        ย้อนกลับ
-                    </Button>
-                )}
+            <div className="flex pt-4 flex-col sm:flex-row gap-4 justify-end">
                 <div className="flex flex-col sm:flex-row gap-4">
                     <Button
                         variant="outline"

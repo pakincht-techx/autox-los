@@ -51,7 +51,20 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
     const [rightContent, setRightContent] = useState<React.ReactNode>(null);
-    const [devRole, setDevRole] = useState<DevRole>('branch-staff');
+    const [devRole, setDevRoleState] = useState<DevRole>('branch-staff');
+
+    // Sync devRole with localStorage
+    useEffect(() => {
+        const stored = localStorage.getItem('devRole');
+        if (stored === 'branch-staff' || stored === 'legal-team') {
+            setDevRoleState(stored);
+        }
+    }, []);
+
+    const setDevRole = (role: DevRole) => {
+        setDevRoleState(role);
+        localStorage.setItem('devRole', role);
+    };
     const [hideNavButtons, setHideNavButtons] = useState(false);
     const [hideSaveDraftButton, setHideSaveDraftButton] = useState(false);
     const [onBack, setOnBack] = useState<(() => void) | null>(null);

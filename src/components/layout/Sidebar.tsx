@@ -16,27 +16,16 @@ import {
     LogOut,
     Settings,
     ShieldCheck,
-    UserCircle,
     HelpCircle,
     Calculator,
-    ChevronsUpDown,
     Search,
     Megaphone,
-    Info,
-    ArrowLeftRight,
-    Shield
+    Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
-import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useSidebar } from "@/components/layout/SidebarContext";
+
 import {
     Dialog,
     DialogContent,
@@ -84,7 +73,7 @@ const navigationGroups = [
 export function Sidebar() {
     // Main sidebar component
     const pathname = usePathname();
-    const { isCollapsed, devRole, setDevRole } = useSidebar();
+    const { isCollapsed, devRole } = useSidebar();
     const router = useRouter();
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const [isBranchInfoOpen, setIsBranchInfoOpen] = useState(false);
@@ -162,56 +151,26 @@ export function Sidebar() {
 
             {/* User Account */}
             <div className={cn("pl-4 pr-2 pt-4 pb-2", isCollapsed && "pl-4 pr-2")}>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <div className={cn(
-                            "flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
-                            isCollapsed && "justify-center p-1"
-                        )}>
-                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                                JS
+                <div 
+                    onClick={() => setIsAccountOpen(true)}
+                    role="button"
+                    tabIndex={0}
+                    className={cn(
+                        "flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
+                        isCollapsed && "justify-center p-1"
+                    )}>
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                        JS
+                    </div>
+                    {!isCollapsed && (
+                        <>
+                            <div className="flex-1 overflow-hidden text-left">
+                                <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
+                                <p className="text-[10px] text-white/60 truncate">{devRole === 'branch-staff' ? 'พนักงานสาขา' : 'ทีม Legal'}</p>
                             </div>
-                            {!isCollapsed && (
-                                <>
-                                    <div className="flex-1 overflow-hidden text-left">
-                                        <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
-                                        <p className="text-[10px] text-white/60 truncate">{devRole === 'branch-staff' ? 'พนักงานสาขา' : 'ทีม Legal'}</p>
-                                    </div>
-                                    <ChevronsUpDown className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
-                                </>
-                            )}
-                        </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
-                        <DropdownMenuLabel>บัญชีของฉัน</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setIsAccountOpen(true)}>
-                            <UserCircle className="mr-2 h-4 w-4" />
-                            <span>ข้อมูลผู้ใช้</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                            <ArrowLeftRight className="w-3 h-3" />
-                            สลับบทบาท (Dev)
-                        </DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => setDevRole('branch-staff')}
-                            className={cn(devRole === 'branch-staff' && 'bg-blue-50 text-blue-700 font-medium')}
-                        >
-                            <UserCircle className="mr-2 h-4 w-4" />
-                            <span>พนักงานสาขา</span>
-                            {devRole === 'branch-staff' && <span className="ml-auto text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">Active</span>}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={() => setDevRole('legal-team')}
-                            className={cn(devRole === 'legal-team' && 'bg-purple-50 text-purple-700 font-medium')}
-                        >
-                            <Shield className="mr-2 h-4 w-4" />
-                            <span>ทีม Legal</span>
-                            {devRole === 'legal-team' && <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">Active</span>}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Navigation */}

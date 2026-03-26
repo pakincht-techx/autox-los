@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody, DialogFooter } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/Textarea";
@@ -393,6 +393,7 @@ export function PolicyChecklist() {
     const [isFailedDialogOpen, setIsFailedDialogOpen] = useState(false);
     const [waiverStatus, setWaiverStatus] = useState<string>("");
     const [waiverReason, setWaiverReason] = useState("");
+    const [waiverSubmitted, setWaiverSubmitted] = useState(false);
 
     return (
         <>
@@ -414,15 +415,19 @@ export function PolicyChecklist() {
                         <div className="flex items-center gap-2">
                             {hasNotPassed && (
                                 <Button 
-                                    variant="outline" 
                                     size="sm" 
-                                    className="h-7 text-xs px-3 shadow-none font-bold"
+                                    className={cn(
+                                        "h-7 text-xs px-3 shadow-none font-bold",
+                                        waiverSubmitted 
+                                            ? "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50" 
+                                            : "bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                                    )}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setIsFailedDialogOpen(true);
                                     }}
                                 >
-                                    ขออนุโลม
+                                    {waiverSubmitted ? "ดูเหตุผลการขออนุโลม" : "ขออนุโลม"}
                                 </Button>
                             )}
                             <ChevronDown className={cn("w-5 h-5 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} />
@@ -485,7 +490,8 @@ export function PolicyChecklist() {
             <Dialog open={isFailedDialogOpen} onOpenChange={setIsFailedDialogOpen}>
                 <DialogContent className="sm:max-w-[700px]">
                     <DialogHeader>
-                        <DialogTitle className="text-gray-900">รายการนโยบายที่ไม่ผ่านเกณฑ์</DialogTitle>
+                        <DialogTitle className="text-gray-900">ขออนุโลม</DialogTitle>
+                        <DialogDescription>กรุณาระบุเหตุผลประกอบการพิจารณาให้สำนักงานใหญ่ เพื่ออธิบายว่าถึงแม้ลูกค้าไม่ผ่านเกณฑ์ที่กำหนด แต่มีเหตุผลสมควรที่จะอนุมัติได้</DialogDescription>
                     </DialogHeader>
                     <DialogBody>
                         <div className="space-y-6 pb-2 pt-1">
@@ -555,7 +561,7 @@ export function PolicyChecklist() {
                             className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
                             disabled={!waiverStatus || (waiverStatus === "ขออนุโลม" && !waiverReason.trim())}
                             onClick={() => {
-                                // Save logic here
+                                setWaiverSubmitted(true);
                                 setIsFailedDialogOpen(false);
                             }}
                         >

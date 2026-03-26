@@ -434,11 +434,11 @@ function MockupContent() {
                         <h2 className="text-xl font-bold text-foreground mb-4">อื่นๆ</h2>
                         <div className="border border-gray-200 rounded-xl bg-white p-5 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-semibold text-foreground">ยกเลิกแบบร่าง</p>
+                                <p className="text-sm font-semibold text-foreground">ยกเลิกใบสมัคร</p>
                                 <p className="text-xs text-gray-400 mt-0.5">โดยพนักงานสาขา</p>
                             </div>
                             <Button variant="destructive" size="sm">
-                                ยกเลิกแบบร่าง
+                                ยกเลิกใบสมัคร
                             </Button>
                         </div>
                     </div>

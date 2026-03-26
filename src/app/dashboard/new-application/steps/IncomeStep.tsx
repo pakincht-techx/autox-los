@@ -249,7 +249,23 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
 
     const handleUpdateReference = (index: number, field: string, value: string) => {
         const refs = [...(formData.referencePersons || [])];
-        refs[index] = { ...refs[index], [field]: value };
+        
+        let finalValue = value;
+        if (field === 'phone') {
+            const numbers = value.replace(/\D/g, '');
+            const digits = numbers.slice(0, 10);
+            if (digits.length > 0) {
+                finalValue = digits.slice(0, 3);
+                if (digits.length > 3) {
+                    finalValue += "-" + digits.slice(3, 6);
+                    if (digits.length > 6) {
+                        finalValue += "-" + digits.slice(6, 10);
+                    }
+                }
+            }
+        }
+
+        refs[index] = { ...refs[index], [field]: finalValue };
         handleChange("referencePersons", refs);
     };
 
@@ -1566,6 +1582,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                 </Select>
                                             </div>
 
+                                            {occ.employmentType && (
+                                            <>
                                             <div className="space-y-2">
                                                 <Label>อาชีพ <span className="text-red-500">*</span></Label>
                                                 <Combobox
@@ -1710,10 +1728,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                     </div>
                                                 </>
                                             )}
+                                            </>
+                                            )}
                                         </div>
+
                                     </div>
 
-                                    {occ.occupationCode !== 'UNEMPLOYED' && (
+                                    {occ.employmentType && occ.occupationCode !== 'UNEMPLOYED' && (
                                         <>
                                             {/* 2. ที่อยู่ที่ทำงาน / กิจการ */}
                                             <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5">
@@ -2859,8 +2880,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                         renderIncomeTable('รายการรายได้จากการสอบถาม', 'cash', incomesBySource['cash'] || [])
                                                                     )}
 
-                                                                    {/* Always show "Other Incomes" table as the fallback/manual entry ground */}
-                                                                    {renderIncomeTable('รายการรายได้อื่นๆ (เพิ่มเติม)', undefined, otherIncomes)}
 
                                                                     {/* Grand Total Footer */}
                                                                     <div className="mt-6 border-t border-border-strong pt-4">
@@ -3027,14 +3046,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                             <TableRow>
                                                                                 <TableHead className="w-[25%] text-xs">ความถี่ <span className="text-red-500">*</span></TableHead>
                                                                                 <TableHead className="w-[25%] text-xs">ยอดขาย (บาท) <span className="text-red-500">*</span></TableHead>
-                                                                                <TableHead className="w-[25%] text-xs">
-                                                                                    {(() => {
-                                                                                        const freq = ((occ.seIncomes?.[0] || {}) as EnterpriseIncome).frequency;
-                                                                                        if (freq === 'daily') return 'จำนวนวันต่อเดือน';
-                                                                                        if (freq === 'weekly') return 'จำนวนสัปดาห์ต่อเดือน';
-                                                                                        return 'จำนวน';
-                                                                                    })()}
-                                                                                </TableHead>
+                                                                                <TableHead className="w-[25%] text-xs">จำนวนต่อเดือน</TableHead>
                                                                                 <TableHead className="w-[25%] text-xs text-right pr-6">รวมยอดขายต่อเดือน</TableHead>
                                                                             </TableRow>
                                                                         </TableHeader>
@@ -3146,16 +3158,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                 <TableHead className="w-[20%] text-xs">รายละเอียดต้นทุน</TableHead>
                                                                                 <TableHead className="w-[15%] text-xs">ความถี่ <span className="text-red-500">*</span></TableHead>
                                                                                 <TableHead className="w-[15%] text-xs">ต้นทุน (บาท) <span className="text-red-500">*</span></TableHead>
-                                                                                <TableHead className="w-[10%] text-xs">
-                                                                                    {(() => {
-                                                                                        const costs = (occ.seCosts || []) as EnterpriseIncome[];
-                                                                                        const freqs = costs.map(c => c.frequency).filter(Boolean);
-                                                                                        const allSame = freqs.length > 0 && freqs.every(f => f === freqs[0]);
-                                                                                        if (allSame && freqs[0] === 'daily') return 'จำนวนวันต่อเดือน';
-                                                                                        if (allSame && freqs[0] === 'weekly') return 'จำนวนสัปดาห์ต่อเดือน';
-                                                                                        return 'จำนวน';
-                                                                                    })()}
-                                                                                </TableHead>
+                                                                                <TableHead className="w-[10%] text-xs">จำนวนต่อเดือน</TableHead>
                                                                                 <TableHead className="w-[15%] text-xs text-right">รวมต่อเดือน</TableHead>
                                                                                 <TableHead className="w-[5%] text-center text-xs">จัดการ</TableHead>
                                                                             </TableRow>
@@ -4688,7 +4691,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     )}
 
                                     {/* ===== ผู้ประเมินสถานที่ทำงาน ===== */}
-                                    {(
+                                    {occ.employmentType && occ.employmentType !== 'UNEMPLOYED' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <div className="flex items-center justify-between pb-2 border-b border-border-color">
                                                 <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -4908,7 +4911,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                             {/* Total Column */}
                             <div className="p-5 flex flex-col justify-center items-center text-center bg-emerald-50/60">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-1 h-5 rounded-full bg-chaiyo-blue" />
                                     <span className="text-sm font-bold text-gray-700">รวมรายได้</span>
                                 </div>
                                 <div className="text-3xl font-black font-mono mt-1 text-chaiyo-blue">

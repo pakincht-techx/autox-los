@@ -1656,13 +1656,13 @@ function PreQuestionPageContent() {
                                                                     >
                                                                         <Eye className="w-6 h-6" />
                                                                     </button>
-                                                                    <button
-                                                                        onClick={(e) => { e.stopPropagation(); handleRemovePhoto(idx); }}
-                                                                        className="absolute top-1.5 right-1.5 text-white hover:text-red-300 transition-colors bg-black/20 hover:bg-black/40 rounded-full p-1.5 border border-white/20 backdrop-blur-sm shadow-sm"
-                                                                    >
-                                                                        <X className="w-3.5 h-3.5" />
-                                                                    </button>
                                                                 </div>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleRemovePhoto(idx); }}
+                                                                    className="absolute top-1.5 right-1.5 z-10 text-white hover:text-red-300 transition-colors bg-black/40 hover:bg-black/60 rounded-full p-1.5 border border-white/20 backdrop-blur-sm shadow-sm"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
                                                                 {isAnalyzing && (
                                                                     <div className="absolute inset-0 bg-blue-500/20 flex flex-col items-center justify-center">
                                                                         <div className="w-full h-0.5 bg-blue-400 absolute top-0 animate-[scan_2s_infinite]" />

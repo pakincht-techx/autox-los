@@ -9,7 +9,6 @@ export default function SensitiveDataPage() {
     return (
         <SensitiveDataConsentStep
             onAccept={() => router.push("/dashboard/new-application/identity-checker")}
-            onBack={() => router.push("/dashboard/new-application/privacy-notice")}
         />
     );
 }

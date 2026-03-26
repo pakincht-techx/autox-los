@@ -467,7 +467,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 />
                                 {(consentCompleted || (app.acceptedConsentCount > 0 && mockCase !== '3')) && (
                                     <ModuleRow
-                                        title="การยอมรับ"
+                                        title="การให้ความยินยอม"
                                         icon={<ClipboardCheck className="w-4 h-4" />}
                                         completionStatus={'completed'}
                                         onView={() => router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=readonly`)}
@@ -524,7 +524,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 className="w-full text-gray-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
                                 onClick={() => setCancelDialogOpen(true)}
                             >
-                                {currentStatus === 'Sent Back' ? 'ยกเลิกใบสมัคร' : 'ยกเลิกแบบร่าง'}
+                                ยกเลิกใบสมัคร
                             </Button>
                         )}
                     </div>
@@ -597,9 +597,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                 <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>ยืนยันการยกเลิกแบบร่าง</DialogTitle>
+                            <DialogTitle>ยืนยันการยกเลิกใบสมัคร</DialogTitle>
                             <DialogDescription>
-                                คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสมัคร <strong>{app.applicationNo}</strong>? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสมัคร? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
@@ -1184,20 +1184,49 @@ function SubmitApplicationDialog({
                         <div className="space-y-5">
                             {/* Block flow (existing) */}
                             {!allPassed && hasBlocks && hasSoftblocks && (
-                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
-                                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                                        <Send className="w-3 h-3 text-blue-600" />
+                                <>
+                                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                                        <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                                            <Send className="w-3 h-3 text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-bold text-blue-800">
+                                                ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
+                                            </p>
+                                            <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
+                                                เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
+                                                หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-blue-800">
-                                            ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
-                                        </p>
-                                        <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
-                                            เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
-                                            หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
-                                        </p>
+
+                                    {/* Verification checklist grouped by module */}
+                                    <div className="space-y-3">
+                                        {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
+                                            const items = MOCK_BLOCK_ITEMS.filter(b => b.module === moduleName);
+                                            if (items.length === 0) return null;
+                                            return (
+                                                <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
+                                                    <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
+                                                        <p className="text-xs font-bold text-gray-600">{moduleName}</p>
+                                                    </div>
+                                                    <div className="divide-y divide-gray-100">
+                                                        {items.map((item, i) => (
+                                                            <div key={i} className="px-4 py-2.5 bg-white flex items-center gap-2.5">
+                                                                <div className="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+                                                                    <AlertTriangle className="w-3 h-3 text-amber-500" />
+                                                                </div>
+                                                                <p className="text-xs font-semibold text-gray-900">
+                                                                    {item.personName || item.collateralType}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
+                                </>
                             )}
 
                             {/* All-passed flow */}

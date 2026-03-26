@@ -67,10 +67,11 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     // applicationStepIndex covers standard stepper steps; also check ALL_FLOW_STEPS phase for extra pages like guarantors
     const isApplicationPhase = applicationStepIndex >= 0 || (!isScreeningPhase && currentFlowIndex >= 0);
 
-    // ── Hide save draft button during screening phase ──────────────────────
+    // ── Hide save draft button during screening phase or specific pages ──────
     useEffect(() => {
-        setHideSaveDraftButton(isScreeningPhase);
-    }, [isScreeningPhase, setHideSaveDraftButton]);
+        const isConsentPage = pathname.includes('/consent');
+        setHideSaveDraftButton(isScreeningPhase || isConsentPage);
+    }, [isScreeningPhase, pathname, setHideSaveDraftButton]);
 
     // Borrower name from formData
     const borrowerDisplayName = [
@@ -94,7 +95,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         const EXTRA_BREADCRUMB_TITLES: Record<string, string> = {
             'guarantors': 'ผู้ค้ำ',
             'refinance': 'รีไฟแนนซ์',
-            'consent': 'ข้อกำหนดและเงื่อนไข',
+            'consent': 'การให้ความยินยอม',
         };
         const pathSlug = pathname.split('/').pop() || '';
         const currentStepTitle = applicationStepIndex >= 0
@@ -131,7 +132,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
         const isSalesheetPage = pathname.includes('/salesheet');
         const isGuarantorDetailPage = pathname.includes('/guarantors/') && !pathname.endsWith('/guarantors');
         const isGuarantorsPage = pathname.endsWith('/guarantors');
-        if (isApplicationStarted && !isReadonly && !isSalesheetPage && !isGuarantorDetailPage && !isGuarantorsPage) {
+        const isConsentPage = pathname.includes('/consent');
+        if (isApplicationStarted && !isReadonly && !isSalesheetPage && !isGuarantorDetailPage && !isGuarantorsPage && !isConsentPage) {
             setRightContent(
                 <Button
                     variant="default"

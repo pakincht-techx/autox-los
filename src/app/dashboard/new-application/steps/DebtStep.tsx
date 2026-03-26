@@ -1335,10 +1335,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                                     : "bg-emerald-50/60"
                             )}>
                                 <div className="flex items-center gap-2 mb-2">
-                                    <div className={cn(
-                                        "w-1 h-5 rounded-full",
-                                        Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0 ? "bg-red-500" : "bg-chaiyo-blue"
-                                    )} />
                                     <span className="text-sm font-bold text-gray-700">รายได้คงเหลือ</span>
                                 </div>
                                 <div className={cn(
