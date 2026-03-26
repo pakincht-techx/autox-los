@@ -3,6 +3,7 @@
 import * as React from "react";
 import { format, parse, isValid, getYear } from "date-fns";
 import { th } from "date-fns/locale";
+import type { DateLibOptions } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
@@ -25,7 +26,7 @@ interface DateRangePickerBEProps {
 }
 
 /** Convert an ISO date string (A.D.) to B.E. display format DD/MM/YYYY */
-function toBEDisplay(isoDate: string): string {
+export function toBEDisplay(isoDate: string): string {
     if (!isoDate) return "";
     const date = new Date(isoDate);
     if (!isValid(date)) return "";
@@ -100,6 +101,13 @@ export function DateRangePickerBE({
                     onSelect={handleSelect}
                     numberOfMonths={2}
                     locale={th}
+                    formatters={{
+                        formatMonthCaption: (month: Date, options?: DateLibOptions) => {
+                            const monthName = format(month, "LLLL", { locale: th });
+                            const yearBE = getYear(month) + 543;
+                            return `${monthName} ${yearBE}`;
+                        },
+                    }}
                 />
             </PopoverContent>
         </Popover>

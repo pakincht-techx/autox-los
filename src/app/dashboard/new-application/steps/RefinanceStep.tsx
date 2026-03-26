@@ -102,9 +102,6 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
     const [hasOverdue, setHasOverdue] = useState(false);
     const [overdueInstallments, setOverdueInstallments] = useState("");
 
-    // วิธีการรับเล่มคืน
-    const [bookReturnMethod, setBookReturnMethod] = useState("");
-    const [bookReturnDays, setBookReturnDays] = useState("");
 
     // ข้อมูลที่อยู่อาศัยปัจจุบัน
     const [housingType, setHousingType] = useState("");
@@ -677,42 +674,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         </div>
                     </div>
 
-                    <hr className="border-gray-100" />
 
-                    {/* ── วิธีการรับเล่มคืน ───────────────────────────── */}
-                    <div className="space-y-4">
-                        <h4 className="text-sm font-bold text-gray-700">
-                            วิธีการรับเล่มคืน และระยะเวลาในการรับเล่มคืน
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                            <div className="space-y-1.5">
-                                <Label>วิธีการรับเล่มคืน</Label>
-                                <Input
-                                    value={bookReturnMethod}
-                                    onChange={(e) => setBookReturnMethod(e.target.value)}
-                                    placeholder="ระบุวิธีการรับเล่มคืน"
-                                    className="h-11 bg-white"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label>ระยะเวลาในการรับเล่ม</Label>
-                                <div className="relative">
-                                    <Input
-                                        value={bookReturnDays}
-                                        onChange={(e) => {
-                                            const raw = e.target.value.replace(/[^0-9]/g, "");
-                                            setBookReturnDays(raw);
-                                        }}
-                                        placeholder="0"
-                                        className="pr-12 h-11 bg-white"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                                        วัน
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 

@@ -45,6 +45,7 @@ Reference the `@theme` block in `globals.css` for all color tokens:
 - **No top-right close (X) icon.** Close via footer buttons or backdrop only.
 - **Default background is `bg-white`** (set in base `DialogContent`/`AlertDialogContent`).
 - **Title color must be `text-gray-900`** — never use `text-chaiyo-blue` for dialog titles.
+- **Generic titles & descriptions only.** Dialog titles and descriptions must be static/generic text. Do **not** interpolate dynamic content (e.g., document type names, entity names, IDs) into `DialogTitle`, `AlertDialogTitle`, `DialogDescription`, or `AlertDialogDescription`. For example, use `ไฟล์ที่อัพโหลด` instead of `ไฟล์ที่อัพโหลด — {label}`.
 - **All footer buttons must be `font-bold`.**
 - **No shadows on buttons** inside dialogs — use `shadow-none`.
 

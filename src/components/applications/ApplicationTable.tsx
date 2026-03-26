@@ -134,7 +134,7 @@ export function ApplicationTable({ data, sortKey, sortDirection, onSort, source 
                                         {getStatusLabel(app.status)}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-muted whitespace-nowrap">{app.submissionDate}</TableCell>
+                                <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.submissionDate}</TableCell>
                                 <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.lastActionTime || '-'}</TableCell>
                                 <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.previousProcessorName || '-'}</TableCell>
                                 <TableCell className="text-muted text-[13px] whitespace-nowrap">{app.makerName}</TableCell>

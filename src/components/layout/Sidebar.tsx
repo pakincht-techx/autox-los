@@ -4,7 +4,7 @@
 // Sync: Move sidebar button
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnnouncementModal } from "@/components/layout/AnnouncementModal";
 import {
     LayoutGrid,
@@ -41,6 +41,7 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -69,6 +70,7 @@ const navigationGroups = [
         items: [
             { name: "รายการใบสมัครของฉัน", href: "/dashboard/applications", icon: Files, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
             { name: "รายการใบสมัครทั้งหมด", href: "/dashboard/all-applications", icon: FolderOpen, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[] },
+            { name: "ประกาศแจ้งเตือน", href: "#announcement", icon: Megaphone, allowedRoles: ['Maker', 'Checker', 'Approver'] as UserRole[], isAnnouncement: true },
         ]
     },
     {
@@ -83,9 +85,11 @@ export function Sidebar() {
     // Main sidebar component
     const pathname = usePathname();
     const { isCollapsed, devRole, setDevRole } = useSidebar();
+    const router = useRouter();
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const [isBranchInfoOpen, setIsBranchInfoOpen] = useState(false);
     const [showAnnouncement, setShowAnnouncement] = useState(false);
+    const [isLogoutOpen, setIsLogoutOpen] = useState(false);
 
     const [mounted, setMounted] = useState(false);
 
@@ -206,11 +210,6 @@ export function Sidebar() {
                             <span>ทีม Legal</span>
                             {devRole === 'legal-team' && <span className="ml-auto text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-bold">Active</span>}
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => console.log("Logout")}>
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>ออกจากระบบ</span>
-                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
@@ -230,6 +229,29 @@ export function Sidebar() {
                             {group.items.map((item) => {
                                 const isActive = pathname === item.href;
                                 const Icon = item.icon;
+
+                                if ((item as any).isAnnouncement) {
+                                    return (
+                                        <div
+                                            key={item.name}
+                                            className={cn(
+                                                "flex items-center gap-3 px-3 py-2 rounded-md transition-all group border border-transparent cursor-pointer",
+                                                "text-white/70 hover:text-white hover:bg-white/10",
+                                                isCollapsed && "justify-center px-0"
+                                            )}
+                                            title={isCollapsed ? item.name : ""}
+                                            onClick={() => setShowAnnouncement(true)}
+                                        >
+                                            <div className="relative shrink-0">
+                                                <Icon className="w-4.5 h-4.5 text-white/70 group-hover:text-white" />
+                                                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-chaiyo-blue"></span>
+                                            </div>
+                                            {!isCollapsed && (
+                                                <span className="text-[13px]">{item.name}</span>
+                                            )}
+                                        </div>
+                                    );
+                                }
 
                                 return (
                                     <Link
@@ -257,29 +279,38 @@ export function Sidebar() {
             </nav>
 
             {/* Announcement & User Footer */}
-            <div className={cn("py-6 pl-4 pr-2 space-y-2 border-t border-white/10", isCollapsed && "pl-4 pr-2")}>
-
-                {/* Announcements - Direct trigger for Modal */}
+            {/* Logout Button */}
+            <div className={cn("py-6 pl-4 pr-2 border-t border-white/10", isCollapsed && "pl-4 pr-2")}>
                 <div
                     className={cn(
-                        "flex items-center gap-3 p-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
-                        isCollapsed && "justify-center p-1 py-2"
+                        "flex items-center gap-3 px-3 py-2 rounded-md transition-colors cursor-pointer group hover:bg-white/10 border border-transparent outline-none",
+                        isCollapsed && "justify-center px-0"
                     )}
-                    onClick={() => setShowAnnouncement(true)}
+                    onClick={() => setIsLogoutOpen(true)}
+                    title={isCollapsed ? "ออกจากระบบ" : ""}
                 >
-                    <div className="relative shrink-0">
-                        <Megaphone className="w-5 h-5 text-white/50 group-hover:text-white transition-colors" />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-chaiyo-blue"></span>
-                    </div>
+                    <LogOut className="w-4.5 h-4.5 shrink-0 text-white/70 group-hover:text-white transition-colors" />
                     {!isCollapsed && (
-                        <div className="flex-1 overflow-hidden text-left">
-                            <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors truncate">ประกาศแจ้งเตือน</p>
-                        </div>
+                        <span className="text-[13px] text-white/70 group-hover:text-white transition-colors">ออกจากระบบ</span>
                     )}
                 </div>
-
-
             </div>
+
+            {/* Logout Confirmation Dialog */}
+            <Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>ยืนยันการออกจากระบบ</DialogTitle>
+                        <DialogDescription>
+                            คุณต้องการออกจากระบบหรือไม่?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" className="min-w-[120px]" onClick={() => setIsLogoutOpen(false)}>ยกเลิก</Button>
+                        <Button variant="destructive" className="min-w-[120px]" onClick={() => { setIsLogoutOpen(false); router.push('/'); }}>ออกจากระบบ</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={isAccountOpen} onOpenChange={setIsAccountOpen}>
                 <DialogContent>
@@ -289,7 +320,7 @@ export function Sidebar() {
                             ข้อมูลส่วนตัวและข้อมูลสาขาของคุณ
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-4 px-6">
                         <div className="grid grid-cols-5 items-center gap-4">
                             <Label className="col-span-2 text-left text-muted-foreground">พนักงาน</Label>
                             <div className="col-span-3 font-medium">1234567</div>
@@ -320,6 +351,9 @@ export function Sidebar() {
                             <div className="col-span-3 font-medium">กรุงเทพมหานคร 2</div>
                         </div>
                     </div>
+                    <DialogFooter>
+                        <Button variant="outline" className="min-w-[120px]" onClick={() => setIsAccountOpen(false)}>ปิด</Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
             <Dialog open={isBranchInfoOpen} onOpenChange={setIsBranchInfoOpen}>

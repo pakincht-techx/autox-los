@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogBody, DialogTitle, DialogTri
 import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/combobox";
-import { DateRangePickerBE } from "@/components/ui/DateRangePickerBE";
+import { DateRangePickerBE, toBEDisplay } from "@/components/ui/DateRangePickerBE";
 
 // Mock Data
 const MOCK_DATA: Application[] = [
@@ -456,8 +456,8 @@ export default function ApplicationsPage() {
                     const badges: { label: string; value: string; onRemove: () => void }[] = [];
                     if (filterName) badges.push({ label: "ผู้กู้", value: filterName, onRemove: () => setFilterName("") });
                     if (filterProduct !== "all") badges.push({ label: "สินเชื่อ", value: filterProduct, onRemove: () => setFilterProduct("all") });
-                    if (filterStartDate || filterEndDate) badges.push({ label: "วันสร้าง", value: [filterStartDate, filterEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterStartDate(""); setFilterEndDate(""); } });
-                    if (filterLastActionStartDate || filterLastActionEndDate) badges.push({ label: "วันดำเนินการ", value: [filterLastActionStartDate, filterLastActionEndDate].filter(Boolean).join(" - "), onRemove: () => { setFilterLastActionStartDate(""); setFilterLastActionEndDate(""); } });
+                    if (filterStartDate || filterEndDate) badges.push({ label: "วันสร้าง", value: [filterStartDate, filterEndDate].filter(Boolean).map(toBEDisplay).join(" - "), onRemove: () => { setFilterStartDate(""); setFilterEndDate(""); } });
+                    if (filterLastActionStartDate || filterLastActionEndDate) badges.push({ label: "วันดำเนินการ", value: [filterLastActionStartDate, filterLastActionEndDate].filter(Boolean).map(toBEDisplay).join(" - "), onRemove: () => { setFilterLastActionStartDate(""); setFilterLastActionEndDate(""); } });
                     if (filterPreviousProcessor) badges.push({ label: "ผู้ดำเนินการก่อนหน้า", value: filterPreviousProcessor, onRemove: () => setFilterPreviousProcessor("") });
                     if (filterMaker) badges.push({ label: "ผู้สร้าง", value: filterMaker, onRemove: () => setFilterMaker("") });
 
@@ -470,12 +470,6 @@ export default function ApplicationsPage() {
                                 >
                                     <span className="text-chaiyo-blue/60">{badge.label}:</span>
                                     <span className="max-w-[120px] truncate">{badge.value}</span>
-                                    <button
-                                        onClick={() => { badge.onRemove(); setCurrentPage(1); }}
-                                        className="ml-0.5 rounded-full p-0.5 hover:bg-chaiyo-blue/20 transition-colors"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
                                 </span>
                             ))}
                             <button

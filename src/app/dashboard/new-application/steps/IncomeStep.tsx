@@ -4546,25 +4546,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                             type="button"
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
-                                                                                                const allPhotos = Object.values(formData.incomePhotos || {}).flat();
-                                                                                                const flatIdx = allPhotos.indexOf(photos[0]);
-                                                                                                if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                                setManagingPhotoGuideId(guide.id);
                                                                                             }}
                                                                                             className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                                         >
                                                                                             <FileText className="w-4 h-4" />
                                                                                             {photos.length} รูปภาพ
-                                                                                        </button>
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                setManagingPhotoGuideId(guide.id);
-                                                                                            }}
-                                                                                            className="flex items-center justify-center w-7 h-7 text-gray-600 hover:text-chaiyo-blue hover:bg-gray-100 rounded-md border border-gray-200 transition-colors bg-white"
-                                                                                            title="จัดการ"
-                                                                                        >
-                                                                                            <Pencil className="w-3.5 h-3.5" />
                                                                                         </button>
                                                                                     </div>
                                                                                 ) : (
@@ -4662,25 +4649,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                             type="button"
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
-                                                                                                const allPhotos = Object.values(formData.incomePhotos || {}).flat();
-                                                                                                const flatIdx = allPhotos.indexOf(photos[0]);
-                                                                                                if (flatIdx !== -1) setLightboxIndex(flatIdx);
+                                                                                                setManagingPhotoGuideId(guide.id);
                                                                                             }}
                                                                                             className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                                         >
                                                                                             <FileText className="w-4 h-4" />
                                                                                             {photos.length} รูปภาพ
-                                                                                        </button>
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                setManagingPhotoGuideId(guide.id);
-                                                                                            }}
-                                                                                            className="flex items-center justify-center w-7 h-7 text-gray-600 hover:text-chaiyo-blue hover:bg-gray-100 rounded-md border border-gray-200 transition-colors bg-white"
-                                                                                            title="จัดการ"
-                                                                                        >
-                                                                                            <Pencil className="w-3.5 h-3.5" />
                                                                                         </button>
                                                                                     </div>
                                                                                 ) : (
@@ -4745,7 +4719,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                         <Label className="flex items-center gap-1.5">
                                                             <span>พนักงาน</span>
                                                             <span className="text-red-500">*</span>
-                                                            <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
                                                         </Label>
                                                         <Combobox
                                                             options={MOCK_STAFF_LIST.map(s => ({
@@ -4763,8 +4736,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label className="flex items-center gap-1.5">
-                                                            <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        <Label>
                                                             เบอร์ติดต่อพนักงาน
                                                         </Label>
                                                         <Input
@@ -4778,8 +4750,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
-                                                        <Label className="flex items-center gap-1.5">
-                                                            <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        <Label>
                                                             วันที่ประเมิน
                                                         </Label>
                                                         <DatePickerBE
@@ -4809,8 +4780,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 </div>
                                                             </div>
                                                             <div className="space-y-2">
-                                                                <Label className="flex items-center gap-1.5 text-muted-foreground">
-                                                                    <Phone className="w-3.5 h-3.5" />
+                                                                <Label className="text-muted-foreground">
                                                                     เบอร์ติดต่อพนักงาน
                                                                 </Label>
                                                                 <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 font-mono">
@@ -4821,8 +4791,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 </div>
                                                             </div>
                                                             <div className="space-y-2">
-                                                                <Label className="flex items-center gap-1.5 text-muted-foreground">
-                                                                    <Calendar className="w-3.5 h-3.5" />
+                                                                <Label className="text-muted-foreground">
                                                                     วันที่ประเมิน
                                                                 </Label>
                                                                 <div className="h-12 flex items-center px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600">
@@ -4839,7 +4808,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 <Label className="flex items-center gap-1.5">
                                                                     <span>พนักงาน</span>
                                                                     <span className="text-red-500">*</span>
-                                                                    <span className="text-xs text-muted-foreground font-normal ml-1">(รหัส, ชื่อ-นามสกุล)</span>
                                                                 </Label>
                                                                 <Combobox
                                                                     options={MOCK_STAFF_LIST.map(s => ({
@@ -4859,8 +4827,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 />
                                                             </div>
                                                             <div className="space-y-2">
-                                                                <Label className="flex items-center gap-1.5">
-                                                                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                <Label>
                                                                     เบอร์ติดต่อพนักงาน
                                                                 </Label>
                                                                 <Input
@@ -4871,8 +4838,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 />
                                                             </div>
                                                             <div className="space-y-2">
-                                                                <Label className="flex items-center gap-1.5">
-                                                                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                                                                <Label>
                                                                     วันที่ประเมิน
                                                                 </Label>
                                                                 <DatePickerBE
@@ -4966,31 +4932,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
             <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => !open && setItemToDelete(null)}>
                 <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            {itemToDelete?.type === 'occupation' ? 'ลบอาชีพเสริม?' : 'ยืนยันการลบข้อมูล'}
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>ยืนยันการลบข้อมูล</AlertDialogTitle>
                         <AlertDialogDescription>
-                            {itemToDelete?.type === 'occupation' ? (
-                                <>
-                                    คุณต้องการลบ <span className="font-medium text-gray-700">&quot;{itemToDelete?.name}&quot;</span> ใช่หรือไม่?{' '}
-                                    ข้อมูลรายได้และรายละเอียดทั้งหมดของอาชีพนี้จะถูกลบอย่างถาวร
-                                </>
-                            ) : itemToDelete?.type === 'bankAccount' ? (
-                                <>
-                                    คุณต้องการลบข้อมูล &quot;{itemToDelete?.name}&quot; ใช่หรือไม่?
-                                    การดำเนินการนี้ไม่สามารถย้อนกลับได้
-                                    {itemToDelete?.hasDocuments && (
-                                        <span className="block mt-2 text-amber-600 font-medium">
-                                            ⚠️ เอกสารรายการเดินบัญชี (Statement) จำนวน {itemToDelete.documentCount} ไฟล์ที่แนบมากับบัญชีนี้จะถูกลบไปด้วย
-                                        </span>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    คุณต้องการลบข้อมูล &quot;{itemToDelete?.name}&quot; ใช่หรือไม่?
-                                    การดำเนินการนี้ไม่สามารถย้อนกลับได้
-                                </>
-                            )}
+                            คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -5081,7 +5025,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
             <Dialog open={managingPhotoGuideId !== null} onOpenChange={(open) => !open && setManagingPhotoGuideId(null)}>
                 <DialogContent className="max-w-3xl">
                     <DialogHeader>
-                        <DialogTitle>ไฟล์ที่อัพโหลด — {PHOTO_GUIDES.find(g => g.id === managingPhotoGuideId)?.title}</DialogTitle>
+                        <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
                     </DialogHeader>
                     <DialogBody className="max-h-[60vh] overflow-y-auto">
                         <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -5318,9 +5262,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                     onPointerDownOutside={(e) => { if (itemToDelete) e.preventDefault(); }}
                 >
                     <DialogHeader>
-                        <DialogTitle>
-                            ไฟล์ที่อัพโหลด — {viewFilesContext?.label}
-                        </DialogTitle>
+                        <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
                     </DialogHeader>
                     <DialogBody>
                         {(() => {
@@ -5457,9 +5399,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                     onPointerDownOutside={(e) => { if (isScannerOpen || itemToDelete) e.preventDefault(); }}
                 >
                     <DialogHeader>
-                        <DialogTitle>
-                            เพิ่ม{currentDocContext?.label}
-                        </DialogTitle>
+                        <DialogTitle>เพิ่มเอกสาร</DialogTitle>
                     </DialogHeader>
 
                     <DialogBody className="space-y-6">
