@@ -379,6 +379,13 @@ const AGRI_TYPES = [
     { value: "รถเกษตรเก่า", label: "รถเกษตรเก่า" }
 ];
 
+const AGRI_USAGE_TYPES = [
+    { value: "ใช้งานเกษตรกรรม", label: "ใช้งานเกษตรกรรม" },
+    { value: "ใช้งานก่อสร้าง", label: "ใช้งานก่อสร้าง" },
+    { value: "ใช้งานขนส่ง", label: "ใช้งานขนส่ง" },
+    { value: "ใช้งานอื่น ๆ", label: "ใช้งานอื่น ๆ" }
+];
+
 const LAND_OFFICES = [
     { value: "กรุงเทพมหานคร", label: "สำนักงานที่ดินกรุงเทพมหานคร" },
     { value: "นนทบุรี", label: "สำนักงานที่ดินนนทบุรี" },
@@ -1781,6 +1788,46 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             </>
                                         )}
                                     </div>
+
+                                    {/* ROW 3B: Agricultural Vehicle Specific Fields */}
+                                    {formData.collateralType === 'agri' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+                                            <div className="space-y-2">
+                                                <Label className="text-[13px] font-medium text-gray-700 ml-0.5">ซีซี (CC)</Label>
+                                                <Input
+                                                    value={formData.cc || ""}
+                                                    onChange={(e) => setFormData({ ...formData, cc: e.target.value })}
+                                                    className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[13px] font-medium text-gray-700 ml-0.5">แรงม้า</Label>
+                                                <Input
+                                                    value={formData.horsePower || ""}
+                                                    onChange={(e) => setFormData({ ...formData, horsePower: e.target.value })}
+                                                    className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[13px] font-medium text-gray-700 ml-0.5">ประเภทการใช้งาน</Label>
+                                                <Select
+                                                    value={formData.agriUsageType || ""}
+                                                    onValueChange={(val) => setFormData({ ...formData, agriUsageType: val })}
+                                                >
+                                                    <SelectTrigger className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                        <SelectValue placeholder="เลือกประเภทการใช้งาน" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {AGRI_USAGE_TYPES.map((type) => (
+                                                            <SelectItem key={type.value} value={type.value}>
+                                                                {type.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* SEPARATOR */}
                                     <div className="border-t border-border-subtle my-8"></div>
