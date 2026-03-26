@@ -604,6 +604,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const categoryCameraRef = useRef<HTMLInputElement>(null);
     const [currentPhotoGuideId, setCurrentPhotoGuideId] = useState<string>("");
     const [currentDocLabel, setCurrentDocLabel] = useState<string>("");
+    const [managingPaperDocLabel, setManagingPaperDocLabel] = useState<string>("");
 
     // Set current year on client side to prevent hydration mismatch
     useEffect(() => {
@@ -1205,6 +1206,101 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 onChange={handleCategoryPhotoUpload}
                             />
 
+                            {/* Paper Document Management Dialog */}
+                            <Dialog open={!!managingPaperDocLabel} onOpenChange={() => setManagingPaperDocLabel("")}>
+                                <DialogContent className="max-w-3xl">
+                                    <DialogHeader>
+                                        <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
+                                    </DialogHeader>
+                                    <DialogBody className="max-h-[60vh] overflow-y-auto">
+                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                            <Table>
+                                                <TableHeader className="bg-gray-50/50">
+                                                    <TableRow>
+                                                        <TableHead className="w-16 text-center text-xs">ลำดับ</TableHead>
+                                                        <TableHead className="text-xs">ชื่อไฟล์</TableHead>
+                                                        <TableHead className="w-24 text-center text-xs">จัดการ</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {managingPaperDocLabel && (() => {
+                                                        const filesForDoc = uploadedPaperDocs.filter((docObj: any) => {
+                                                            const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                            return label === managingPaperDocLabel;
+                                                        });
+                                                        if (filesForDoc.length === 0) {
+                                                            return (
+                                                                <TableRow>
+                                                                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                                                                        ไม่มีไฟล์ในรายการนี้
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        }
+                                                        return filesForDoc.map((docObj: any, pIdx) => {
+                                                            const fileUrl = typeof docObj === 'string' ? docObj : docObj.url;
+                                                            const fileName = fileUrl.split('/').pop() || `Document_${pIdx + 1}.pdf`;
+                                                            return (
+                                                                <TableRow key={pIdx}>
+                                                                    <TableCell className="text-center font-medium text-gray-500">
+                                                                        {pIdx + 1}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-sm text-gray-700">{fileName}</span>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                    <TableCell className="text-center">
+                                                                        <div className="flex items-center justify-center gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setLightboxIndex(uploadedPaperDocs.findIndex((doc: any) => {
+                                                                                        const url = typeof doc === 'string' ? doc : doc.url;
+                                                                                        const label = typeof doc === 'string' ? "อื่นๆ" : (doc.label || "อื่นๆ");
+                                                                                        return url === fileUrl && label === managingPaperDocLabel;
+                                                                                    }));
+                                                                                    setUploadedDocs(filesForDoc.map((doc: any) => typeof doc === 'string' ? doc : doc.url));
+                                                                                }}
+                                                                                className="w-8 h-8 rounded-full text-chaiyo-blue hover:bg-blue-50 border border-transparent hover:border-blue-100 flex items-center justify-center transition-all bg-white"
+                                                                                title="ดูไฟล์"
+                                                                            >
+                                                                                <Eye className="w-4 h-4" />
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const newDocs = uploadedPaperDocs.filter((doc: any) => {
+                                                                                        const url = typeof doc === 'string' ? doc : doc.url;
+                                                                                        const label = typeof doc === 'string' ? "อื่นๆ" : (doc.label || "อื่นๆ");
+                                                                                        return !(url === fileUrl && label === managingPaperDocLabel);
+                                                                                    });
+                                                                                    setUploadedPaperDocs(newDocs);
+                                                                                    setAnalyzedPaperCount(prev => Math.max(0, prev - 1));
+                                                                                }}
+                                                                                className="w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 flex items-center justify-center transition-all bg-white"
+                                                                                title="ลบ"
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </DialogBody>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setManagingPaperDocLabel("")} className="min-w-[104px]">
+                                            ปิด
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+
                             {/* PAPER DOCS UPLOAD SECTION - TABLE-BASED LAYOUT */}
                             <div className="p-6 space-y-6">
                                 {/* Header */}
@@ -1276,11 +1372,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             type="button"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
-                                                                                setLightboxIndex(uploadedPaperDocs.findIndex((docObj: any) => {
-                                                                                    const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
-                                                                                    return label === docLabel;
-                                                                                }));
-                                                                                setUploadedDocs(uploadedFilesForDoc.map((docObj: any) => typeof docObj === 'string' ? docObj : docObj.url));
+                                                                                setManagingPaperDocLabel(docLabel);
                                                                             }}
                                                                             className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                         >
@@ -1361,11 +1453,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                 type="button"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    setLightboxIndex(uploadedPaperDocs.findIndex((docObj: any) => {
-                                                                                        const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
-                                                                                        return label === docLabel;
-                                                                                    }));
-                                                                                    setUploadedDocs(uploadedFilesForDoc.map((docObj: any) => typeof docObj === 'string' ? docObj : docObj.url));
+                                                                                    setManagingPaperDocLabel(docLabel);
                                                                                 }}
                                                                                 className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                                             >
