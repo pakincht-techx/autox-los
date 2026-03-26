@@ -1636,6 +1636,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                             setCoordinateModalOpen(true);
                                                         }}>ยังไม่ได้ระบุตำแหน่ง - คลิกเพื่อตั้งตำแหน่ง</p>
                                                     )}
+
+                                                    <p className="text-[11px] text-gray-500">* กรุณาระบุพิกัดให้ตรงกับตำแหน่งสถานที่จริงเพื่อใช้ในการประเมินและตรวจสอบ</p>
                                                 </div>
                                             </div>
                                         </div>
