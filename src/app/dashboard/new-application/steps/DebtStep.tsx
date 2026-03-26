@@ -1045,7 +1045,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
     ];
 
     return (
-        <div className="flex flex-col xl:flex-row gap-6 items-start animate-in fade-in slide-in-from-bottom-2">
+        <div className="flex flex-col gap-6 items-start animate-in fade-in slide-in-from-bottom-2">
             {/* Main Form Container */}
             <div className="flex-1 space-y-6 w-full min-w-0">
                 <input
@@ -1086,7 +1086,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                                     <Table>
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow>
-                                                <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
+                                                <TableHead className="w-[8%] text-center text-xs">ลำดับ</TableHead>
                                                 <TableHead className="w-[50%] text-xs">ประเภทสินเชื่อ <span className="text-red-500">*</span></TableHead>
                                                 <TableHead className="w-[30%] text-xs text-right pr-10">ค่างวด (บาท/เดือน) <span className="text-red-500">*</span></TableHead>
                                                 <TableHead className="w-[10%] text-center text-xs">จัดการ</TableHead>
@@ -1178,28 +1178,80 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                                     <Table>
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow className="hover:bg-transparent border-none">
-                                                <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
-                                                <TableHead className="w-[50%] text-xs">รายละเอียด</TableHead>
-                                                <TableHead className="w-[40%] text-right pr-10 text-xs">ค่างวด (บาท/เดือน)</TableHead>
+                                                <TableHead className="w-[8%] text-center text-xs">ลำดับ</TableHead>
+                                                <TableHead className="w-[37%] text-xs">รายละเอียด</TableHead>
+                                                <TableHead className="w-[25%] text-right pr-6 text-xs text-gray-400">วงเงินรวม (บาท)</TableHead>
+                                                <TableHead className="w-[30%] text-right pr-10 text-xs font-semibold">ค่างวด (บาท/เดือน)</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            <TableRow className="hover:bg-gray-50/50 transition-colors border-border-subtle">
-                                                <TableCell className="text-center text-xs text-gray-400">1</TableCell>
-                                                <TableCell className="text-sm text-gray-700">ค่างวดสินเชื่อ</TableCell>
-                                                <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                    {formatNumberWithCommas(formData.chaiyoLoanInstallment || 0)}
+                                            {[
+                                                { label: "สินเชื่อรถจักรยานยนต์", limit: formData.chaiyoMotorcycleLimit, installment: formData.chaiyoMotorcycleInstallment },
+                                                { label: "สินเชื่อรถยนต์", limit: formData.chaiyoCarLimit, installment: formData.chaiyoCarInstallment },
+                                                { label: "สินเชื่อรถบรรทุก", limit: formData.chaiyoTruckLimit, installment: formData.chaiyoTruckInstallment },
+                                                { label: "สินเชื่อรถเพื่อการเกษตร", limit: formData.chaiyoAgriLimit, installment: formData.chaiyoAgriInstallment },
+                                                { label: "สินเชื่อจำนำที่ดิน", limit: formData.chaiyoLandPledgeLimit, installment: formData.chaiyoLandPledgeInstallment },
+                                                { label: "สินเชื่อจำนองที่ดิน", limit: formData.chaiyoLandMortgageLimit, installment: formData.chaiyoLandMortgageInstallment },
+                                                { label: "สินเชื่ออื่นๆ", limit: formData.chaiyoOtherLimit, installment: formData.chaiyoOtherInstallment },
+                                            ].map((row, idx) => (
+                                                <TableRow
+                                                    key={`loan-${idx}`}
+                                                    className="hover:bg-gray-50/50 transition-colors border-border-subtle"
+                                                >
+                                                    <TableCell className="text-center text-xs text-gray-400">{idx + 1}</TableCell>
+                                                    <TableCell className="text-sm text-gray-700">
+                                                        {row.label}
+                                                    </TableCell>
+                                                    <TableCell className="text-right pr-6 font-mono text-xs text-gray-400">
+                                                        {formatNumberWithCommas(row.limit || 0)}
+                                                    </TableCell>
+                                                    <TableCell className="text-right pr-10 font-mono text-sm font-medium text-gray-800">
+                                                        {formatNumberWithCommas(row.installment || 0)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                            {/* Subtotal: ค่างวดสินเชื่อ */}
+                                            <TableRow className="bg-gray-50/80 hover:bg-gray-50/80 transition-none border-border-subtle">
+                                                <TableCell colSpan={2} className="text-right font-semibold py-2.5 text-xs text-gray-600">
+                                                    รวมค่างวดสินเชื่อ:
+                                                </TableCell>
+                                                <TableCell className="text-right pr-6 py-2.5">
+                                                    <span className="font-mono text-xs text-gray-400">
+                                                        {formatNumberWithCommas(
+                                                            (Number(formData.chaiyoMotorcycleLimit) || 0) +
+                                                            (Number(formData.chaiyoCarLimit) || 0) +
+                                                            (Number(formData.chaiyoTruckLimit) || 0) +
+                                                            (Number(formData.chaiyoAgriLimit) || 0) +
+                                                            (Number(formData.chaiyoLandPledgeLimit) || 0) +
+                                                            (Number(formData.chaiyoLandMortgageLimit) || 0) +
+                                                            (Number(formData.chaiyoOtherLimit) || 0)
+                                                        )}
+                                                    </span>
+                                                </TableCell>
+                                                <TableCell className="text-right pr-10 py-2.5">
+                                                    <span className="font-semibold font-mono text-sm text-gray-800">
+                                                        {formatNumberWithCommas(
+                                                            (Number(formData.chaiyoMotorcycleInstallment) || 0) +
+                                                            (Number(formData.chaiyoCarInstallment) || 0) +
+                                                            (Number(formData.chaiyoTruckInstallment) || 0) +
+                                                            (Number(formData.chaiyoAgriInstallment) || 0) +
+                                                            (Number(formData.chaiyoLandPledgeInstallment) || 0) +
+                                                            (Number(formData.chaiyoLandMortgageInstallment) || 0) +
+                                                            (Number(formData.chaiyoOtherInstallment) || 0)
+                                                        )}
+                                                    </span>
                                                 </TableCell>
                                             </TableRow>
                                             <TableRow className="hover:bg-gray-50/50 transition-colors border-border-subtle">
-                                                <TableCell className="text-center text-xs text-gray-400">2</TableCell>
+                                                <TableCell className="text-center text-xs text-gray-400">1</TableCell>
                                                 <TableCell className="text-sm text-gray-700">ค่างวดประกัน</TableCell>
+                                                <TableCell className="text-right pr-6 font-mono text-xs text-gray-400">-</TableCell>
                                                 <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
                                                     {formatNumberWithCommas(formData.chaiyoInsuranceInstallment || 0)}
                                                 </TableCell>
                                             </TableRow>
                                             <TableRow className="bg-gray-100/80 transition-none">
-                                                <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">ภาระหนี้ที่ลูกค้ามีกับเงินไชโยรวมรายเดือน:</TableCell>
+                                                <TableCell colSpan={3} className="text-right font-bold py-4 text-xs">ภาระหนี้ที่ลูกค้ามีกับเงินไชโยรวมรายเดือน:</TableCell>
                                                 <TableCell className="text-right pr-10 py-4">
                                                     <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
                                                         {formatNumberWithCommas(formData.totalChaiyoDebt || 0)}
@@ -1207,63 +1259,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-
-                            {/* Chaiyo Loan Limit Table */}
-                            <div className="md:col-span-2 space-y-4 pt-4 mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                                <div className="flex items-center justify-between">
-                                    <h5 className="font-bold text-gray-700 flex items-center gap-2">
-                                        สินเชื่อที่มีทั้งหมดกับเงินไชโย
-                                    </h5>
-                                </div>
-
-                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                    <Table>
-                                        <TableHeader className="bg-gray-50/50">
-                                            <TableRow className="hover:bg-transparent border-none">
-                                                <TableHead className="w-[10%] text-center text-xs">ลำดับ</TableHead>
-                                                <TableHead className="w-[60%] text-xs">ประเภทสินเชื่อ</TableHead>
-                                                <TableHead className="w-[30%] text-right pr-10 text-xs">วงเงินรวม (บาท)</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {[
-                                                { label: "สินเชื่อรถจักรยานยนต์", value: formData.chaiyoMotorcycleLimit },
-                                                { label: "สินเชื่อรถยนต์", value: formData.chaiyoCarLimit },
-                                                { label: "สินเชื่อรถบรรทุก", value: formData.chaiyoTruckLimit },
-                                                { label: "สินเชื่อรถเพื่อการเกษตร", value: formData.chaiyoAgriLimit },
-                                                { label: "สินเชื่อจำนำที่ดิน", value: formData.chaiyoLandPledgeLimit },
-                                                { label: "สินเชื่อจำนองที่ดิน", value: formData.chaiyoLandMortgageLimit },
-                                                { label: "สินเชื่ออื่นๆ", value: formData.chaiyoOtherLimit },
-                                            ].map((row, idx) => (
-                                                <TableRow
-                                                    key={idx}
-                                                    className="hover:bg-gray-50/50 transition-colors border-border-subtle"
-                                                >
-                                                    <TableCell className="text-center text-xs text-gray-400">{idx + 1}</TableCell>
-                                                    <TableCell className="text-sm text-gray-700">
-                                                        {row.label}
-                                                    </TableCell>
-                                                    <TableCell className="text-right pr-10 font-mono text-sm text-gray-600">
-                                                        {formatNumberWithCommas(row.value || 0)}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                        <TableFooter>
-                                            <TableRow className="bg-gray-100/80 hover:bg-gray-100/80 transition-none">
-                                                <TableCell colSpan={2} className="text-right font-bold py-4 text-xs">
-                                                    ยอดรวมวงเงินทุกสินเชื่อของเงินไชโย:
-                                                </TableCell>
-                                                <TableCell className="text-right pr-10 py-4">
-                                                    <div className="text-lg font-bold font-mono text-gray-900 pr-0.5">
-                                                        {formatNumberWithCommas(formData.chaiyoTotalLimit || 0)}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        </TableFooter>
                                     </Table>
                                 </div>
                             </div>
@@ -1277,70 +1272,86 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
 
             </div>
 
-            {/* Right side breakdown */}
-            <div className="w-full xl:w-[350px] shrink-0 sticky top-6 space-y-4">
+            {/* Summary breakdown */}
+            <div className="w-full space-y-4">
                 <Card className="border-border-strong overflow-hidden">
-                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                        <CardTitle className="text-base flex items-center gap-2 text-chaiyo-blue">
+                    <CardHeader className="bg-gray-50/80 border-b border-border-strong pb-3 pt-4">
+                        <CardTitle className="text-base flex items-center gap-2 text-gray-800">
                             <PieChart className="w-5 h-5 text-chaiyo-blue" />
-                            สรุปรายได้และภาระหนี้
+                            สรุปรายได้และภาระหนี้ (บาท/เดือน)
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="p-4 space-y-4">
-                            {/* Income Breakdown */}
-                            <div className="space-y-2">
-                                <h4 className="text-sm font-bold text-emerald-700 flex items-center gap-2">
-                                    รายได้   <TrendingUp className="w-4 h-4" />
-                                </h4>
-                                <div className="space-y-1.5 text-sm">
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>รายได้อาชีพหลัก</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.mainOccupationIncome || 0)).toFixed(2))}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                            {/* Income Column */}
+                            <div className="p-5 space-y-3">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1 h-5 rounded-full bg-emerald-500" />
+                                    <h4 className="text-sm font-bold text-gray-700">รายได้</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">รายได้อาชีพหลัก</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.mainOccupationIncome || 0)).toFixed(2))}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>รายได้อาชีพเสริม</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.secondaryOccupationIncome || 0)).toFixed(2))}</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">รายได้อาชีพเสริม</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.secondaryOccupationIncome || 0)).toFixed(2))}</span>
                                     </div>
-                                    <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
-                                        <span>รวมรายได้</span>
-                                        <span className="font-mono text-emerald-600">{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
-                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                                    <span className="text-sm font-bold text-gray-800">รวมรายได้</span>
+                                    <span className="font-mono font-bold text-lg text-emerald-600">{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
                                 </div>
                             </div>
 
-                            {/* Debt Breakdown */}
-                            <div className="space-y-2 pt-3">
-                                <h4 className="text-sm font-bold text-orange-700 flex items-center gap-2">
-                                    ภาระหนี้ <TrendingDown className="w-4 h-4" />
-                                </h4>
-                                <div className="space-y-1.5 text-sm">
-
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>{isGuarantor ? "ภาระหนี้ที่ลูกค้ามีกับเงินไชโย" : "ภาระหนี้ในระบบ (รวมภาระหนี้จาก NCB)"}</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
+                            {/* Debt Column */}
+                            <div className="p-5 space-y-3">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1 h-5 rounded-full bg-orange-500" />
+                                    <h4 className="text-sm font-bold text-gray-700">ภาระหนี้</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">{isGuarantor ? "ภาระหนี้อื่นๆ (ไม่รวมเงินไชโย)" : "ภาระหนี้นอกระบบ"}</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.totalPersonalDebt || 0)).toFixed(2))}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>{isGuarantor ? "ภาระหนี้อื่นๆ (ไม่รวมเงินไชโย)" : "ภาระหนี้นอกระบบ"}</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.totalPersonalDebt || 0)).toFixed(2))}</span>
-                                    </div>
-                                    <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
-                                        <span>รวมภาระหนี้</span>
-                                        <span className="font-mono text-orange-600">{formatNumberWithCommas(roundDown2(Number(formData.totalDebt || 0)).toFixed(2))}</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">{isGuarantor ? "ภาระหนี้ที่ลูกค้ามีกับเงินไชโย" : "ภาระหนี้ในระบบ (รวม NCB)"}</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.totalChaiyoDebt || 0)).toFixed(2))}</span>
                                     </div>
                                 </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                                    <span className="text-sm font-bold text-gray-800">รวมภาระหนี้</span>
+                                    <span className="font-mono font-bold text-lg text-orange-600">{formatNumberWithCommas(roundDown2(Number(formData.totalDebt || 0)).toFixed(2))}</span>
+                                </div>
+                            </div>
+
+                            {/* Net Remaining Column */}
+                            <div className={cn(
+                                "p-5 flex flex-col justify-center items-center text-center",
+                                Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0
+                                    ? "bg-red-50/60"
+                                    : "bg-emerald-50/60"
+                            )}>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className={cn(
+                                        "w-1 h-5 rounded-full",
+                                        Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0 ? "bg-red-500" : "bg-chaiyo-blue"
+                                    )} />
+                                    <span className="text-sm font-bold text-gray-700">รายได้คงเหลือ</span>
+                                </div>
+                                <div className={cn(
+                                    "text-3xl font-black font-mono mt-1",
+                                    Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0
+                                        ? "text-red-600"
+                                        : "text-chaiyo-blue"
+                                )}>
+                                    {formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0)).toFixed(2))}
+                                </div>
+                                <span className="text-xs text-gray-400 mt-1">บาท/เดือน</span>
                             </div>
                         </div>
-
-                        {/* Net Income Remaining */}
-                        <div className="bg-blue-50/50 p-4 border-t border-blue-100 space-y-1 text-right">
-                            <Label className="text-chaiyo-blue text-sm block">รายได้คงเหลือรายเดือน</Label>
-                            <div className={Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0 ? "text-2xl font-black text-red-600 font-mono" : "text-2xl font-black text-blue-700 font-mono"}>
-                                {formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0)).toFixed(2))}
-                            </div>
-                        </div>
-
-
                     </CardContent>
                 </Card>
             </div>

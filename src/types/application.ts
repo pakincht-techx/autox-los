@@ -362,6 +362,15 @@ export interface CustomerFormData {
     chaiyoLandMortgageLimit?: number;
     chaiyoOtherLimit?: number;
 
+    // Chaiyo Per-Loan Installments (ค่างวดสินเชื่อ)
+    chaiyoMotorcycleInstallment?: number;
+    chaiyoCarInstallment?: number;
+    chaiyoTruckInstallment?: number;
+    chaiyoAgriInstallment?: number;
+    chaiyoLandPledgeInstallment?: number;
+    chaiyoLandMortgageInstallment?: number;
+    chaiyoOtherInstallment?: number;
+
     // Financial & Application Status
     income?: number;
     expenses?: number;

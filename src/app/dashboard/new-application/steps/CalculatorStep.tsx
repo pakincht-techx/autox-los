@@ -70,6 +70,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     // Insurance State
     const [selectedInsurances, setSelectedInsurances] = useState<string[]>([]);
     const [includeInsuranceInLoan, setIncludeInsuranceInLoan] = useState<boolean>(true);
+    const [carInsuranceEnabled, setCarInsuranceEnabled] = useState<boolean>(false);
 
     // PA Insurance State (Land only)
     const [paInsuranceEnabled, setPaInsuranceEnabled] = useState<boolean>(formData?.paInsuranceEnabled || false);
@@ -494,11 +495,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                             <Input
                                                 type="text"
                                                 value={interestRateInput}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    if (/^\d*\.?\d*$/.test(val)) setInterestRateInput(val);
-                                                }}
-                                                className="pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-left"
+                                                readOnly
+                                                disabled
+                                                className="pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-gray-50 border-gray-200 text-left cursor-not-allowed"
                                             />
                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">%</span>
                                         </div>
@@ -695,13 +694,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             {/* 1. Freebie Insurance (Mock Logic: Car/Moto/Truck/Agri get free loan protection) */}
                             {['car', 'moto', 'truck', 'agri'].includes(selectedProduct) && (
                                 <div className="space-y-4">
-                                    <Label className="text-md font-bold mb-1"> ประกันภัย</Label>
+                                    <Label className="text-md font-bold mb-1">ประกันคุ้มครองวงเงินสินเชื่อ</Label>
                                     <div className="flex justify-between items-center p-3 rounded-xl border border-gray-200 bg-white">
                                         <div className="flex items-center gap-3">
                                             <img src="/insurance-logo/Property 1=FWD.png" alt="FWD" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-gray-800">FWD</span>
-                                                <span className="text-xs text-gray-500">ประกันคุ้มครองวงเงินกู้</span>
+                                                <span className="text-sm font-semibold text-gray-800">ประกันคุ้มครองวงเงินสินเชื่อ FWD</span>
+                                                <span className="text-xs text-gray-500">ฟรี! ความคุ้มครองทันที ไม่มีค่าใช้จ่ายเพิ่มเติม</span>
                                             </div>
                                         </div>
                                     </div>
@@ -711,65 +710,99 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             {/* 2. Optional Insurance Selection */}
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-md font-bold">ประกันภัย</Label>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 text-xs"
-                                        onClick={() => {
-                                            setDraftInsurances([...selectedInsurances]);
-                                            setIsInsuranceDialogOpen(true);
+                                    <Label className="text-md font-bold">ประกันภัยรถยนต์/ประกันรถมอเตอไซค์</Label>
+                                    <RadioGroup
+                                        value={carInsuranceEnabled ? 'yes' : 'no'}
+                                        onValueChange={(val) => {
+                                            setCarInsuranceEnabled(val === 'yes');
+                                            if (val === 'no') setSelectedInsurances([]);
                                         }}
+                                        className="flex items-center gap-4"
                                     >
-                                        เลือกประกัน
-                                    </Button>
+                                        <div className="flex items-center gap-2">
+                                            <RadioGroupItem value="yes" id="car-insurance-yes" />
+                                            <Label htmlFor="car-insurance-yes" className="text-sm font-normal cursor-pointer">ต้องการ</Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <RadioGroupItem value="no" id="car-insurance-no" />
+                                            <Label htmlFor="car-insurance-no" className="text-sm font-normal cursor-pointer">ไม่ต้องการ</Label>
+                                        </div>
+                                    </RadioGroup>
                                 </div>
 
-                                {selectedInsurances.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {selectedInsurances.map(id => {
-                                            const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                            if (!option) return null;
-                                            return (
-                                                <div key={id} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-                                                    {/* Company Header */}
-                                                    <div className="flex justify-between items-center p-3">
-                                                        <div className="flex items-center gap-3">
-                                                            {option.logo ? (
-                                                                <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                            ) : (
-                                                                <ShieldCheck className="w-6 h-6 text-chaiyo-blue shrink-0" />
-                                                            )}
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-semibold text-gray-800">{option.company}</span>
-                                                                <span className="text-xs text-gray-500">{option.label}</span>
+                                {carInsuranceEnabled && (
+                                    <>
+                                        {selectedInsurances.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {selectedInsurances.map(id => {
+                                                    const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                                    if (!option) return null;
+                                                    return (
+                                                        <div key={id} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+                                                            {/* Company Header */}
+                                                            <div className="flex justify-between items-center p-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    {option.logo ? (
+                                                                        <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                                    ) : (
+                                                                        <ShieldCheck className="w-6 h-6 text-chaiyo-blue shrink-0" />
+                                                                    )}
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-sm font-semibold text-gray-800">{option.company}</span>
+                                                                        <span className="text-xs text-gray-500">{option.label}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    className="h-8 text-xs"
+                                                                    onClick={() => {
+                                                                        setDraftInsurances([...selectedInsurances]);
+                                                                        setIsInsuranceDialogOpen(true);
+                                                                    }}
+                                                                >
+                                                                    เปลี่ยนแผนประกัน
+                                                                </Button>
                                                             </div>
-                                                        </div>
-                                                    </div>
 
-                                                    {/* Detail Rows */}
-                                                    <div className="divide-y divide-gray-100 border-t border-gray-100">
-                                                        {option.coverage && (
-                                                            <div className="flex items-center justify-between px-4 py-2.5">
-                                                                <span className="text-xs text-gray-500">ทุนประกัน</span>
-                                                                <span className="text-sm">{option.coverage.toLocaleString()} บาท</span>
+                                                            {/* Detail Rows */}
+                                                            <div className="divide-y divide-gray-100 border-t border-gray-100">
+                                                                {option.coverage && (
+                                                                    <div className="flex items-center justify-between px-4 py-2.5">
+                                                                        <span className="text-xs text-gray-500">ทุนประกัน</span>
+                                                                        <span className="text-sm">{option.coverage.toLocaleString()} บาท</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex items-center justify-between px-4 py-2.5">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                        <span className="text-[11px] text-gray-400">*ค่าเบี้ยประกันจะถูกรวมในวงเงินสินเชื่อ</span>
+                                                                    </div>
+                                                                    <span className="text-sm">{option.price.toLocaleString()} บาท</span>
+                                                                </div>
                                                             </div>
-                                                        )}
-                                                        <div className="flex items-center justify-between px-4 py-2.5">
-                                                            <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
-                                                            <span className="text-sm">{option.price.toLocaleString()} บาท</span>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="text-center p-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                                        <ShieldCheck className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                        <p className="text-sm text-gray-500 font-medium">ยังไม่มีประกันเพิ่มเติม</p>
-                                        <p className="text-xs text-gray-400 mt-1">คลิก "เลือกประกัน" เพื่อเลือกความคุ้มครอง</p>
-                                    </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center p-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                                                <ShieldCheck className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                                <p className="text-sm text-gray-500 font-medium">ยังไม่มีประกันเพิ่มเติม</p>
+                                                <p className="text-xs text-gray-400 mt-1">คลิก "เลือกแผนประกัน" เพื่อเลือกความคุ้มครอง</p>
+                                                <Button
+                                                    size="sm"
+                                                    className="h-8 text-xs mt-3"
+                                                    onClick={() => {
+                                                        setDraftInsurances([...selectedInsurances]);
+                                                        setIsInsuranceDialogOpen(true);
+                                                    }}
+                                                >
+                                                    เลือกแผนประกัน
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
 
@@ -779,11 +812,21 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             {true && (
                                 <div className="space-y-4 pt-2">
                                     <div className="flex items-center justify-between">
-                                        <Label className="text-md font-bold">ประกันภัย</Label>
-                                        <Switch
-                                            checked={paInsuranceEnabled}
-                                            onCheckedChange={setPaInsuranceEnabled}
-                                        />
+                                        <Label className="text-md font-bold">ประกันคุ้มครองวงเงินสินเชื่อ</Label>
+                                        <RadioGroup
+                                            value={paInsuranceEnabled ? 'yes' : 'no'}
+                                            onValueChange={(val) => setPaInsuranceEnabled(val === 'yes')}
+                                            className="flex items-center gap-4"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <RadioGroupItem value="yes" id="pa-insurance-yes" />
+                                                <Label htmlFor="pa-insurance-yes" className="text-sm font-normal cursor-pointer">ต้องการ</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <RadioGroupItem value="no" id="pa-insurance-no" />
+                                                <Label htmlFor="pa-insurance-no" className="text-sm font-normal cursor-pointer">ไม่ต้องการ</Label>
+                                            </div>
+                                        </RadioGroup>
                                     </div>
 
                                     {paInsuranceEnabled && (
@@ -808,11 +851,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     </div>
 
                                                     <div className="flex items-center justify-between px-4 py-2.5">
-                                                        <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
-                                                        <span className="text-sm">{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                    </div>
-
-                                                    <div className="flex items-center justify-between px-4 py-2.5">
                                                         <span className="text-xs text-gray-500">เวลาการคุ้มครอง</span>
                                                         <Select
                                                             value={paCoverageMonths.toString()}
@@ -832,48 +870,40 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     </div>
 
                                                     <div className="flex items-center justify-between px-4 py-2.5">
-                                                        <span className="text-xs text-gray-500">วันที่เริ่มการคุ้มครอง</span>
-                                                        <DatePickerBE
-                                                            value={paStartDateValue}
-                                                            onChange={(val) => setPaStartDateValue(val)}
-                                                            className="w-[160px]"
-                                                            inputClassName="h-9 rounded-lg"
-                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-xs text-gray-500">ค่าเบี้ยประกัน</span>
+                                                            <span className="text-[11px] text-gray-400">*ค่าเบี้ยประกันจะถูกรวมในวงเงินสินเชื่อ</span>
+                                                        </div>
+                                                        <span className="text-sm">{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
                                                     </div>
 
-                                                    <div className="flex items-center justify-between px-4 py-2.5">
-                                                        <span className="text-xs text-gray-500">วันที่สิ้นสุดความคุ้มครอง</span>
-                                                        <span className="text-sm text-gray-700">{paEndDate}</span>
+                                                    {/* ผู้รับผลประโยชน์ */}
+                                                    <div className="px-4 py-2.5">
+                                                        <span className="text-xs font-bold text-gray-600 mb-2 block">ผู้รับผลประโยชน์</span>
+                                                        <div className="rounded-lg border border-gray-200 overflow-hidden">
+                                                            <Table>
+                                                                <TableHeader>
+                                                                    <TableRow className="bg-gray-50 border-b border-gray-200 hover:bg-gray-50">
+                                                                        <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 w-16 text-xs">อันดับ</TableHead>
+                                                                        <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 text-xs">ชื่อผู้รับผลประโยชน์</TableHead>
+                                                                    </TableRow>
+                                                                </TableHeader>
+                                                                <TableBody>
+                                                                    <TableRow className="hover:bg-transparent">
+                                                                        <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">1</TableCell>
+                                                                        <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">บริษัท ออโต้ เอกซ์ จำกัด</TableCell>
+                                                                    </TableRow>
+                                                                    <TableRow className="hover:bg-transparent">
+                                                                        <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">2</TableCell>
+                                                                        <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">ทายาททางกฎหมาย</TableCell>
+                                                                    </TableRow>
+                                                                </TableBody>
+                                                            </Table>
+                                                        </div>
                                                     </div>
+
                                                 </div>
 
-                                            </div>
-
-                                            {/* ผู้รับผลประโยชน์ Section */}
-                                            <div className="pt-2">
-                                                <div className="flex items-center gap-2 mb-3">
-                                                    <span className="text-xs font-bold text-gray-600">ผู้รับผลประโยชน์</span>
-                                                </div>
-                                                <div className="rounded-lg border border-gray-200 overflow-hidden">
-                                                    <Table>
-                                                        <TableHeader>
-                                                            <TableRow className="bg-gray-50 border-b border-gray-200 hover:bg-gray-50">
-                                                                <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 w-16 text-xs">อันดับ</TableHead>
-                                                                <TableHead className="px-3 py-2 text-left font-semibold text-gray-500 text-xs">ชื่อผู้รับผลประโยชน์</TableHead>
-                                                            </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            <TableRow className="hover:bg-transparent">
-                                                                <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">1</TableCell>
-                                                                <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">บริษัท ออโต้ เอกซ์ จำกัด</TableCell>
-                                                            </TableRow>
-                                                            <TableRow className="hover:bg-transparent">
-                                                                <TableCell className="px-3 py-2.5 text-gray-700 font-medium text-xs">2</TableCell>
-                                                                <TableCell className="px-3 py-2.5 text-gray-800 font-semibold text-xs">ทายาททางกฎหมาย</TableCell>
-                                                            </TableRow>
-                                                        </TableBody>
-                                                    </Table>
-                                                </div>
                                             </div>
                                         </>
                                     )}

@@ -131,3 +131,28 @@ Every dialog follows a **Header → Body → Footer** structure:
       ...
   </SelectContent>
   ```
+
+## Component & Pattern Consistency Check
+
+**Before creating or modifying any UI component or pattern, you MUST perform a consistency check:**
+
+### Workflow
+1. **Identify the pattern.** Describe what you are about to build (e.g., "radio group with label", "delete confirmation dialog", "inline edit form").
+2. **Search for existing usage.** Use `grep_search` to look for similar components, class patterns, or UI structures already used in the codebase. Check:
+   - `src/components/ui/` for base UI primitives
+   - `src/components/application/` for domain-specific components
+   - `src/app/dashboard/` for page-level patterns already in use
+3. **Classify the pattern:**
+   - **Existing** — The exact same pattern already exists. → **Reuse it as-is.** Copy the same structure, classes, and spacing.
+   - **Variant of existing** — A similar pattern exists but needs minor adaptation. → **Extend the existing pattern** rather than creating something new. Match styling (font weights, spacing, colors).
+   - **New** — No matching pattern exists. → **Confirm with the user** before implementing. Explain what the new pattern is and why existing options don't fit.
+4. **Report your finding.** Before writing code, briefly state:
+   - What pattern you found (or didn't find)
+   - Where it's used (file + line)
+   - Whether you'll reuse, extend, or create new
+
+### Key Principles
+- **Reuse first.** Always prefer reusing an existing component or layout pattern over creating a new one.
+- **Same component, same styling.** If multiple pages use the same form field pattern, they must use identical class names, spacing, and structure.
+- **No one-off styles.** Avoid adding unique `className` combinations that only appear in one place. If a new style is needed, it likely belongs as a variant in `src/components/ui/`.
+- **Ask when in doubt.** If unsure whether a pattern is new or existing, ask the user before proceeding.

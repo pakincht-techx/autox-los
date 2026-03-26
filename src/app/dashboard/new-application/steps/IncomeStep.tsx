@@ -1407,7 +1407,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
     ];
 
     return (
-        <div className="flex flex-col xl:flex-row gap-6 items-start animate-in fade-in slide-in-from-bottom-2">
+        <div className="flex flex-col gap-6 items-start animate-in fade-in slide-in-from-bottom-2">
             {/* Main Form Container */}
             <div className="flex-1 space-y-6 w-full min-w-0">
                 <input
@@ -4687,8 +4687,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
 
                                     )}
 
-                                    {/* ===== ผู้ประเมินสถานที่ทำงาน (hide for guarantor) ===== */}
-                                    {!isGuarantor && (
+                                    {/* ===== ผู้ประเมินสถานที่ทำงาน ===== */}
+                                    {(
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <div className="flex items-center justify-between pb-2 border-b border-border-color">
                                                 <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -4876,36 +4876,45 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                 </Card>
             </div>
 
-            {/* Right side breakdown */}
-            <div className="w-full xl:w-[350px] shrink-0 sticky top-6 space-y-4">
+            {/* Summary breakdown */}
+            <div className="w-full space-y-4">
                 <Card className="border-border-strong overflow-hidden">
-                    <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                        <CardTitle className="text-base flex items-center gap-2 text-chaiyo-blue">
+                    <CardHeader className="bg-gray-50/80 border-b border-border-strong pb-3 pt-4">
+                        <CardTitle className="text-base flex items-center gap-2 text-gray-800">
                             <PieChart className="w-5 h-5 text-chaiyo-blue" />
-                            สรุปรายได้
+                            สรุปรายได้ (บาท/เดือน)
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="p-4 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                             {/* Income Breakdown */}
-                            <div className="space-y-2">
-                                <h4 className="text-sm font-bold text-chaiyo-blue flex items-center gap-2">
-                                    รายได้   <TrendingUp className="w-4 h-4" />
-                                </h4>
-                                <div className="space-y-1.5 text-sm">
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>รายได้อาชีพหลัก</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.mainOccupationIncome || 0)).toFixed(2))}</span>
+                            <div className="p-5 space-y-3">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1 h-5 rounded-full bg-emerald-500" />
+                                    <h4 className="text-sm font-bold text-gray-700">รายได้</h4>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">รายได้อาชีพหลัก</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.mainOccupationIncome || 0)).toFixed(2))}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600">
-                                        <span>รายได้อาชีพเสริม</span>
-                                        <span className="font-mono">{formatNumberWithCommas(roundDown2(Number(formData.secondaryOccupationIncome || 0)).toFixed(2))}</span>
-                                    </div>
-                                    <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-100">
-                                        <span>รวมรายได้</span>
-                                        <span className="font-mono text-chaiyo-blue">{formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500">รายได้อาชีพเสริม</span>
+                                        <span className="font-mono text-gray-700">{formatNumberWithCommas(roundDown2(Number(formData.secondaryOccupationIncome || 0)).toFixed(2))}</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Total Column */}
+                            <div className="p-5 flex flex-col justify-center items-center text-center bg-emerald-50/60">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-1 h-5 rounded-full bg-chaiyo-blue" />
+                                    <span className="text-sm font-bold text-gray-700">รวมรายได้</span>
+                                </div>
+                                <div className="text-3xl font-black font-mono mt-1 text-chaiyo-blue">
+                                    {formatNumberWithCommas(roundDown2(Number(formData.totalIncome || 0)).toFixed(2))}
+                                </div>
+                                <span className="text-xs text-gray-400 mt-1">บาท/เดือน</span>
                             </div>
                         </div>
                     </CardContent>

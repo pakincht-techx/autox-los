@@ -402,7 +402,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     <TableRow className="hover:bg-gray-50/50 transition-colors">
                                         <TableCell className="px-4 py-3">
                                             <span className="text-sm text-gray-700">
-                                                ยอดหนี้ปิดบัญชี ณ วันที่ {closureDate} <span className="text-gray-400">(ล่วงหน้า 7 วัน)</span>
+                                                ยอดหนี้ปิดบัญชี ณ วันที่ {closureDate} <span className="text-gray-400">(ล่วงหน้า 7 วัน)</span> <span className="text-red-500">*</span>
                                             </span>
                                         </TableCell>
                                         <TableCell className="px-4 py-3">
@@ -519,7 +519,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                     {/* ── สินเชื่ออื่นๆ ที่ผูกกับรถคันนี้ ────────────── */}
                     <div className="space-y-4">
                         <h4 className="text-sm font-bold text-gray-700">
-                            มีสินเชื่ออื่นๆ ที่ผูกกับรถคันนี้
+                            มีสินเชื่ออื่นๆ ที่ผูกกับหลักประกันนี้
                         </h4>
 
                         <RadioGroup
@@ -545,12 +545,14 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             </div>
                         </RadioGroup>
 
-                        <p className="text-xs text-red-500 leading-relaxed pl-1">
-                            * หากผู้กู้มีสินเชื่อหลายประเภทกับ Finance เดิม เช่น ผู้กู้มีสินเชื่อจำนำเล่มทะเบียน และมีสินเชื่ออื่นที่ผูกกับรถที่นำมาขอสินเชื่อ Refinance (สินเชื่อหมุนเวียน, สินเชื่อบุคคล) <span className="font-bold">ห้ามรับทำสินเชื่อ</span>
-                        </p>
-
                         {hasOtherLoans === true && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                                    <p className="text-sm text-red-700 font-medium leading-relaxed">
+                                        *** หากผู้กู้มีสินเชื่อหลายประเภทกับ Finance เดิม เช่น ผู้กู้มีสินเชื่อจำนำเล่มทะเบียน และมีสินเชื่ออื่นที่ผูกกับรถที่นำมาขอสินเชื่อ Refinance (สินเชื่อหมุนเวียน, สินเชื่อบุคคล) <span className="font-bold">ห้ามรับทำสินเชื่อเด็ดขาด</span>
+                                    </p>
+                                </div>
+
                                 <div className="flex items-center justify-end">
                                     <Button
                                         type="button"
@@ -636,42 +638,50 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         <h4 className="text-sm font-bold text-gray-700">
                             สถานะบัญชี
                         </h4>
-                        <div className="space-y-3 pl-1">
+                        <RadioGroup
+                            value={hasOverdue ? "yes" : "no"}
+                            onValueChange={(val) => {
+                                const isYes = val === "yes";
+                                setHasOverdue(isYes);
+                                if (!isYes) setOverdueInstallments("");
+                            }}
+                            className="flex items-center gap-6 pl-1"
+                        >
                             <div className="flex items-center gap-2.5">
-                                <Checkbox
-                                    id="hasOverdue"
-                                    checked={hasOverdue}
-                                    onCheckedChange={(checked) => {
-                                        setHasOverdue(!!checked);
-                                        if (!checked) setOverdueInstallments("");
-                                    }}
-                                />
-                                <Label htmlFor="hasOverdue" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                <RadioGroupItem value="yes" id="overdueYes" />
+                                <Label htmlFor="overdueYes" className="text-sm font-medium text-gray-700 cursor-pointer">
                                     มีการค้างชำระ
                                 </Label>
                             </div>
-                            {hasOverdue && (
-                                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <Label>
-                                        จำนวนงวดที่ค้างชำระ <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative max-w-md">
-                                        <Input
-                                            value={overdueInstallments}
-                                            onChange={(e) => {
-                                                const raw = e.target.value.replace(/[^0-9]/g, "");
-                                                setOverdueInstallments(raw);
-                                            }}
-                                            placeholder="0"
-                                            className="pr-14 h-11 bg-white"
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                                            งวด
-                                        </span>
-                                    </div>
+                            <div className="flex items-center gap-2.5">
+                                <RadioGroupItem value="no" id="overdueNo" />
+                                <Label htmlFor="overdueNo" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    ไม่มีการค้างชำระ
+                                </Label>
+                            </div>
+                        </RadioGroup>
+
+                        {hasOverdue && (
+                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <Label>
+                                    จำนวนงวดที่ค้างชำระ <span className="text-red-500">*</span>
+                                </Label>
+                                <div className="relative max-w-md">
+                                    <Input
+                                        value={overdueInstallments}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/[^0-9]/g, "");
+                                            setOverdueInstallments(raw);
+                                        }}
+                                        placeholder="0"
+                                        className="pr-14 h-11 bg-white"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                                        งวด
+                                    </span>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
 
 

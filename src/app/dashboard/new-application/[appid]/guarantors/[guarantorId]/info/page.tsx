@@ -100,7 +100,7 @@ export default function GuarantorInfoPage() {
 
     return (
         <>
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+            <div className="space-y-6">
                 <CustomerInfoStep
                     formData={guarantorFormData}
                     setFormData={setGuarantorFormData}

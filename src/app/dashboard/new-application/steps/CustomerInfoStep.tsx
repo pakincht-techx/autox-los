@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/Label";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/Badge";
 import {
     Table,
@@ -686,15 +687,22 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="flex items-center gap-2.5">
-                                <Checkbox
-                                    id="combineIncomeWithBorrower"
-                                    checked={formData.combineIncomeWithBorrower || false}
-                                    onCheckedChange={(checked) => handleChange("combineIncomeWithBorrower", !!checked)}
-                                />
-                                <Label htmlFor="combineIncomeWithBorrower" className="cursor-pointer text-sm font-medium">
-                                    รวมรายได้กับผู้กู้
-                                </Label>
+                            <div className="space-y-2">
+                                <Label>รายได้ผู้ค้ำประกัน <span className="text-red-500">*</span></Label>
+                                <RadioGroup
+                                    value={formData.combineIncomeWithBorrower ? "combine" : "separate"}
+                                    onValueChange={(val) => handleChange("combineIncomeWithBorrower", val === "combine")}
+                                    className="flex items-center gap-6"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <RadioGroupItem value="combine" id="incomeOptionCombine" />
+                                        <Label htmlFor="incomeOptionCombine" className="cursor-pointer text-sm font-medium">รวมรายได้กับผู้กู้</Label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <RadioGroupItem value="separate" id="incomeOptionSeparate" />
+                                        <Label htmlFor="incomeOptionSeparate" className="cursor-pointer text-sm font-medium">ไม่รวมรายได้กับผู้กู้</Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
                         </div>
                     </CardContent>

@@ -47,7 +47,7 @@ export default function AddGuarantorPage() {
     const params = useParams();
     const appId = params.appid as string;
     
-    const { setBreadcrumbs, setRightContent } = useSidebar();
+    const { setBreadcrumbs, setRightContent, setHideSaveDraftButton } = useSidebar();
     const { isApplicationStarted, formData: applicationFormData } = useApplication();
     const searchParams = useSearchParams();
     const isReadonly = searchParams.get('state') === 'readonly';
@@ -68,11 +68,14 @@ export default function AddGuarantorPage() {
         if (!isReadonly) {
             setRightContent(null);
         }
+
+        // Hide save draft button on add guarantor page
+        setHideSaveDraftButton(true);
         
         return () => {
-            // Cleaned up by layout if navigating away to another step
+            setHideSaveDraftButton(false);
         };
-    }, [appId, setBreadcrumbs, applicationFormData?.firstName, router, isReadonly, setRightContent]);
+    }, [appId, setBreadcrumbs, applicationFormData?.firstName, router, isReadonly, setRightContent, setHideSaveDraftButton]);
 
     // Local form data for new guarantor
     const [formData, setFormData] = useState<any>({
@@ -477,7 +480,7 @@ export default function AddGuarantorPage() {
                                 <div className="flex items-center gap-4">
 
                                     <Button variant="ghost" onClick={() => setShowNotContinueDialog(true)} className="text-red-500 hover:bg-red-50">
-                                        <XCircle className="w-5 h-5 mr-1" /> ยกเลิก
+                                        <XCircle className="w-5 h-5 mr-1" /> ออกจากการทำรายการ
                                     </Button>
                                 </div>
                             </div>

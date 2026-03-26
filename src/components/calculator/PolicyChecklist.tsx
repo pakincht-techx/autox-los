@@ -39,7 +39,7 @@ const BORROWER_ROWS: PolicyRow[] = [
         id: "borrower_age",
         policy: "อายุผู้กู้",
         customerInfo: "22 ปี",
-        result: "ขออนุโลมได้",
+        result: "ไม่ผ่าน",
     },
     {
         id: "borrower_age_with_term",
@@ -244,7 +244,6 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
                 policy: "LTV",
                 customerInfo: "65 %",
                 result: "ผ่าน",
-                badge: "test program",
             },
         ],
     },
