@@ -2130,7 +2130,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                     <SelectValue placeholder="กรุณาระบุ" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value="">กรุณาระบุ</SelectItem>
                                                                     <SelectItem value="เกษตรกรรม">เกษตรกรรม</SelectItem>
                                                                     <SelectItem value="ค้าขาย">ค้าขาย</SelectItem>
                                                                     <SelectItem value="ให้เช่า">ให้เช่า</SelectItem>
