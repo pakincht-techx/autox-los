@@ -19,6 +19,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { ActionMenu } from "@/components/ui/ActionMenu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -53,6 +54,7 @@ import {
     AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogAction,
+    AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import {
     Alert,
@@ -726,13 +728,20 @@ function PreQuestionPageContent() {
     const [isIncomeDebtExpanded, setIsIncomeDebtExpanded] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [showProducts, setShowProducts] = useState(false);
-    const { setHideSaveDraftButton } = useSidebar();
+    const { setHideSaveDraftButton, setOnBack } = useSidebar();
+
+    const [isBackConfirmOpen, setIsBackConfirmOpen] = useState(false);
+    const [pendingCollateralType, setPendingCollateralType] = useState<string | null>(null);
+    const [isCollateralChangeConfirmOpen, setIsCollateralChangeConfirmOpen] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
         setHideSaveDraftButton(true);
-        return () => setHideSaveDraftButton(false);
-    }, [setHideSaveDraftButton]);
+        return () => {
+            setHideSaveDraftButton(false);
+            setOnBack(null);
+        };
+    }, [setHideSaveDraftButton, setOnBack]);
 
     // --- REFINED LAND APPRAISAL CALCULATION ---
     const calculatedLandResult = useMemo(() => {
@@ -1101,6 +1110,54 @@ function PreQuestionPageContent() {
     };
     const prevStep = () => setCurrentStep(prev => prev - 1);
 
+    // Check if user has filled any collateral-specific data
+    const hasCollateralData = Boolean(
+        formData.brand ||
+        formData.model ||
+        formData.year ||
+        formData.borrowerAge ||
+        formData.nationality ||
+        formData.collateralStatus !== 'clear' ||
+        formData.occupationGroup ||
+        formData.loanPurpose ||
+        (formData.appraisalPrice && formData.appraisalPrice > 0) ||
+        formData.landDeedType ||
+        Object.keys(formData.collateralQuestions || {}).length > 0
+    );
+
+    const handleCollateralTypeChange = (newType: string) => {
+        if (newType === formData.collateralType) return;
+        if (hasCollateralData) {
+            setPendingCollateralType(newType);
+            setIsCollateralChangeConfirmOpen(true);
+        } else {
+            applyCollateralTypeChange(newType);
+        }
+    };
+
+    const applyCollateralTypeChange = (newType: string) => {
+        const tenureOpts = TENURE_OPTIONS[newType] || [];
+        const maxTenure = tenureOpts.length > 0 ? Math.max(...tenureOpts) : 0;
+        setFormData({
+            ...formData,
+            collateralType: newType,
+            brand: '',
+            model: '',
+            year: '',
+            appraisalPrice: 0,
+            requestedDuration: maxTenure,
+            collateralStatus: 'clear',
+            borrowerAge: '',
+            nationality: '',
+            occupationGroup: '',
+            loanPurpose: '',
+            collateralQuestions: {},
+            landDeedType: undefined,
+            ...(newType === 'land' ? { landDeedType: 'ns4' } : {})
+        });
+        setAiDetectedFields([]);
+    };
+
     // Mock AI Analysis from Photo Step
     const handleAnalyze = () => {
         setIsAnalyzing(true);
@@ -1341,6 +1398,29 @@ function PreQuestionPageContent() {
 
     const { setBreadcrumbs, setRightContent } = useSidebar();
 
+    // Check if the form has been filled (dirty)
+    const isFormDirty = Boolean(
+        formData.borrowerAge ||
+        formData.collateralStatus ||
+        formData.nationality ||
+        formData.brand ||
+        formData.model ||
+        formData.year ||
+        formData.occupationGroup ||
+        formData.loanPurpose ||
+        formData.landDeedType ||
+        currentStep > 1
+    );
+
+    useEffect(() => {
+        setOnBack(() => {
+            if (isFormDirty) {
+                return () => setIsBackConfirmOpen(true);
+            }
+            return null;
+        });
+    }, [isFormDirty, setOnBack]);
+
     useEffect(() => {
         setBreadcrumbs([
             { label: "สร้างใบสมัครใหม่", isActive: true }
@@ -1489,23 +1569,7 @@ function PreQuestionPageContent() {
                                         {PRODUCTS.map((p) => (
                                             <button
                                                 key={p.id}
-                                                onClick={() => {
-                                                    const tenureOpts = TENURE_OPTIONS[p.id] || [];
-                                                    const maxTenure = tenureOpts.length > 0 ? Math.max(...tenureOpts) : 0;
-                                                    setFormData({
-                                                        ...formData,
-                                                        collateralType: p.id,
-                                                        brand: '',
-                                                        model: '',
-                                                        year: '',
-                                                        appraisalPrice: 0,
-                                                        requestedDuration: maxTenure,
-                                                        collateralStatus: 'clear',
-                                                        // Automatically default to 'ns4' when land is selected
-                                                        ...(p.id === 'land' ? { landDeedType: 'ns4' } : {})
-                                                    });
-                                                    setAiDetectedFields([]);
-                                                }}
+                                                onClick={() => handleCollateralTypeChange(p.id)}
                                                 className={cn(
                                                     "flex-1 min-w-[104px] py-3 px-4 rounded-xl border text-sm font-bold transition-all text-center group flex flex-col items-center justify-center gap-2",
                                                     formData.collateralType === p.id
@@ -3359,6 +3423,57 @@ function PreQuestionPageContent() {
                                 className="bg-chaiyo-blue hover:bg-blue-800 text-white px-8 py-2 rounded-xl h-11 min-w-[104px]"
                             >
                                 รับทราบ
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Back Confirmation Dialog */}
+                <AlertDialog open={isBackConfirmOpen} onOpenChange={setIsBackConfirmOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>ออกจากหน้าสร้างใบสมัครใหม่?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                ข้อมูลที่คุณกรอกไว้และยังไม่ได้บันทึกอาจจะสูญหาย คุณแน่ใจหรือไม่ว่าต้องการออกจากหน้านี้?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel className={cn(buttonVariants({ variant: "outline" }), "min-w-[104px]")}>
+                                ยกเลิก
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() => router.back()}
+                                className={cn(buttonVariants({ variant: "destructive" }), "min-w-[104px]")}
+                            >
+                                ยืนยันการออก
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Collateral Type Change Confirmation Dialog */}
+                <AlertDialog open={isCollateralChangeConfirmOpen} onOpenChange={setIsCollateralChangeConfirmOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>เปลี่ยนประเภทหลักประกัน?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                ข้อมูลหลักประกันที่คุณกรอกไว้จะถูกล้างทั้งหมด คุณแน่ใจหรือไม่ว่าต้องการเปลี่ยนประเภทหลักประกัน?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel className={cn(buttonVariants({ variant: "outline" }), "min-w-[104px]")}>
+                                ยกเลิก
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() => {
+                                    if (pendingCollateralType) {
+                                        applyCollateralTypeChange(pendingCollateralType);
+                                        setPendingCollateralType(null);
+                                    }
+                                }}
+                                className={cn(buttonVariants({ variant: "destructive" }), "min-w-[104px]")}
+                            >
+                                ยืนยัน
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
