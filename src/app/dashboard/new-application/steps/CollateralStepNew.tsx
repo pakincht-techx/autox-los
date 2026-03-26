@@ -4117,14 +4117,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {(formData.otherVehicles || []).length === 0 ? (
-                                                        <TableRow>
-                                                            <TableCell colSpan={6} className="text-center py-6 text-gray-400 text-sm">
-                                                                คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลรถยนต์
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ) : (
-                                                        (formData.otherVehicles || []).map((vehicle: any, idx: number) => (
+                                                    {((formData.otherVehicles || []).length === 0 ? [{ id: 'new', carNumber: '1', type: '', brand: '', model: '', status: '' }] : formData.otherVehicles).map((vehicle: any, idx: number) => (
                                                             <TableRow key={vehicle.id || idx} className="hover:bg-transparent">
                                                                 <TableCell className="text-center align-middle text-xs font-medium">
                                                                     {idx + 1}
@@ -4225,8 +4218,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                     )}
                                                                 </TableCell>
                                                             </TableRow>
-                                                        ))
-                                                    )}
+                                                        ))}
                                                 </TableBody>
                                             </Table>
                                         </div>
@@ -4288,14 +4280,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {(formData.otherLands || []).length === 0 ? (
-                                                        <TableRow>
-                                                            <TableCell colSpan={4} className="text-center py-6 text-gray-400 text-sm">
-                                                                คลิก "เพิ่ม" เพื่อเพิ่มข้อมูลที่ดิน
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ) : (
-                                                        (formData.otherLands || []).map((land: any, idx: number) => (
+                                                    {((formData.otherLands || []).length === 0 ? [{ id: 'new', landNumber: '1', landUse: '', status: '' }] : formData.otherLands).map((land: any, idx: number) => (
                                                             <TableRow key={land.id || idx} className="hover:bg-transparent">
                                                                 <TableCell className="text-center align-middle text-xs font-medium">
                                                                     {idx + 1}
@@ -4356,8 +4341,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                     )}
                                                                 </TableCell>
                                                             </TableRow>
-                                                        ))
-                                                    )}
+                                                        ))}
                                                 </TableBody>
                                             </Table>
                                         </div>
@@ -4398,7 +4382,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 </div>
                                             </div>
                                             <div className="flex items-center justify-between p-4 bg-emerald-50/30 border border-emerald-100/50 rounded-xl md:col-span-2">
-                                                <Label className="text-base font-bold text-emerald-800">ราคาประเมินรวมทั้งสิ้น</Label>
+                                                <Label className="text-base font-bold text-emerald-800">ราคาประเมินรวม (สุทธิ)</Label>
                                                 <div className="text-2xl font-bold text-emerald-600">
                                                     {formData.grandTotalAppraisal ? Number(formData.grandTotalAppraisal).toLocaleString() : "0"} <span className="text-sm text-emerald-800/60 ml-1">บาท</span>
                                                 </div>
