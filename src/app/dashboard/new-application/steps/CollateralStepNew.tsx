@@ -1016,6 +1016,59 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                             </TableRow>
                                                         );
                                                     })}
+                                                    {/* Other Photos Row */}
+                                                    {(() => {
+                                                        const otherPhotos = collateralPhotos['other'] || [];
+                                                        const hasOtherPhotos = otherPhotos.length > 0;
+                                                        return (
+                                                            <TableRow className="hover:bg-transparent">
+                                                                <TableCell className="py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className={cn(
+                                                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                            hasOtherPhotos ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                        )}>
+                                                                            {hasOtherPhotos ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                        </div>
+                                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">รูปภาพอื่นๆ</span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {hasOtherPhotos ? (
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setManagingPhotoGuideId('other');
+                                                                                }}
+                                                                                className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                            >
+                                                                                <FileText className="w-4 h-4" />
+                                                                                {otherPhotos.length} รูปภาพ
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <div className="flex items-center justify-end gap-1">
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() => handleTriggerCategoryPhotoUpload('other')}
+                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                        >
+                                                                            <Plus className="w-3.5 h-3.5" />
+                                                                            เพิ่มรูปอื่นๆ
+                                                                        </Button>
+                                                                    </div>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })()}
                                                 </TableBody>
                                             </Table>
                                         </div>
@@ -1415,6 +1468,65 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         </TableRow>
                                                     );
                                                 })}
+                                                {/* Other Documents Row */}
+                                                {(() => {
+                                                    const otherFiles = uploadedPaperDocs.filter((docObj: any) => {
+                                                        const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                        return label === "อื่นๆ";
+                                                    });
+                                                    const hasOtherFiles = otherFiles.length > 0;
+                                                    return (
+                                                        <TableRow className="hover:bg-transparent">
+                                                            <TableCell className="py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={cn(
+                                                                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                        hasOtherFiles ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                    )}>
+                                                                        {hasOtherFiles ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                    </div>
+                                                                    <span className="font-medium text-gray-700 text-sm whitespace-nowrap">เอกสารอื่นๆ</span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {hasOtherFiles ? (
+                                                                    <div className="flex items-center gap-3">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setManagingPaperDocLabel("อื่นๆ");
+                                                                            }}
+                                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                        >
+                                                                            <FileText className="w-4 h-4" />
+                                                                            {otherFiles.length} ไฟล์
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => {
+                                                                            setCurrentDocLabel("อื่นๆ");
+                                                                            paperInputRef.current?.click();
+                                                                        }}
+                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                    >
+                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                        เพิ่มเอกสารอื่นๆ
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })()}
                                             </TableBody>
                                         </Table>
                                     </div>
