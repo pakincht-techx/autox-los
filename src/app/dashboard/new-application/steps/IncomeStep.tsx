@@ -4347,8 +4347,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                             )}
                                         </>
                                     )}
-                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed, hide for guarantor) ===== */}
-                                    {!isGuarantor && occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
+                                    {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed) ===== */}
+                                    {occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <Users className="w-5 h-5 text-chaiyo-blue" /> บุคคลอ้างอิง

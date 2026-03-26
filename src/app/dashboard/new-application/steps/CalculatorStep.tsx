@@ -1134,7 +1134,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 รายละเอียดบัญชีรับโอนเงินกู้
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-1 gap-4 px-6 pb-6 pt-5">
+                        <CardContent className="grid grid-cols-1 px-6 pb-6 pt-5">
                             {/* Upload Book Bank Table */}
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center justify-between mb-2">
@@ -1187,7 +1187,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                 if (bookBankFile) setIsDeleteDialogOpen(true);
                                                             }}
                                                             className={cn(
-                                                                "h-8 text-xs gap-1.5 font-medium relative", 
+                                                                "h-8 text-xs gap-1.5 font-medium relative",
                                                                 bookBankFile ? "w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50" : ""
                                                             )}
                                                             title={bookBankFile ? "ลบไฟล์" : "อัพโหลดไฟล์"}
@@ -1195,9 +1195,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัพโหลดไฟล์</>}
                                                         </Button>
                                                         {!bookBankFile && (
-                                                            <input 
-                                                                type="file" 
-                                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                                            <input
+                                                                type="file"
+                                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                                 onChange={(e) => {
                                                                     if (e.target.files && e.target.files.length > 0) {
                                                                         setBookBankFile(e.target.files[0]);
@@ -1250,15 +1250,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     </Select>
                                 </div>
 
-                                {/* Bank Account Name */}
-                                <div className="space-y-1.5">
-                                    <Label className="text-sm">ชื่อบัญชี <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
-                                        value={formData?.bankAccountName || ''}
-                                        onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
-                                    />
-                                </div>
+
 
                                 {/* Bank Account Number */}
                                 <div className="space-y-1.5">
@@ -1300,6 +1292,15 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                             setFormData?.({ ...formData, bankAccountNumber: finalValue });
                                         }}
                                         className="font-mono text-base"
+                                    />
+                                </div>
+                                {/* Bank Account Name */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">ชื่อบัญชี <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
+                                        value={formData?.bankAccountName || ''}
+                                        onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
                                     />
                                 </div>
                             </div>
