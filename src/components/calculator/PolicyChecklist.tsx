@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/Button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/Textarea";
+import { Label } from "@/components/ui/Label";
 
 // Policy row types
 type PolicyResult = "ผ่าน" | "ไม่ผ่าน" | "ขออนุโลมได้" | null;
@@ -198,6 +203,18 @@ const GUARANTORS: Guarantor[] = [
 // Standard (non-guarantor) sections
 const STANDARD_SECTIONS: PolicySection[] = [
     {
+        id: "project",
+        label: "ข้อมูลโครงการ",
+        rows: [
+            {
+                id: "project_name",
+                policy: "ชื่อโครงการ",
+                customerInfo: "test program",
+                result: null,
+            }
+        ]
+    },
+    {
         id: "borrower",
         label: "ข้อมูลผู้กู้",
         rows: BORROWER_ROWS,
@@ -366,28 +383,48 @@ export function PolicyChecklist() {
         ...AFTER_GUARANTOR_SECTIONS.flatMap(s => s.rows),
     ];
     const rowsWithResult = allRows.filter(r => r.result !== null);
-    const hasNotPassed = rowsWithResult.some(r => r.result === "ไม่ผ่าน");
+    const failedRows = rowsWithResult.filter(r => r.result === "ไม่ผ่าน");
+    const hasNotPassed = failedRows.length > 0;
     const hasException = rowsWithResult.some(r => r.result === "ขออนุโลมได้");
     const overallStatus = hasNotPassed ? "ไม่ผ่าน" : hasException ? "ขออนุโลมได้" : "ผ่าน";
     const overallVariant = hasNotPassed ? "danger" : hasException ? "warning" : "success";
 
     const [isOpen, setIsOpen] = useState(false);
+    const [isFailedDialogOpen, setIsFailedDialogOpen] = useState(false);
+    const [waiverStatus, setWaiverStatus] = useState<string>("");
+    const [waiverReason, setWaiverReason] = useState("");
 
     return (
+        <>
             <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                 <CardHeader
                     className="bg-blue-50/50 border-b border-border-strong pb-4 cursor-pointer select-none"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" />
-                            Policy Checklist
-                        </CardTitle>
                         <div className="flex items-center gap-2">
+                            <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                                <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" />
+                                Policy Checklist
+                            </CardTitle>
                             <Badge variant={overallVariant}>
                                 {overallStatus}
                             </Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {hasNotPassed && (
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs px-3 shadow-none font-bold"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsFailedDialogOpen(true);
+                                    }}
+                                >
+                                    ขออนุโลม
+                                </Button>
+                            )}
                             <ChevronDown className={cn("w-5 h-5 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} />
                         </div>
                     </div>
@@ -444,5 +481,89 @@ export function PolicyChecklist() {
                 </CardContent>
                 )}
             </Card>
+
+            <Dialog open={isFailedDialogOpen} onOpenChange={setIsFailedDialogOpen}>
+                <DialogContent className="sm:max-w-[700px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-gray-900">รายการนโยบายที่ไม่ผ่านเกณฑ์</DialogTitle>
+                    </DialogHeader>
+                    <DialogBody>
+                        <div className="space-y-6 pb-2 pt-1">
+                            {/* Table List */}
+                            <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                <Table>
+                                    <TableHeader className="bg-gray-50/50">
+                                        <TableRow>
+                                            <TableHead className="w-[40%] text-xs">รายการ</TableHead>
+                                            <TableHead className="w-[40%] text-xs">ข้อมูลลูกค้า</TableHead>
+                                            <TableHead className="w-[20%] text-xs text-center">สถานะ</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {failedRows.map((row, idx) => (
+                                            <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors">
+                                                <TableCell className="text-sm font-medium">{row.policy}</TableCell>
+                                                <TableCell className="text-sm text-gray-600">
+                                                    {Array.isArray(row.customerInfo) ? row.customerInfo.join(', ') : row.customerInfo}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    <Badge variant="danger">ไม่ผ่าน</Badge>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Waiver Options */}
+                            <div className="space-y-4">
+                                <Label className="text-sm font-bold text-gray-900">การขออนุโลม <span className="text-red-500">*</span></Label>
+                                <RadioGroup value={waiverStatus} onValueChange={setWaiverStatus} className="flex gap-6">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="ขออนุโลม" id="waiver-yes" />
+                                        <Label htmlFor="waiver-yes" className="font-normal cursor-pointer text-sm">ขออนุโลม</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="ไม่ขออนุโลม" id="waiver-no" />
+                                        <Label htmlFor="waiver-no" className="font-normal cursor-pointer text-sm">ไม่ขออนุโลม</Label>
+                                    </div>
+                                </RadioGroup>
+
+                                {waiverStatus === "ขออนุโลม" && (
+                                    <div className="space-y-2 animate-in fade-in duration-300">
+                                        <Label className="text-sm font-bold text-gray-900">เหตุผลที่ขออนุโลม <span className="text-red-500">*</span></Label>
+                                        <Textarea
+                                            placeholder="กรอกเหตุผลที่ขออนุโลม..."
+                                            value={waiverReason}
+                                            onChange={(e) => setWaiverReason(e.target.value)}
+                                            className="min-h-[100px] bg-white border-gray-200"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button 
+                            variant="outline" 
+                            className="min-w-[120px] font-bold shadow-none" 
+                            onClick={() => setIsFailedDialogOpen(false)}
+                        >
+                            ปิด
+                        </Button>
+                        <Button
+                            className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                            disabled={!waiverStatus || (waiverStatus === "ขออนุโลม" && !waiverReason.trim())}
+                            onClick={() => {
+                                // Save logic here
+                                setIsFailedDialogOpen(false);
+                            }}
+                        >
+                            บันทึก
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }

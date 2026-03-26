@@ -3123,7 +3123,13 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
             </AlertDialog>
 
             {/* Phone Ownership Verification Dialog */}
-            <Dialog open={showPhoneVerifyDialog} onOpenChange={setShowPhoneVerifyDialog}>
+            <Dialog open={showPhoneVerifyDialog} onOpenChange={(open) => {
+                if (!open && phoneOwnershipStatus === 'error') {
+                    handleChange("phoneOwnershipProof", null);
+                    setPhoneOwnershipStatus('idle');
+                }
+                setShowPhoneVerifyDialog(open);
+            }}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="text-center flex flex-col items-center gap-4">
@@ -3196,7 +3202,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                     {!isPhoneOwnershipVerifying && (
                         <DialogFooter>
                             <Button
-                                className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
+                                className="w-full font-bold shadow-none bg-chaiyo-blue text-white hover:bg-chaiyo-blue/90"
                                 onClick={() => {
                                     if (phoneOwnershipStatus === 'error') {
                                         handleChange("phoneOwnershipProof", null);

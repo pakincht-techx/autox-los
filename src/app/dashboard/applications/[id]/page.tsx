@@ -240,7 +240,7 @@ function getMockApp(mockCase: string | null) {
 
 export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { setBreadcrumbs, setRightContent, devRole, setHideNavButtons, setHideSaveDraftButton } = useSidebar();
+    const { setBreadcrumbs, setRightContent, devRole, setHideNavButtons, setHideSaveDraftButton, setOnBack } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [consentCompleted, setConsentCompleted] = useState(false);
@@ -291,11 +291,13 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
             { label: `${app.applicationNo.slice(8)} (${firstName})`, isActive: true }
         ]);
 
+        setOnBack(() => () => router.back());
+
         // No right content in the top bar — action buttons are in the header section
         setRightContent(null);
 
         // Hide nav buttons and save draft button on applications detail page
-        setHideNavButtons(true);
+        setHideNavButtons(false);
         setHideSaveDraftButton(true);
 
         return () => {
@@ -303,8 +305,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
             setRightContent(null);
             setHideNavButtons(false);
             setHideSaveDraftButton(false);
+            setOnBack(null);
         };
-    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, viewMode, canEdit, currentStatus, statusParam, setHideNavButtons, setHideSaveDraftButton]);
+    }, [app.applicationNo, app.applicantName, from, setBreadcrumbs, setRightContent, viewMode, canEdit, currentStatus, statusParam, setHideNavButtons, setHideSaveDraftButton, setOnBack, router]);
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
@@ -964,8 +967,19 @@ function ModuleRow({
     onEdit?: () => void;
     onView?: () => void;
 }) {
+    const handleClick = () => {
+        if (onEdit) onEdit();
+        else if (onView) onView();
+    };
+
     return (
-        <div className="flex items-center justify-between px-4 py-3.5 group">
+        <div 
+            onClick={onEdit || onView ? handleClick : undefined}
+            className={cn(
+                "flex items-center justify-between px-4 py-3.5 group transition-colors",
+                (onEdit || onView) && "cursor-pointer hover:bg-gray-50"
+            )}
+        >
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-400">
                     {icon ?? <User className="w-4 h-4" />}
@@ -979,24 +993,14 @@ function ModuleRow({
                     </div>
                 )}
                 {onEdit && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onEdit}
-                        className="h-8 w-8 p-0 rounded-lg text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
-                    >
+                    <div className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 group-hover:text-chaiyo-blue group-hover:bg-blue-50 transition-colors">
                         <Pencil className="w-3.5 h-3.5" />
-                    </Button>
+                    </div>
                 )}
                 {onView && !onEdit && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onView}
-                        className="h-8 w-8 p-0 rounded-lg text-gray-400 hover:text-chaiyo-blue hover:bg-blue-50"
-                    >
+                    <div className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 group-hover:text-chaiyo-blue group-hover:bg-blue-50 transition-colors">
                         <Eye className="w-3.5 h-3.5" />
-                    </Button>
+                    </div>
                 )}
             </div>
         </div>

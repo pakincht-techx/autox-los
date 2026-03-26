@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard } from "lucide-react";
+import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard, ImagePlus, FileText, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +12,8 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Verify if available, otherwise use custom or standard input
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/Dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
 import { Switch } from "@/components/ui/switch";
@@ -54,6 +55,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
     const [totalInterest, setTotalInterest] = useState<number>(0);
     const [selectedProduct, setSelectedProduct] = useState<string>("car");
+    const [bookBankFile, setBookBankFile] = useState<File | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     // Local Payment Method State
     const [localPaymentMethod, setLocalPaymentMethod] = useState<'installment' | 'bullet'>(formData?.paymentMethod || paymentMethod || 'installment');
@@ -64,7 +67,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [seasonalStartMonth, setSeasonalStartMonth] = useState<string>("5");
 
     // New State for Max Loan Logic
-    const [maxLoanAmount, setMaxLoanAmount] = useState<number>(1000000);
+    const [maxLoanAmount, setMaxLoanAmount] = useState<number>(500000);
     const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
     // Insurance State
@@ -194,7 +197,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
     // Calculate Max Loan based on formData (if available)
     useEffect(() => {
-        let calculatedMax = 1000000; // Default Max Loan
+        let calculatedMax = 500000; // Default Max Loan
         // Logic: Appraisal * LTV - Deductions
 
         // Priority 1: Appraisal Price (from AI/Collateral Step)
@@ -526,17 +529,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     </div>
                                 </div>
 
-                                {/* Program Name (read-only) */}
-                                <div className="space-y-1.5">
-                                    <Label className="text-sm">ชื่อโครงการ</Label>
-                                    <Input
-                                        type="text"
-                                        value="test program"
-                                        readOnly
-                                        disabled
-                                        className="pl-4 h-12 bg-gray-50 border-gray-200 text-sm cursor-not-allowed"
-                                    />
-                                </div>
                             </div>
 
                             {/* Seasonal Payment Section */}
@@ -1143,67 +1135,203 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 gap-4 px-6 pb-6 pt-5">
-                            {/* Select Bank */}
-                            <div className="space-y-1.5">
-                                <Label className="text-sm">ธนาคาร</Label>
-                                <Select
-                                    value={formData?.bankName || ''}
-                                    onValueChange={(val) => setFormData?.({ ...formData, bankName: val })}
-                                >
-                                    <SelectTrigger className="w-full h-12 rounded-xl bg-white border-gray-200 text-sm">
-                                        <SelectValue placeholder="-- เลือกธนาคาร --">
-                                            {formData?.bankName && (
-                                                <div className="flex items-center gap-2">
-                                                    <img
-                                                        src={THAI_BANKS.find(b => b.value === formData.bankName)?.logo}
-                                                        alt={formData.bankName}
-                                                        className="w-5 h-5 object-contain"
-                                                    />
-                                                    <span className="truncate">{THAI_BANKS.find(b => b.value === formData.bankName)?.label}</span>
-                                                </div>
-                                            )}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {THAI_BANKS.map(bank => (
-                                            <SelectItem key={bank.value} value={bank.value}>
-                                                <div className="flex items-center gap-2">
-                                                    <img src={bank.logo} alt={bank.label} className="w-5 h-5 object-contain shrink-0" />
-                                                    <span>{bank.label}</span>
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            {/* Upload Book Bank Table */}
+                            <div className="space-y-3 mb-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                        อัพโหลดหน้าสมุดบัญชีธนาคาร
+                                    </Label>
+                                </div>
+                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                    <Table>
+                                        <TableHeader className="bg-gray-50/50">
+                                            <TableRow className="hover:bg-transparent">
+                                                <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ <span className="text-red-500 text-sm">*</span></TableHead>
+                                                <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            <TableRow className="hover:bg-transparent">
+                                                <TableCell className="py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn(
+                                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                            bookBankFile ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                        )}>
+                                                            {bookBankFile ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                        </div>
+                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">หน้าสมุดบัญชีธนาคาร (Book Bank)</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {bookBankFile ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => window.open(URL.createObjectURL(bookBankFile), '_blank')}
+                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                        >
+                                                            <FileText className="w-3.5 h-3.5" /> 1 ไฟล์
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="relative inline-block">
+                                                        <Button
+                                                            type="button"
+                                                            variant={bookBankFile ? "ghost" : "outline"}
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                if (bookBankFile) setIsDeleteDialogOpen(true);
+                                                            }}
+                                                            className={cn(
+                                                                "h-8 text-xs gap-1.5 font-medium relative", 
+                                                                bookBankFile ? "w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50" : ""
+                                                            )}
+                                                            title={bookBankFile ? "ลบไฟล์" : "อัพโหลดไฟล์"}
+                                                        >
+                                                            {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัพโหลดไฟล์</>}
+                                                        </Button>
+                                                        {!bookBankFile && (
+                                                            <input 
+                                                                type="file" 
+                                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                                                onChange={(e) => {
+                                                                    if (e.target.files && e.target.files.length > 0) {
+                                                                        setBookBankFile(e.target.files[0]);
+                                                                    }
+                                                                }}
+                                                                accept="image/*,.pdf"
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </div>
                             </div>
 
-                            {/* Bank Account Name */}
-                            <div className="space-y-1.5">
-                                <Label className="text-sm">ชื่อบัญชี</Label>
-                                <Input
-                                    placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
-                                    value={formData?.bankAccountName || ''}
-                                    onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
-                                    className="h-12 rounded-xl bg-white border-gray-200"
-                                />
-                            </div>
+                            {/* Bank Account Details */}
+                            <div className="space-y-4">
+                                {/* Select Bank */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">ธนาคาร <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        value={formData?.bankName || ''}
+                                        onValueChange={(val) => setFormData?.({ ...formData, bankName: val })}
+                                    >
+                                        <SelectTrigger className="w-full text-sm">
+                                            <SelectValue placeholder="-- เลือกธนาคาร --">
+                                                {formData?.bankName && (
+                                                    <div className="flex items-center gap-2">
+                                                        <img
+                                                            src={THAI_BANKS.find(b => b.value === formData.bankName)?.logo}
+                                                            alt={formData.bankName}
+                                                            className="w-5 h-5 object-contain"
+                                                        />
+                                                        <span className="truncate">{THAI_BANKS.find(b => b.value === formData.bankName)?.label}</span>
+                                                    </div>
+                                                )}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                                            {THAI_BANKS.map(bank => (
+                                                <SelectItem key={bank.value} value={bank.value}>
+                                                    <div className="flex items-center gap-2">
+                                                        <img src={bank.logo} alt={bank.label} className="w-5 h-5 object-contain shrink-0" />
+                                                        <span>{bank.label}</span>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            {/* Bank Account Number */}
-                            <div className="space-y-1.5">
-                                <Label className="text-sm">เลขที่บัญชี</Label>
-                                <Input
-                                    placeholder="กรอกเลขที่บัญชีธนาคาร"
-                                    value={formData?.bankAccountNumber || ''}
-                                    onChange={(e) => setFormData?.({ ...formData, bankAccountNumber: e.target.value })}
-                                    className="h-12 rounded-xl bg-white border-gray-200"
-                                    maxLength={15}
-                                />
+                                {/* Bank Account Name */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">ชื่อบัญชี <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
+                                        value={formData?.bankAccountName || ''}
+                                        onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
+                                    />
+                                </div>
+
+                                {/* Bank Account Number */}
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm">เลขที่บัญชี <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        placeholder="กรอกเลขที่บัญชีธนาคาร"
+                                        value={formData?.bankAccountNumber || ''}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            const bankName = formData?.bankName;
+                                            let finalValue = value;
+                                            const numbers = value.replace(/\D/g, '');
+                                            if (bankName === 'TRUEMONEY') {
+                                                const digits = numbers.slice(0, 10);
+                                                if (digits.length > 0) {
+                                                    finalValue = digits.slice(0, 3);
+                                                    if (digits.length > 3) {
+                                                        finalValue += "-" + digits.slice(3, 6);
+                                                        if (digits.length > 6) {
+                                                            finalValue += "-" + digits.slice(6, 10);
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                const digits = numbers.slice(0, 10);
+                                                if (digits.length > 0) {
+                                                    finalValue = digits.slice(0, 3);
+                                                    if (digits.length > 3) {
+                                                        finalValue += "-" + digits.slice(3, 4);
+                                                        if (digits.length > 4) {
+                                                            finalValue += "-" + digits.slice(4, 9);
+                                                            if (digits.length > 9) {
+                                                                finalValue += "-" + digits.slice(9, 10);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            setFormData?.({ ...formData, bankAccountNumber: finalValue });
+                                        }}
+                                        className="font-mono text-base"
+                                    />
+                                </div>
                             </div>
 
 
                         </CardContent>
                     </Card>
 
+
+                    {/* Delete Confirmation Dialog */}
+                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>ยืนยันการลบไฟล์</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    คุณต้องการลบไฟล์หน้าสมุดบัญชีธนาคารใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>ยกเลิก</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={() => {
+                                        setBookBankFile(null);
+                                        setIsDeleteDialogOpen(false);
+                                    }}
+                                    className="bg-status-rejected hover:bg-status-rejected/90 text-white"
+                                >
+                                    ยืนยันการลบ
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
 
                     {/* Policy Checklist - Last Section */}
                     <PolicyChecklist />
