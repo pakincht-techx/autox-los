@@ -603,6 +603,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
     const categoryPhotoInputRef = useRef<HTMLInputElement>(null);
     const categoryCameraRef = useRef<HTMLInputElement>(null);
     const [currentPhotoGuideId, setCurrentPhotoGuideId] = useState<string>("");
+    const [currentDocLabel, setCurrentDocLabel] = useState<string>("");
 
     // Set current year on client side to prevent hydration mismatch
     useEffect(() => {
@@ -715,11 +716,13 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
         const newDocs: { url: string, label: string }[] = [];
         for (let i = 0; i < files.length; i++) {
             const url = URL.createObjectURL(files[i]);
-            const defaultLabel = availableDocs[uploadedPaperDocs.length + i]?.label || "อื่นๆ";
+            // Use currentDocLabel if set, otherwise use the next available doc label
+            const defaultLabel = currentDocLabel || availableDocs[uploadedPaperDocs.length + i]?.label || "อื่นๆ";
             newDocs.push({ url, label: defaultLabel });
         }
 
         setUploadedPaperDocs((prev: { url: string, label: string }[]) => [...prev, ...newDocs]);
+        setCurrentDocLabel(""); // Reset after upload
         setIsAnalyzing(true);
         toast.info("กำลังตรวจสอบเอกสารหลักประกัน...", { duration: 1500 });
 
@@ -1202,181 +1205,203 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                 onChange={handleCategoryPhotoUpload}
                             />
 
-                            {/* PAPER DOCS UPLOAD SECTION - 2 COLUMN LAYOUT */}
-                            <div className="p-6 space-y-4">
+                            {/* PAPER DOCS UPLOAD SECTION - TABLE-BASED LAYOUT */}
+                            <div className="p-6 space-y-6">
                                 {/* Header */}
-                                <div className="flex items-center gap-3 flex-wrap">
-                                    <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                                        <Book className="w-4 h-4 text-emerald-600" />
+                                <div className="flex items-center gap-3">
+                                    <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color flex-1">
+                                        <Book className="w-5 h-5 text-emerald-600" />
                                         รายการเอกสารที่ต้องใช้
-                                        <button
-                                            type="button"
-                                            onClick={() => setPaperGuideDialogOpen(true)}
-                                            className="text-gray-400 hover:text-emerald-600 transition-colors"
-                                        >
-                                            <Info className="w-4 h-4" />
-                                        </button>
                                     </h4>
-                                    <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full hidden">
-                                        {analyzedPaperCount} / {getPaperDocs(formData.collateralType, formData).length} ชุด
-                                    </span>
                                 </div>
 
-                                {/* 2-Column Layout: 60% Left (Documents) + 40% Right (Checklist) */}
-                                <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
-                                    {/* LEFT: Document Upload Area */}
-                                    <div className="space-y-3">
-                                        {/* Upload Buttons */}
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="file"
-                                                ref={paperInputRef}
-                                                className="hidden"
-                                                accept="image/*,application/pdf"
-                                                multiple
-                                                onChange={handlePaperUpload}
-                                            />
-                                            <input
-                                                type="file"
-                                                ref={paperCameraRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                capture="environment"
-                                                onChange={handlePaperUpload}
-                                            />
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => paperInputRef.current?.click()}
-                                                disabled={isAnalyzing}
-                                                size="sm"
-                                            >
-                                                <Upload className="w-4 h-4 mr-2" />
-                                                อัปโหลดเอกสาร
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => paperCameraRef.current?.click()}
-                                                disabled={isAnalyzing}
-                                                size="sm"
-                                            >
-                                                <Camera className="w-4 h-4 mr-2" />
-                                                เปิดกล้อง
-                                            </Button>
-                                        </div>
+                                {/* Hidden file inputs */}
+                                <input
+                                    type="file"
+                                    ref={paperInputRef}
+                                    className="hidden"
+                                    accept="image/*,application/pdf"
+                                    multiple
+                                    onChange={handlePaperUpload}
+                                />
+                                <input
+                                    type="file"
+                                    ref={paperCameraRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    capture="environment"
+                                    onChange={handlePaperUpload}
+                                />
 
-                                        {/* Document Grid - Larger Previews */}
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50/50 p-3 rounded-xl border border-dashed border-gray-200 min-h-[280px]">
-                                            {uploadedPaperDocs.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center text-gray-400 gap-2 opacity-60 py-8">
-                                                    <FilePlus className="w-10 h-10" />
-                                                    <p className="text-sm font-medium italic">ยังไม่มีการอัปโหลดเอกสาร</p>
-                                                </div>
-                                            ) : (
-                                                uploadedPaperDocs.map((docObj: any, idx) => {
-                                                    const url = typeof docObj === 'string' ? docObj : docObj.url;
-                                                    const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                {/* Mandatory Documents Table */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <Label className="text-sm font-bold text-gray-700">เอกสารบังคับ</Label>
+                                    </div>
+                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[45%] text-xs">เอกสาร <span className="text-red-500 text-sm">*</span></TableHead>
+                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                    <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {getPaperDocs(formData.collateralType, formData).filter(g => g.required).map((doc, idx) => {
+                                                    const docLabel = doc.label;
+                                                    const uploadedFilesForDoc = uploadedPaperDocs.filter((docObj: any) => {
+                                                        const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                        return label === docLabel;
+                                                    });
+                                                    const hasFiles = uploadedFilesForDoc.length > 0;
 
                                                     return (
-                                                        <div key={idx} className="flex flex-col gap-2 relative bg-white p-2 border border-border-strong rounded-lg shadow-sm group">
-                                                            <div className="relative aspect-[3/4] rounded-[4px] overflow-hidden bg-gray-50 border border-border-subtle">
-                                                                {url.endsWith('.pdf') ? (
-                                                                    <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 text-red-600 gap-1.5 p-2">
-                                                                        <FileText className="w-8 h-8" />
-                                                                        <span className="text-[8px] font-bold truncate w-full text-center">PDF</span>
+                                                        <TableRow key={`mandatory-${idx}`} className="hover:bg-transparent">
+                                                            <TableCell className="py-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={cn(
+                                                                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                        hasFiles ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                    )}>
+                                                                        {hasFiles ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                    </div>
+                                                                    <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{docLabel}</span>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {hasFiles ? (
+                                                                    <div className="flex items-center gap-3">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setLightboxIndex(uploadedPaperDocs.findIndex((docObj: any) => {
+                                                                                    const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                                                    return label === docLabel;
+                                                                                }));
+                                                                                setUploadedDocs(uploadedFilesForDoc.map((docObj: any) => typeof docObj === 'string' ? docObj : docObj.url));
+                                                                            }}
+                                                                            className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                        >
+                                                                            <FileText className="w-4 h-4" />
+                                                                            {uploadedFilesForDoc.length} ไฟล์
+                                                                        </button>
                                                                     </div>
                                                                 ) : (
-                                                                    <img src={url} alt={`paper-${idx}`} className="w-full h-full object-cover" />
+                                                                    <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
                                                                 )}
-                                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                                    <button
-                                                                        onClick={() => { setLightboxIndex(idx); setUploadedDocs(uploadedPaperDocs.map((p: any) => typeof p === 'string' ? p : p.url)); }}
-                                                                        className="p-1.5 bg-white/20 hover:bg-white/40 rounded-full border border-white/30 backdrop-blur-sm text-white"
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => {
+                                                                            setCurrentDocLabel(docLabel);
+                                                                            paperInputRef.current?.click();
+                                                                        }}
+                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
                                                                     >
-                                                                        <Eye className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleRemovePaper(idx)}
-                                                                        className="p-1.5 bg-white/20 hover:bg-red-500 rounded-full border border-white/30 backdrop-blur-sm text-white"
-                                                                    >
-                                                                        <X className="w-4 h-4" />
-                                                                    </button>
+                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                        เพิ่มเอกสาร
+                                                                    </Button>
                                                                 </div>
-                                                                {idx >= analyzedPaperCount && isAnalyzing && (
-                                                                    <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
-                                                                        <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <Select
-                                                                value={label}
-                                                                onValueChange={(val) => {
-                                                                    const newDocs: any[] = [...uploadedPaperDocs];
-                                                                    if (typeof newDocs[idx] === 'string') {
-                                                                        newDocs[idx] = { url: newDocs[idx], label: val };
-                                                                    } else {
-                                                                        newDocs[idx] = { ...newDocs[idx], label: val };
-                                                                    }
-                                                                    setUploadedPaperDocs(newDocs);
-                                                                }}
-                                                            >
-                                                                <SelectTrigger className="h-9 text-[11px] bg-white border-gray-200">
-                                                                    <div className="truncate text-left pr-2"><SelectValue /></div>
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {getPaperDocs(formData.collateralType, formData).map((doc, dIdx) => (
-                                                                        <SelectItem key={dIdx} value={doc.label} className="text-[11px]">
-                                                                            {doc.label}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                    <SelectItem value="อื่นๆ" className="text-[11px]">อื่นๆ</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
+                                                            </TableCell>
+                                                        </TableRow>
                                                     );
-                                                })
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* RIGHT: Required Documents Checklist - Auto-checked by AI */}
-                                    <div className="space-y-2 bg-gray-50/50 p-4 rounded-lg border border-gray-200">
-                                        <h5 className="text-xs font-bold text-gray-700 uppercase tracking-wide">รายการเอกสารที่ต้องใช้</h5>
-                                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                                            {getPaperDocs(formData.collateralType, formData).map((doc, idx) => {
-                                                const isAnalyzed = idx < analyzedPaperCount;
-
-                                                return (
-                                                    <div key={idx} className={cn(
-                                                        "flex items-start gap-2 p-2 rounded border transition-colors text-xs",
-                                                        isAnalyzed
-                                                            ? "bg-emerald-50 border-emerald-200"
-                                                            : "bg-white border-gray-200"
-                                                    )}>
-                                                        <div className={cn(
-                                                            "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
-                                                            isAnalyzed
-                                                                ? "bg-emerald-500 text-white"
-                                                                : "border-2 border-gray-300"
-                                                        )}>
-                                                            {isAnalyzed && (
-                                                                <Check className="w-3 h-3 font-bold" />
-                                                            )}
-                                                        </div>
-                                                        <p className={cn(
-                                                            "leading-tight flex-1",
-                                                            isAnalyzed ? "text-emerald-700 font-medium" : "text-gray-600"
-                                                        )}>
-                                                            {doc.label}
-                                                        </p>
-                                                        {isAnalyzed && (
-                                                            <span className="text-[10px] text-emerald-600 font-semibold whitespace-nowrap">ยืนยันแล้ว</span>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                                })}
+                                            </TableBody>
+                                        </Table>
                                     </div>
                                 </div>
+
+                                {/* Optional Documents Table */}
+                                {getPaperDocs(formData.collateralType, formData).some(g => !g.required) && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Label className="text-sm font-bold text-gray-700">เอกสารเพิ่มเติม</Label>
+                                        </div>
+                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                            <Table>
+                                                <TableHeader className="bg-gray-50/50">
+                                                    <TableRow className="hover:bg-transparent">
+                                                        <TableHead className="w-[45%] text-xs">เอกสาร</TableHead>
+                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                        <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {getPaperDocs(formData.collateralType, formData).filter(g => !g.required).map((doc, idx) => {
+                                                        const docLabel = doc.label;
+                                                        const uploadedFilesForDoc = uploadedPaperDocs.filter((docObj: any) => {
+                                                            const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                            return label === docLabel;
+                                                        });
+                                                        const hasFiles = uploadedFilesForDoc.length > 0;
+
+                                                        return (
+                                                            <TableRow key={`optional-${idx}`} className="hover:bg-transparent">
+                                                                <TableCell className="py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className={cn(
+                                                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0",
+                                                                            hasFiles ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                        )}>
+                                                                            {hasFiles ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                        </div>
+                                                                        <span className="font-medium text-gray-700 text-sm whitespace-nowrap">{docLabel}</span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {hasFiles ? (
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setLightboxIndex(uploadedPaperDocs.findIndex((docObj: any) => {
+                                                                                        const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
+                                                                                        return label === docLabel;
+                                                                                    }));
+                                                                                    setUploadedDocs(uploadedFilesForDoc.map((docObj: any) => typeof docObj === 'string' ? docObj : docObj.url));
+                                                                                }}
+                                                                                className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                            >
+                                                                                <FileText className="w-4 h-4" />
+                                                                                {uploadedFilesForDoc.length} ไฟล์
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                    )}
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <div className="flex items-center justify-end gap-1">
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() => {
+                                                                                setCurrentDocLabel(docLabel);
+                                                                                paperInputRef.current?.click();
+                                                                            }}
+                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                        >
+                                                                            <Plus className="w-3.5 h-3.5" />
+                                                                            เพิ่มเอกสาร
+                                                                        </Button>
+                                                                    </div>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        );
+                                                    })}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* ANALYSIS BUTTON */}
