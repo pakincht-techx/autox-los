@@ -3661,16 +3661,19 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 type="button"
                                                 variant="outline"
                                                 size="sm"
+                                                disabled={(formData.otherVehicles || []).length >= 20}
                                                 onClick={() => {
                                                     const currentVehicles = formData.otherVehicles || [];
-                                                    setFormData({
-                                                        ...formData,
-                                                        otherVehicles: [...currentVehicles, { id: Date.now(), carNumber: (currentVehicles.length + 1).toString(), type: "", brand: "", model: "", status: "" }]
-                                                    });
+                                                    if (currentVehicles.length < 20) {
+                                                        setFormData({
+                                                            ...formData,
+                                                            otherVehicles: [...currentVehicles, { id: Date.now(), carNumber: (currentVehicles.length + 1).toString(), type: "", brand: "", model: "", status: "" }]
+                                                        });
+                                                    }
                                                 }}
                                                 className="text-xs gap-1"
                                             >
-                                                <Plus className="w-3 h-3" /> เพิ่ม ({(formData.otherVehicles || []).length})
+                                                <Plus className="w-3 h-3" /> เพิ่ม ({(formData.otherVehicles || []).length}/20)
                                             </Button>
                                         </div>
 
@@ -3831,16 +3834,19 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 type="button"
                                                 variant="outline"
                                                 size="sm"
+                                                disabled={(formData.otherLands || []).length >= 20}
                                                 onClick={() => {
                                                     const currentLands = formData.otherLands || [];
-                                                    setFormData({
-                                                        ...formData,
-                                                        otherLands: [...currentLands, { id: Date.now(), landNumber: (currentLands.length + 1).toString(), landUse: "", status: "" }]
-                                                    });
+                                                    if (currentLands.length < 20) {
+                                                        setFormData({
+                                                            ...formData,
+                                                            otherLands: [...currentLands, { id: Date.now(), landNumber: (currentLands.length + 1).toString(), landUse: "", status: "" }]
+                                                        });
+                                                    }
                                                 }}
                                                 className="text-xs gap-1"
                                             >
-                                                <Plus className="w-3 h-3" /> เพิ่ม ({(formData.otherLands || []).length})
+                                                <Plus className="w-3 h-3" /> เพิ่ม ({(formData.otherLands || []).length}/20)
                                             </Button>
                                         </div>
 
