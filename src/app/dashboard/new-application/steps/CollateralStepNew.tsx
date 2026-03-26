@@ -2125,12 +2125,18 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
                                                         <div className="flex flex-col md:flex-row md:items-center justify-between px-4 py-4 gap-4">
                                                             <span className="text-sm text-gray-700 font-bold">ใช้ทำมาหากินด้านไหน</span>
-                                                            <Input
-                                                                placeholder="ระบุ เช่น ทำสวน, ค้าขาย"
-                                                                className="h-10 w-full md:w-80 bg-white border-gray-200 focus:border-chaiyo-blue"
-                                                                value={formData.landUsageType || ""}
-                                                                onChange={(e) => setFormData({ ...formData, landUsageType: e.target.value })}
-                                                            />
+                                                            <Select value={formData.landUsageType || ""} onValueChange={(value) => setFormData({ ...formData, landUsageType: value })}>
+                                                                <SelectTrigger className="h-10 w-full md:w-80 bg-white border-gray-200 focus:border-chaiyo-blue">
+                                                                    <SelectValue placeholder="กรุณาระบุ" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="">กรุณาระบุ</SelectItem>
+                                                                    <SelectItem value="เกษตรกรรม">เกษตรกรรม</SelectItem>
+                                                                    <SelectItem value="ค้าขาย">ค้าขาย</SelectItem>
+                                                                    <SelectItem value="ให้เช่า">ให้เช่า</SelectItem>
+                                                                    <SelectItem value="อื่นๆ">อื่นๆ</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
                                                         </div>
                                                     </>
                                                 )}
