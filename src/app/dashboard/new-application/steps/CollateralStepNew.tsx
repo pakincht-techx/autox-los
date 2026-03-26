@@ -138,7 +138,10 @@ const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
     truck: [
         { id: 'truck_q1', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
     ],
-    agri: [],
+    agri: [
+        { id: 'agri_q1', text: 'เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่' },
+        { id: 'agri_q2', text: 'ถ้ามีคนมาติดต่อขอซื้อหลักประกัน ท่านจะขายในราคาเท่าไร' },
+    ],
     land: [
         { id: 'land_q1', text: 'เป็นที่ดินตาบอด / ภาระจำยอมของบุคคลอื่น / มีรั้วปิดทางเข้าออก / ที่ดินติดคลอง / ติดลำธารที่ไม่ติดถนนสาธารณะ / ที่ดินสาธารณะประโยชน์ที่รถยนต์ไม่สามารถเข้าออกได้' },
         { id: 'land_q2', text: 'เป็นที่ดินติดโรงเรียน / วัด / ศาลเจ้า / สถานที่ศักดิ์อื่น ๆ / สุสาน / ป่าช้า / บ่อขยะ / ติดเขตการรถไฟ' },
@@ -607,6 +610,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     car_q8: 'no', car_q9: 'no', car_q10: 'no', car_q11: 'no', car_q12: 'no', car_q13: 'no', car_q14: 'no', car_q15: 'no', car_q16: 'no',
                     moto_q1: 'no', moto_q2: 'no', moto_q3: 'no',
                     truck_q1: 'no',
+                    agri_q1: 'no', agri_q2: '',
                     land_q1: 'no', land_q2: 'no', land_q3: 'no', land_q4: 'no', land_q5: 'no', land_q6: 'no', land_q7: 'no', land_q8: 'no', land_q9: 'no'
                 },
                 isLivelihoodCollateral: formData.isLivelihoodCollateral || 'yes',
@@ -2020,7 +2024,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     >
                                         <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                                             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                            เงื่อนไขการประเมินสภาพ{formData.collateralType === 'land' ? 'ทรัพย์สิน' : 'รถ'}
+                                            {formData.collateralType === 'agri' ? 'เงื่อนไขการประเมินหลักประกัน' : `เงื่อนไขการประเมินสภาพ${formData.collateralType === 'land' ? 'ทรัพย์สิน' : 'รถ'}`}
                                         </h4>
                                         <ChevronDown
                                             className={cn(
