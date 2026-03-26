@@ -138,6 +138,7 @@ const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
     ],
     truck: [
         { id: 'truck_q1', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
+        { id: 'truck_q2', text: 'เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่' },
     ],
     agri: [
         { id: 'agri_q1', text: 'เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่' },
@@ -609,7 +610,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     car_q1: 'no', car_q2: 'no', car_q3: 'no', car_q4: 'no', car_q5: 'no', car_q6: 'no', car_q7: 'no',
                     car_q8: 'no', car_q9: 'no', car_q10: 'no', car_q11: 'no', car_q12: 'no', car_q13: 'no', car_q14: 'no', car_q15: 'no', car_q16: 'no',
                     moto_q1: 'no', moto_q2: 'no', moto_q3: 'no', moto_q4: 'no',
-                    truck_q1: 'no',
+                    truck_q1: 'no', truck_q2: 'no',
                     agri_q1: 'no', agri_q2: '',
                     land_q1: 'no', land_q2: 'no', land_q3: 'no', land_q4: 'no', land_q5: 'no', land_q6: 'no', land_q7: 'no', land_q8: 'no', land_q9: 'no'
                 },
