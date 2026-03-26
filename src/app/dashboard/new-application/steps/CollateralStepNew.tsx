@@ -4358,33 +4358,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             onClick={(e) => e.stopPropagation()}
                         />
 
-                        <div className="mt-6 px-6 py-4 bg-white/10 rounded-2xl backdrop-blur-md max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-                            <Select
-                                value={typeof uploadedPhotos[lightboxIndex as number] === 'string' ? "อื่นๆ" : (uploadedPhotos[lightboxIndex as number]?.label || "อื่นๆ")}
-                                onValueChange={(val) => {
-                                    const newPhotos: any[] = [...uploadedPhotos];
-                                    const photoIdx = lightboxIndex as number;
-                                    if (typeof newPhotos[photoIdx] === 'string') {
-                                        newPhotos[photoIdx] = { url: newPhotos[photoIdx], label: val };
-                                    } else {
-                                        newPhotos[photoIdx] = { ...newPhotos[photoIdx], label: val };
-                                    }
-                                    setUploadedPhotos(newPhotos);
-                                }}
-                            >
-                                <SelectTrigger className="bg-white text-gray-900 border-white/30">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {getPhotoDocs(formData.collateralType).map((doc: any, idx: number) => (
-                                        <SelectItem key={idx} value={doc.label}>
-                                            {doc.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
                         <div className="mt-8 flex gap-3 px-4 py-3 bg-white/5 rounded-2xl backdrop-blur-md" onClick={(e) => e.stopPropagation()}>
                             {uploadedDocs.map((doc, idx) => (
                                 <button
