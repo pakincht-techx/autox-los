@@ -1293,7 +1293,18 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             </Table>
                                         </div>
                                     </DialogBody>
-                                    <DialogFooter>
+                                    <DialogFooter className="gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setCurrentDocLabel(managingPaperDocLabel);
+                                                paperInputRef.current?.click();
+                                            }}
+                                        >
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            เพิ่มเอกสาร
+                                        </Button>
                                         <Button variant="outline" onClick={() => setManagingPaperDocLabel("")} className="min-w-[104px]">
                                             ปิด
                                         </Button>
