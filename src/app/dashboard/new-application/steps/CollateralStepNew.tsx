@@ -134,6 +134,7 @@ const COLLATERAL_QUESTIONS: Record<string, { id: string; text: string }[]> = {
         { id: 'moto_q1', text: 'เป็นรถจากเต้นท์' },
         { id: 'moto_q2', text: 'เป็นรถดัดแปลงสภาพ, รถแข่ง, รถแต่งเกิน 50%, รถดัดแปลงเครื่องยนต์' },
         { id: 'moto_q3', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
+        { id: 'moto_q4', text: 'เป็นหลักประกันที่ใช้ทำมาหากินหรือไม่' },
     ],
     truck: [
         { id: 'truck_q1', text: 'เป็นรถตัดต่อ, เคยชนหนัก' },
@@ -607,7 +608,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     ...(formData.collateralQuestions || {}),
                     car_q1: 'no', car_q2: 'no', car_q3: 'no', car_q4: 'no', car_q5: 'no', car_q6: 'no', car_q7: 'no',
                     car_q8: 'no', car_q9: 'no', car_q10: 'no', car_q11: 'no', car_q12: 'no', car_q13: 'no', car_q14: 'no', car_q15: 'no', car_q16: 'no',
-                    moto_q1: 'no', moto_q2: 'no', moto_q3: 'no',
+                    moto_q1: 'no', moto_q2: 'no', moto_q3: 'no', moto_q4: 'no',
                     truck_q1: 'no',
                     agri_q1: 'no', agri_q2: '',
                     land_q1: 'no', land_q2: 'no', land_q3: 'no', land_q4: 'no', land_q5: 'no', land_q6: 'no', land_q7: 'no', land_q8: 'no', land_q9: 'no'
@@ -1745,7 +1746,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         </div>
                                     </div>
 
-                                    {/* ROW 3: รุ่นย่อย, ซีซี, แรงม้า */}
+                                    {/* ROW 3: รุ่นย่อย, ซีซี */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
                                         <div className="space-y-2">
                                             <Label className="text-[13px] font-medium text-gray-700 ml-0.5">หมายเลขรุ่นย่อย</Label>
@@ -1773,14 +1774,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     <Input
                                                         value={formData.cc || ""}
                                                         onChange={(e) => setFormData({ ...formData, cc: e.target.value })}
-                                                        className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[13px] font-medium text-gray-700 ml-0.5">แรงม้า</Label>
-                                                    <Input
-                                                        value={formData.horsePower || ""}
-                                                        onChange={(e) => setFormData({ ...formData, horsePower: e.target.value })}
                                                         className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium text-left focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                                     />
                                                 </div>
