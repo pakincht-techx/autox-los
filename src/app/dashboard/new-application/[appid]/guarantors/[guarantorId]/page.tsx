@@ -6,6 +6,7 @@ import { User, Coins, FileText, Pencil, Check, Trash2, Eye, CircleCheck, Upload 
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import {
     AlertDialog,
@@ -231,10 +232,19 @@ function ModuleRow({
     onEdit?: () => void;
     onView?: () => void;
 }) {
-    const isEmpty = !onEdit && !onView;
+    const handleClick = () => {
+        if (onEdit) onEdit();
+        else if (onView) onView();
+    };
 
     return (
-        <div className="flex items-center justify-between px-4 py-3.5 group">
+        <div 
+            onClick={onEdit || onView ? handleClick : undefined}
+            className={cn(
+                "flex items-center justify-between px-4 py-3.5 group transition-colors",
+                (onEdit || onView) && "cursor-pointer hover:bg-gray-50"
+            )}
+        >
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0 text-gray-400">
                     {icon ?? <User className="w-4 h-4" />}
@@ -248,24 +258,14 @@ function ModuleRow({
                     </div>
                 )}
                 {onEdit && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-gray-400 hover:text-chaiyo-blue"
-                        onClick={onEdit}
-                    >
-                        <Pencil className="w-4 h-4" />
-                    </Button>
+                    <div className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 group-hover:text-chaiyo-blue group-hover:bg-blue-50 transition-colors">
+                        <Pencil className="w-3.5 h-3.5" />
+                    </div>
                 )}
-                {onView && !onEdit && !isEmpty && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-gray-400 hover:text-chaiyo-blue"
-                        onClick={onView}
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
+                {onView && !onEdit && (
+                    <div className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 group-hover:text-chaiyo-blue group-hover:bg-blue-50 transition-colors">
+                        <Eye className="w-3.5 h-3.5" />
+                    </div>
                 )}
             </div>
         </div>
