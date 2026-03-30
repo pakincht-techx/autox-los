@@ -80,7 +80,7 @@ export default function GuarantorDetailPage({ params }: { params: Promise<{ appi
                     SECTION 1: GUARANTOR HEADER (full-width border bottom)
                 ═══════════════════════════════════════════════════════════ */}
                 <div className="bg-sidebar">
-                    <div className="max-w-6xl mx-auto px-6 lg:px-8 pt-6 pb-3">
+                    <div className="px-6 lg:px-8 pt-6 pb-3">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <h1 className="text-3xl font-bold text-foreground tracking-tight">
@@ -94,7 +94,7 @@ export default function GuarantorDetailPage({ params }: { params: Promise<{ appi
                 {/* ═══════════════════════════════════════════════════════════
                     SECTION 2: GUARANTOR DETAIL
                 ═══════════════════════════════════════════════════════════ */}
-                <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
+                <div className="p-6 lg:p-8 space-y-8">
                     <div className="flex gap-8 items-start">
                         {/* ── Left column: Module list ── */}
                         <div className="flex-1 min-w-0 space-y-5">

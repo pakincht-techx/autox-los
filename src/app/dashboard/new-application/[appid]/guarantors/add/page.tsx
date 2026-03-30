@@ -316,26 +316,7 @@ export default function AddGuarantorPage() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-            <div className="relative flex items-center justify-between px-12 md:px-24 mb-8">
-                <div className="absolute top-[15px] left-16 right-16 md:left-28 md:right-28 h-[2px] z-0">
-                    <div className="absolute inset-0 bg-gray-300"></div>
-                    <div
-                        className="absolute left-0 top-0 h-full bg-chaiyo-blue transition-all duration-500"
-                        style={{
-                            width: stage === 'COMPLETE' || stage === 'FACE_SUCCESS' ? '100%' :
-                                stage === 'FACE_VERIFY' ? '75%' :
-                                    stage === 'CHECKING_MEMBER' ? '50%' :
-                                        stage === 'READING_CARD' ? '25%' : '0%'
-                        }}
-                    ></div>
-                </div>
-
-                <StepIndicator num={1} label="ข้อมูลบุคคล" active={stage === 'INIT' || stage === 'READING_CARD' || stage === 'TAKING_ID_FRONT' || stage === 'TAKING_ID_BACK'} completed={stage !== 'INIT' && stage !== 'READING_CARD' && stage !== 'TAKING_ID_FRONT' && stage !== 'TAKING_ID_BACK'} />
-                <StepIndicator num={2} label="ตรวจสอบสถานะ" active={stage === 'CHECKING_MEMBER'} completed={stage === 'FACE_VERIFY' || stage === 'FACE_SUCCESS' || stage === 'COMPLETE'} />
-                <StepIndicator num={3} label="ยืนยันใบหน้า" active={stage === 'FACE_VERIFY'} completed={stage === 'FACE_SUCCESS' || stage === 'COMPLETE'} />
-            </div>
-
+        <div className="space-y-8">
             <div className="max-w-2xl mx-auto pt-4 transition-all duration-500 w-full">
                 <div className="space-y-8 pb-20">
                     {(stage === 'INIT' || (stage === 'READING_CARD' && (verificationMethod === 'DIPCHIP' || idBackPhoto))) && (
@@ -577,27 +558,3 @@ export default function AddGuarantorPage() {
         </div>
     );
 }
-
-function StepIndicator({ num, label, active, completed, skipped }: { num: number, label: string, active: boolean, completed: boolean, skipped?: boolean }) {
-    if (skipped) {
-        return (
-            <div className="flex flex-col items-center gap-2 z-10 opacity-50">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center border border-gray-100 bg-gray-50 text-gray-300">-</div>
-                <span className="text-xs font-bold absolute -bottom-6 w-32 text-center text-gray-300">{label}</span>
-            </div>
-        )
-    }
-
-    return (
-        <div className={cn("flex flex-col items-center gap-2 z-10")}>
-            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300",
-                active ? "border-chaiyo-blue ring-4 ring-blue-50 text-chaiyo-blue bg-white" :
-                    completed ? "bg-chaiyo-blue text-white border-chaiyo-blue" :
-                        "bg-white border-gray-200 text-gray-300"
-            )}>
-                {completed ? <CheckCircle className="w-5 h-5" /> : num}
-            </div>
-            <span className={cn("text-xs font-bold absolute -bottom-6 w-32 text-center", active || completed ? "text-chaiyo-blue" : "text-gray-300")}>{label}</span>
-        </div>
-    )
-} 
