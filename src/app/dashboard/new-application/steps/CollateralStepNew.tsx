@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Combobox } from "@/components/ui/combobox";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { NumericInputWithControls } from "@/components/ui/NumericInputWithControls";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -783,7 +784,13 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
 
     const handleTriggerCategoryPhotoUpload = (guideId: string) => {
         setCurrentPhotoGuideId(guideId);
-        categoryCameraRef.current?.click();
+        // For vehicles (car, moto, truck, agri), only allow camera
+        const vehicleTypes = ['car', 'moto', 'truck', 'agri'];
+        if (vehicleTypes.includes(formData.collateralType)) {
+            categoryCameraRef.current?.click();
+        } else {
+            categoryPhotoInputRef.current?.click();
+        }
     };
 
     const handleCategoryPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -862,7 +869,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                         <div className="divide-y divide-border-subtle">
                             {/* COLLATERAL TYPE SELECT */}
                             <div className="p-6 bg-gray-50/30">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
                                     <div className="space-y-1">
                                         <Label className="text-[13px] text-muted-foreground ml-1">ประเภทหลักประกัน <span className="text-red-500">*</span></Label>
                                         <Select
@@ -885,24 +892,38 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                         </Select>
                                     </div>
                                     {formData.collateralType === 'land' && (
-                                        <div className="space-y-1">
-                                            <Label className="text-[13px] text-muted-foreground ml-1">ประเภทโฉนดที่ดิน <span className="text-red-500">*</span></Label>
-                                            <Select
-                                                value={formData.landDeedType || "น.ส. 4"}
-                                                onValueChange={(val) => setFormData({ ...formData, landDeedType: val })}
-                                            >
-                                                <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {DEED_TYPES.map((type) => (
-                                                        <SelectItem key={type.value} value={type.value}>
-                                                            {type.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
+                                        <>
+                                            <div className="space-y-1">
+                                                <Label className="text-[13px] text-muted-foreground ml-1">ประเภทโฉนดที่ดิน <span className="text-red-500">*</span></Label>
+                                                <Select
+                                                    value={formData.landDeedType || "น.ส. 4"}
+                                                    onValueChange={(val) => setFormData({ ...formData, landDeedType: val })}
+                                                >
+                                                    <SelectTrigger className="h-12 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DEED_TYPES.map((type) => (
+                                                            <SelectItem key={type.value} value={type.value}>
+                                                                {type.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            {formData.landDeedType !== "อ.ช. 2" && (
+                                                <div className="space-y-1">
+                                                    <Label className="text-[13px] text-muted-foreground ml-1">จำนวนสิ่งปลูกสร้าง</Label>
+                                                    <NumericInputWithControls
+                                                        value={formData.buildingCount || 0}
+                                                        onChange={(val) => setFormData({ ...formData, buildingCount: val })}
+                                                        min={0}
+                                                        max={30}
+                                                        step={1}
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -1006,10 +1027,10 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             variant="outline"
                                                                             size="sm"
                                                                             onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
-                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                            className="h-8 text-xs gap-1.5 font-medium"
                                                                         >
                                                                             <Plus className="w-3.5 h-3.5" />
-                                                                            เพิ่มเอกสาร
+                                                                            {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มเอกสาร'}
                                                                         </Button>
                                                                     </div>
                                                                 </TableCell>
@@ -1059,10 +1080,10 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             variant="outline"
                                                                             size="sm"
                                                                             onClick={() => handleTriggerCategoryPhotoUpload('other')}
-                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                            className="h-8 text-xs gap-1.5 font-medium"
                                                                         >
                                                                             <Plus className="w-3.5 h-3.5" />
-                                                                            เพิ่มรูปอื่นๆ
+                                                                            {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มรูปอื่นๆ'}
                                                                         </Button>
                                                                     </div>
                                                                 </TableCell>
@@ -1163,10 +1184,10 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                 variant="outline"
                                                                                 size="sm"
                                                                                 onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
-                                                                                className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                                className="h-8 text-xs gap-1.5 font-medium"
                                                                             >
                                                                                 <Plus className="w-3.5 h-3.5" />
-                                                                                เพิ่มเอกสาร
+                                                                                {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มเอกสาร'}
                                                                             </Button>
                                                                         </div>
                                                                     </TableCell>
@@ -1230,7 +1251,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 onClick={() => handleTriggerCategoryPhotoUpload(managingPhotoGuideId)}
                                             >
                                                 <Plus className="w-4 h-4 mr-2" />
-                                                เพิ่มรูปภาพ
+                                                {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มรูปภาพ'}
                                             </Button>
                                             <DialogClose asChild>
                                                 <Button variant="outline">ปิด</Button>
@@ -1458,7 +1479,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             setCurrentDocLabel(docLabel);
                                                                             paperInputRef.current?.click();
                                                                         }}
-                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                        className="h-8 text-xs gap-1.5 font-medium"
                                                                     >
                                                                         <Plus className="w-3.5 h-3.5" />
                                                                         เพิ่มเอกสาร
@@ -1517,7 +1538,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             setCurrentDocLabel("อื่นๆ");
                                                                             paperInputRef.current?.click();
                                                                         }}
-                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                        className="h-8 text-xs gap-1.5 font-medium"
                                                                     >
                                                                         <Plus className="w-3.5 h-3.5" />
                                                                         เพิ่มเอกสารอื่นๆ
@@ -1598,7 +1619,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                 setCurrentDocLabel(docLabel);
                                                                                 paperInputRef.current?.click();
                                                                             }}
-                                                                            className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                            className="h-8 text-xs gap-1.5 font-medium"
                                                                         >
                                                                             <Plus className="w-3.5 h-3.5" />
                                                                             เพิ่มเอกสาร
@@ -1800,22 +1821,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
                                                     />
                                                 </div>
-                                                {formData.collateralType === 'land' && formData.landDeedType !== "อ.ช. 2" && (
-                                                    <div className="space-y-1">
-                                                        <Label className="text-[13px] text-muted-foreground ml-1">จำนวนสิ่งปลูกสร้าง</Label>
-                                                        <Input
-                                                            type="number"
-                                                            min="0"
-                                                            max="5"
-                                                            value={formData.buildingCount || "0"}
-                                                            onChange={(e) => {
-                                                                const val = Math.min(5, Math.max(0, Number(e.target.value)));
-                                                                setFormData({ ...formData, buildingCount: val });
-                                                            }}
-                                                            className="h-10 rounded-xl bg-white border-gray-200 text-gray-900 font-medium focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue/20"
-                                                        />
-                                                    </div>
-                                                )}
                                             </>
                                         )}
                                     </div>
@@ -2449,7 +2454,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                     {/* Vehicle Condition Inspection */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 mt-6 pt-6 border-t border-gray-100">
                                         <div className="flex flex-col md:col-span-2">
-                                            <Label className="text-[13px] font-medium text-gray-700 mb-3">การตรวจสอบสภาพรถ</Label>
+                                            <Label className="text-[13px] font-medium text-gray-700 mb-3">การตรวจสอบกรรมสิทธิ์</Label>
                                             <div className="flex items-center gap-3">
                                                 <button
                                                     type="button"
@@ -4118,107 +4123,107 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 </TableHeader>
                                                 <TableBody>
                                                     {((formData.otherVehicles || []).length === 0 ? [{ id: 'new', carNumber: '1', type: '', brand: '', model: '', status: '' }] : formData.otherVehicles).map((vehicle: any, idx: number) => (
-                                                            <TableRow key={vehicle.id || idx} className="hover:bg-transparent">
-                                                                <TableCell className="text-center align-middle text-xs font-medium">
-                                                                    {idx + 1}
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={vehicle.type || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], type: value };
+                                                        <TableRow key={vehicle.id || idx} className="hover:bg-transparent">
+                                                            <TableCell className="text-center align-middle text-xs font-medium">
+                                                                {idx + 1}
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={vehicle.type || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], type: value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {CAR_TYPES.map((type) => (
+                                                                            <SelectItem key={type.value} value={type.value}>
+                                                                                {type.label}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={vehicle.brand || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], brand: value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {CAR_BRANDS.map((brand) => (
+                                                                            <SelectItem key={brand.value} value={brand.label}>
+                                                                                {brand.label}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={vehicle.usageType || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], usageType: value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="ประกอบอาชีพ">ประกอบอาชีพ</SelectItem>
+                                                                        <SelectItem value="ใช้เพื่อการเดินทาง">ใช้เพื่อการเดินทาง</SelectItem>
+                                                                        <SelectItem value="ปฏิเสธการให้ข้อมูล">ปฏิเสธการให้ข้อมูล</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={vehicle.status || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newVehicles = [...(formData.otherVehicles || [])];
+                                                                        newVehicles[idx] = { ...newVehicles[idx], status: value };
+                                                                        setFormData({ ...formData, otherVehicles: newVehicles });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="ปลอดภาระ">ปลอดภาระ</SelectItem>
+                                                                        <SelectItem value="ติดไฟแนนซ์">ติดไฟแนนซ์</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="text-right align-middle">
+                                                                {(formData.otherVehicles || []).length > 0 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => {
+                                                                            const newVehicles = (formData.otherVehicles || []).filter((_: any, i: number) => i !== idx);
                                                                             setFormData({ ...formData, otherVehicles: newVehicles });
                                                                         }}
+                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                                                                     >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {CAR_TYPES.map((type) => (
-                                                                                <SelectItem key={type.value} value={type.value}>
-                                                                                    {type.label}
-                                                                                </SelectItem>
-                                                                            ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={vehicle.brand || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], brand: value };
-                                                                            setFormData({ ...formData, otherVehicles: newVehicles });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {CAR_BRANDS.map((brand) => (
-                                                                                <SelectItem key={brand.value} value={brand.label}>
-                                                                                    {brand.label}
-                                                                                </SelectItem>
-                                                                            ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={vehicle.usageType || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], usageType: value };
-                                                                            setFormData({ ...formData, otherVehicles: newVehicles });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="ประกอบอาชีพ">ประกอบอาชีพ</SelectItem>
-                                                                            <SelectItem value="ใช้เพื่อการเดินทาง">ใช้เพื่อการเดินทาง</SelectItem>
-                                                                            <SelectItem value="ปฏิเสธการให้ข้อมูล">ปฏิเสธการให้ข้อมูล</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={vehicle.status || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newVehicles = [...(formData.otherVehicles || [])];
-                                                                            newVehicles[idx] = { ...newVehicles[idx], status: value };
-                                                                            setFormData({ ...formData, otherVehicles: newVehicles });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="ปลอดภาระ">ปลอดภาระ</SelectItem>
-                                                                            <SelectItem value="ติดไฟแนนซ์">ติดไฟแนนซ์</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-middle">
-                                                                    {(formData.otherVehicles || []).length > 0 && (
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            onClick={() => {
-                                                                                const newVehicles = (formData.otherVehicles || []).filter((_: any, i: number) => i !== idx);
-                                                                                setFormData({ ...formData, otherVehicles: newVehicles });
-                                                                            }}
-                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
                                                 </TableBody>
                                             </Table>
                                         </div>
@@ -4281,67 +4286,67 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 </TableHeader>
                                                 <TableBody>
                                                     {((formData.otherLands || []).length === 0 ? [{ id: 'new', landNumber: '1', landUse: '', status: '' }] : formData.otherLands).map((land: any, idx: number) => (
-                                                            <TableRow key={land.id || idx} className="hover:bg-transparent">
-                                                                <TableCell className="text-center align-middle text-xs font-medium">
-                                                                    {idx + 1}
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={land.landUse || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newLands = [...(formData.otherLands || [])];
-                                                                            newLands[idx] = { ...newLands[idx], landUse: value };
+                                                        <TableRow key={land.id || idx} className="hover:bg-transparent">
+                                                            <TableCell className="text-center align-middle text-xs font-medium">
+                                                                {idx + 1}
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={land.landUse || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newLands = [...(formData.otherLands || [])];
+                                                                        newLands[idx] = { ...newLands[idx], landUse: value };
+                                                                        setFormData({ ...formData, otherLands: newLands });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        {LAND_USE_TYPES.map((use) => (
+                                                                            <SelectItem key={use.value} value={use.value}>
+                                                                                {use.label}
+                                                                            </SelectItem>
+                                                                        ))}
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="align-top">
+                                                                <Select
+                                                                    value={land.status || ""}
+                                                                    onValueChange={(value) => {
+                                                                        const newLands = [...(formData.otherLands || [])];
+                                                                        newLands[idx] = { ...newLands[idx], status: value };
+                                                                        setFormData({ ...formData, otherLands: newLands });
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
+                                                                        <SelectValue placeholder="เลือก" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="ปลอดภาระ">ปลอดภาระ</SelectItem>
+                                                                        <SelectItem value="ติดไฟแนนซ์">ติดไฟแนนซ์</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </TableCell>
+                                                            <TableCell className="text-right align-middle">
+                                                                {(formData.otherLands || []).length > 0 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => {
+                                                                            const newLands = (formData.otherLands || []).filter((_: any, i: number) => i !== idx);
                                                                             setFormData({ ...formData, otherLands: newLands });
                                                                         }}
+                                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                                                                     >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {LAND_USE_TYPES.map((use) => (
-                                                                                <SelectItem key={use.value} value={use.value}>
-                                                                                    {use.label}
-                                                                                </SelectItem>
-                                                                            ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="align-top">
-                                                                    <Select
-                                                                        value={land.status || ""}
-                                                                        onValueChange={(value) => {
-                                                                            const newLands = [...(formData.otherLands || [])];
-                                                                            newLands[idx] = { ...newLands[idx], status: value };
-                                                                            setFormData({ ...formData, otherLands: newLands });
-                                                                        }}
-                                                                    >
-                                                                        <SelectTrigger className="h-9 rounded-lg text-sm bg-white">
-                                                                            <SelectValue placeholder="เลือก" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            <SelectItem value="ปลอดภาระ">ปลอดภาระ</SelectItem>
-                                                                            <SelectItem value="ติดไฟแนนซ์">ติดไฟแนนซ์</SelectItem>
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                </TableCell>
-                                                                <TableCell className="text-right align-middle">
-                                                                    {(formData.otherLands || []).length > 0 && (
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            onClick={() => {
-                                                                                const newLands = (formData.otherLands || []).filter((_: any, i: number) => i !== idx);
-                                                                                setFormData({ ...formData, otherLands: newLands });
-                                                                            }}
-                                                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
                                                 </TableBody>
                                             </Table>
                                         </div>
