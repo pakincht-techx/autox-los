@@ -962,8 +962,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                 <Card className="border-border-subtle overflow-hidden shadow-none">
                                     <CardHeader className="bg-gray-50/50 border-b pb-4">
                                         <CardTitle className="text-sm font-bold flex items-center gap-2 text-gray-700">
-                                            <FileText className="w-4 h-4 text-chaiyo-blue" />
-                                            ข้อมูลที่ดึงได้จากบัตร
+                            ข้อมูลที่ดึงได้จากบัตร
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-6 space-y-6">

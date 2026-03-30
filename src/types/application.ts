@@ -1,6 +1,7 @@
 export interface SocialMedia {
     platform: string;
     accountName: string;
+    otherPlatform?: string;
 }
 
 export interface IncomeItem {
@@ -30,6 +31,7 @@ export interface SAIncome {
     type?: string;
     detail?: string;
     amount?: number | string;
+    yearlyAmount?: number | string;
     sourceDocType?: string;
 }
 
@@ -198,6 +200,11 @@ export interface IncomeOccupation {
     payslipMonths?: string[];
     // Slip count per payslip month: key = month index, value = number of slips
     payslipSlipCounts?: Record<string, number>;
+
+    // Tavi 50 Monthly (named months, like payslips)
+    tavi50MonthlyMonths?: string[];
+    // Slip count per tavi 50 month: key = month index, value = number of slips
+    tavi50MonthlySlipCounts?: Record<string, number>;
 
     // Statement month tracking per bank account
     // Key: bank account index (e.g. "0", "1"), Value: array of month labels (e.g. ["ม.ค.", "ก.พ."])

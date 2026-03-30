@@ -861,7 +861,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 <Card className="border-border-strong overflow-hidden mb-6">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            <Upload className="w-5 h-5" />
                             อัปโหลดเอกสารหลักประกัน
                         </CardTitle>
                     </CardHeader>
@@ -1663,7 +1662,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            <FileText className="w-5 h-5" />
                             ข้อมูลหลักประกัน
                         </CardTitle>
                     </CardHeader>
@@ -2628,7 +2626,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            <UserCheck className="w-5 h-5" />
                             ข้อมูลผู้ถือครอง/กรรมสิทธิ์
                         </CardTitle>
                     </CardHeader>
@@ -3003,8 +3000,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <Card className="border-border-strong overflow-hidden">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                                <Calculator className="w-5 h-5" />
-                                รายละเอียดราคาประเมิน
+                            รายละเอียดราคาประเมิน
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
@@ -4062,7 +4058,6 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                 <Card className="border-border-strong overflow-hidden mb-6">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            <UserCheck className="w-5 h-5" />
                             ข้อมูลทรัพย์สินอื่นๆ
                         </CardTitle>
                     </CardHeader>
@@ -4363,8 +4358,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <Card className="border-border-strong overflow-hidden">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                                <Calculator className="w-5 h-5" />
-                                ราคาประเมินสินทรัพย์
+                            ราคาประเมินสินทรัพย์
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">

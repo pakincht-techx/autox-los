@@ -213,6 +213,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
     const [selectedPayslipMonth, setSelectedPayslipMonth] = useState<string>('');
     const [pendingDeletePayslipMonth, setPendingDeletePayslipMonth] = useState<{ occId: string, monthLabel: string } | null>(null);
 
+    // Tavi 50 Monthly dialog state
+    const [tavi50MonthDialogOpen, setTavi50MonthDialogOpen] = useState(false);
+    const [tavi50MonthDialogOccId, setTavi50MonthDialogOccId] = useState<string | null>(null);
+    const [selectedTavi50Month, setSelectedTavi50Month] = useState<string>('');
+    const [pendingDeleteTavi50Month, setPendingDeleteTavi50Month] = useState<{ occId: string, monthLabel: string } | null>(null);
+
 
     // Debt Row Handlers
     const handleSaveSpecialIncome = (source: SpecialIncomeSource | SpecialIncome) => {
@@ -690,6 +696,150 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
         });
     };
 
+    // Tavi 50 Monthly Handlers
+    const handleOpenAddTavi50MonthDialog = (occId: string) => {
+        setTavi50MonthDialogOccId(occId);
+        setSelectedTavi50Month('');
+        setTavi50MonthDialogOpen(true);
+    };
+
+    const handleConfirmAddTavi50Month = () => {
+        if (!tavi50MonthDialogOccId || !selectedTavi50Month) return;
+        const occ = occupations.find((o: IncomeOccupation) => o.id === tavi50MonthDialogOccId);
+        if (!occ) return;
+        const currentMonths: string[] = occ.tavi50MonthlyMonths || [];
+        if (currentMonths.includes(selectedTavi50Month)) {
+            setTavi50MonthDialogOpen(false);
+            return;
+        }
+        const newMonths = [...currentMonths, selectedTavi50Month];
+        newMonths.sort((a, b) => THAI_MONTHS_SHORT.indexOf(a) - THAI_MONTHS_SHORT.indexOf(b));
+        // Initialize 1 slip for the new month
+        const monthIdx = newMonths.indexOf(selectedTavi50Month);
+        const currentSlipCounts = { ...(occ.tavi50MonthlySlipCounts || {}) };
+        // Re-index slip counts for months that shifted
+        const reindexedSlipCounts: Record<string, number> = {};
+        newMonths.forEach((m, i) => {
+            const oldIdx = currentMonths.indexOf(m);
+            if (oldIdx !== -1) {
+                reindexedSlipCounts[String(i)] = currentSlipCounts[String(oldIdx)] || 1;
+            } else {
+                reindexedSlipCounts[String(i)] = 1; // new month starts with 1 slip
+            }
+        });
+        // Re-index income sourceDocType keys
+        const reindexedIncomes = (occ.saIncomes || []).map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('tavi50_monthly_')) {
+                const match = inc.sourceDocType.match(/^tavi50_monthly_(\d+)_slip_(\d+)$/);
+                if (match) {
+                    const oldMonthIdx = Number(match[1]);
+                    const slipIdx = match[2];
+                    const oldMonthLabel = currentMonths[oldMonthIdx];
+                    const newMonthIdx = newMonths.indexOf(oldMonthLabel);
+                    if (newMonthIdx !== -1) {
+                        return { ...inc, sourceDocType: `tavi50_monthly_${newMonthIdx}_slip_${slipIdx}` };
+                    }
+                }
+            }
+            return inc;
+        });
+        handleOccupationChange(tavi50MonthDialogOccId, {
+            tavi50MonthlyMonths: newMonths,
+            tavi50MonthlySlipCounts: reindexedSlipCounts,
+            saIncomes: reindexedIncomes,
+        });
+        setTavi50MonthDialogOpen(false);
+    };
+
+    const handleRemoveTavi50Month = (occId: string, monthLabel: string) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentMonths: string[] = occ.tavi50MonthlyMonths || [];
+        const monthIdx = currentMonths.indexOf(monthLabel);
+        if (monthIdx === -1) return;
+
+        const newMonths = currentMonths.filter((m: string) => m !== monthLabel);
+        const currentSlipCounts = { ...(occ.tavi50MonthlySlipCounts || {}) };
+        const slipCount = currentSlipCounts[String(monthIdx)] || 0;
+
+        // Remove all income rows for this month (all slips)
+        let updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('tavi50_monthly_')) {
+                const match = inc.sourceDocType.match(/^tavi50_monthly_(\d+)_slip_(\d+)$/);
+                if (match && Number(match[1]) === monthIdx) return false;
+            }
+            return true;
+        });
+
+        // Re-index remaining months
+        const reindexedSlipCounts: Record<string, number> = {};
+        newMonths.forEach((m, i) => {
+            const oldIdx = currentMonths.indexOf(m);
+            reindexedSlipCounts[String(i)] = currentSlipCounts[String(oldIdx)] || 1;
+        });
+
+        updatedIncomes = updatedIncomes.map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith('tavi50_monthly_')) {
+                const match = inc.sourceDocType.match(/^tavi50_monthly_(\d+)_slip_(\d+)$/);
+                if (match) {
+                    const oldMonthIdx = Number(match[1]);
+                    if (oldMonthIdx > monthIdx) {
+                        return { ...inc, sourceDocType: `tavi50_monthly_${oldMonthIdx - 1}_slip_${match[2]}` };
+                    }
+                }
+            }
+            return inc;
+        });
+
+        handleOccupationChange(occId, {
+            tavi50MonthlyMonths: newMonths,
+            tavi50MonthlySlipCounts: reindexedSlipCounts,
+            saIncomes: updatedIncomes,
+        });
+    };
+
+    const handleAddTavi50Slip = (occId: string, monthIdx: number) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentSlipCounts = { ...(occ.tavi50MonthlySlipCounts || {}) };
+        const current = currentSlipCounts[String(monthIdx)] || 0;
+        currentSlipCounts[String(monthIdx)] = current + 1;
+        handleOccupationChange(occId, 'tavi50MonthlySlipCounts', currentSlipCounts);
+    };
+
+    const handleRemoveTavi50Slip = (occId: string, monthIdx: number, slipIdx: number) => {
+        const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+        if (!occ) return;
+        const currentSlipCounts = { ...(occ.tavi50MonthlySlipCounts || {}) };
+        const current = currentSlipCounts[String(monthIdx)] || 0;
+        if (current <= 0) return;
+        currentSlipCounts[String(monthIdx)] = current - 1;
+
+        // Remove income rows for this slip
+        const sourceKey = `tavi50_monthly_${monthIdx}_slip_${slipIdx}`;
+        let updatedIncomes = (occ.saIncomes || []).filter((inc: SAIncome) => inc.sourceDocType !== sourceKey);
+
+        // Re-index remaining slips
+        updatedIncomes = updatedIncomes.map((inc: SAIncome) => {
+            if (inc.sourceDocType?.startsWith(`tavi50_monthly_${monthIdx}_slip_`)) {
+                const match = inc.sourceDocType.match(/^tavi50_monthly_\d+_slip_(\d+)$/);
+                if (match) {
+                    const incSlipIdx = Number(match[1]);
+                    if (incSlipIdx > slipIdx) {
+                        return { ...inc, sourceDocType: `tavi50_monthly_${monthIdx}_slip_${incSlipIdx - 1}` };
+                    }
+                }
+            }
+            return inc;
+        });
+
+        handleOccupationChange(occId, {
+            tavi50MonthlySlipCounts: currentSlipCounts,
+            saIncomes: updatedIncomes,
+        });
+    };
+
+
     const handleAddBankAccount = (occId: string) => {
         const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
         if (!occ) return;
@@ -778,7 +928,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
         const currentIncomes = [...(occ.saIncomes || [])];
 
         let finalValue = value;
-        if (field === 'amount') {
+        if (field === 'amount' || field === 'yearlyAmount') {
             // Numbers only, handle decimals and round down to 2 places
             const clean = value.replace(/[^0-9.]/g, '');
             const parts = clean.split('.');
@@ -792,6 +942,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
         }
 
         currentIncomes[index] = { ...currentIncomes[index], [field]: finalValue };
+
+        if (field === 'yearlyAmount') {
+            // Calculate monthly amount as yearly / 12 and round down to 2 decimal places
+            const yearlyNum = Number(finalValue) || 0;
+            const monthlyNum = Math.floor((yearlyNum / 12) * 100) / 100;
+            currentIncomes[index].amount = monthlyNum.toString();
+        }
 
         // Calculate total income for this occupation
         const total = currentIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
@@ -1222,9 +1379,13 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
             return [
                 { type: 'other_income', detail: 'เงินโอนเข้าบัญชี (เฉลี่ย 6 เดือน)', amount: '35000', sourceDocType }
             ];
-        } else if (docType === 'tavi50') {
+        } else if (docType.startsWith('tavi50_monthly')) {
             return [
-                { type: 'salary', detail: 'รายได้พึงประเมิน', amount: '45000', sourceDocType }
+                { type: 'salary', detail: 'รายได้พึงประเมิน (ต่อเดือน)', amount: '45000', sourceDocType }
+            ];
+        } else if (docType === 'tavi50_yearly') {
+            return [
+                { type: 'salary', detail: 'รายได้พึงประเมิน (ทั้งปี)', yearlyAmount: '540000', amount: '45000', sourceDocType }
             ];
         } else if (docType === 'salary_cert') {
             return [
@@ -1286,6 +1447,35 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                 saIncomes: updatedIncomes,
                 totalIncome: totalIncome
             });
+        } else if (docType === 'tavi50_monthly') {
+            const existingTavi50Count = currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('tavi50_monthly_')).length;
+            const newDocs: IncomeDocument[] = [];
+            let allNewOCRRows: SAIncome[] = [];
+
+            files.forEach((file, fileIdx) => {
+                const tavi50Key = `tavi50_monthly_${existingTavi50Count + fileIdx}`;
+                newDocs.push({
+                    id: generateId('doc'),
+                    type: tavi50Key,
+                    name: file.name,
+                    originalName: file.name,
+                    url: URL.createObjectURL(file),
+                    status: 'success',
+                    uploadedAt: new Date().toISOString(),
+                    // DEV MOCK: first file always has password
+                    ...(fileIdx === 0 ? { isLocked: true, password: 'mock1234' } : {})
+                });
+                allNewOCRRows = [...allNewOCRRows, ...generateMockOCRIncomeRows(tavi50Key)];
+            });
+
+            const updatedIncomes = [...currentIncomes, ...allNewOCRRows];
+            const totalIncome = updatedIncomes.reduce((acc: number, curr: SAIncome) => acc + (Number(curr.amount) || 0), 0);
+
+            handleOccupationChange(occId, {
+                incomeDocuments: [...currentDocs, ...newDocs],
+                saIncomes: updatedIncomes,
+                totalIncome: totalIncome
+            });
         } else {
             const newDocs: IncomeDocument[] = files.map((file, fileIdx) => ({
                 id: generateId('doc'),
@@ -1328,10 +1518,12 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
         const currentDocs = occ.incomeDocuments || [];
         const currentIncomes = occ.saIncomes || [];
 
-        // For payslip, assign unique indexed key
+        // For payslip and tavi50_monthly, assign unique indexed key
         const actualDocType = docType === 'payslip'
             ? `payslip_${currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('payslip_')).length}`
-            : docType;
+            : docType === 'tavi50_monthly'
+                ? `tavi50_monthly_${currentDocs.filter((d: IncomeDocument) => d.type?.startsWith('tavi50_monthly_')).length}`
+                : docType;
 
         const scanName = `สแกน_${new Date().getTime()}.pdf`;
         const newDoc: IncomeDocument = {
@@ -1418,7 +1610,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
     const INCOME_DOC_TYPES = [
         { id: 'payslip', label: 'สลิปเงินเดือน (Payslip)' },
         { id: 'statement', label: 'รายการเดินบัญชี (Statement)' },
-        { id: 'tavi50', label: 'ทวิ 50' },
+        { id: 'tavi50_yearly', label: 'ทวิ 50 (รายปี)' },
+        { id: 'tavi50_monthly', label: 'ทวิ 50 (รายเดือน)' },
         { id: 'salary_cert', label: 'หนังสือรับรองเงินเดือน' },
     ];
 
@@ -1439,7 +1632,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <Briefcase className="w-5 h-5" />
                             อาชีพและรายได้
                         </CardTitle>
                     </CardHeader>
@@ -2061,7 +2253,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
 
                                                                         return dynamicDocTypes.map((docType) => {
                                                                             const uploadedDocs = (occ.incomeDocuments || []).filter((d: IncomeDocument) =>
-                                                                                docType.id === 'payslip' ? d.type?.startsWith('payslip_') : d.type === docType.id
+                                                                                docType.id === 'payslip' ? d.type?.startsWith('payslip_') :
+                                                                                docType.id === 'tavi50_monthly' ? d.type?.startsWith('tavi50_monthly_') :
+                                                                                d.type === docType.id
                                                                             );
 
                                                                             return (
@@ -2358,9 +2552,10 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                 incomes: (SAIncome & { originalIndex: number })[],
                                                                 showAddButton: boolean = true,
                                                                 sourceDocs?: IncomeDocument[],
-                                                                onRemove?: () => void
+                                                                onRemove?: () => void,
+                                                                isYearly: boolean = false
                                                             ) => {
-                                                                const sourceTotal = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+                                                                const sourceTotal = incomes.reduce((sum, item) => sum + (Number(isYearly ? item.yearlyAmount : item.amount) || 0), 0);
                                                                 const sourceDoc = sourceDocs && sourceDocs.length > 0 ? sourceDocs[0] : undefined;
                                                                 const displayTitle = sourceDoc
                                                                     ? `${title.split(' - ')[0]} - ${sourceDoc.originalName || sourceDoc.name}`
@@ -2416,7 +2611,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                     <TableRow>
                                                                                         <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้ <span className="text-red-500">*</span></TableHead>
                                                                                         <TableHead className="w-[40%] text-xs py-3">รายละเอียดรายได้</TableHead>
-                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท) <span className="text-red-500">*</span></TableHead>
+                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้{isYearly ? 'ทั้งปี' : ''} (บาท) <span className="text-red-500">*</span></TableHead>
                                                                                         <TableHead className="w-[10%] text-center text-xs py-3">จัดการ</TableHead>
                                                                                     </TableRow>
                                                                                 </TableHeader>
@@ -2458,8 +2653,8 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                                     <TableCell className="py-2.5">
                                                                                                         <Input
                                                                                                             type="text"
-                                                                                                            value={formatNumberWithCommas(item.amount ?? '')}
-                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'amount', e.target.value)}
+                                                                                                            value={formatNumberWithCommas((isYearly ? item.yearlyAmount : item.amount) ?? '')}
+                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, isYearly ? 'yearlyAmount' : 'amount', e.target.value)}
                                                                                                             placeholder="0.00"
                                                                                                             className="h-9 text-sm bg-gray-50/30 text-right font-mono"
                                                                                                         />
@@ -2509,6 +2704,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                             const dynamicDocTypes: { id: string; label: string }[] = [];
                                                             // Collect all payslip_N doc types from uploaded documents
                                                             const payslipDocTypes = uploadedDocTypes.filter(dt => dt.startsWith('payslip_'));
+                                                            // Collect all tavi50_monthly_N doc types
+                                                            const tavi50DocTypes = uploadedDocTypes.filter(dt => dt.startsWith('tavi50_monthly_'));
+                                                            
                                                             INCOME_DOC_TYPES.forEach(dt => {
                                                                 if (dt.id === 'payslip') {
                                                                     // Expand payslip into individual payslip_N entries
@@ -2516,6 +2714,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                         dynamicDocTypes.push({
                                                                             id: pdt,
                                                                             label: `สลิปเงินเดือน (Payslip) - เดือนที่ ${idx + 1}`
+                                                                        });
+                                                                    });
+                                                                } else if (dt.id === 'tavi50_monthly') {
+                                                                    // Expand tavi50_monthly into individual tavi50_monthly_N entries
+                                                                    tavi50DocTypes.forEach((tdt, idx) => {
+                                                                        dynamicDocTypes.push({
+                                                                            id: tdt,
+                                                                            label: `ทวิ 50 (รายเดือน) - เดือนที่ ${idx + 1}`
                                                                         });
                                                                     });
                                                                 } else if (dt.id === 'statement') {
@@ -2540,8 +2746,14 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                             // Separate doc types into payslip, statement, and other categories
                                                             const payslipMonths: string[] = occ.payslipMonths || [];
                                                             const payslipSlipCounts: Record<string, number> = occ.payslipSlipCounts || {};
+                                                            const tavi50Months: string[] = occ.tavi50MonthlyMonths || [];
+                                                            const tavi50SlipCounts: Record<string, number> = occ.tavi50MonthlySlipCounts || {};
+                                                            
                                                             const statementUploaded = uploadedDocTypes.filter(dt => dt.startsWith('statement_'));
-                                                            const otherUploaded = uploadedDocTypes.filter(dt => !dt.startsWith('payslip_') && !dt.startsWith('statement_'));
+                                                            const tavi50YearlyUploaded = uploadedDocTypes.includes('tavi50_yearly');
+                                                            const tavi50MonthlyUploaded = uploadedDocTypes.filter(dt => dt.startsWith('tavi50_monthly_')).length > 0;
+                                                            const salaryCertUploaded = uploadedDocTypes.includes('salary_cert');
+                                                            const otherUploaded = uploadedDocTypes.filter(dt => !dt.startsWith('payslip_') && !dt.startsWith('statement_') && dt !== 'salary_cert' && dt !== 'tavi50_yearly' && dt !== 'tavi50_monthly' && !dt.startsWith('tavi50_monthly_'));
 
                                                             return (
                                                                 <>
@@ -2866,6 +3078,335 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                             </div>
                                                                         );
                                                                     })}
+
+                                                                    {/* Tavi 50 (Yearly) Section */}
+                                                                    {tavi50YearlyUploaded && (() => {
+                                                                        const label = dynamicDocTypes.find(d => d.id === 'tavi50_yearly')?.label || 'ทวิ 50 (รายปี)';
+                                                                        const sourceIncomes = incomesBySource['tavi50_yearly'] || [];
+                                                                        const filterDocs = allDocs.filter((d: IncomeDocument) => d.type === 'tavi50_yearly');
+                                                                        const sourceDoc = filterDocs.length > 0 ? filterDocs[0] : undefined;
+                                                                        
+                                                                        return (
+                                                                            <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                                <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                                                                    <div className="flex items-center gap-2.5">
+                                                                                        <FileText className="w-4 h-4 text-emerald-600" />
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: {label}</span>
+                                                                                        </div>
+                                                                                        {sourceDoc && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                onClick={() => window.open(sourceDoc.url, '_blank')}
+                                                                                                className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                                                title="ดูเอกสารต้นฉบับ"
+                                                                                            >
+                                                                                                <Eye className="w-4 h-4" />
+                                                                                            </Button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        {/* Empty right side container */}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="mt-3">
+                                                                                    {renderIncomeTable(
+                                                                                        `รายการรายได้จาก: ${label}`, 
+                                                                                        'tavi50_yearly', 
+                                                                                        sourceIncomes, 
+                                                                                        true,
+                                                                                        undefined,
+                                                                                        undefined,
+                                                                                        true // isYearly = true
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })()}
+
+                                                                    {/* Tavi 50 (Monthly) Section - Multi-Slip per Month */}
+                                                                    {tavi50MonthlyUploaded && (
+                                                                        <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                            <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <FileText className="w-4 h-4 text-emerald-600" />
+                                                                                    <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: ทวิ 50 (รายเดือน)</span>
+                                                                                </div>
+                                                                                <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                    onClick={() => handleOpenAddTavi50MonthDialog(occ.id)}
+                                                                                    className="h-8 text-xs font-medium"
+                                                                                >
+                                                                                    <Plus className="w-3 h-3 mr-1" /> เพิ่มเดือน
+                                                                                </Button>
+                                                                            </div>
+                                                                            {tavi50Months.length > 0 ? (
+                                                                                <Tabs defaultValue={`tavi50_monthly_month_0`} className="w-full">
+                                                                                    <TabsList className="w-full h-auto p-0 bg-transparent border-b border-border-subtle justify-start flex-wrap gap-0 rounded-none">
+                                                                                        {tavi50Months.map((monthLabel: string, mIdx: number) => (
+                                                                                            <TabsTrigger
+                                                                                                key={`tavi50_monthly_month_${mIdx}`}
+                                                                                                value={`tavi50_monthly_month_${mIdx}`}
+                                                                                                className="relative px-4 py-2 text-xs font-bold rounded-none border-b-2 border-transparent data-[state=active]:border-chaiyo-blue data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none text-gray-500 hover:text-gray-700 bg-transparent shadow-none transition-all"
+                                                                                            >
+                                                                                                <span>{monthLabel}</span>
+                                                                                            </TabsTrigger>
+                                                                                        ))}
+                                                                                    </TabsList>
+                                                                                    {tavi50Months.map((monthLabel: string, mIdx: number) => {
+                                                                                        const monthFullName = THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(monthLabel)] || monthLabel;
+                                                                                        const slipCount = tavi50SlipCounts[String(mIdx)] || 0;
+                                                                                        return (
+                                                                                            <TabsContent key={`tavi50_monthly_month_${mIdx}`} value={`tavi50_monthly_month_${mIdx}`} className="mt-3">
+                                                                                                <motion.div
+                                                                                                    initial={{ opacity: 0, y: 6 }}
+                                                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                                                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                                                                                                    className="space-y-4"
+                                                                                                >
+                                                                                                    {/* Month Header */}
+                                                                                                    <div className="flex items-center justify-between">
+                                                                                                        <Label className="text-sm font-bold text-gray-700">{monthFullName}</Label>
+                                                                                                        <div className="flex items-center gap-2">
+                                                                                                            <Button
+                                                                                                                type="button"
+                                                                                                                variant="outline"
+                                                                                                                size="sm"
+                                                                                                                onClick={() => setPendingDeleteTavi50Month({ occId: occ.id, monthLabel })}
+                                                                                                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                                                title="ลบเดือนนี้"
+                                                                                                            >
+                                                                                                                <Trash2 className="w-4 h-4" />
+                                                                                                            </Button>
+                                                                                                            <Button
+                                                                                                                type="button"
+                                                                                                                variant="outline"
+                                                                                                                size="sm"
+                                                                                                                onClick={() => handleAddTavi50Slip(occ.id, mIdx)}
+                                                                                                                className="h-8 text-xs font-medium"
+                                                                                                            >
+                                                                                                                <Plus className="w-3 h-3 mr-1" /> เพิ่มเอกสาร
+                                                                                                            </Button>
+                                                                                                        </div>
+                                                                                                    </div>
+
+                                                                                                    {/* Slips */}
+                                                                                                    {slipCount > 0 ? (
+                                                                                                        <div className="border border-border-subtle rounded-xl bg-white overflow-hidden divide-y divide-border-subtle">
+                                                                                                            {Array.from({ length: slipCount }, (_, sIdx) => {
+                                                                                                                const slipSourceKey = `tavi50_monthly_${mIdx}_slip_${sIdx}`;
+                                                                                                                const slipIncomes = incomesBySource[slipSourceKey] || [];
+                                                                                                                const slipDefaultLabel = `ทวิ 50 (รายเดือน) ${String(sIdx + 1).padStart(2, '0')}`;
+                                                                                                                const tavi50Docs = allDocs.filter((d: IncomeDocument) => d.type === slipSourceKey || d.type === `tavi50_monthly_${mIdx}` || d.type === `tavi50_monthly_${sIdx}`);
+                                                                                                                const sourceDoc = tavi50Docs.length > 0 ? tavi50Docs[0] : undefined;
+                                                                                                                const slipLabel = sourceDoc
+                                                                                                                    ? (sourceDoc.name || sourceDoc.originalName || slipDefaultLabel)
+                                                                                                                    : slipDefaultLabel;
+
+                                                                                                                return (
+                                                                                                                    <div key={slipSourceKey} className="p-4 space-y-3">
+                                                                                                                        {/* Slip Header */}
+                                                                                                                        <div className="flex items-center justify-between">
+                                                                                                                            <div className="flex items-center gap-2">
+                                                                                                                                <Label className="text-sm font-bold text-gray-700">{slipLabel}</Label>
+                                                                                                                                {sourceDoc && (
+                                                                                                                                    <Button
+                                                                                                                                        type="button"
+                                                                                                                                        variant="ghost"
+                                                                                                                                        size="sm"
+                                                                                                                                        onClick={() => window.open(sourceDoc.url, '_blank')}
+                                                                                                                                        className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                                                                                        title="ดูเอกสารต้นฉบับ"
+                                                                                                                                    >
+                                                                                                                                        <Eye className="w-4 h-4" />
+                                                                                                                                    </Button>
+                                                                                                                                )}
+                                                                                                                            </div>
+                                                                                                                            <div className="flex items-center gap-2">
+                                                                                                                                {slipCount > 1 && (
+                                                                                                                                    <Button
+                                                                                                                                        type="button"
+                                                                                                                                        variant="outline"
+                                                                                                                                        size="sm"
+                                                                                                                                        onClick={() => handleRemoveTavi50Slip(occ.id, mIdx, sIdx)}
+                                                                                                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                                                                        title="ลบเอกสารนี้"
+                                                                                                                                    >
+                                                                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                                                                    </Button>
+                                                                                                                                )}
+                                                                                                                                <Button
+                                                                                                                                    type="button"
+                                                                                                                                    variant="outline"
+                                                                                                                                    size="sm"
+                                                                                                                                    onClick={() => handleAddSAIncomeRow(occ.id, slipSourceKey)}
+                                                                                                                                    className="h-8 text-xs font-medium bg-white"
+                                                                                                                                >
+                                                                                                                                    <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการ
+                                                                                                                                </Button>
+                                                                                                                            </div>
+                                                                                                                        </div>
+
+                                                                                                                        {/* Slip Income Table */}
+                                                                                                                        <div className="border border-border-strong rounded-lg overflow-hidden bg-white">
+                                                                                                                            <Table>
+                                                                                                                                <TableHeader className="bg-gray-50/50">
+                                                                                                                                    <TableRow>
+                                                                                                                                        <TableHead className="w-[30%] text-xs py-3">ประเภทรายได้ <span className="text-red-500">*</span></TableHead>
+                                                                                                                                        <TableHead className="w-[40%] text-xs py-3">รายละเอียดรายได้</TableHead>
+                                                                                                                                        <TableHead className="w-[20%] text-xs py-3 text-right">รายได้ (บาท) <span className="text-red-500">*</span></TableHead>
+                                                                                                                                        <TableHead className="w-[10%] text-center text-xs py-3">จัดการ</TableHead>
+                                                                                                                                    </TableRow>
+                                                                                                                                </TableHeader>
+                                                                                                                                <TableBody>
+                                                                                                                                    {slipIncomes.length === 0 ? (
+                                                                                                                                        <TableRow>
+                                                                                                                                            <TableCell colSpan={4} className="h-16 text-center text-muted-foreground italic text-xs">
+                                                                                                                                                ยังไม่มีรายการรายได้ กรุณากดเพิ่มรายการ
+                                                                                                                                            </TableCell>
+                                                                                                                                        </TableRow>
+                                                                                                                                    ) : (
+                                                                                                                                        slipIncomes.map((item) => {
+                                                                                                                                            const originalIdx = item.originalIndex;
+                                                                                                                                            return (
+                                                                                                                                                <TableRow key={originalIdx} className="group transition-colors hover:bg-gray-50/50">
+                                                                                                                                                    <TableCell className="py-2.5">
+                                                                                                                                                        <Select
+                                                                                                                                                            value={item.type || ""}
+                                                                                                                                                            onValueChange={(val) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'type', val)}
+                                                                                                                                                        >
+                                                                                                                                                            <SelectTrigger className="h-9 text-sm bg-gray-50/30">
+                                                                                                                                                                <SelectValue placeholder="ระบุประเภทรายได้" />
+                                                                                                                                                            </SelectTrigger>
+                                                                                                                                                            <SelectContent>
+                                                                                                                                                                {SA_INCOME_TYPES.map(type => (
+                                                                                                                                                                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                                                                                                                                                                ))}
+                                                                                                                                                            </SelectContent>
+                                                                                                                                                        </Select>
+                                                                                                                                                    </TableCell>
+                                                                                                                                                    <TableCell className="py-2.5">
+                                                                                                                                                        <Input
+                                                                                                                                                            value={item.detail || ""}
+                                                                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'detail', e.target.value)}
+                                                                                                                                                            placeholder="รายละเอียด"
+                                                                                                                                                            className="h-9 text-sm bg-gray-50/30"
+                                                                                                                                                        />
+                                                                                                                                                    </TableCell>
+                                                                                                                                                    <TableCell className="py-2.5">
+                                                                                                                                                        <Input
+                                                                                                                                                            type="text"
+                                                                                                                                                            value={formatNumberWithCommas(item.amount ?? '')}
+                                                                                                                                                            onChange={(e) => handleUpdateSAIncomeRow(occ.id, originalIdx, 'amount', e.target.value)}
+                                                                                                                                                            placeholder="จำนวน"
+                                                                                                                                                            className="h-9 text-sm bg-gray-50/30 text-right font-mono"
+                                                                                                                                                        />
+                                                                                                                                                    </TableCell>
+                                                                                                                                                    <TableCell className="py-2.5 text-center">
+                                                                                                                                                        <Button
+                                                                                                                                                            variant="ghost"
+                                                                                                                                                            size="sm"
+                                                                                                                                                            className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                                                                                                                                                            onClick={() => setItemToDelete({
+                                                                                                                                                                index: originalIdx,
+                                                                                                                                                                occId: occ.id,
+                                                                                                                                                                name: item.detail || (SA_INCOME_TYPES.find(t => t.value === item.type)?.label) || `รายการที่ ${originalIdx + 1}`,
+                                                                                                                                                                type: 'saIncomeRow'
+                                                                                                                                                            })}
+                                                                                                                                                        >
+                                                                                                                                                            <Trash2 className="w-4 h-4" />
+                                                                                                                                                        </Button>
+                                                                                                                                                    </TableCell>
+                                                                                                                                                </TableRow>
+                                                                                                                                            );
+                                                                                                                                        })
+                                                                                                                                    )}
+                                                                                                                                </TableBody>
+                                                                                                                                {slipIncomes.length > 0 && (
+                                                                                                                                    <TableFooter>
+                                                                                                                                        <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
+                                                                                                                                            <TableCell colSpan={2} className="text-right font-bold py-3 text-xs text-gray-700">
+                                                                                                                                                รวมยอดจากเอกสารนี้:
+                                                                                                                                            </TableCell>
+                                                                                                                                            <TableCell colSpan={2} className="text-right pr-[4.5rem] py-3">
+                                                                                                                                                <div className="text-sm font-semibold font-mono text-gray-700">
+                                                                                                                                                    {formatNumberWithCommas(slipIncomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0))}
+                                                                                                                                                </div>
+                                                                                                                                            </TableCell>
+                                                                                                                                        </TableRow>
+                                                                                                                                    </TableFooter>
+                                                                                                                                )}
+                                                                                                                            </Table>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                );
+                                                                                                            })}
+                                                                                                        </div>
+                                                                                                    ) : (
+                                                                                                        <div className="text-center py-6 text-muted-foreground text-sm italic">
+                                                                                                            ยังไม่มีเอกสาร กรุณากดเพิ่มเอกสาร
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </motion.div>
+                                                                                            </TabsContent>
+                                                                                        );
+                                                                                    })}
+                                                                                </Tabs>
+                                                                            ) : (
+                                                                                <div className="text-center py-8 text-muted-foreground text-sm italic">
+                                                                                    ยังไม่มีเดือน กรุณากดเพิ่มเดือน
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Salary Certificate Section */}
+                                                                    {salaryCertUploaded && (() => {
+                                                                        const label = dynamicDocTypes.find(d => d.id === 'salary_cert')?.label || 'หนังสือรับรองเงินเดือน';
+                                                                        const sourceIncomes = incomesBySource['salary_cert'] || [];
+                                                                        const salaryCertDocs = allDocs.filter((d: IncomeDocument) => d.type === 'salary_cert');
+                                                                        const sourceDoc = salaryCertDocs.length > 0 ? salaryCertDocs[0] : undefined;
+                                                                        
+                                                                        return (
+                                                                            <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                                                                <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                                                                    <div className="flex items-center gap-2.5">
+                                                                                        <FileText className="w-4 h-4 text-emerald-600" />
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <span className="text-sm font-bold text-gray-800">รายการรายได้จาก: {label}</span>
+                                                                                        </div>
+                                                                                        {sourceDoc && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="sm"
+                                                                                                onClick={() => window.open(sourceDoc.url, '_blank')}
+                                                                                                className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                                                title="ดูเอกสารต้นฉบับ"
+                                                                                            >
+                                                                                                <Eye className="w-4 h-4" />
+                                                                                            </Button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                    <div className="flex items-center gap-2">
+                                                                                        {/* Empty right side container since there are no month/add-row buttons on the section header */}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="mt-3">
+                                                                                    {renderIncomeTable(
+                                                                                        `รายการรายได้จาก: ${label}`, 
+                                                                                        'salary_cert', 
+                                                                                        sourceIncomes, 
+                                                                                        true
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })()}
 
                                                                     {/* Other Doc Types - Flat (ทวิ 50, หนังสือรับรองเงินเดือน, custom, etc.) */}
                                                                     {otherUploaded.map(docType => {
@@ -4236,7 +4777,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                     <div className="space-y-4">
                                                         <div className="flex items-center justify-between mb-1">
                                                             <h5 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                                                <TrendingUp className="w-4 h-4 text-chaiyo-blue" /> ตารางสรุปช่วงเวลาและผลผลิต
+                                                                ตารางสรุปช่วงเวลาและผลผลิต
                                                             </h5>
                                                             <div className="flex items-center gap-3">
                                                                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
@@ -4348,7 +4889,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                         </>
                                     )}
                                     {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed) ===== */}
-                                    {occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && (
+                                    {occ.isMain && occ.occupationCode !== 'UNEMPLOYED' && occ.employmentType && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <Users className="w-5 h-5 text-chaiyo-blue" /> บุคคลอ้างอิง
@@ -4471,7 +5012,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     )}
 
                                     {/* อัพโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
-                                    {occ.occupationCode !== 'UNEMPLOYED' && occ.businessStatus !== 'closed' && (
+                                    {occ.occupationCode !== 'UNEMPLOYED' && occ.businessStatus !== 'closed' && occ.employmentType && (
                                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                                                 <ImagePlus className="w-5 h-5 text-chaiyo-blue" /> อัพโหลดรูปประกอบกิจการ
@@ -4568,7 +5109,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                         variant="outline"
                                                                                         size="sm"
                                                                                         onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                                        className="h-8 text-xs gap-1.5 font-medium"
                                                                                     >
                                                                                         <Plus className="w-3.5 h-3.5" />
                                                                                         เพิ่มเอกสาร
@@ -4671,7 +5212,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                                                                         variant="outline"
                                                                                         size="sm"
                                                                                         onClick={() => handleTriggerPhotoUpload(guide.id)}
-                                                                                        className="h-8 text-xs gap-1.5 font-medium hover:border-chaiyo-blue/50 hover:bg-blue-50/50"
+                                                                                        className="h-8 text-xs gap-1.5 font-medium"
                                                                                     >
                                                                                         <Plus className="w-3.5 h-3.5" />
                                                                                         เพิ่มเอกสาร
@@ -4858,17 +5399,19 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     )}
 
                                     {/* หมายเหตุ per occupation */}
-                                    <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
-                                        <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
-                                            <MessageSquare className="w-5 h-5 text-chaiyo-blue" /> หมายเหตุ
-                                        </h4>
-                                        <Textarea
-                                            value={occ.remarks || ""}
-                                            onChange={(e) => handleOccupationChange(occ.id, "remarks", e.target.value)}
-                                            placeholder="บันทึกหมายเหตุเพิ่มเติมสำหรับอาชีพนี้ (ถ้ามี)"
-                                            className="min-h-[100px] resize-none bg-white"
-                                        />
-                                    </div>
+                                    {occ.employmentType && (
+                                        <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
+                                            <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
+                                                <MessageSquare className="w-5 h-5 text-chaiyo-blue" /> หมายเหตุ
+                                            </h4>
+                                            <Textarea
+                                                value={occ.remarks || ""}
+                                                onChange={(e) => handleOccupationChange(occ.id, "remarks", e.target.value)}
+                                                placeholder="บันทึกหมายเหตุเพิ่มเติมสำหรับอาชีพนี้ (ถ้ามี)"
+                                                className="min-h-[100px] resize-none bg-white"
+                                            />
+                                        </div>
+                                    )}
                                 </TabsContent>
                             ))
                             }
@@ -4884,7 +5427,6 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-gray-50/80 border-b border-border-strong pb-3 pt-4">
                         <CardTitle className="text-base flex items-center gap-2 text-gray-800">
-                            <PieChart className="w-5 h-5 text-chaiyo-blue" />
                             สรุปรายได้ (บาท/เดือน)
                         </CardTitle>
                     </CardHeader>
@@ -5012,7 +5554,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบเดือน</AlertDialogTitle>
                         <AlertDialogDescription>
-                            คุณต้องการลบข้อมูลเดือน &quot;{pendingDeleteMonth ? (THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(pendingDeleteMonth.monthLabel)] || pendingDeleteMonth.monthLabel) : ''}&quot; ใช่หรือไม่?
+                            คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -5126,7 +5668,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
             <Dialog open={payslipMonthDialogOpen} onOpenChange={setPayslipMonthDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>เพิ่มเดือน (สลิปเงินเดือน)</DialogTitle>
+                        <DialogTitle>เพิ่มเดือน</DialogTitle>
                         <DialogDescription>
                             เลือกเดือนที่ต้องการเพิ่มรายการรายได้จากสลิปเงินเดือน
                         </DialogDescription>
@@ -5172,7 +5714,7 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบเดือน (สลิปเงินเดือน)</AlertDialogTitle>
                         <AlertDialogDescription>
-                            คุณต้องการลบข้อมูลเดือน &quot;{pendingDeletePayslipMonth ? (THAI_MONTHS_FULL[THAI_MONTHS_SHORT.indexOf(pendingDeletePayslipMonth.monthLabel)] || pendingDeletePayslipMonth.monthLabel) : ''}&quot; และ Slip ทั้งหมดภายในเดือนนี้ ใช่หรือไม่?
+                            คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -5183,6 +5725,76 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     handleRemovePayslipMonth(pendingDeletePayslipMonth.occId, pendingDeletePayslipMonth.monthLabel);
                                 }
                                 setPendingDeletePayslipMonth(null);
+                            }}
+                            className="bg-status-rejected hover:bg-status-rejected/90"
+                        >
+                            ยืนยันการลบ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Tavi 50 Monthly Add Dialog */}
+            <Dialog open={tavi50MonthDialogOpen} onOpenChange={setTavi50MonthDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>เพิ่มเดือน</DialogTitle>
+                        <DialogDescription>
+                            เลือกเดือนที่ต้องการเพิ่มรายการรายได้จาก ทวิ 50 (รายเดือน)
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogBody>
+                        <div className="space-y-3">
+                            <Label>เดือน <span className="text-red-500">*</span></Label>
+                            <Select value={selectedTavi50Month} onValueChange={setSelectedTavi50Month}>
+                                <SelectTrigger className="h-11 bg-white">
+                                    <SelectValue placeholder="เลือกเดือน..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {THAI_MONTHS_SHORT.map((month, idx) => {
+                                        const existingMonths = tavi50MonthDialogOccId
+                                            ? (occupations.find(o => o.id === tavi50MonthDialogOccId)?.tavi50MonthlyMonths || [])
+                                            : [];
+                                        const isAlreadyAdded = existingMonths.includes(month);
+                                        const fullName = THAI_MONTHS_FULL[idx];
+                                        return (
+                                            <SelectItem key={month} value={month} disabled={isAlreadyAdded}>
+                                                {fullName} {isAlreadyAdded ? '(เพิ่มแล้ว)' : ''}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setTavi50MonthDialogOpen(false)} className="min-w-[104px]">
+                            ยกเลิก
+                        </Button>
+                        <Button onClick={handleConfirmAddTavi50Month} disabled={!selectedTavi50Month} className="min-w-[104px]">
+                            ยืนยัน
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Tavi 50 Month Confirmation */}
+            <AlertDialog open={pendingDeleteTavi50Month !== null} onOpenChange={(open) => !open && setPendingDeleteTavi50Month(null)}>
+                <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบเดือน (ทวิ 50 (รายเดือน))</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (pendingDeleteTavi50Month) {
+                                    handleRemoveTavi50Month(pendingDeleteTavi50Month.occId, pendingDeleteTavi50Month.monthLabel);
+                                }
+                                setPendingDeleteTavi50Month(null);
                             }}
                             className="bg-status-rejected hover:bg-status-rejected/90"
                         >
@@ -5285,7 +5897,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     ? d.type?.startsWith('payslip')
                                     : viewFilesContext.docType === 'statement'
                                         ? d.type?.startsWith('statement')
-                                        : d.type === viewFilesContext.docType
+                                        : viewFilesContext.docType === 'tavi50_monthly'
+                                            ? d.type?.startsWith('tavi50_monthly_')
+                                            : d.type === viewFilesContext.docType
                             );
 
                             if (fileList.length === 0) return (
@@ -5458,7 +6072,9 @@ export function IncomeStep({ formData, setFormData, isExistingCustomer = false, 
                                     ? d.type?.startsWith('payslip')
                                     : currentDocContext.docType === 'statement'
                                         ? d.type?.startsWith('statement')
-                                        : d.type === currentDocContext.docType;
+                                        : currentDocContext.docType === 'tavi50_monthly'
+                                            ? d.type?.startsWith('tavi50_monthly_')
+                                            : d.type === currentDocContext.docType;
                             });
 
                             if (currentFileList.length === 0) return null;

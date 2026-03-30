@@ -658,7 +658,6 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <Users className="w-5 h-5" />
                             ข้อมูลผู้ค้ำประกัน
                         </CardTitle>
                     </CardHeader>
@@ -713,8 +712,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <User className="w-5 h-5" />
-                        {isGuarantor ? 'ข้อมูลส่วนตัว (ผู้ค้ำประกัน)' : 'ข้อมูลส่วนตัว (ผู้กู้หลัก)'}
+                            {isGuarantor ? 'ข้อมูลส่วนตัว (ผู้ค้ำประกัน)' : 'ข้อมูลส่วนตัว (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -1040,8 +1038,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <MapPin className="w-5 h-5" />
-                        {isGuarantor ? 'ที่อยู่ (ผู้ค้ำประกัน)' : 'ที่อยู่ (ผู้กู้หลัก)'}
+                            {isGuarantor ? 'ที่อยู่ (ผู้ค้ำประกัน)' : 'ที่อยู่ (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -1340,7 +1337,6 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <Home className="w-5 h-5" />
                             {isGuarantor ? 'ข้อมูลครอบครัว (ผู้ค้ำประกัน)' : 'ข้อมูลครอบครัว (ผู้กู้หลัก)'}
                         </CardTitle>
                     </CardHeader>
@@ -1421,7 +1417,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                             <>
                                 <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
                                     <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                                        <Users className="w-4 h-4 text-chaiyo-blue" /> จำนวนสมาชิกในครอบครัว
+                                        จำนวนสมาชิกในครอบครัว
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         <div className="space-y-2 group">
@@ -1466,7 +1462,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
 
                                 <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
                                     <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-2">
-                                        <Users className="w-4 h-4 text-chaiyo-blue" /> ความสัมพันธ์และภาระค่าใช้จ่าย
+                                        ความสัมพันธ์และภาระค่าใช้จ่าย
                                     </div>
                                     <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
                                         <Table>
@@ -1587,7 +1583,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                 <div className="mt-8 space-y-4 pt-6 border-t border-border-subtle">
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
-                                            <Users className="w-4 h-4 text-chaiyo-blue" /> ข้อมูลบุตร
+                                            ข้อมูลบุตร
                                         </div>
                                         <Button
                                             type="button"
@@ -1681,8 +1677,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                        <Phone className="w-5 h-5" />
-                        {isGuarantor ? 'ข้อมูลการติดต่อ (ผู้ค้ำประกัน)' : 'ข้อมูลการติดต่อ (ผู้กู้หลัก)'}
+                            {isGuarantor ? 'ข้อมูลการติดต่อ (ผู้ค้ำประกัน)' : 'ข้อมูลการติดต่อ (ผู้กู้หลัก)'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-6">
@@ -2041,7 +2036,7 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                         <div className="space-y-4 pt-4">
                             <div className="flex items-center justify-between mb-2">
                                 <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                    <Globe className="w-4 h-4 text-chaiyo-blue" /> เครือข่ายสังคมออนไลน์ (Social Media)
+                                    เครือข่ายสังคมออนไลน์ (Social Media)
                                 </Label>
                                 <Button
                                     type="button"
@@ -2079,24 +2074,34 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                                                 <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors group">
                                                     <TableCell className="text-center font-medium py-3 text-gray-600">{idx + 1}</TableCell>
                                                     <TableCell className="py-3">
-                                                        <Select
-                                                            value={item.platform}
-                                                            onValueChange={(val) => handleUpdateSocialMedia(idx, "platform", val)}
-                                                        >
-                                                            <SelectTrigger className="h-10 bg-white border-gray-200">
-                                                                <SelectValue />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {SOCIAL_PLATFORMS.map(p => (
-                                                                    <SelectItem key={p.value} value={p.value}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <SocialIcon platform={p.value} />
-                                                                            <span>{p.label}</span>
-                                                                        </div>
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <div className="space-y-2">
+                                                            <Select
+                                                                value={item.platform}
+                                                                onValueChange={(val) => handleUpdateSocialMedia(idx, "platform", val)}
+                                                            >
+                                                                <SelectTrigger className="h-10 bg-white border-gray-200">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {SOCIAL_PLATFORMS.map(p => (
+                                                                        <SelectItem key={p.value} value={p.value}>
+                                                                            <div className="flex items-center gap-2">
+                                                                                <SocialIcon platform={p.value} />
+                                                                                <span>{p.label}</span>
+                                                                            </div>
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {item.platform === "other" && (
+                                                                <Input
+                                                                    value={item.otherPlatform || ""}
+                                                                    onChange={(e) => handleUpdateSocialMedia(idx, "otherPlatform", e.target.value)}
+                                                                    placeholder="ระบุชื่อแพลตฟอร์ม"
+                                                                    className="h-10 bg-white border-gray-200 focus:border-chaiyo-blue focus:ring-1 focus:ring-chaiyo-blue"
+                                                                />
+                                                            )}
+                                                        </div>
                                                     </TableCell>
                                                     <TableCell className="py-3">
                                                         <Input
@@ -2132,7 +2137,6 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <ClipboardList className="w-5 h-5" />
                             รหัสอ้างอิง
                         </CardTitle>
                     </CardHeader>
@@ -2175,7 +2179,6 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <ClipboardList className="w-5 h-5" />
                             แบบสอบถาม
                         </CardTitle>
                     </CardHeader>
@@ -2184,7 +2187,6 @@ export function CustomerInfoStep({ formData, setFormData, variant = 'borrower' }
                             {/* Sub-section 1: Extra Income */}
                             <div className="rounded-xl border border-gray-200 bg-gray-50/40 p-5 space-y-4">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                                    <Wallet className="w-4 h-4 text-chaiyo-blue" />
                                     <h3 className="text-sm font-bold text-gray-700">การหารายได้เสริม</h3>
                                 </div>
 

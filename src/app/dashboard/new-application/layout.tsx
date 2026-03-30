@@ -70,7 +70,8 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     // ── Hide save draft button during screening phase or specific pages ──────
     useEffect(() => {
         const isConsentPage = pathname.includes('/consent');
-        setHideSaveDraftButton(isScreeningPhase || isConsentPage);
+        const isGuarantorsPage = pathname.endsWith('/guarantors');
+        setHideSaveDraftButton(isScreeningPhase || isConsentPage || isGuarantorsPage);
     }, [isScreeningPhase, pathname, setHideSaveDraftButton]);
 
     // Borrower name from formData
@@ -91,10 +92,10 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             }
         };
 
-        // Fallback titles for slugs not in APPLICATION_STEPS
         const EXTRA_BREADCRUMB_TITLES: Record<string, string> = {
             'guarantors': 'ผู้ค้ำ',
             'refinance': 'รีไฟแนนซ์',
+            'verify-address': 'ตรวจสอบที่อยู่',
             'consent': 'การให้ความยินยอม',
         };
         const pathSlug = pathname.split('/').pop() || '';
@@ -163,7 +164,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     <Save className="w-4 h-4 mr-2" /> บันทึกและกลับ
                 </Button>
             );
-        } else if (isReadonly) {
+        } else if (isReadonly && !isConsentPage) {
             setRightContent(
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                     <Eye className="w-4 h-4" />

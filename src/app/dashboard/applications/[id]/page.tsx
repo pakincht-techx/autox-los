@@ -5,7 +5,7 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2 } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2, Home } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -84,6 +84,7 @@ const BASE_MOCK_APP = {
         debt: true,
         guarantor: true,
         refinance: true,
+        verifyAddress: true,
         documents: true,
         consent: false,
     } as Record<string, boolean>,
@@ -436,6 +437,13 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                     completionStatus={app.moduleStatus.refinance ? 'completed' : 'incomplete'}
                                     onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=draft`) : undefined}
                                     onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/refinance?state=readonly`) : undefined}
+                                />
+                                <ModuleRow
+                                    title="ตรวจสอบที่อยู่"
+                                    icon={<Home className="w-4 h-4" />}
+                                    completionStatus={app.moduleStatus.verifyAddress ? 'completed' : 'incomplete'}
+                                    onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/verify-address?state=draft`) : undefined}
+                                    onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/verify-address?state=readonly`) : undefined}
                                 />
                             </div>
                         </div>

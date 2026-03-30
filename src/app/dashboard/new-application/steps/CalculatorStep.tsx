@@ -414,8 +414,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                                <Calculator className="w-5 h-5 text-chaiyo-blue" />
-                                รายละเอียดวงเงินและระยะเวลาผ่อน
+                            รายละเอียดวงเงินและระยะเวลาผ่อน
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6 px-6 pb-6 pt-5">
@@ -677,8 +676,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                                <ShieldCheck className="w-5 h-5 text-chaiyo-blue" />
-                                ประกันภัย
+                            ประกันภัย
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="px-6 pb-6 pt-5 space-y-4">
@@ -1130,8 +1128,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                                <Banknote className="w-5 h-5 text-chaiyo-blue" />
-                                รายละเอียดบัญชีรับโอนเงินกู้
+                            รายละเอียดบัญชีรับโอนเงินกู้
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 px-6 pb-6 pt-5">

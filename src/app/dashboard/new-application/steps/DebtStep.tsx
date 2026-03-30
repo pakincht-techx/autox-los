@@ -1060,7 +1060,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                 <Card className="border-border-strong">
                     <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                         <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            <CreditCard className="w-5 h-5" />
                             ภาระหนี้สิน
                         </CardTitle>
                     </CardHeader>
@@ -1277,7 +1276,6 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                 <Card className="border-border-strong overflow-hidden">
                     <CardHeader className="bg-gray-50/80 border-b border-border-strong pb-3 pt-4">
                         <CardTitle className="text-base flex items-center gap-2 text-gray-800">
-                            <PieChart className="w-5 h-5 text-chaiyo-blue" />
                             สรุปรายได้และภาระหนี้ (บาท/เดือน)
                         </CardTitle>
                     </CardHeader>

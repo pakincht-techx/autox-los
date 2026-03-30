@@ -10,7 +10,7 @@ interface StatusBannerProps {
     size?: StatusBannerSize;
     icon?: LucideIcon;
     title: string;
-    description?: string;
+    description?: ReactNode;
     action?: ReactNode;
     className?: string;
 }

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { FileText, CheckCircle2, Plus } from "lucide-react";
+import { FileText, CheckCircle2, Plus, Info, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
+import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import { CustomerFormData } from "@/types/application";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { StatusBanner } from "@/components/ui/StatusBanner";
 import {
     Table,
     TableBody,
@@ -16,13 +18,32 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/Table";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DocumentUploadStepProps {
     formData: CustomerFormData;
     setFormData: React.Dispatch<React.SetStateAction<CustomerFormData>>;
 }
 
-const documentSections = [
+type DocumentDoc = { id: string; name: string; req: boolean };
+type DocumentSection = {
+    title: string;
+    docs: DocumentDoc[];
+    isViewOnly?: boolean;
+    sourceModule?: string;
+    isCustom?: boolean;
+};
+
+const documentSections: DocumentSection[] = [
     {
         title: "ยืนยันตัวตน",
         docs: [
@@ -35,6 +56,8 @@ const documentSections = [
     },
     {
         title: "รูปถ่ายหลักประกัน",
+        isViewOnly: true,
+        sourceModule: "รูปถ่ายหลักประกัน",
         docs: [
             { id: "photo_rear_selfie", name: "รูปหลังรถเห็นป้ายทะเบียน พร้อม เซลฟี่-ถือบัตรพนักงาน", req: true },
             { id: "photo_front_hood", name: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์", req: true },
@@ -101,23 +124,93 @@ const documentSections = [
             { id: "waiver_onetime", name: "อนุโลม ต่อสัญญา One-Time", req: false },
             { id: "waiver_insurance", name: "อนุโลม ผู้กู้ทำหรือไม่ทำประกัน ( PA Safty Loan) / ประกันภัยรถยนต์", req: false },
         ]
+    },
+    {
+        title: "เอกสารอื่นๆ",
+        isCustom: true,
+        docs: []
     }
 ];
 
 export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStepProps) {
-    const [uploads, setUploads] = useState<Record<string, boolean>>({});
+    const [uploads, setUploads] = useState<Record<string, number>>({
+        photo_rear_selfie: 1,
+        photo_front_hood: 2,
+        photo_front_left45: 1,
+        photo_front_right45: 1,
+        photo_rear_left45: 2,
+        photo_rear_right45: 1,
+        photo_interior_console: 3,
+        photo_chassis: 1,
+    });
     const [activeTab, setActiveTab] = useState("0");
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
+    const [customDocs, setCustomDocs] = useState<DocumentDoc[]>([]);
+    const [docToDelete, setDocToDelete] = useState<DocumentDoc | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadingDocId, setUploadingDocId] = useState<string | null>(null);
 
-    const handleUpload = (id: string) => {
-        // Simulate upload
-        setUploads(prev => ({ ...prev, [id]: true }));
+    const sections = useMemo(() => {
+        return documentSections.map(section => {
+            if (section.isCustom) {
+                return { ...section, docs: customDocs };
+            }
+            return section;
+        });
+    }, [customDocs]);
+
+    const MOCK_CAR_PHOTOS = [
+        'https://images.unsplash.com/photo-1554224155-169641357599?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800',
+        'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=800',
+    ];
+
+    const handleViewPhotos = (id: string, count: number) => {
+        // Generate mock photos for preview
+        const mockPhotos = Array.from({ length: count }).map((_, i) =>
+            MOCK_CAR_PHOTOS[i % MOCK_CAR_PHOTOS.length]
+        );
+        setLightboxPhotos(mockPhotos);
+        setLightboxIndex(0);
     };
 
-    const uploadedCount = Object.values(uploads).filter(Boolean).length;
-    const totalDocsCount = documentSections.reduce((acc, curr) => acc + curr.docs.length, 0);
+    const handleUpload = (id: string) => {
+        setUploadingDocId(id);
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0 && uploadingDocId) {
+            // Simulate upload by adding the count of selected files
+            setUploads(prev => ({ 
+                ...prev, 
+                [uploadingDocId]: (prev[uploadingDocId] || 0) + e.target.files!.length 
+            }));
+        }
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+        setUploadingDocId(null);
+    };
+
+    const uploadedCount = Object.values(uploads).filter(count => count > 0).length;
+    const totalDocsCount = sections.reduce((acc, curr) => acc + curr.docs.length, 0);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                multiple
+                onChange={handleFileChange} 
+            />
 
             <div className="flex items-center justify-between">
                 <Label className="text-xl font-bold text-gray-900">เอกสารประกอบการสมัคร ({uploadedCount}/{totalDocsCount} ไฟล์)</Label>
@@ -126,8 +219,8 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
             <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full flex flex-col lg:flex-row gap-8">
                 <TabsList className="w-full lg:w-72 flex flex-col h-auto justify-start bg-transparent p-0 flex-shrink-0">
                     <LayoutGroup>
-                    {documentSections.map((section, idx) => {
-                        const sectionUploadCount = section.docs.filter(d => uploads[d.id]).length;
+                    {sections.map((section, idx) => {
+                        const sectionUploadCount = section.docs.filter(d => (uploads[d.id] || 0) > 0).length;
                         const isActive = activeTab === String(idx);
                         return (
                             <TabsTrigger
@@ -161,7 +254,7 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
 
                 <div className="flex-1 overflow-hidden min-w-0">
                     <AnimatePresence mode="wait">
-                    {documentSections.map((section, idx) => {
+                    {sections.map((section, idx) => {
                         return (
                             <TabsContent key={idx} value={String(idx)} className="m-0 focus-visible:outline-none" forceMount={activeTab === String(idx) ? true : undefined}>
                                 <motion.div
@@ -171,18 +264,59 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                     exit={{ opacity: 0, y: -8 }}
                                     transition={{ duration: 0.2, ease: "easeOut" }}
                                 >
+                                {section.isViewOnly && section.sourceModule && (
+                                    <div className="mb-6">
+                                        <StatusBanner
+                                            variant="info"
+                                            icon={Info}
+                                            title="เอกสารดูได้อย่างเดียว (View Only)"
+                                            description={
+                                                <span>
+                                                    เอกสารเหล่านี้ถูกอัปโหลดจาก <span className="font-semibold text-blue-700">{section.sourceModule}</span> หากต้องการแก้ไข หรืออัปเดตข้อมูล กรุณาไปที่ <span className="font-semibold text-blue-700">{section.sourceModule}</span>
+                                                </span>
+                                            }
+                                        />
+                                    </div>
+                                )}
+                                {section.isCustom && (
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="text-sm font-bold text-gray-700">รายการเอกสาร</div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                const newId = `other_${Date.now()}`;
+                                                setCustomDocs(prev => [...prev, { id: newId, name: 'เอกสารอื่นๆ', req: false }]);
+                                            }}
+                                            className="h-9 gap-1.5 font-medium"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            เพิ่มเอกสารอื่นๆ
+                                        </Button>
+                                    </div>
+                                )}
                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
                                     <Table className="table-fixed">
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow>
-                                                <TableHead className="w-[400px] text-xs">ประเภทเอกสาร</TableHead>
+                                                <TableHead className={cn("text-xs", section.isViewOnly ? "w-auto" : "w-[400px]")}>ประเภทเอกสาร</TableHead>
                                                 <TableHead className="text-xs">ไฟล์ที่อัพโหลด</TableHead>
-                                                <TableHead className="w-[120px] text-right text-xs">จัดการ</TableHead>
+                                                {!section.isViewOnly && (
+                                                    <TableHead className="w-[160px] text-right text-xs">จัดการ</TableHead>
+                                                )}
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {section.docs.map((doc) => {
-                                                const isUploaded = uploads[doc.id];
+                                            {section.docs.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={section.isViewOnly ? 2 : 3} className="text-center py-8 text-muted-foreground text-sm">
+                                                        ไม่มีเอกสารในรายการนี้
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                section.docs.map((doc) => {
+                                                const fileCount = uploads[doc.id] || 0;
+                                                const isUploaded = fileCount > 0;
                                                 return (
                                                     <TableRow key={doc.id} className="hover:bg-transparent">
                                                         <TableCell className="py-4">
@@ -193,43 +327,72 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                                                 )}>
                                                                     {isUploaded ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                                                                 </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-medium text-gray-700 text-sm">{doc.name}</span>
-                                                                    {doc.req && <span className="text-red-500 text-sm">*</span>}
-                                                                </div>
+                                                                {section.isCustom ? (
+                                                                    <Input
+                                                                        value={doc.name}
+                                                                        onChange={(e) => {
+                                                                            setCustomDocs(prev => prev.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d));
+                                                                        }}
+                                                                        className="h-8 text-sm font-medium w-[200px]"
+                                                                        placeholder="ชื่อเอกสาร"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-medium text-gray-700 text-sm">{doc.name}</span>
+                                                                        {doc.req && <span className="text-red-500 text-sm">*</span>}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             {isUploaded ? (
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => handleUpload(doc.id)}
-                                                                    className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
+                                                                    onClick={() => section.isViewOnly ? handleViewPhotos(doc.id, fileCount) : handleUpload(doc.id)}
+                                                                    className={cn(
+                                                                        "flex items-center gap-1.5 text-xs font-medium cursor-pointer",
+                                                                        section.isViewOnly ? "text-chaiyo-blue hover:text-chaiyo-blue no-underline" : "text-chaiyo-blue hover:underline"
+                                                                    )}
                                                                 >
                                                                     <FileText className="w-3.5 h-3.5" />
-                                                                    1 ไฟล์
+                                                                    {fileCount} ไฟล์
                                                                 </button>
                                                             ) : (
                                                                 <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
                                                             )}
                                                         </TableCell>
-                                                        <TableCell className="text-right">
-                                                            <div className="flex items-center justify-end gap-1">
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    onClick={() => handleUpload(doc.id)}
-                                                                    className="h-8 text-xs gap-1.5 font-medium"
-                                                                >
-                                                                    <Plus className="w-3.5 h-3.5" />
-                                                                    เพิ่มเอกสาร
-                                                                </Button>
-                                                            </div>
-                                                        </TableCell>
+                                                        {!section.isViewOnly && (
+                                                            <TableCell className="text-right">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleUpload(doc.id)}
+                                                                        className="h-8 text-xs gap-1.5 font-medium"
+                                                                    >
+                                                                        <Plus className="w-3.5 h-3.5" />
+                                                                        เพิ่มเอกสาร
+                                                                    </Button>
+                                                                    {section.isCustom && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => setDocToDelete(doc)}
+                                                                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                            title="ลบเอกสาร"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            </TableCell>
+                                                        )}
                                                     </TableRow>
-                                                );
-                                            })}
+                                                 );
+                                            })
+                                            )}
                                         </TableBody>
                                     </Table>
                                 </div>
@@ -240,6 +403,104 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                     </AnimatePresence>
                 </div>
             </Tabs>
+
+            {/* Photo Lightbox */}
+            {lightboxIndex !== null && lightboxPhotos.length > 0 && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
+                    onClick={() => setLightboxIndex(null)}
+                >
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+                        className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all border border-white/20"
+                    >
+                        <X className="w-8 h-8" />
+                    </button>
+
+                    {/* Navigation */}
+                    {lightboxPhotos.length > 1 && (
+                        <>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLightboxIndex(prev => prev !== null ? (prev - 1 + lightboxPhotos.length) % lightboxPhotos.length : 0);
+                                }}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m15 18-6-6 6-6" /></svg>
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLightboxIndex(prev => prev !== null ? (prev + 1) % lightboxPhotos.length : 0);
+                                }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white p-2 rounded-full hover:bg-white/10 transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10"><path d="m9 18 6-6-6-6" /></svg>
+                            </button>
+                        </>
+                    )}
+
+                    {/* Main Image */}
+                    <img
+                        src={lightboxPhotos[lightboxIndex ?? 0]}
+                        alt={`Document View ${(lightboxIndex ?? 0) + 1}`}
+                        className="max-h-[80vh] max-w-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+
+                    {/* Thumbnail Strip */}
+                    <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 px-4 overflow-x-auto pb-2" onClick={(e) => e.stopPropagation()}>
+                        {lightboxPhotos.map((url, idx) => (
+                            <button
+                                key={idx}
+                                onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                                className={cn(
+                                    "w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0",
+                                    idx === lightboxIndex ? "border-white scale-110 ring-2 ring-white/20" : "border-transparent opacity-50 hover:opacity-100"
+                                )}
+                            >
+                                <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="absolute top-4 left-4 text-white/80 font-medium bg-black/50 px-3 py-1 rounded-full backdrop-blur-md">
+                        {(lightboxIndex ?? 0) + 1} / {lightboxPhotos.length}
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={docToDelete !== null} onOpenChange={(open: boolean) => !open && setDocToDelete(null)}>
+                <AlertDialogContent onCloseAutoFocus={(e: Event) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการลบเอกสาร</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการลบข้อมูลนี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (docToDelete) {
+                                    setCustomDocs(prev => prev.filter(d => d.id !== docToDelete.id));
+                                    setUploads(prev => {
+                                        const next = { ...prev };
+                                        delete next[docToDelete.id];
+                                        return next;
+                                    });
+                                }
+                                setDocToDelete(null);
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            ยืนยันการลบ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
