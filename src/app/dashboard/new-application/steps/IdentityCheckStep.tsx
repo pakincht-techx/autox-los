@@ -514,45 +514,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
         <>
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
 
-                {/* Stage Indicators */}
-                <div className="relative flex items-center justify-between px-12 md:px-24 mb-8">
-                    {/* Connecting Line */}
-                    <div className="absolute top-[15px] left-16 right-16 md:left-28 md:right-28 h-[2px] z-0">
-                        <div className="absolute inset-0 bg-gray-300"></div>
-                        <div
-                            className="absolute left-0 top-0 h-full bg-chaiyo-blue transition-all duration-500"
-                            style={{
-                                width: stage === 'COMPLETE' || stage === 'FACE_SUCCESS' ? '100%' :
-                                    stage === 'FACE_VERIFY' ? '75%' :
-                                        stage === 'CHECKING_MEMBER' ? '50%' :
-                                            stage === 'CARD_SUCCESS' ? '25%' :
-                                                stage === 'READING_CARD' ? '10%' : '0%'
-                            }}
-                        ></div>
-                    </div>
 
-                    <StepIndicator
-                        num={1}
-                        label="ข้อมูลบุคคล"
-                        active={stage === 'INIT' || stage === 'READING_CARD' || stage === 'CARD_SUCCESS'}
-                        completed={stage !== 'INIT' && stage !== 'READING_CARD' && stage !== 'CARD_SUCCESS'}
-                    />
-
-                    <StepIndicator
-                        num={2}
-                        label="ตรวจสอบสถานะ"
-                        active={stage === 'CHECKING_MEMBER'}
-                        completed={stage === 'FACE_VERIFY' || stage === 'FACE_SUCCESS' || stage === 'COMPLETE'}
-                    />
-
-                    <StepIndicator
-                        num={3}
-                        label="ยืนยันใบหน้า"
-                        active={stage === 'FACE_VERIFY'}
-                        completed={stage === 'FACE_SUCCESS' || stage === 'COMPLETE'}
-                        skipped={isExistingMember && stage === 'COMPLETE'}
-                    />
-                </div>
 
                 {/* Main Content Area */}
                 <div className="max-w-2xl mx-auto pt-4 transition-all duration-500 w-full">
@@ -654,7 +616,6 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                     icon={IdCard}
                                     title={stage === 'TAKING_ID_FRONT' ? 'ขั้นตอนที่ 1: ถ่ายรูปด้านหน้าบัตร' : 'ขั้นตอนที่ 2: ถ่ายรูปด้านหลังบัตร'}
                                     description="วางบัตรให้ตรงกับกรอบที่กำหนด และกดปุ่มถ่ายภาพ"
-                                    action={<Button variant="ghost" onClick={handleBackToSelection} className="text-orange-600 hover:text-orange-700 hover:bg-orange-100">ยกเลิก</Button>}
                                 />
 
                                 <Card className="border-border-subtle bg-slate-900 overflow-hidden relative aspect-[3/2] rounded-3xl shadow-2xl">
@@ -741,6 +702,16 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                         )}
                                     </CardContent>
                                 </Card>
+
+                                <div className="flex justify-center pt-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleBackToSelection}
+                                        className="min-w-[120px] rounded-2xl h-12 font-bold"
+                                    >
+                                        ยกเลิก
+                                    </Button>
+                                </div>
                             </div>
                         )}
 
@@ -765,20 +736,10 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                         {(stage === 'FACE_VERIFY') && (
                             <div className="space-y-6 animate-in zoom-in-95 duration-500">
                                 <StatusBanner
-                                    variant="info"
+                                    variant="orange"
                                     icon={Camera}
                                     title="ตรวจสอบใบหน้า (Liveness Check)"
                                     description="กรุณาวางใบหน้าให้อยู่ในกรอบ ระบบจะตรวจสอบอัตโนมัติ"
-                                    action={
-                                        <Button
-                                            variant="ghost"
-                                            onClick={() => setShowNotContinueDialog(true)}
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50 font-bold"
-                                        >
-                                            <XCircle className="w-5 h-5 mr-1" />
-                                            ออกจากการทำรายการ
-                                        </Button>
-                                    }
                                 />
 
                                 <Card className="border-border-subtle bg-slate-900 overflow-hidden relative aspect-square md:aspect-video rounded-3xl shadow-2xl">
@@ -827,6 +788,16 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                         )}
                                     </CardContent>
                                 </Card>
+
+                                <div className="flex justify-center pt-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowNotContinueDialog(true)}
+                                        className="min-w-[120px] rounded-2xl h-12 font-bold"
+                                    >
+                                        ยกเลิก
+                                    </Button>
+                                </div>
                             </div>
                         )}
 
@@ -1240,28 +1211,3 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
     );
 }
 
-function StepIndicator({ num, label, active, completed, skipped }: { num: number, label: string, active: boolean, completed: boolean, skipped?: boolean }) {
-    if (skipped) {
-        return (
-            <div className="flex flex-col items-center gap-2 z-10 opacity-50">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center border border-gray-100 bg-gray-50 text-gray-300">
-                    -
-                </div>
-                <span className="text-xs font-bold absolute -bottom-6 w-32 text-center text-gray-300">{label}</span>
-            </div>
-        )
-    }
-
-    return (
-        <div className={cn("flex flex-col items-center gap-2 z-10")}>
-            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300",
-                active ? "border-chaiyo-blue ring-4 ring-blue-50 text-chaiyo-blue bg-white" :
-                    completed ? "bg-chaiyo-blue text-white border-chaiyo-blue" :
-                        "bg-white border-gray-200 text-gray-300"
-            )}>
-                {completed ? <CheckCircle className="w-5 h-5" /> : num}
-            </div>
-            <span className={cn("text-xs font-bold absolute -bottom-6 w-32 text-center", active || completed ? "text-chaiyo-blue" : "text-gray-300")}>{label}</span>
-        </div>
-    )
-}

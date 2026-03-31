@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { useApplication } from "../../../context/ApplicationContext";
+import { SensitiveDataConsentStep } from "../../../steps/SensitiveDataConsentStep";
 import { 
     CheckCircle, 
     Loader2, 
@@ -89,6 +90,7 @@ export default function AddGuarantorPage() {
         cardType: "THAI_ID" // Always THAI_ID for guarantor
     });
 
+    const [consentCompleted, setConsentCompleted] = useState(false);
     const [stage, setStage] = useState<KYCStage>('INIT');
     const [verificationMethod, setVerificationMethod] = useState<'DIPCHIP' | 'MANUAL' | null>('DIPCHIP');
     const [dipchipError, setDipchipError] = useState(false);
@@ -315,6 +317,17 @@ export default function AddGuarantorPage() {
         router.push(`/dashboard/new-application/${appId}/guarantors/G-D${Date.now()}/info`); // Navigate to guarantor info page
     };
 
+    // Show sensitive consent before identity verification
+    if (!consentCompleted) {
+        return (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                <div className="pt-4 transition-all duration-500 w-full">
+                    <SensitiveDataConsentStep onAccept={() => setConsentCompleted(true)} />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
 
@@ -384,7 +397,6 @@ export default function AddGuarantorPage() {
                                     <h4 className="font-bold text-orange-800 text-sm">{stage === 'TAKING_ID_FRONT' ? 'ขั้นตอนที่ 1: ถ่ายรูปด้านหน้าบัตร' : 'ขั้นตอนที่ 2: ถ่ายรูปด้านหลังบัตร'}</h4>
                                     <p className="text-orange-700/70 text-xs">วางบัตรให้ตรงกับกรอบที่กำหนด และกดปุ่มถ่ายภาพ</p>
                                 </div>
-                                <Button variant="ghost" onClick={handleBackToSelection} className="text-orange-600 hover:text-orange-700 hover:bg-orange-100">ยกเลิก</Button>
                             </div>
 
                             <Card className="border-border-subtle bg-slate-900 overflow-hidden relative aspect-[3/2] rounded-3xl shadow-2xl">
@@ -431,6 +443,16 @@ export default function AddGuarantorPage() {
                                     )}
                                 </CardContent>
                             </Card>
+
+                            <div className="flex justify-center pt-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={handleBackToSelection}
+                                    className="min-w-[120px] rounded-2xl h-12 font-bold"
+                                >
+                                    ยกเลิก
+                                </Button>
+                            </div>
                         </div>
                     )}
 
@@ -450,21 +472,13 @@ export default function AddGuarantorPage() {
 
                     {(stage === 'FACE_VERIFY') && (
                         <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                            <div className="bg-chaiyo-blue/10 border border-chaiyo-blue/20 rounded-xl p-4 flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
-                                        <Camera className="w-6 h-6 text-chaiyo-blue" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h4 className="font-bold text-chaiyo-blue text-sm">ตรวจสอบใบหน้า (Liveness Check)</h4>
-                                        <p className="text-chaiyo-blue/70 text-xs">กรุณาวางใบหน้าให้อยู่ในกรอบ ระบบจะตรวจสอบอัตโนมัติ</p>
-                                    </div>
+                            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
+                                    <Camera className="w-6 h-6 text-orange-600" />
                                 </div>
-                                <div className="flex items-center gap-4">
-
-                                    <Button variant="ghost" onClick={() => setShowNotContinueDialog(true)} className="text-red-500 hover:bg-red-50">
-                                        <XCircle className="w-5 h-5 mr-1" /> ออกจากการทำรายการ
-                                    </Button>
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-orange-800 text-sm">ตรวจสอบใบหน้า (Liveness Check)</h4>
+                                    <p className="text-orange-700/70 text-xs">กรุณาวางใบหน้าให้อยู่ในกรอบ ระบบจะตรวจสอบอัตโนมัติ</p>
                                 </div>
                             </div>
 
@@ -499,6 +513,16 @@ export default function AddGuarantorPage() {
                                     )}
                                 </CardContent>
                             </Card>
+
+                            <div className="flex justify-center pt-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowNotContinueDialog(true)}
+                                    className="min-w-[120px] rounded-2xl h-12 font-bold"
+                                >
+                                    ยกเลิก
+                                </Button>
+                            </div>
                         </div>
                     )}
 
