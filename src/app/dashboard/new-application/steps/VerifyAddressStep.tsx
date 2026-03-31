@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, Home, Calendar, AlertCircle } from "lucide-react";
+import { Phone, Home, Calendar } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -15,7 +15,8 @@ import { DatePickerBE } from "@/components/ui/DatePickerBE";
 import { CustomerFormData } from "@/types/application";
 import { Combobox } from "@/components/ui/combobox";
 import { cn } from "@/lib/utils";
-import { StatusBanner } from "@/components/ui/StatusBanner";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface VerifyAddressStepProps {
     formData: CustomerFormData;
@@ -30,9 +31,13 @@ const MOCK_STAFF_LIST = [
     { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
+const MismatchHint = ({ show }: { show: boolean }) => (
+    show ? <p className="text-xs text-orange-600 mt-1 animate-in fade-in slide-in-from-top-1">ไม่ตรงกับข้อมูลผู้กู้</p> : null
+);
+
 export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepProps) {
     // ข้อมูลที่อยู่อาศัยปัจจุบัน
-    const [housingType, setHousingType] = useState("สถานที่ตั้งถูกต้อง");
+    const [housingType, setHousingType] = useState("ถูกต้อง");
     const [housingStatus, setHousingStatus] = useState("");
     const [housingDurationYears, setHousingDurationYears] = useState("");
     const [housingDurationMonths, setHousingDurationMonths] = useState("");
@@ -44,44 +49,26 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
     const [assessorPhone, setAssessorPhone] = useState(MOCK_STAFF_LIST[0].phone);
     const [assessmentDate, setAssessmentDate] = useState("");
 
-    // Determine mismatch logic
-    const isMismatch = (() => {
-        if (!formData) return false;
-        
-        // If an input is entirely empty, maybe don't trigger warning yet? (Or trigger it based on any populated mismatch)
-        let hasChecked = false;
+    const handleAddressChange = (field: keyof CustomerFormData, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
-        if (housingStatus) {
-            hasChecked = true;
-            if (housingStatus !== formData.currentHousingStatus) return true;
-        }
+    const isAddressDisabled = housingType !== "ไม่ถูกต้อง";
 
-        if (housingDurationYears) {
-            hasChecked = true;
-            if (housingDurationYears !== formData.housingDurationYears) return true;
-        }
-
-        if (housingDurationMonths) {
-            hasChecked = true;
-            if (housingDurationMonths !== formData.housingDurationMonths) return true;
-        }
-
-        if (livingWith) {
-            hasChecked = true;
-            if (livingWith !== formData.currentResidentType) return true;
-        }
-
-        if (livingWith === "อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์" && livingWithRelationships.length > 0) {
-            hasChecked = true;
+    // Per-field mismatch checks
+    const mismatch = {
+        housingStatus: housingStatus ? housingStatus !== formData.currentHousingStatus : false,
+        housingDurationYears: housingDurationYears ? housingDurationYears !== formData.housingDurationYears : false,
+        housingDurationMonths: housingDurationMonths ? housingDurationMonths !== formData.housingDurationMonths : false,
+        livingWith: livingWith ? livingWith !== formData.currentResidentType : false,
+        livingWithRelationships: (() => {
+            if (livingWith !== "อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์" || livingWithRelationships.length === 0) return false;
             const currentRels = formData.currentResidentRelationships || [];
             if (livingWithRelationships.length !== currentRels.length) return true;
-            for (const r of livingWithRelationships) {
-                if (!currentRels.includes(r)) return true;
-            }
-        }
+            return livingWithRelationships.some(r => !currentRels.includes(r));
+        })(),
+    };
 
-        return false;
-    })();
 
     return (
         <div className="space-y-6">
@@ -92,35 +79,79 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-6 pb-6 pt-6 space-y-6">
-                    {isMismatch && (
-                        <StatusBanner
-                            variant="orange"
-                            icon={AlertCircle}
-                            title="ข้อมูลไม่ตรงกัน"
-                            description="ไม่ตรงกับข้อมูลผู้กู้ ให้ตรวจสอบรายละเอียดให้ถูกต้องก่อนส่งใบสมัคร"
-                            className="mb-2 animate-in fade-in slide-in-from-top-1"
-                        />
-                    )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                        {/* สถานที่ตั้ง */}
-                        <div className="space-y-1.5">
-                            <Label>
-                                สถานที่ตั้ง <span className="text-red-500">*</span>
-                            </Label>
-                            <Select value={housingType} onValueChange={setHousingType}>
-                                <SelectTrigger className="h-11 bg-white">
-                                    <SelectValue placeholder="ระบุสถานที่ตั้ง" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="สถานที่ตั้งถูกต้อง">สถานที่ตั้งถูกต้อง</SelectItem>
-                                    <SelectItem value="สถานที่ตั้งไม่ถูกต้อง">สถานที่ตั้งไม่ถูกต้อง</SelectItem>
-                                    <SelectItem value="ไม่พบสถานที่ตั้ง">ไม่พบสถานที่ตั้ง</SelectItem>
-                                </SelectContent>
-                            </Select>
+                    <div className="space-y-3">
+                        <Label className="text-sm font-bold text-gray-800">
+                            สถานที่ตั้ง <span className="text-red-500">*</span>
+                        </Label>
+                        <RadioGroup 
+                            value={housingType} 
+                            onValueChange={setHousingType}
+                            className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-6"
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ถูกต้อง" id="loc-correct" />
+                                <Label htmlFor="loc-correct" className="font-normal cursor-pointer text-sm">ถูกต้อง</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ไม่ถูกต้อง" id="loc-incorrect" />
+                                <Label htmlFor="loc-incorrect" className="font-normal cursor-pointer text-sm">ไม่ถูกต้อง</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="ไม่พบ" id="loc-notfound" />
+                                <Label htmlFor="loc-notfound" className="font-normal cursor-pointer text-sm">ไม่พบ</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    <div className="space-y-4 border-t border-border-strong pt-6">
+                        <Label className="text-base font-bold text-gray-800">
+                            ที่อยู่ปัจจุบัน
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">บ้านเลขที่</Label>
+                                <Input disabled={isAddressDisabled} value={formData.houseNumber || ""} onChange={e => handleAddressChange("houseNumber", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">หมู่ที่</Label>
+                                <Input disabled={isAddressDisabled} value={formData.moo || ""} onChange={e => handleAddressChange("moo", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">อาคาร/หมู่บ้าน</Label>
+                                <Input disabled={isAddressDisabled} value={formData.village || ""} onChange={e => handleAddressChange("village", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">ซอย</Label>
+                                <Input disabled={isAddressDisabled} value={formData.soi || ""} onChange={e => handleAddressChange("soi", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">ถนน</Label>
+                                <Input disabled={isAddressDisabled} value={formData.street || ""} onChange={e => handleAddressChange("street", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">ตำบล/แขวง</Label>
+                                <Input disabled={isAddressDisabled} value={formData.subDistrict || ""} onChange={e => handleAddressChange("subDistrict", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">อำเภอ/เขต</Label>
+                                <Input disabled={isAddressDisabled} value={formData.district || ""} onChange={e => handleAddressChange("district", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">จังหวัด</Label>
+                                <Input disabled={isAddressDisabled} value={formData.province || ""} onChange={e => handleAddressChange("province", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs text-muted-foreground">รหัสไปรษณีย์</Label>
+                                <Input disabled={isAddressDisabled} value={formData.zipCode || ""} onChange={e => handleAddressChange("zipCode", e.target.value)} className="h-11 bg-white disabled:bg-gray-50 disabled:text-gray-500" />
+                            </div>
                         </div>
+                    </div>
 
-                        {/* สถานะที่อยู่อาศัย */}
+                    <div className="border-t border-border-strong pt-6">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            {/* สถานะที่อยู่อาศัย */}
                         <div className="space-y-1.5">
                             <Label>
                                 สถานะที่อยู่อาศัย <span className="text-red-500">*</span>
@@ -135,6 +166,7 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
                                     <SelectItem value="เช่า">เช่า</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <MismatchHint show={mismatch.housingStatus} />
                         </div>
 
                         {/* ระยะเวลาที่พักอาศัย */}
@@ -165,6 +197,7 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 pointer-events-none">เดือน</span>
                                 </div>
                             </div>
+                            <MismatchHint show={mismatch.housingDurationYears || mismatch.housingDurationMonths} />
                         </div>
 
                         {/* อาศัยอยู่กับใคร */}
@@ -187,38 +220,43 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
                                         <SelectItem value="อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์">อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <MismatchHint show={mismatch.livingWith} />
                             </div>
 
                             {livingWith === "อยู่ร่วมกับผู้อื่น โปรดระบุความสัมพันธ์" && (
-                                <div className="space-y-3 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <Label className="text-xs text-muted-foreground">โปรดระบุความสัมพันธ์ (เลือกได้มากกว่า 1)</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["พ่อ", "แม่", "ลูก", "สามี/ภรรยา/แฟน", "ญาติ", "เพื่อน"].map((relation) => {
-                                            const isSelected = livingWithRelationships.includes(relation);
-                                            return (
-                                                <Button
-                                                    key={relation}
-                                                    type="button"
-                                                    variant={isSelected ? "default" : "outline"}
-                                                    className={cn(
-                                                        "h-9 px-3 rounded-full text-xs font-medium transition-all",
-                                                        isSelected ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90" : "bg-white hover:bg-gray-100 border-border-strong text-gray-700"
-                                                    )}
-                                                    onClick={() => {
-                                                        setLivingWithRelationships(prev =>
-                                                            isSelected
-                                                                ? prev.filter(r => r !== relation)
-                                                                : [...prev, relation]
-                                                        );
-                                                    }}
-                                                >
-                                                    {relation}
-                                                </Button>
-                                            );
-                                        })}
+                                <>
+                                    <div className="space-y-3 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 animate-in fade-in slide-in-from-top-1 duration-200">
+                                        <Label className="text-xs text-muted-foreground">โปรดระบุความสัมพันธ์ (เลือกได้มากกว่า 1)</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {["พ่อ", "แม่", "ลูก", "สามี/ภรรยา/แฟน", "ญาติ", "เพื่อน"].map((relation) => {
+                                                const isSelected = livingWithRelationships.includes(relation);
+                                                return (
+                                                    <Button
+                                                        key={relation}
+                                                        type="button"
+                                                        variant={isSelected ? "default" : "outline"}
+                                                        className={cn(
+                                                            "h-9 px-3 rounded-full text-xs font-medium transition-all",
+                                                            isSelected ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90" : "bg-white hover:bg-gray-100 border-border-strong text-gray-700"
+                                                        )}
+                                                        onClick={() => {
+                                                            setLivingWithRelationships(prev =>
+                                                                isSelected
+                                                                    ? prev.filter(r => r !== relation)
+                                                                    : [...prev, relation]
+                                                            );
+                                                        }}
+                                                    >
+                                                        {relation}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
+                                    <MismatchHint show={mismatch.livingWithRelationships} />
+                                </>
                             )}
+                        </div>
                         </div>
                     </div>
 
