@@ -1226,11 +1226,10 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 <div className="space-y-1.5">
                                     <Label className="text-sm">ธนาคาร <span className="text-red-500">*</span></Label>
                                     <Select
-                                        disabled={isRCCOChecker}
                                         value={formData?.bankName || ''}
                                         onValueChange={(val) => setFormData?.({ ...formData, bankName: val })}
                                     >
-                                        <SelectTrigger className={cn("w-full text-sm", isRCCOChecker && "bg-gray-50 cursor-not-allowed")}>
+                                        <SelectTrigger className="w-full text-sm">
                                             <SelectValue placeholder="-- เลือกธนาคาร --">
                                                 {formData?.bankName && (
                                                     <div className="flex items-center gap-2">
@@ -1263,7 +1262,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 <div className="space-y-1.5">
                                     <Label className="text-sm">เลขที่บัญชี <span className="text-red-500">*</span></Label>
                                     <Input
-                                        disabled={isRCCOChecker}
                                         placeholder="กรอกเลขที่บัญชีธนาคาร"
                                         value={formData?.bankAccountNumber || ''}
                                         onChange={(e) => {
@@ -1306,7 +1304,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 <div className="space-y-1.5">
                                     <Label className="text-sm">ชื่อบัญชี <span className="text-red-500">*</span></Label>
                                     <Input
-                                        disabled={isRCCOChecker}
                                         placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
                                         value={formData?.bankAccountName || ''}
                                         onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
