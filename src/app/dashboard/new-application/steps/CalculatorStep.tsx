@@ -82,6 +82,14 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [maxLoanAmount, setMaxLoanAmount] = useState<number>(500000);
     const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
+    // RCCO Checker Loan Breakdown Overrides
+    const [rccoAmountBeforeInsurance, setRccoAmountBeforeInsurance] = useState<string>("");
+    const [rccoInsurancePremium, setRccoInsurancePremium] = useState<string>("");
+    const [rccoAmountWithInsurance, setRccoAmountWithInsurance] = useState<string>("");
+    const [rccoDuration, setRccoDuration] = useState<string>("");
+    const [rccoInterestRate, setRccoInterestRate] = useState<string>("");
+    const [rccoMonthlyPayment, setRccoMonthlyPayment] = useState<string>("");
+
     // Insurance State
     const [selectedInsurances, setSelectedInsurances] = useState<string[]>([]);
     const [includeInsuranceInLoan, setIncludeInsuranceInLoan] = useState<boolean>(true);
@@ -693,6 +701,174 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </div>
                             </div>
 
+                        </CardContent>
+                    </Card>
+
+                    {/* Loan Breakdown Comparison Table Section */}
+                    <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
+                        <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                            <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                            การเปรียบเทียบวงเงิน
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-6 pb-6 pt-5">
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b border-gray-200">
+                                            <th className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-r border-gray-200">รายการ</th>
+                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ลูกค้าต้องการ</th>
+                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ระบบ Recommended</th>
+                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800">RC Checker</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* วงเงินก่อนรวมประกัน */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินก่อนรวมประกัน</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{amount.toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{amount.toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoAmountBeforeInsurance}
+                                                        onChange={(e) => setRccoAmountBeforeInsurance(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={amount.toString()}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+
+                                        {/* ค่าเบี้ยประกัน */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่าเบี้ยประกัน</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoInsurancePremium}
+                                                        onChange={(e) => setRccoInsurancePremium(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={calculateTotalInsurancePremium().toString()}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+
+                                        {/* วงเงินสินเชื่อรวมประกัน */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินสินเชื่อรวมประกัน</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoAmountWithInsurance}
+                                                        onChange={(e) => setRccoAmountWithInsurance(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={(amount + calculateTotalInsurancePremium()).toString()}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+
+                                        {/* ระยะเวลาผ่อน */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ระยะเวลาผ่อน</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoDuration}
+                                                        onChange={(e) => setRccoDuration(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={months.toString()}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+
+                                        {/* ดอกเบี้ย */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ดอกเบี้ย</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoInterestRate}
+                                                        onChange={(e) => setRccoInterestRate(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+
+                                        {/* ค่างวด */}
+                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่างวด</td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {isRCCOChecker ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={rccoMonthlyPayment}
+                                                        onChange={(e) => setRccoMonthlyPayment(e.target.value)}
+                                                        className="text-center text-sm font-semibold"
+                                                        placeholder={monthlyPayment.toFixed(2)}
+                                                    />
+                                                ) : (
+                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </CardContent>
                     </Card>
 
