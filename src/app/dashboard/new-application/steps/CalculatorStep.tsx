@@ -59,7 +59,15 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
     const [totalInterest, setTotalInterest] = useState<number>(0);
     const [selectedProduct, setSelectedProduct] = useState<string>("car");
-    const [bookBankFile, setBookBankFile] = useState<File | null>(null);
+    // Initialize with mock data for RCCO-Checker
+    const [bookBankFile, setBookBankFile] = useState<File | null>(() => {
+        if (isRCCOChecker) {
+            const mockFile = new File(['mock bank book content'], 'สมุดบัญชีธนาคาร.pdf', { type: 'application/pdf' });
+            Object.defineProperty(mockFile, 'lastModifiedDate', { value: new Date('2026-04-01') });
+            return mockFile;
+        }
+        return null;
+    });
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     // Local Payment Method State
@@ -296,6 +304,18 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             });
         }
     }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan, paInsuranceEnabled, setFormData]);
+
+    // Populate mock data for RCCO-Checker
+    useEffect(() => {
+        if (isRCCOChecker && setFormData) {
+            setFormData((prev: any) => ({
+                ...prev,
+                bankName: prev?.bankName || 'KBANK',
+                bankAccountNumber: prev?.bankAccountNumber || '123-4-56789-0',
+                bankAccountName: prev?.bankAccountName || 'นายสมชาย ใจดี',
+            }));
+        }
+    }, [isRCCOChecker, setFormData]);
 
     const calculateLoan = () => {
         if (amount <= 0 || months <= 0) {
