@@ -165,7 +165,7 @@ const DEED_TYPES = [
 
 const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string; icon: any; description: string; demoUrl: string; required: boolean }>> = {
     car: [
-        { id: "front_plate_engine", title: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้า และเครื่องยนต์ชัดเจน", demoUrl: "/images/guidelines/car_front_engine_demo.png", required: true },
+        { id: "front_plate_engine", title: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปรงรถหน้า + เห็นเครื่องยนต์", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปรงรถหน้า และเครื่องยนต์ชัดเจน", demoUrl: "/images/guidelines/car_front_engine_demo.png", required: true },
         { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/car_back_selfie_demo.png", required: true },
         { id: "front_left_45", title: "รูปหน้ารถ - เฉียงซ้าย 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ซ้าย 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_left_45_demo.png", required: true },
         { id: "front_right_45", title: "รูปหน้ารถ - เฉียงขวา 45 องศา", icon: Camera, description: "ถ่ายรถจากมุมเฉียงหน้า-ขวา 45 องศา เห็นสภาพประตู กระบะ และตัวรถ", demoUrl: "/images/guidelines/car_front_right_45_demo.png", required: true },
@@ -175,7 +175,7 @@ const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string;
         { id: "vin_chassis", title: "รูปเลขตัวถัง / คัสซี่", icon: Camera, description: "ถ่ายเลขตัวถัง (VIN Number) บริเวณประตูคนขับหรือพื้นรถให้ชัดเจน", demoUrl: "/images/guidelines/car_vin_chassis_demo.png", required: true },
     ],
     moto: [
-        { id: "front_plate_engine", title: "รูปหน้ารถจักรยานยนต์ เห็นป้ายทะเบียน", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียนและหน้ารถชัดเจน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/moto_front_demo.png", required: true },
+        { id: "front_plate_engine", title: "รูปหน้ารถจักรยานยนต์ เห็นป้ายทะเบียน", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียนและหน้ารถชัดเจน เปิดกระโปรงรถหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/moto_front_demo.png", required: true },
         { id: "back_plate_selfie", title: "รูปหลังรถจักรยานยนต์ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่หรือเจ้าของรถ", demoUrl: "/images/guidelines/moto_back_selfie_demo.png", required: true },
         { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_left_45_demo.png", required: true },
         { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/moto_right_45_demo.png", required: true },
@@ -183,7 +183,7 @@ const COLLATERAL_PHOTO_GUIDES: Record<string, Array<{ id: string; title: string;
         { id: "vin_chassis", title: "รูปเลขตัวถัง / หมายเลขเครื่องยนต์", icon: Camera, description: "ถ่ายเลขตัวถังหรือเลขเครื่องยนต์ให้ชัดเจน", demoUrl: "/images/guidelines/moto_vin_demo.png", required: true },
     ],
     truck: [
-        { id: "front_plate_engine", title: "รูปหน้ารถบรรทุก เห็นป้ายทะเบียน / เปิดกระโปงหน้า", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปงหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/truck_front_demo.png", required: true },
+        { id: "front_plate_engine", title: "รูปหน้ารถบรรทุก เห็นป้ายทะเบียน / เปิดกระโปรงรถหน้า", icon: Camera, description: "ถ่ายหน้ารถให้เห็นป้ายทะเบียน เปิดกระโปรงรถหน้าเห็นเครื่องยนต์", demoUrl: "/images/guidelines/truck_front_demo.png", required: true },
         { id: "back_plate_selfie", title: "รูปหลังรถ เห็นป้ายทะเบียน / พนักงานเซลฟี่", icon: Camera, description: "ถ่ายหลังรถให้เห็นป้ายทะเบียน พร้อมพนักงานเซลฟี่", demoUrl: "/images/guidelines/truck_back_selfie_demo.png", required: true },
         { id: "left_side_45", title: "รูปด้านซ้าย - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงซ้าย 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_left_45_demo.png", required: true },
         { id: "right_side_45", title: "รูปด้านขวา - เฉียง 45 องศา", icon: Camera, description: "ถ่ายจากมุมเฉียงขวา 45 องศา เห็นสภาพรถโดยรวม", demoUrl: "/images/guidelines/truck_right_45_demo.png", required: true },
@@ -482,12 +482,12 @@ const getPhotoDocs = (type: string) => {
     }
     return [
         {
-            label: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์",
+            label: "รูปหน้ารถ เห็นป้ายทะเบียน / เปิดกระโปรงรถหน้า + เห็นเครื่องยนต์",
             required: true,
-            guideline: "ถ่ายรูปด้านหน้าของรถให้เห็นป้ายทะเบียนชัดเจน และเปิดกระโปงหน้าเพื่อเห็นเครื่องยนต์"
+            guideline: "ถ่ายรูปด้านหน้าของรถให้เห็นป้ายทะเบียนชัดเจน และเปิดกระโปรงรถหน้าเพื่อเห็นเครื่องยนต์"
         },
         {
-            label: "รูปหลังรถ เห็นป้ายทะเบียน / เปิดกระโปงหน้า + เห็นเครื่องยนต์",
+            label: "รูปหลังรถ เห็นป้ายทะเบียน / เปิดกระโปรงรถหลัง + เห็นเครื่องยนต์",
             required: true,
             guideline: "ถ่ายรูปด้านหลังของรถให้เห็นป้ายทะเบียนชัดเจน"
         },
@@ -1028,8 +1028,8 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
                                                                             className="h-8 text-xs gap-1.5 font-medium"
                                                                         >
-                                                                            <Plus className="w-3.5 h-3.5" />
-                                                                            {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มเอกสาร'}
+                                                                            <Camera className="w-3.5 h-3.5" />
+                                                                            {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'เปิดกล้อง' : 'เพิ่มเอกสาร'}
                                                                         </Button>
                                                                     </div>
                                                                 </TableCell>
@@ -1081,7 +1081,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                             onClick={() => handleTriggerCategoryPhotoUpload('other')}
                                                                             className="h-8 text-xs gap-1.5 font-medium"
                                                                         >
-                                                                            <Plus className="w-3.5 h-3.5" />
+                                                                            <Camera className="w-3.5 h-3.5" />
                                                                             {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มรูปอื่นๆ'}
                                                                         </Button>
                                                                     </div>
@@ -1185,7 +1185,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                                 onClick={() => handleTriggerCategoryPhotoUpload(guide.id)}
                                                                                 className="h-8 text-xs gap-1.5 font-medium"
                                                                             >
-                                                                                <Plus className="w-3.5 h-3.5" />
+                                                                                <Camera className="w-3.5 h-3.5" />
                                                                                 {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มเอกสาร'}
                                                                             </Button>
                                                                         </div>
@@ -1249,7 +1249,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 variant="outline"
                                                 onClick={() => handleTriggerCategoryPhotoUpload(managingPhotoGuideId)}
                                             >
-                                                <Plus className="w-4 h-4 mr-2" />
+                                                <Camera className="w-4 h-4 mr-2" />
                                                 {['car', 'moto', 'truck', 'agri'].includes(formData.collateralType) ? 'ถ่ายภาพ' : 'เพิ่มรูปภาพ'}
                                             </Button>
                                             <DialogClose asChild>
@@ -1488,7 +1488,26 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                         </TableRow>
                                                     );
                                                 })}
-                                                {/* Other Documents Row */}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+
+                                {/* Other Documents Section */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <Label className="text-sm font-bold text-gray-700">รายการเอกสารอื่นๆ</Label>
+                                    </div>
+                                    <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[45%] text-xs">เอกสาร</TableHead>
+                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                    <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
                                                 {(() => {
                                                     const otherFiles = uploadedPaperDocs.filter((docObj: any) => {
                                                         const label = typeof docObj === 'string' ? "อื่นๆ" : (docObj.label || "อื่นๆ");
@@ -1540,7 +1559,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                                         className="h-8 text-xs gap-1.5 font-medium"
                                                                     >
                                                                         <Plus className="w-3.5 h-3.5" />
-                                                                        เพิ่มเอกสารอื่นๆ
+                                                                        เพิ่มเอกสาร
                                                                     </Button>
                                                                 </div>
                                                             </TableCell>
@@ -3000,7 +3019,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <Card className="border-border-strong overflow-hidden">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            รายละเอียดราคาประเมิน
+                                รายละเอียดราคาประเมิน
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
@@ -4358,7 +4377,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                     <Card className="border-border-strong overflow-hidden">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue font-bold">
-                            ราคาประเมินสินทรัพย์
+                                ราคาประเมินสินทรัพย์
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">

@@ -9,7 +9,7 @@ export interface BreadcrumbItem {
     onClick?: () => void;
 }
 
-export type DevRole = 'branch-staff' | 'legal-team';
+export type DevRole = 'branch-staff' | 'legal-team' | 'district-checker' | 'rcco-checker' | 'rcco-approver' | 'credit-committee';
 
 interface SidebarContextType {
     isCollapsed: boolean;
@@ -56,8 +56,8 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     // Sync devRole with localStorage
     useEffect(() => {
         const stored = localStorage.getItem('devRole');
-        if (stored === 'branch-staff' || stored === 'legal-team') {
-            setDevRoleState(stored);
+        if (stored === 'branch-staff' || stored === 'legal-team' || stored === 'district-checker' || stored === 'rcco-checker' || stored === 'rcco-approver' || stored === 'credit-committee') {
+            setDevRoleState(stored as DevRole);
         }
     }, []);
 

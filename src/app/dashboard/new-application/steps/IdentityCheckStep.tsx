@@ -928,7 +928,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                                                     });
                                                 }}
                                             >
-                                                <Save className="w-4 h-4" /> บันทึกและกลับสู่หน้าหลัก
+                                                <Save className="w-4 h-4" /> ตรวจสอบแล้ว
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -1224,7 +1224,7 @@ export function IdentityCheckStep({ formData, setFormData, onNext }: IdentityChe
                             onClick={() => window.location.href = '/dashboard'}
                             className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white h-12 rounded-xl flex items-center justify-center gap-2 min-w-[104px] order-1 sm:order-2"
                         >
-                            <Save className="w-4 h-4" /> บันทึกและกลับสู่หน้าหลัก
+                            <Save className="w-4 h-4" /> ตรวจสอบแล้ว
                         </AlertDialogAction>
                         <AlertDialogCancel
                             onClick={() => setShowNotContinueDialog(false)}

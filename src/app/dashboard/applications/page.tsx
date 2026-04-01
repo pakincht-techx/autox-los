@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/Label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { Combobox } from "@/components/ui/combobox";
 import { DateRangePickerBE, toBEDisplay } from "@/components/ui/DateRangePickerBE";
+import { CHECKER_MOCK_DATA } from "@/data/checkerMockData";
 
 // Mock Data
 const MOCK_DATA: Application[] = [
@@ -165,6 +166,10 @@ export default function ApplicationsPage() {
     const rowsPerPage = 10;
     const { devRole } = useSidebar();
 
+    // Determine which data set to use based on role
+    const isCheckerRole = devRole === 'district-checker' || devRole === 'rcco-checker' || devRole === 'rcco-approver';
+    const currentData = isCheckerRole ? CHECKER_MOCK_DATA : MOCK_DATA;
+
     // Reset tab when role changes
     useEffect(() => {
         setCurrentTab("all");
@@ -216,16 +221,23 @@ export default function ApplicationsPage() {
     const previousProcessorOptions = Array.from(new Set(MOCK_DATA.map(app => app.previousProcessorName).filter(Boolean))).map(name => ({ label: name!, value: name! }));
 
     // Role-based tabs and status filtering
-    const tabs = devRole === 'branch-staff'
+    const tabs = isCheckerRole
         ? [
             { label: "ทั้งหมด", value: "all" },
-            { label: "แบบร่าง", value: "Draft" },
-            { label: "ส่งกลับ", value: "Sent Back" },
+            { label: "ผ่านการตรวจสอบ", value: "all-approved" },
+            { label: "ต้องตรวจสอบ", value: "needs-review" },
+            { label: "เสี่ยงการฉ้อโกง", value: "fraud-flagged" },
         ]
-        : [
-            { label: "ทั้งหมด", value: "all" },
-            { label: "รอพิจารณา", value: "In Review" },
-        ];
+        : devRole === 'branch-staff'
+            ? [
+                { label: "ทั้งหมด", value: "all" },
+                { label: "แบบร่าง", value: "Draft" },
+                { label: "ส่งกลับ", value: "Sent Back" },
+            ]
+            : [
+                { label: "ทั้งหมด", value: "all" },
+                { label: "รอพิจารณา", value: "In Review" },
+            ];
 
     const excludedStatuses: ApplicationStatus[] = devRole === 'branch-staff'
         ? ['Approved', 'Rejected', 'Cancelled', 'In Review']
