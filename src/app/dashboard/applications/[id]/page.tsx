@@ -5,7 +5,7 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2, Home } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2, Home, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -244,6 +244,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const { setBreadcrumbs, setRightContent, devRole, setHideNavButtons, setHideSaveDraftButton, setOnBack } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+    const [isIncompleteDialogOpen, setIsIncompleteDialogOpen] = useState(false);
     const [consentCompleted, setConsentCompleted] = useState(false);
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -336,7 +337,17 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             {canEdit && (
                                 <Button
                                     variant="default"
-                                    onClick={() => setIsSubmitDialogOpen(true)}
+                                    onClick={() => {
+                                        const incompleteModules = Object.entries(app.moduleStatus)
+                                            .filter(([key, done]) => key !== 'consent' && !done)
+                                            .map(([key]) => key);
+                                        if (incompleteModules.length > 0) {
+                                            setIsIncompleteDialogOpen(true);
+                                        } else {
+                                            // Navigation to the full page consent flow
+                                            router.push(`/dashboard/new-application/${app.applicationNo}/consent?state=draft`);
+                                        }
+                                    }}
                                 >
                                     <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
                                 </Button>
@@ -626,11 +637,18 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                     </DialogContent>
                 </Dialog>
 
+                {/* Incomplete Modules Warning Dialog */}
+                <IncompleteModulesDialog
+                    open={isIncompleteDialogOpen}
+                    onOpenChange={setIsIncompleteDialogOpen}
+                    moduleStatus={app.moduleStatus}
+                    applicationNo={app.applicationNo}
+                />
+
                 {/* Submit Application Dialog (Maker) — with block warnings */}
                 <SubmitApplicationDialog
                     open={isSubmitDialogOpen}
                     onOpenChange={setIsSubmitDialogOpen}
-                    isSubmitting={isSubmitting}
                     allPassed={mockCase === '3'}
                     onSubmit={() => {
                         setIsSubmitting(true);
@@ -801,7 +819,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="max-w-[160px] truncate hover:underline cursor-pointer"
-                                                        >{entry.file.name}</a>
+                                                        >
+                                                            {entry.file.name}
+                                                        </a>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
@@ -809,7 +829,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                                                 setReviewAttachments(prev => prev.filter((_, idx) => idx !== i));
                                                             }}
                                                             className="ml-0.5 text-blue-400 hover:text-red-500 transition-colors"
-                                                        >✕</button>
+                                                        >
+                                                            ✕
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -1083,231 +1105,159 @@ const PASSED_MODULES = [
     { module: 'ผู้ค้ำประกัน', description: 'ผู้ค้ำประกันผ่านการตรวจสอบ' },
 ];
 
-const CONSENT_STEPS = [
-    {
-        title: 'ข้อกำหนดและเงื่อนไข (Terms & Conditions)',
-        description: 'กรุณาอ่านและยอมรับข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ',
-        content: `ข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ\n\nผู้กู้ตกลงและยินยอมผูกพันตามข้อกำหนดและเงื่อนไขที่ระบุไว้ในสัญญาสินเชื่อฉบับนี้ทุกประการ โดยมีสาระสำคัญดังนี้\n\n1. อัตราดอกเบี้ย: อัตราดอกเบี้ยเป็นไปตามที่บริษัทกำหนด และอาจมีการเปลี่ยนแปลงตามประกาศของบริษัท\n2. ระยะเวลาผ่อนชำระ: ผู้กู้ต้องชำระค่างวดตามกำหนดเวลาที่ระบุในสัญญา\n3. ค่าธรรมเนียม: ผู้กู้รับทราบและยินยอมชำระค่าธรรมเนียมต่างๆ ที่เกี่ยวข้อง\n4. การผิดนัดชำระ: หากผู้กู้ผิดนัดชำระ บริษัทมีสิทธิ์คิดดอกเบี้ยผิดนัดตามอัตราที่กฎหมายกำหนด\n5. หลักประกัน: หลักประกันที่ใช้ในการค้ำประกันสินเชื่อจะอยู่ภายใต้เงื่อนไขตามที่ระบุในสัญญา\n6. การบอกเลิกสัญญา: บริษัทมีสิทธิ์บอกเลิกสัญญาได้ทันทีหากผู้กู้ผิดเงื่อนไขข้อใดข้อหนึ่ง`,
-        checkboxLabel: 'ข้าพเจ้าได้อ่านและยอมรับข้อกำหนดและเงื่อนไขการใช้บริการสินเชื่อ',
-    },
-    {
-        title: 'ความยินยอมทางการตลาด (Marketing Consent)',
-        description: 'ข้อมูลของท่านอาจถูกใช้เพื่อวัตถุประสงค์ทางการตลาด',
-        content: `ความยินยอมในการใช้ข้อมูลเพื่อวัตถุประสงค์ทางการตลาด\n\nบริษัท ออโต้ เอกซ์ จำกัด ขอความยินยอมจากท่านในการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่าน เพื่อวัตถุประสงค์ดังต่อไปนี้:\n\n1. การนำเสนอผลิตภัณฑ์และบริการที่เหมาะสม\n2. การส่งข่าวสาร โปรโมชั่น และสิทธิพิเศษ\n3. การวิเคราะห์พฤติกรรมเพื่อปรับปรุงบริการ\n4. การติดต่อสื่อสารผ่านช่องทางต่างๆ เช่น โทรศัพท์ อีเมล SMS หรือ LINE\n\nท่านสามารถถอนความยินยอมได้ทุกเมื่อโดยแจ้งความประสงค์ผ่านช่องทางที่บริษัทกำหนด`,
-        checkboxLabel: 'ข้าพเจ้ายินยอมให้ใช้ข้อมูลเพื่อวัตถุประสงค์ทางการตลาด',
-    },
-    {
-        title: 'ความยินยอมการประกันภัย (Insurance Consent)',
-        description: 'กรุณารับทราบเงื่อนไขการประกันภัยที่เกี่ยวข้องกับสินเชื่อ',
-        content: `เงื่อนไขการประกันภัยสำหรับสินเชื่อ\n\nผู้กู้รับทราบและยินยอมเงื่อนไขการประกันภัยดังนี้:\n\n1. ประกันภัยหลักประกัน: หลักประกันที่ใช้ในการค้ำประกันสินเชื่อต้องมีการทำประกันภัยตลอดระยะเวลาสัญญา\n2. ผู้รับผลประโยชน์: บริษัทจะเป็นผู้รับผลประโยชน์ตามกรมธรรม์ประกันภัย\n3. ค่าเบี้ยประกันภัย: ผู้กู้เป็นผู้รับผิดชอบค่าเบี้ยประกันภัยทั้งหมด\n4. การต่ออายุ: ผู้กู้ต้องต่ออายุกรมธรรม์ก่อนวันหมดอายุ\n5. ประกันชีวิตกลุ่ม (PA): ผู้กู้ได้รับการคุ้มครองประกันอุบัติเหตุส่วนบุคคลตามเงื่อนไขที่บริษัทกำหนด`,
-        checkboxLabel: 'ข้าพเจ้ารับทราบและยินยอมเงื่อนไขการประกันภัยที่เกี่ยวข้อง',
-    },
-];
+function IncompleteModulesDialog({
+    open,
+    onOpenChange,
+    moduleStatus,
+    applicationNo
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    moduleStatus: Record<string, boolean>;
+    applicationNo: string;
+}) {
+    const router = useRouter();
+    const incompleteModules = [];
+
+    if (!moduleStatus.customerInfo) incompleteModules.push({ name: 'ข้อมูลผู้กู้', path: 'customer-info', icon: <User className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.collateral) incompleteModules.push({ name: 'หลักประกัน', path: 'collateral-info', icon: <Car className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.loanDetail) incompleteModules.push({ name: 'รายละเอียดสินเชื่อ', path: 'loan-calculator', icon: <FileText className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.income) incompleteModules.push({ name: 'อาชีพและรายได้', path: 'income', icon: <Coins className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.debt) incompleteModules.push({ name: 'ภาระหนี้', path: 'debt', icon: <Wallet className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.guarantor) incompleteModules.push({ name: 'ผู้ค้ำประกัน', path: 'guarantors', icon: <Users className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.documents) incompleteModules.push({ name: 'เอกสารแนบ', path: 'documents', icon: <Upload className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.refinance) incompleteModules.push({ name: 'รีไฟแนนซ์', path: 'refinance', icon: <RefreshCw className="w-4 h-4 text-gray-500" /> });
+    if (!moduleStatus.verifyAddress) incompleteModules.push({ name: 'ตรวจสอบที่อยู่', path: 'verify-address', icon: <Home className="w-4 h-4 text-gray-500" /> });
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-md">
+                <DialogHeader className="text-left">
+                    <DialogTitle>ไม่สามารถส่งใบสมัครได้</DialogTitle>
+                    <DialogDescription>
+                        กรุณากรอกข้อมูลให้ครบทุกรายการก่อนส่งใบสมัคร
+                    </DialogDescription>
+                </DialogHeader>
+                
+                <DialogBody>
+                    <div className="space-y-0 mt-4">
+                        {incompleteModules.map((module, index) => (
+                            <div 
+                                key={index} 
+                                onClick={() => {
+                                    onOpenChange(false);
+                                    router.push(`/dashboard/new-application/${applicationNo}/${module.path}?state=draft`);
+                                }}
+                                className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors group border-b border-gray-100 last:border-0"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                        {module.icon}
+                                    </div>
+                                    <span className="text-sm font-semibold text-gray-700">{module.name}</span>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                            </div>
+                        ))}
+                    </div>
+                </DialogBody>
+
+                <DialogFooter className="mt-6 sm:justify-end">
+                    <Button 
+                        variant="outline"
+                        className="min-w-[104px]"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        ปิด
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 function SubmitApplicationDialog({
     open,
     onOpenChange,
-    isSubmitting,
     allPassed = false,
     onSubmit,
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    isSubmitting: boolean;
     allPassed?: boolean;
     onSubmit: () => void;
 }) {
-    const [dialogStep, setDialogStep] = useState(1);
-    const [consentChecked, setConsentChecked] = useState([false, false, false]);
-
-    // Reset state when dialog opens/closes
-    useEffect(() => {
-        if (open) {
-            setDialogStep(1);
-            setConsentChecked([false, false, false]);
-        }
-    }, [open]);
-
-    const softblocks = MOCK_BLOCK_ITEMS.filter(b => b.type === 'softblock');
-    const hasSoftblocks = softblocks.length > 0;
     const hasBlocks = MOCK_BLOCK_ITEMS.length > 0;
+    const hasSoftblocks = MOCK_BLOCK_ITEMS.some(b => b.type === 'softblock');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleConsentChange = (index: number, checked: boolean) => {
-        setConsentChecked(prev => {
-            const next = [...prev];
-            next[index] = checked;
-            return next;
-        });
-    };
-
-    // For all-passed flow: consent step index (0, 1, 2) maps to dialogStep 2, 3, 4
-    const consentIndex = dialogStep - 2;
-    const currentConsent = CONSENT_STEPS[consentIndex];
-    const isConsentStep = allPassed && dialogStep >= 2 && dialogStep <= 4;
-    const isFinalStep = allPassed && dialogStep === 4;
-
-    // Step titles for header
     const getStepTitle = () => {
-        if (!allPassed || dialogStep === 1) return 'ส่งใบสมัครสินเชื่อ';
-        return currentConsent?.title || 'ส่งใบสมัครสินเชื่อ';
+        return 'ส่งใบสมัครสินเชื่อ';
     };
 
     const getStepDescription = () => {
-        if (dialogStep === 1) {
-            if (allPassed) return 'ข้อมูลทั้งหมดผ่านการตรวจสอบเรียบร้อย กรุณาดำเนินการขั้นตอนถัดไป';
-            if (hasBlocks) return 'ตรวจพบรายการที่ต้องตรวจสอบเพิ่มเติมจากระบบ กรุณาตรวจสอบรายละเอียดก่อนส่งใบสมัคร';
-            return 'ใบสมัครจะถูกส่งเข้าสู่ระบบเพื่อพิจารณาอนุมัติ';
-        }
-        return currentConsent?.description || '';
+        if (allPassed) return 'ข้อมูลทั้งหมดผ่านการตรวจสอบเรียบร้อย กรุณาดำเนินการส่งใบสมัคร';
+        if (hasBlocks) return 'ตรวจพบรายการที่ต้องตรวจสอบเพิ่มเติมจากระบบ กรุณาตรวจสอบรายละเอียดก่อนส่งใบสมัคร';
+        return 'ใบสมัครจะถูกส่งเข้าสู่ระบบเพื่อพิจารณาอนุมัติ';
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent size="lg">
+            <DialogContent>
                 <DialogHeader>
                     <div className="flex items-center justify-between">
                         <DialogTitle>{getStepTitle()}</DialogTitle>
-                        {/* Step indicator for all-passed flow */}
-                        {allPassed && dialogStep >= 2 && (
-                            <div className="flex items-center gap-1.5 shrink-0">
-                                {CONSENT_STEPS.map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className={cn(
-                                            "h-1.5 rounded-full transition-all",
-                                            i === consentIndex ? "w-8 bg-chaiyo-blue" : i < consentIndex ? "w-4 bg-emerald-400" : "w-4 bg-gray-200"
-                                        )}
-                                    />
-                                ))}
-                                <span className="text-[10px] text-gray-400 ml-1.5">ขั้นตอน {consentIndex + 1} / {CONSENT_STEPS.length}</span>
-                            </div>
-                        )}
                     </div>
                     <DialogDescription>{getStepDescription()}</DialogDescription>
                 </DialogHeader>
 
                 <DialogBody>
-                    {/* Step 1: Status check */}
-                    {dialogStep === 1 && (
+                    {!allPassed && hasBlocks && hasSoftblocks && (
                         <div className="space-y-5">
-                            {/* Block flow (existing) */}
-                            {!allPassed && hasBlocks && hasSoftblocks && (
-                                <>
-                                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
-                                        <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                                            <Send className="w-3 h-3 text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-blue-800">
-                                                ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
-                                            </p>
-                                            <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
-                                                เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
-                                                หลังจากทีมตรวจสอบให้ความเห็นแล้ว ใบสมัครจะถูกส่งกลับมายังพนักงานสาขาเพื่อดำเนินการต่อ
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Verification checklist grouped by module */}
-                                    <div className="space-y-3">
-                                        {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
-                                            const items = MOCK_BLOCK_ITEMS.filter(b => b.module === moduleName);
-                                            if (items.length === 0) return null;
-                                            return (
-                                                <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
-                                                    <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
-                                                        <p className="text-xs font-bold text-gray-600">{moduleName}</p>
-                                                    </div>
-                                                    <div className="divide-y divide-gray-100">
-                                                        {items.map((item, i) => (
-                                                            <div key={i} className="px-4 py-2.5 bg-white flex items-center gap-2.5">
-                                                                <div className="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
-                                                                    <AlertTriangle className="w-3 h-3 text-amber-500" />
-                                                                </div>
-                                                                <p className="text-xs font-semibold text-gray-900">
-                                                                    {item.personName || item.collateralType}
-                                                                </p>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </>
-                            )}
-
-                            {/* All-passed flow */}
-                            {allPassed && (
-                                <div className="space-y-3">
-                                    {PASSED_MODULES.map((mod, i) => (
-                                        <div
-                                            key={i}
-                                            className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl"
-                                        >
-                                            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                                                <CircleCheck className="w-4.5 h-4.5 text-emerald-500" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900">{mod.module}</p>
-                                            </div>
-                                            <Badge variant="success" className="gap-1 shrink-0">
-                                                <CircleCheck className="w-3.5 h-3.5" />
-                                                ผ่าน
-                                            </Badge>
-                                        </div>
-                                    ))}
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5">
+                                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Send className="w-3 h-3 text-blue-600" />
                                 </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Steps 2-4: Consent steps */}
-                    {isConsentStep && currentConsent && (
-                        <div className="space-y-4">
-                            <div className="border border-gray-200 rounded-xl bg-white overflow-hidden">
-                                <div className="p-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-chaiyo-blue" />
-                                    <span className="text-sm font-semibold text-gray-700">
-                                        กรุณาอ่านและทำความเข้าใจรายละเอียดก่อนดำเนินการต่อ
-                                    </span>
-                                </div>
-                                <div className="h-[280px] overflow-y-auto p-5 text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                                    {currentConsent.content}
+                                <div>
+                                    <p className="text-xs font-bold text-blue-800">
+                                        ใบสมัครจะถูกส่งไปยังทีมตรวจสอบก่อน
+                                    </p>
+                                    <p className="text-[11px] text-blue-600 mt-0.5 leading-relaxed">
+                                        เนื่องจากมีรายการที่ต้องตรวจสอบ ใบสมัครจะถูกส่งให้ทีม Legal / Compliance / Fraud พิจารณาก่อน
+                                    </p>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-100 flex items-start gap-3">
-                                <Checkbox
-                                    id={`consent-${consentIndex}`}
-                                    className="mt-0.5"
-                                    checked={consentChecked[consentIndex]}
-                                    onCheckedChange={(checked) => handleConsentChange(consentIndex, checked as boolean)}
-                                />
-                                <label
-                                    htmlFor={`consent-${consentIndex}`}
-                                    className="cursor-pointer select-none text-sm text-gray-700 font-semibold leading-snug"
-                                >
-                                    {currentConsent.checkboxLabel}
-                                </label>
+                            <div className="space-y-3">
+                                {['ข้อมูลผู้กู้', 'หลักประกัน', 'ผู้ค้ำประกัน'].map(moduleName => {
+                                    const items = MOCK_BLOCK_ITEMS.filter(b => b.module === moduleName);
+                                    if (items.length === 0) return null;
+                                    return (
+                                        <div key={moduleName} className="border border-gray-200 rounded-xl overflow-hidden">
+                                            <div className="bg-gray-50 border-b border-gray-200 px-4 py-2.5">
+                                                <p className="text-xs font-bold text-gray-600">{moduleName}</p>
+                                            </div>
+                                            <div className="divide-y divide-gray-100">
+                                                {items.map((item, i) => (
+                                                    <div key={i} className="px-4 py-2.5 bg-white flex items-center gap-2.5">
+                                                        <div className="w-5 h-5 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0">
+                                                            <AlertTriangle className="w-3 h-3 text-amber-500" />
+                                                        </div>
+                                                        <p className="text-xs font-semibold text-gray-900">
+                                                            {item.personName || item.collateralType}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
                 </DialogBody>
 
                 <DialogFooter>
-                    {/* Back button for consent steps */}
-                    {isConsentStep && (
-                        <Button
-                            variant="outline"
-                            onClick={() => setDialogStep(prev => prev - 1)}
-                            className="min-w-[104px] mr-auto"
-                        >
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            ย้อนกลับ
-                        </Button>
-                    )}
-
                     <Button
                         variant="outline"
                         onClick={() => onOpenChange(false)}
@@ -1316,74 +1266,24 @@ function SubmitApplicationDialog({
                         ยกเลิก
                     </Button>
 
-                    {/* Step 1 all-passed: ดำเนินการต่อ */}
-                    {dialogStep === 1 && allPassed && (
-                        <Button
-                            onClick={() => setDialogStep(2)}
-                            variant="default"
-                            className="min-w-[104px]"
-                        >
-                            ดำเนินการต่อ
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                    )}
-
-                    {/* Step 1 with blocks: ส่งใบสมัคร (to legal) */}
-                    {dialogStep === 1 && !allPassed && (
-                        <Button
-                            onClick={onSubmit}
-                            variant="default"
-                            className="min-w-[104px]"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    กำลังส่ง...
-                                </>
-                            ) : (
-                                <>
-                                    <Send className="w-4 h-4 mr-1.5" />
-                                    ส่งใบสมัคร
-                                </>
-                            )}
-                        </Button>
-                    )}
-
-                    {/* Consent steps 2-3: ถัดไป */}
-                    {isConsentStep && !isFinalStep && (
-                        <Button
-                            onClick={() => setDialogStep(prev => prev + 1)}
-                            variant="default"
-                            className="min-w-[104px]"
-                            disabled={!consentChecked[consentIndex]}
-                        >
-                            ถัดไป
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                    )}
-
-                    {/* Final consent step 4: ส่งใบสมัคร */}
-                    {isFinalStep && (
-                        <Button
-                            onClick={onSubmit}
-                            variant="default"
-                            className="min-w-[104px]"
-                            disabled={isSubmitting || !consentChecked[consentIndex]}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    กำลังส่ง...
-                                </>
-                            ) : (
-                                <>
-                                    <Send className="w-4 h-4 mr-1.5" />
-                                    ส่งใบสมัคร
-                                </>
-                            )}
-                        </Button>
-                    )}
+                    <Button
+                        onClick={onSubmit}
+                        variant="default"
+                        className="min-w-[104px]"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                กำลังส่ง...
+                            </>
+                        ) : (
+                            <>
+                                <Send className="w-4 h-4 mr-1.5" />
+                                ส่งใบสมัคร
+                            </>
+                        )}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

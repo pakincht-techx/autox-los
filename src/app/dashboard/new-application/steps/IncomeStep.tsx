@@ -3032,6 +3032,10 @@ export function IncomeStep({
 
                             {/* Corporate Account Checkbox */}
                             <div className="px-5 py-4 border-t border-border-color bg-gray-50/20">
+                              <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200/60 px-2.5 py-1.5 rounded-md w-fit">
+                                <Info className="w-4 h-4" />
+                                <span>เนื่องจากบัญชีผู้กู้ไม่ตรงกับชื่อผู้กู้</span>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <Checkbox
                                   id={`corp-acc-${occ.id}-${accIdx}`}
@@ -3049,7 +3053,7 @@ export function IncomeStep({
                                   htmlFor={`corp-acc-${occ.id}-${accIdx}`}
                                   className="cursor-pointer font-medium"
                                 >
-                                  อ้างอิงบัญชีนิติบุคคล
+                                  บัญชีนี้เป็นบัญชีที่อ้างอิงบัญชีนิติบุคคล
                                 </Label>
                               </div>
                               {account?.isCorporateAccount && (
