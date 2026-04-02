@@ -421,14 +421,6 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
-            {/* Timer notification bar */}
-            {timerActive && devRole === 'rcco-checker' && (
-                <div className="w-full py-2 px-4 flex items-center justify-center gap-3" style={{ backgroundColor: '#FFF7ED' }}>
-                    <AlertCircle className="w-5 h-5 shrink-0" style={{ color: '#C2410C' }} />
-                    <span className="font-semibold" style={{ color: '#C2410C' }}>ระยะเวลาทำใบงานนี้ ให้เสร็จสิ้นภายใน {formatTimer(timeLeft)}</span>
-                </div>
-            )}
-
             {/* ═══════════════════════════════════════════════════════════
                 SECTION 1: APP HEADER (full-width border bottom)
             ═══════════════════════════════════════════════════════════ */}
@@ -501,6 +493,14 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                     </div>
                 </div>
             </div>
+
+            {/* Timer notification bar */}
+            {timerActive && devRole === 'rcco-checker' && (
+                <div className="w-full py-2 px-4 flex items-center justify-center gap-3" style={{ backgroundColor: '#FFF7ED' }}>
+                    <AlertCircle className="w-5 h-5 shrink-0" style={{ color: '#C2410C' }} />
+                    <span className="font-semibold" style={{ color: '#C2410C' }}>ระยะเวลาทำใบงานนี้ ให้เสร็จสิ้นภายใน {formatTimer(timeLeft)}</span>
+                </div>
+            )}
 
             <div className="max-w-6xl mx-auto p-6 lg:p-8 space-y-8">
 
