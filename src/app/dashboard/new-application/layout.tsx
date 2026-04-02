@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationProvider, useApplication, APPLICATION_STEPS, ALL_FLOW_STEPS } from "./context/ApplicationContext";
 import { MandatoryFieldWarningDialog } from "./components/MandatoryFieldWarningDialog";
+import { RCCOCheckerSidebar } from "./components/RCCOCheckerSidebar";
 import {
     Dialog,
     DialogContent,
@@ -195,7 +196,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
                     {children}
                 </div>
             ) : (
-            <div className="max-w-7xl mx-auto space-y-6 p-6 lg:px-6 lg:py-6 pb-32">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 lg:px-6 lg:py-6 pb-32">
 
 
 
@@ -214,22 +215,27 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
                 {/* ── APPLICATION PHASE: Clean card wrapper ─────────── */}
                 {isApplicationPhase && (
-                    <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-                        <Card className="min-h-[600px] border-none shadow-none bg-transparent">
-                            <CardContent className={cn("p-0 w-full", isReadonly && "relative")}>
-                                {isReadonly && (
-                                    <div className="absolute inset-0 z-20" style={{ pointerEvents: 'all' }}>
-                                        <div className="pointer-events-none" />
+                    <>
+                        <div className="lg:col-span-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <Card className="min-h-[600px] border-none shadow-none bg-transparent">
+                                <CardContent className={cn("p-0 w-full", isReadonly && "relative")}>
+                                    {isReadonly && (
+                                        <div className="absolute inset-0 z-20" style={{ pointerEvents: 'all' }}>
+                                            <div className="pointer-events-none" />
+                                        </div>
+                                    )}
+                                    <div className={cn(isReadonly && "pointer-events-none select-none opacity-90")}>
+                                        {children}
                                     </div>
-                                )}
-                                <div className={cn(isReadonly && "pointer-events-none select-none opacity-90")}>
-                                    {children}
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </div>
 
-
-                    </div>
+                        {/* RCCO Checker Sidebar */}
+                        <div className="lg:col-span-1 animate-in fade-in slide-in-from-right-8 duration-700">
+                            <RCCOCheckerSidebar />
+                        </div>
+                    </>
                 )}
             </div>
             )}
