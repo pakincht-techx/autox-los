@@ -497,14 +497,6 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                     <Send className="w-4 h-4 mr-2" /> ส่งใบสมัคร
                                 </Button>
                             )}
-                            {viewMode === 'approver' && currentStatus !== 'Sent Back' && (
-                                <Button
-                                    className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                                    onClick={() => setReviewDialogOpen(true)}
-                                >
-                                    <MessageSquare className="w-4 h-4 mr-1.5" /> ให้ความเห็น
-                                </Button>
-                            )}
                         </div>
                     </div>
                 </div>
