@@ -261,9 +261,10 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     // ── Derive view mode from source + role ───────────────────────────────
     // from=my → maker (editable)
     // from=all + legal-team → approver (approve/reject/send-back)
+    // from=all + rcco-checker → approver (with task claim feature)
     // from=all + branch-staff → readonly (view-only, no actions)
     const viewMode: ViewMode = from === 'all'
-        ? (devRole === 'legal-team' ? 'approver' : 'readonly')
+        ? (devRole === 'legal-team' || devRole === 'rcco-checker' ? 'approver' : 'readonly')
         : 'maker';
 
     // ── Status: approver/readonly defaults to "In Review", maker keeps Draft
@@ -280,6 +281,43 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const [historyLog, setHistoryLog] = useState(app.historyLog);
     const [customerStatusOverride, setCustomerStatusOverride] = useState<string | null>(null);
     const [softblockDetailOpen, setSoftblockDetailOpen] = useState(false);
+
+    // ── RCCO Checker timer ──────────────────────────────────────────────────
+    const [timerActive, setTimerActive] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(60 * 60); // 60 minutes in seconds
+
+    useEffect(() => {
+        if (!timerActive || timeLeft <= 0) return;
+
+        const interval = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    setTimerActive(false);
+                    toast.error("หมดเวลาในการทำใบงาน", {
+                        description: "กรุณาส่งคืนใบงานไป Maker",
+                    });
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [timerActive, timeLeft]);
+
+    const formatTimer = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    };
+
+    const handleClaimTask = () => {
+        setTimerActive(true);
+        setTimeLeft(60 * 60);
+        toast.success("เคลมใบงานสำเร็จ", {
+            description: "คุณมีเวลา 60 นาทีในการทำใบงาน",
+        });
+    };
 
     // ── Set breadcrumbs + right content ──────────────────────────────────
     useEffect(() => {
@@ -313,6 +351,14 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
     return (
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
+            {/* Timer notification bar */}
+            {timerActive && devRole === 'rcco-checker' && (
+                <div className="w-full bg-orange-500 text-white py-2 px-4 flex items-center justify-center gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <span className="font-semibold">ระยะเวลาทำใบงานนี้ ให้เสร็จสิ้นภายใน {formatTimer(timeLeft)}</span>
+                </div>
+            )}
+
             {/* ═══════════════════════════════════════════════════════════
                 SECTION 1: APP HEADER (full-width border bottom)
             ═══════════════════════════════════════════════════════════ */}
@@ -334,6 +380,16 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
+                            {devRole === 'rcco-checker' && viewMode === 'approver' && (
+                                <Button
+                                    variant="default"
+                                    onClick={handleClaimTask}
+                                    disabled={timerActive}
+                                    className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                                >
+                                    <Send className="w-4 h-4 mr-2" /> เคลมใบงาน
+                                </Button>
+                            )}
                             {canEdit && (
                                 <Button
                                     variant="default"
