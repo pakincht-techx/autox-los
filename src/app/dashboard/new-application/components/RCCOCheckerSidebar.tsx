@@ -20,47 +20,12 @@ export function RCCOCheckerSidebar() {
     comment: '',
   });
 
-  // Pages RCCO Checker should see
-  const rccoPages = [
-    { label: 'ข้อมูลผู้กู้', slug: 'customer-info' },
-    { label: 'อาชีพและรายได้', slug: 'income' },
-    { label: 'หลักประกัน', slug: 'collateral-info' },
-    { label: 'ภาระหนี้', slug: 'debt' },
-    { label: 'Policy', slug: 'policy' },
-    { label: 'ผู้ค้ำประกัน', slug: 'guarantors' },
-    { label: 'รีไฟแนนซ์', slug: 'refinance' },
-    { label: 'ตรวจสอบที่อยู่', slug: 'verify-address' },
-    { label: 'รายละเอียดสินเชื่อ', slug: 'loan-calculator' },
-  ];
-
   if (devRole !== 'rcco-checker') {
     return null;
   }
 
   return (
     <div className="space-y-6">
-      {/* Application Pages Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">หน้าการพิจารณา</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {rccoPages.map((page) => (
-              <div
-                key={page.slug}
-                className="flex items-center px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <div className="flex-1 text-sm font-medium text-gray-700">
-                  {page.label}
-                </div>
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Review and Opinion Section */}
       <Card>
         <CardHeader>
