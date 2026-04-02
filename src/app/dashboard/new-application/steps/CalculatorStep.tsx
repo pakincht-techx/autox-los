@@ -51,6 +51,7 @@ interface CalculatorStepProps {
 export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavigation, readOnlyProduct, paymentMethod = 'installment' }: CalculatorStepProps) {
     const { devRole } = useSidebar();
     const isRCCOChecker = devRole === 'rcco-checker';
+    const isBranchStaff = devRole === 'branch-staff';
 
     const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 600000);
     const SYSTEM_MAX_AMOUNT = 700000;
@@ -705,6 +706,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     </Card>
 
                     {/* Loan Breakdown Comparison Table Section */}
+                    {!isBranchStaff && (
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
@@ -717,8 +719,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     <thead>
                                         <tr className="bg-gray-50 border-b border-gray-200">
                                             <th className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-r border-gray-200">รายการ</th>
-                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ลูกค้าต้องการ</th>
                                             <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ระบบ Recommended</th>
+                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ลูกค้าต้องการ</th>
                                             <th className="px-4 py-3 text-center text-sm font-bold text-gray-800">RC Checker</th>
                                         </tr>
                                     </thead>
@@ -736,13 +738,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoAmountBeforeInsurance}
+                                                        value={rccoAmountBeforeInsurance || amount.toString()}
                                                         onChange={(e) => setRccoAmountBeforeInsurance(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={amount.toString()}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{amount.toLocaleString('th-TH')}</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -760,13 +762,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoInsurancePremium}
+                                                        value={rccoInsurancePremium || calculateTotalInsurancePremium().toString()}
                                                         onChange={(e) => setRccoInsurancePremium(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={calculateTotalInsurancePremium().toString()}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -784,13 +786,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoAmountWithInsurance}
+                                                        value={rccoAmountWithInsurance || (amount + calculateTotalInsurancePremium()).toString()}
                                                         onChange={(e) => setRccoAmountWithInsurance(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={(amount + calculateTotalInsurancePremium()).toString()}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -808,13 +810,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoDuration}
+                                                        value={rccoDuration || months.toString()}
                                                         onChange={(e) => setRccoDuration(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={months.toString()}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{months} เดือน</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -832,13 +834,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoInterestRate}
+                                                        value={rccoInterestRate || (INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
                                                         onChange={(e) => setRccoInterestRate(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -856,13 +858,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 {isRCCOChecker ? (
                                                     <Input
                                                         type="number"
-                                                        value={rccoMonthlyPayment}
+                                                        value={rccoMonthlyPayment || monthlyPayment.toFixed(2)}
                                                         onChange={(e) => setRccoMonthlyPayment(e.target.value)}
                                                         className="text-center text-sm font-semibold"
                                                         placeholder={monthlyPayment.toFixed(2)}
                                                     />
                                                 ) : (
-                                                    <div className="text-sm font-bold text-gray-500">-</div>
+                                                    <div className="text-sm font-bold text-gray-500">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
                                                 )}
                                             </td>
                                         </tr>
@@ -871,6 +873,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </div>
                         </CardContent>
                     </Card>
+                    )}
 
                     {/* Insurance Section */}
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
