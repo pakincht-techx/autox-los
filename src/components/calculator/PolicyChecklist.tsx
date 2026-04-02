@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { ClipboardCheck, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -409,7 +409,6 @@ export function PolicyChecklist() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                                <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" />
                                 Policy Checklist
                             </CardTitle>
                             <Badge variant={overallVariant}>
@@ -417,7 +416,6 @@ export function PolicyChecklist() {
                             </Badge>
                         </div>
                         <div className="flex items-center gap-2">
-                            {hasNotPassed && (
                                 <Button 
                                     size="sm" 
                                     className={cn(
@@ -433,7 +431,6 @@ export function PolicyChecklist() {
                                 >
                                     {waiverSubmitted ? "ดูเหตุผลการขออนุโลม" : "ขออนุโลม"}
                                 </Button>
-                            )}
                             <ChevronDown className={cn("w-5 h-5 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} />
                         </div>
                     </div>

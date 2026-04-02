@@ -520,7 +520,7 @@ export default function AddGuarantorPage() {
                                     onClick={() => setShowNotContinueDialog(true)}
                                     className="min-w-[120px] rounded-2xl h-12 font-bold"
                                 >
-                                    ยกเลิก
+                                    ออกจากการทำรายการ
                                 </Button>
                             </div>
                         </div>

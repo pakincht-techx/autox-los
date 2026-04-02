@@ -130,6 +130,20 @@ Every dialog follows a **Header → Body → Footer** structure:
   ```
 - **Table inputs**: Do **not** include the unit inside the input. Instead, display the unit in the **table column header label** (e.g., `จำนวน (บาท)`). This keeps table cells compact and avoids redundancy.
 
+## Number Formatting (Monetary / Numeric Inputs)
+- **Always display commas** in numeric/monetary inputs. Use `type="text"` (never `type="number"`) with `formatNumberWithCommas()` on the displayed value.
+- **Strip commas on save.** In the `onChange` handler, strip commas before storing: `e.target.value.replace(/,/g, "")`.
+- Pattern:
+  ```tsx
+  <Input
+    type="text"
+    value={formatNumberWithCommas(item.amount)}
+    onChange={(e) => handleUpdate(e.target.value.replace(/,/g, ""))}
+    placeholder="0.00"
+  />
+  ```
+- **Read-only display**: Use `formatNumberWithCommas(value)` for all numeric displays (totals, summaries, table cells).
+
 ## Select / Dropdown
 - **Fixed-height dropdown list.** When a `Select` may contain many options (e.g., months, years, provinces), always set a fixed max-height on `SelectContent` with scrollable overflow to prevent the dropdown from overflowing the screen. Use `max-h-[200px] overflow-y-auto`.
   ```tsx
