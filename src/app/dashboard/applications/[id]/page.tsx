@@ -376,9 +376,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     }, [timerActive, timeLeft]);
 
     const formatTimer = (seconds: number) => {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     };
 
     const handleClaimTask = () => {
@@ -423,9 +423,9 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         <div className="h-full overflow-y-auto no-scrollbar bg-sidebar">
             {/* Timer notification bar */}
             {timerActive && devRole === 'rcco-checker' && (
-                <div className="w-full bg-orange-500 text-white py-2 px-4 flex items-center justify-center gap-3">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    <span className="font-semibold">ระยะเวลาทำใบงานนี้ ให้เสร็จสิ้นภายใน {formatTimer(timeLeft)}</span>
+                <div className="w-full py-2 px-4 flex items-center justify-center gap-3" style={{ backgroundColor: '#FFF7ED' }}>
+                    <AlertCircle className="w-5 h-5 shrink-0" style={{ color: '#C2410C' }} />
+                    <span className="font-semibold" style={{ color: '#C2410C' }}>ระยะเวลาทำใบงานนี้ ให้เสร็จสิ้นภายใน {formatTimer(timeLeft)}</span>
                 </div>
             )}
 
