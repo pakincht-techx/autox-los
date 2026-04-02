@@ -102,11 +102,11 @@ export function RCCOCheckerSidebar() {
           </div>
 
           {/* Reviewed By */}
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <Label className="text-sm font-semibold text-gray-600">
+          <div className="flex justify-between items-center">
+            <Label className="text-sm font-semibold text-gray-600 m-0">
               พิจารณาโดย
             </Label>
-            <div className="text-base font-medium text-gray-900 mt-2">
+            <div className="text-base font-medium text-gray-900">
               {devRole === 'rcco-checker' ? 'RC Checker' : 'Unknown'}
             </div>
           </div>
