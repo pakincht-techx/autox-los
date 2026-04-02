@@ -70,7 +70,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
     // ── Hide save draft button during screening phase or specific pages ──────
     useEffect(() => {
         const isConsentPage = pathname.includes('/consent');
-        const isGuarantorsPage = pathname.endsWith('/guarantors');
+        const isGuarantorsPage = pathname.endsWith('/guarantors') || pathname.includes('/guarantors/add');
         setHideSaveDraftButton(isScreeningPhase || isConsentPage || isGuarantorsPage);
     }, [isScreeningPhase, pathname, setHideSaveDraftButton]);
 

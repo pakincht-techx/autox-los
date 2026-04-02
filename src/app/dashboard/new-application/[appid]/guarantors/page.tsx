@@ -23,7 +23,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/Dialog";
-import { Plus, Users, CircleCheck, AlertTriangle, ChevronLeft, Circle } from "lucide-react";
+import { Plus, Users, CircleCheck, AlertTriangle, ChevronLeft, Circle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Guarantor } from "@/types/application";
 import { toast } from "sonner";
@@ -258,6 +258,18 @@ export default function GuarantorsPage() {
                         <p className="text-sm text-gray-300 mt-1">กดปุ่ม "เพิ่มผู้ค้ำประกัน" เพื่อเพิ่มข้อมูล</p>
                     </div>
                 )}
+
+                {/* Privacy Notice */}
+                <div className="flex items-start gap-2.5 p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                    <Info className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        โปรดอ่านเพิ่มเติมเกี่ยวกับประกาศนโยบายความเป็นส่วนตัวของผู้ให้กู้อย่างละเอียด เพื่อให้เข้าใจถึงการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลและสิทธิเจ้าของข้อมูลส่วนบุคคลที่เว็บไซต์ของผู้ให้กู้{" "}
+                        <a href="https://chaiyo.co.th/policy-page" target="_blank" rel="noopener noreferrer" className="text-chaiyo-blue hover:underline font-medium">
+                            https://chaiyo.co.th/policy-page
+                        </a>{" "}
+                        และ/หรือช่องทางทื่ผู้ให้กู้กำหนด หรือตามที่ผู้ให้กู้จะเปลี่ยนแปลงในภายหน้า
+                    </p>
+                </div>
             </div>
 
             {/* Soft-Block Warning Dialog */}

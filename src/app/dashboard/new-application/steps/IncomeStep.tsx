@@ -98,6 +98,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/Dialog";
+import { useSidebar } from "@/components/layout/SidebarContext";
 import { AddressForm } from "@/components/application/AddressForm";
 import {
   CustomerFormData,
@@ -252,6 +253,7 @@ export function IncomeStep({
   isExistingCustomer = false,
   isGuarantor = false,
 }: IncomeStepProps) {
+  const { devRole } = useSidebar();
   const handleChange = <K extends keyof CustomerFormData>(
     field: K,
     value: CustomerFormData[K],
@@ -404,6 +406,7 @@ export function IncomeStep({
     occId: string;
     bankIdx: number;
   } | null>(null);
+  const [seStatementPage, setSeStatementPage] = useState(1);
   // SE Statement Items Handlers
   const initSEStatementMockData = (occId: string) => {
     const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
@@ -440,20 +443,42 @@ export function IncomeStep({
     handleOccupationChange(occId, "seStatementItems", items);
   };
 
-  const handleAddManualSEStatementItem = (occId: string) => {
+  const handleUpdateSEStatementNote = (
+    occId: string,
+    index: number,
+    note: string,
+  ) => {
     const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
     if (!occ) return;
     const items = [...(occ.seStatementItems || [])];
-    items.push({
+    items[index] = { ...items[index], note };
+    handleOccupationChange(occId, "seStatementItems", items);
+  };
+
+  const handleAddManualSEStatementItem = (occId: string, afterIndex?: number) => {
+    const occ = occupations.find((o: IncomeOccupation) => o.id === occId);
+    if (!occ) return;
+    const items = [...(occ.seStatementItems || [])];
+    const newItem = {
       code: "",
       dateTime: "",
-      type: "in",
+      type: "in" as const,
       description: "",
       amount: "",
       included: true,
       isManual: true,
-    });
+    };
+    if (afterIndex !== undefined && afterIndex >= 0 && afterIndex < items.length) {
+      items.splice(afterIndex + 1, 0, newItem);
+    } else {
+      items.push(newItem);
+    }
     handleOccupationChange(occId, "seStatementItems", items);
+    // Auto-navigate to the page containing the new row
+    const SE_ITEMS_PER_PAGE = 25;
+    const newRowIndex = afterIndex !== undefined ? afterIndex + 1 : items.length - 1;
+    const targetPage = Math.ceil((newRowIndex + 1) / SE_ITEMS_PER_PAGE);
+    setSeStatementPage(targetPage);
   };
 
   const handleEditManualSEStatementItem = (
@@ -2615,6 +2640,7 @@ export function IncomeStep({
                   sourceDocs?: IncomeDocument[],
                   onRemove?: () => void,
                   isYearly: boolean = false,
+                  isMandatory: boolean = true,
                 ) => {
                   const sourceTotal = incomes.reduce(
                     (sum, item) =>
@@ -2627,16 +2653,16 @@ export function IncomeStep({
                       ? sourceDocs[0]
                       : undefined;
                   const displayTitle = sourceDoc
-                    ? `${title.split(" - ")[0]} - ${sourceDoc.originalName || sourceDoc.name}`
+                    ? (sourceDoc.originalName || sourceDoc.name) || title
                     : title;
 
                   return (
                     <div key={sourceKey || "other"} className="space-y-3">
                       <div className="flex items-center justify-between pl-1 pr-1">
-                        <Label className="text-sm font-bold text-gray-700 truncate mr-2">
-                          {displayTitle}
-                        </Label>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 truncate">
+                          <Label className="text-sm font-bold text-gray-700 truncate">
+                            {displayTitle}
+                          </Label>
                           {sourceDoc && (
                             <Button
                               type="button"
@@ -2645,12 +2671,14 @@ export function IncomeStep({
                               onClick={() =>
                                 window.open(sourceDoc.url, "_blank")
                               }
-                              className="h-8 text-xs font-medium text-chaiyo-blue hover:text-chaiyo-blue/80"
+                              className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue shrink-0"
+                              title="ดูเอกสารต้นฉบับ"
                             >
-                              <Eye className="w-3.5 h-3.5 mr-1" />{" "}
-                              ดูเอกสารต้นฉบับ
+                              <Eye className="w-4 h-4" />
                             </Button>
                           )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
                           {onRemove && (
                             <Button
                               type="button"
@@ -2686,14 +2714,14 @@ export function IncomeStep({
                             <TableRow>
                               <TableHead className="w-[30%] text-xs py-3">
                                 ประเภทรายได้{" "}
-                                <span className="text-red-500">*</span>
+                                {isMandatory && <span className="text-red-500">*</span>}
                               </TableHead>
                               <TableHead className="w-[40%] text-xs py-3">
                                 รายละเอียดรายได้
                               </TableHead>
                               <TableHead className="w-[20%] text-xs py-3 text-right">
                                 รายได้{isYearly ? "ทั้งปี" : ""} (บาท){" "}
-                                <span className="text-red-500">*</span>
+                                {isMandatory && <span className="text-red-500">*</span>}
                               </TableHead>
                               <TableHead className="w-[10%] text-center text-xs py-3">
                                 จัดการ
@@ -3002,6 +3030,7 @@ export function IncomeStep({
                                     occId: occ.id,
                                     bankIdx: accIdx,
                                   });
+                                  setSeStatementPage(1);
                                   setSeStatementDialogOpen(true);
                                 }}
                                 className="h-8 text-xs font-medium"
@@ -3160,7 +3189,7 @@ export function IncomeStep({
                               />
                             </div>
 
-                            {occ.occupationCode !== "UNEMPLOYED" && (
+                            {!!occ.occupationCode && occ.occupationCode !== "UNEMPLOYED" && (
                               <>
                                 {occ.employmentType === "SE" && (
                                   <div className="space-y-2">
@@ -3401,6 +3430,7 @@ export function IncomeStep({
                     </div>
 
                     {occ.employmentType &&
+                      !!occ.occupationCode &&
                       occ.occupationCode !== "UNEMPLOYED" && (
                         <>
                           {/* 2. ที่อยู่ที่ทำงาน / กิจการ */}
@@ -5264,7 +5294,7 @@ export function IncomeStep({
                                             <div className="flex items-center gap-2">
                                               <FileText className="w-4 h-4 text-emerald-600" />
                                               <span className="text-sm font-bold text-gray-800">
-                                                รายการรายได้จาก: ทวิ 50
+                                                รายการรายได้จาก: 50 ทวิ (หนังสือรับรองการหักภาษี ณ ที่จ่าย)
                                               </span>
                                             </div>
                                             <Button
@@ -5296,14 +5326,22 @@ export function IncomeStep({
                                                     incomesBySource[
                                                       "tavi50_yearly"
                                                     ] || [];
+                                                  const tavi50YearlyDocs =
+                                                    allDocs.filter(
+                                                      (
+                                                        d: IncomeDocument,
+                                                      ) =>
+                                                        d.type ===
+                                                        "tavi50_yearly",
+                                                    );
                                                   return (
                                                     <div className="space-y-4">
                                                       {renderIncomeTable(
-                                                        `รายการรายได้จาก: ทวิ 50 (รายปี)`,
+                                                        `รายการรายได้จาก: 50 ทวิ (หนังสือรับรองการหักภาษี ณ ที่จ่าย) (รายปี)`,
                                                         "tavi50_yearly",
                                                         sourceIncomes,
                                                         true,
-                                                        undefined,
+                                                        tavi50YearlyDocs,
                                                         () =>
                                                           setPendingDeleteTavi50Yearly(
                                                             occ.id,
@@ -5356,6 +5394,12 @@ export function IncomeStep({
                                                               monthLabel,
                                                             )
                                                           ] || monthLabel;
+                                                        const monthDocs = allDocs.filter(
+                                                          (d: IncomeDocument) =>
+                                                            d.type ===
+                                                            `tavi50_monthly_${mIdx}`
+                                                        );
+                                                        const monthDoc = monthDocs.length > 0 ? monthDocs[0] : undefined;
                                                         const slipCount =
                                                           tavi50SlipCounts[
                                                             String(mIdx)
@@ -5383,11 +5427,27 @@ export function IncomeStep({
                                                             >
                                                               {/* Month Header */}
                                                               <div className="flex items-center justify-between">
-                                                                <Label className="text-sm font-bold text-gray-700">
-                                                                  {
-                                                                    monthFullName
-                                                                  }
-                                                                </Label>
+                                                                <div className="flex items-center gap-2">
+                                                                  <Label className="text-sm font-bold text-gray-700">
+                                                                    {
+                                                                      monthFullName
+                                                                    }
+                                                                  </Label>
+                                                                  {monthDoc && (
+                                                                    <Button
+                                                                      type="button"
+                                                                      variant="ghost"
+                                                                      size="sm"
+                                                                      onClick={() =>
+                                                                        window.open(monthDoc.url, "_blank")
+                                                                      }
+                                                                      className="h-7 w-7 p-0 text-gray-400 hover:text-chaiyo-blue"
+                                                                      title="ดูเอกสารต้นฉบับ"
+                                                                    >
+                                                                      <Eye className="w-4 h-4" />
+                                                                    </Button>
+                                                                  )}
+                                                                </div>
                                                                 <div className="flex items-center gap-2">
                                                                   <Button
                                                                     type="button"
@@ -5442,7 +5502,7 @@ export function IncomeStep({
                                                                         incomesBySource[
                                                                           slipSourceKey
                                                                         ] || [];
-                                                                      const slipDefaultLabel = `ทวิ 50 (รายเดือน) ${String(sIdx + 1).padStart(2, "0")}`;
+                                                                      const slipDefaultLabel = `50 ทวิ (หนังสือรับรองการหักภาษี ณ ที่จ่าย) (รายเดือน) ${String(sIdx + 1).padStart(2, "0")}`;
                                                                       const tavi50Docs =
                                                                         allDocs.filter(
                                                                           (
@@ -5865,15 +5925,42 @@ export function IncomeStep({
                                         );
                                       })}
 
-                                      {/* Cash Income Table (if selected) */}
-                                      {(occ.incomeChannels || []).includes(
-                                        "cash",
-                                      ) &&
-                                        renderIncomeTable(
+                                      {/* Cash Income Table */}
+                                      <div className="border border-border-strong rounded-xl bg-white p-5 space-y-4">
+                                        <div className="flex items-center justify-between pb-2.5 border-b border-border-color">
+                                          <div className="flex items-center gap-2">
+                                            <FileText className="w-4 h-4 text-emerald-600" />
+                                            <span className="text-sm font-bold text-gray-800">
+                                              รายการรายได้จากการสอบถาม
+                                            </span>
+                                          </div>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                              handleAddSAIncomeRow(
+                                                occ.id,
+                                                "cash",
+                                              )
+                                            }
+                                            className="h-8 text-xs font-medium"
+                                          >
+                                            <Plus className="w-3 h-3 mr-1" />{" "}
+                                            เพิ่มรายการรายได้
+                                          </Button>
+                                        </div>
+                                        {renderIncomeTable(
                                           "รายการรายได้จากการสอบถาม",
                                           "cash",
                                           incomesBySource["cash"] || [],
+                                          false,
+                                          undefined,
+                                          undefined,
+                                          false,
+                                          (occ.incomeChannels || []).includes("cash")
                                         )}
+                                      </div>
 
                                       {/* Grand Total Footer */}
                                       <div className="mt-6 border-t border-border-strong pt-4">
@@ -6155,56 +6242,58 @@ export function IncomeStep({
                                 {occ.businessStatus !== "closed" && (
                                   <>
                                     {/* SE Income Method Checkboxes */}
-                                    <div className="space-y-3 mt-6 mb-2">
-                                      <Label className="font-bold text-gray-800">
-                                        แหล่งรายได้ที่นำมาคำนวณ
-                                      </Label>
-                                      <div className="flex items-center gap-6">
-                                        <div className="flex items-center gap-2">
-                                          <Checkbox
-                                            id={`use-statement-main-${occ.id}`}
-                                            checked={
-                                              occ.useBankStatementIncome ||
-                                              false
-                                            }
-                                            onCheckedChange={(checked) =>
-                                              handleOccupationChange(
-                                                occ.id,
-                                                "useBankStatementIncome",
-                                                !!checked,
-                                              )
-                                            }
-                                          />
-                                          <Label
-                                            htmlFor={`use-statement-main-${occ.id}`}
-                                            className="cursor-pointer font-medium"
-                                          >
-                                            ใช้รายได้จากบัญชีธนาคาร
-                                          </Label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <Checkbox
-                                            id={`use-inquired-main-${occ.id}`}
-                                            checked={
-                                              occ.useInquiredIncome || false
-                                            }
-                                            onCheckedChange={(checked) =>
-                                              handleOccupationChange(
-                                                occ.id,
-                                                "useInquiredIncome",
-                                                !!checked,
-                                              )
-                                            }
-                                          />
-                                          <Label
-                                            htmlFor={`use-inquired-main-${occ.id}`}
-                                            className="cursor-pointer font-medium"
-                                          >
-                                            ใช้รายได้จากการสอบถาม
-                                          </Label>
+                                    {devRole !== 'branch-staff' && (
+                                      <div className="space-y-3 mt-6 mb-2">
+                                        <Label className="font-bold text-gray-800">
+                                          แหล่งรายได้ที่นำมาคำนวณ
+                                        </Label>
+                                        <div className="flex items-center gap-6">
+                                          <div className="flex items-center gap-2">
+                                            <Checkbox
+                                              id={`use-statement-main-${occ.id}`}
+                                              checked={
+                                                occ.useBankStatementIncome ||
+                                                false
+                                              }
+                                              onCheckedChange={(checked) =>
+                                                handleOccupationChange(
+                                                  occ.id,
+                                                  "useBankStatementIncome",
+                                                  !!checked,
+                                                )
+                                              }
+                                            />
+                                            <Label
+                                              htmlFor={`use-statement-main-${occ.id}`}
+                                              className="cursor-pointer font-medium"
+                                            >
+                                              ใช้รายได้จากบัญชีธนาคาร
+                                            </Label>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Checkbox
+                                              id={`use-inquired-main-${occ.id}`}
+                                              checked={
+                                                occ.useInquiredIncome || false
+                                              }
+                                              onCheckedChange={(checked) =>
+                                                handleOccupationChange(
+                                                  occ.id,
+                                                  "useInquiredIncome",
+                                                  !!checked,
+                                                )
+                                              }
+                                            />
+                                            <Label
+                                              htmlFor={`use-inquired-main-${occ.id}`}
+                                              className="cursor-pointer font-medium"
+                                            >
+                                              ใช้รายได้จากการสอบถาม
+                                            </Label>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
+                                    )}
 
                                     {/* SE Statement Section */}
                                     {seStatementSection}
@@ -8824,6 +8913,7 @@ export function IncomeStep({
                       )}
                     {/* ===== บุคคลอ้างอิง (only show on the main occupation tab, and not for unemployed) ===== */}
                     {occ.isMain &&
+                      !!occ.occupationCode &&
                       occ.occupationCode !== "UNEMPLOYED" &&
                       occ.employmentType && (
                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
@@ -9023,6 +9113,7 @@ export function IncomeStep({
 
                     {/* ===== บุคคลอ้างอิง for secondary occupations ===== */}
                     {!occ.isMain &&
+                      !!occ.occupationCode &&
                       occ.occupationCode !== "UNEMPLOYED" &&
                       occ.employmentType && (
                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
@@ -9447,7 +9538,7 @@ export function IncomeStep({
                       )}
 
                     {/* อัพโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
-                    {occ.occupationCode !== "UNEMPLOYED" &&
+                    {!!occ.occupationCode && occ.occupationCode !== "UNEMPLOYED" &&
                       occ.businessStatus !== "closed" &&
                       occ.employmentType && (
                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
@@ -9781,7 +9872,8 @@ export function IncomeStep({
 
                     {/* ===== ผู้ประเมินสถานที่ทำงาน ===== */}
                     {occ.employmentType &&
-                      occ.employmentType !== "UNEMPLOYED" && (
+                      occ.employmentType !== "UNEMPLOYED" &&
+                      !!occ.occupationCode && (
                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                           <div className="flex items-center justify-between pb-2 border-b border-border-color">
                             <h4 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -10002,7 +10094,7 @@ export function IncomeStep({
                       )}
 
                     {/* หมายเหตุ per occupation */}
-                    {occ.employmentType && (
+                    {occ.employmentType && !!occ.occupationCode && (
                       <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-3">
                         <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                           <MessageSquare className="w-5 h-5 text-chaiyo-blue" />{" "}
@@ -11290,20 +11382,45 @@ export function IncomeStep({
         >
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100 flex flex-row items-center justify-between">
             <DialogTitle>จัดการรายการเดินบัญชี</DialogTitle>
-            {seStatementDialogContext && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  handleAddManualSEStatementItem(seStatementDialogContext.occId)
-                }
-                className="h-8 text-xs font-medium"
-              >
-                <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการ
-              </Button>
-            )}
+            {(() => {
+              if (!seStatementDialogContext) return null;
+              const hdrOcc = occupations.find(
+                (o: IncomeOccupation) => o.id === seStatementDialogContext.occId,
+              );
+              const hdrItems = hdrOcc?.seStatementItems || [];
+              if (hdrItems.length === 0) return null;
+              const SE_PP = 25;
+              const tp = Math.ceil(hdrItems.length / SE_PP) || 1;
+              return (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400 font-medium">
+                    หน้า {seStatementPage} จาก {tp} (ทั้งหมด {hdrItems.length} รายการ)
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs bg-white text-gray-500 hover:text-gray-900 border-gray-200 px-2"
+                      disabled={seStatementPage === 1}
+                      onClick={() => setSeStatementPage((p) => Math.max(1, p - 1))}
+                    >
+                      ก่อนหน้า
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs bg-white text-gray-500 hover:text-gray-900 border-gray-200 px-2"
+                      disabled={seStatementPage >= tp}
+                      onClick={() => setSeStatementPage((p) => Math.min(tp, p + 1))}
+                    >
+                      ถัดไป
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </DialogHeader>
-          <DialogBody className="flex-1 overflow-hidden flex flex-col p-6 bg-gray-50/30">
+          <DialogBody className="flex-1 overflow-hidden flex flex-col bg-white p-0">
             {(() => {
               if (!seStatementDialogContext) return null;
               const dialogOcc = occupations.find(
@@ -11318,9 +11435,16 @@ export function IncomeStep({
                 0,
               );
 
+              const SE_ITEMS_PER_PAGE = 25;
+              const totalPages = Math.ceil(items.length / SE_ITEMS_PER_PAGE) || 1;
+              const paginatedItems = items.slice(
+                (seStatementPage - 1) * SE_ITEMS_PER_PAGE,
+                seStatementPage * SE_ITEMS_PER_PAGE
+              );
+
               return (
-                <div className="flex flex-col h-full gap-4">
-                  <div className="border border-border-strong rounded-xl overflow-y-auto bg-white flex-1 min-h-0">
+                <div className="flex flex-col h-full">
+                  <div className="overflow-y-auto bg-white flex-1 min-h-0">
                     <Table>
                       <TableHeader className="bg-gray-50/80">
                         <TableRow>
@@ -11340,7 +11464,7 @@ export function IncomeStep({
                             จำนวน (บาท)
                           </TableHead>
                           <TableHead className="w-[30%] text-xs py-3">
-                            เหตุผลที่ไม่รวม
+                            หมายเหตุ
                           </TableHead>
                         </TableRow>
                       </TableHeader>
@@ -11349,13 +11473,29 @@ export function IncomeStep({
                           <TableRow>
                             <TableCell
                               colSpan={6}
-                              className="h-24 text-center text-muted-foreground italic text-xs"
+                              className="h-24 text-center"
                             >
-                              ยังไม่มีรายการจาก Statement
+                              <div className="flex flex-col items-center gap-2">
+                                <span className="text-muted-foreground italic text-xs">ยังไม่มีรายการจาก Statement</span>
+                                {seStatementDialogContext && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleAddManualSEStatementItem(seStatementDialogContext.occId)
+                                    }
+                                    className="h-8 text-xs font-medium"
+                                  >
+                                    <Plus className="w-3 h-3 mr-1" /> เพิ่มรายการ
+                                  </Button>
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
                         ) : (
-                          items.map((item, absoluteIdx) => {
+                          paginatedItems.map((item, idx) => {
+                            const absoluteIdx = (seStatementPage - 1) * SE_ITEMS_PER_PAGE + idx;
                             return (
                               <TableRow
                                 key={absoluteIdx}
@@ -11395,7 +11535,6 @@ export function IncomeStep({
                                   )}
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                  {item.isManual ? (
                                     <Input
                                       type="datetime-local"
                                       value={item.dateTime || ""}
@@ -11408,23 +11547,10 @@ export function IncomeStep({
                                         )
                                       }
                                       onClick={(e) => e.stopPropagation()}
-                                      className="h-8 text-xs bg-white font-sans"
+                                      className="h-8 !text-xs bg-white font-sans"
                                     />
-                                  ) : (
-                                    <span
-                                      className={cn(
-                                        "text-xs leading-tight font-sans",
-                                        item.included
-                                          ? "text-gray-600"
-                                          : "text-gray-400 line-through",
-                                      )}
-                                    >
-                                      {item.dateTime || "-"}
-                                    </span>
-                                  )}
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                  {item.isManual ? (
                                     <Input
                                       value={item.code}
                                       onChange={(e) =>
@@ -11436,24 +11562,11 @@ export function IncomeStep({
                                         )
                                       }
                                       onClick={(e) => e.stopPropagation()}
-                                      className="h-8 text-xs bg-white min-w-[60px]"
+                                      className="h-8 !text-xs bg-white min-w-[60px]"
                                       placeholder="รหัส"
                                     />
-                                  ) : (
-                                    <span
-                                      className={cn(
-                                        "text-sm font-mono",
-                                        item.included
-                                          ? "text-gray-700"
-                                          : "text-gray-400 line-through",
-                                      )}
-                                    >
-                                      {item.code || "-"}
-                                    </span>
-                                  )}
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                  {item.isManual ? (
                                     <Textarea
                                       value={item.description}
                                       onChange={(e) =>
@@ -11466,7 +11579,7 @@ export function IncomeStep({
                                       }
                                       onClick={(e) => e.stopPropagation()}
                                       rows={1}
-                                      className="min-h-[32px] text-xs bg-white resize-none overflow-hidden py-2"
+                                      className="min-h-[32px] !text-xs bg-white resize-none overflow-hidden py-2"
                                       placeholder="รายละเอียด"
                                       onInput={(e) => {
                                         const t =
@@ -11475,21 +11588,8 @@ export function IncomeStep({
                                         t.style.height = t.scrollHeight + "px";
                                       }}
                                     />
-                                  ) : (
-                                    <span
-                                      className={cn(
-                                        "text-xs",
-                                        item.included
-                                          ? "text-gray-700"
-                                          : "text-gray-400 line-through",
-                                      )}
-                                    >
-                                      {item.description || "-"}
-                                    </span>
-                                  )}
                                 </TableCell>
                                 <TableCell className="py-2.5 text-right w-[20%]">
-                                  {item.isManual ? (
                                     <div
                                       className="flex items-center gap-1.5 justify-end"
                                       onClick={(e) => e.stopPropagation()}
@@ -11535,49 +11635,27 @@ export function IncomeStep({
                                         </button>
                                       </div>
                                       <Input
-                                        type="number"
-                                        value={item.amount}
+                                        type="text"
+                                        value={formatNumberWithCommas(item.amount)}
                                         onChange={(e) =>
                                           handleEditManualSEStatementItem(
                                             seStatementDialogContext.occId,
                                             absoluteIdx,
                                             "amount",
-                                            e.target.value,
+                                            e.target.value.replace(/,/g, ""),
                                           )
                                         }
-                                        className="h-8 text-xs text-right bg-white min-w-[70px] w-full"
+                                        className="h-8 !text-xs text-right bg-white min-w-[70px] w-full"
                                         placeholder="0.00"
                                       />
                                     </div>
-                                  ) : (
-                                    <span
-                                      className={cn(
-                                        "text-sm font-mono flex flex-row items-center justify-end gap-1.5",
-                                        item.included
-                                          ? item.type === "in"
-                                            ? "text-emerald-600 font-semibold"
-                                            : item.type === "out"
-                                              ? "text-rose-600 font-semibold"
-                                              : "text-gray-700"
-                                          : "text-gray-400 line-through",
-                                      )}
-                                    >
-                                      {item.included && item.type === "in" && (
-                                        <Plus className="w-3 h-3" />
-                                      )}
-                                      {item.included && item.type === "out" && (
-                                        <Minus className="w-3 h-3" />
-                                      )}
-                                      {formatNumberWithCommas(item.amount ?? 0)}
-                                    </span>
-                                  )}
                                 </TableCell>
                                 <TableCell className="py-2.5">
                                   <div className="flex items-center gap-2 justify-between">
                                     {!item.included ? (
                                       <div
                                         onClick={(e) => e.stopPropagation()}
-                                        className="flex-1"
+                                        className="flex-1 flex flex-col gap-1.5"
                                       >
                                         <Select
                                           value={item.excludeReason || ""}
@@ -11606,14 +11684,51 @@ export function IncomeStep({
                                             )}
                                           </SelectContent>
                                         </Select>
+                                        <Textarea
+                                          value={(item as any).note || ""}
+                                          onChange={(e) =>
+                                            handleUpdateSEStatementNote(
+                                              seStatementDialogContext.occId,
+                                              absoluteIdx,
+                                              e.target.value,
+                                            )
+                                          }
+                                          rows={1}
+                                          className="min-h-[32px] !text-[11px] bg-white resize-none overflow-hidden py-2"
+                                          placeholder="หมายเหตุ..."
+                                          onInput={(e) => {
+                                            const t = e.target as HTMLTextAreaElement;
+                                            t.style.height = "auto";
+                                            t.style.height = t.scrollHeight + "px";
+                                          }}
+                                        />
                                       </div>
                                     ) : (
-                                      <span className="text-xs text-muted-foreground w-full text-left pl-2">
-                                        —
-                                      </span>
+                                      <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="flex-1"
+                                      >
+                                        <Textarea
+                                          value={(item as any).note || ""}
+                                          onChange={(e) =>
+                                            handleUpdateSEStatementNote(
+                                              seStatementDialogContext.occId,
+                                              absoluteIdx,
+                                              e.target.value,
+                                            )
+                                          }
+                                          rows={1}
+                                          className="min-h-[32px] !text-[11px] bg-white resize-none overflow-hidden py-2"
+                                          placeholder="หมายเหตุ..."
+                                          onInput={(e) => {
+                                            const t = e.target as HTMLTextAreaElement;
+                                            t.style.height = "auto";
+                                            t.style.height = t.scrollHeight + "px";
+                                          }}
+                                        />
+                                      </div>
                                     )}
 
-                                    {item.isManual && (
                                       <Button
                                         variant="ghost"
                                         size="sm"
@@ -11628,7 +11743,21 @@ export function IncomeStep({
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </Button>
-                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleAddManualSEStatementItem(
+                                          seStatementDialogContext.occId,
+                                          absoluteIdx,
+                                        );
+                                      }}
+                                      className="h-7 w-7 p-0 shrink-0 rounded-full text-gray-300 hover:text-gray-600 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      title="แทรกรายการด้านล่าง"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </Button>
                                   </div>
                                 </TableCell>
                               </TableRow>
@@ -11673,12 +11802,12 @@ export function IncomeStep({
               <Button
                 variant="outline"
                 onClick={() => setSeStatementDialogOpen(false)}
-                className="h-9 px-4 rounded-lg text-sm text-gray-600 border-gray-200 hover:bg-gray-50"
+                className="h-9 px-4 rounded-lg text-sm text-gray-600 border-gray-200 hover:bg-gray-50 min-w-[100px]"
               >
                 ยกเลิก
               </Button>
               <Button
-                className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white text-sm"
+                className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white text-sm min-w-[100px]"
                 onClick={() => setSeStatementDialogOpen(false)}
               >
                 ยืนยัน

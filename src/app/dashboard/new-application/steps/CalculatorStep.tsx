@@ -478,9 +478,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Removed as per request */}
 
-            <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto w-full">
-                {/* Left Column - Input Sections */}
-                <div className="flex-1 space-y-6 min-w-0">
+            <div className="flex flex-col gap-8 mx-auto w-full pb-8">
+                {/* Main Column - Input Sections */}
+                <div className="w-full space-y-6">
 
                     {/* Product Selection */}
                     {!(readOnlyProduct || (formData && formData.collateralType)) && (
@@ -833,7 +833,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="none">ไม่มี</SelectItem>
-                                                    {Array.from(new Set(INSURANCE_OPTIONS.filter(opt => opt.type === 'car').map(opt => opt.company))).map(company => (
+                                                    {Array.from(new Set(INSURANCE_OPTIONS.filter(opt => opt.type === 'car' && opt.company).map(opt => opt.company as string))).map(company => (
                                                         <SelectItem key={company} value={company}>{company}</SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -1033,6 +1033,131 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* Consolidated Receipt Card Moved Here */}
+                    {(() => {
+                        const netAmount = amount + (includeInsuranceInLoan ? calculateTotalInsurancePremium() : 0);
+                        const hasInsurance = includeInsuranceInLoan && calculateTotalInsurancePremium() > 0;
+                        const hasPaInsurance = paInsuranceEnabled;
+                        const isFreebieEligible = ['car', 'moto', 'truck', 'agri'].includes(selectedProduct);
+                        const income = Number(formData?.income) || 0;
+                        const debt = Number(formData?.monthlyDebt) || 0;
+                        const netIncome = Math.max(0, income - debt);
+                        const payment = Math.ceil(monthlyPayment);
+                        const dsrPercentage = netIncome > 0 ? Math.min(100, (payment / netIncome) * 100) : 100;
+                        const isSafe = dsrPercentage <= 60;
+
+                        return (
+                            <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500 bg-white">
+                                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                                        สรุปยอดสินเชื่อ
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6 flex flex-col space-y-5">
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* ── Card 1: Loan Info + Insurance ── */}
+                                    <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
+                                        <div className="mb-2">
+                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
+                                                {displayLoanCode}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
+                                        <div className="space-y-2.5">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-500">วงเงิน</span>
+                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                            </div>
+                                        </div>
+                                        {(hasInsurance || hasPaInsurance) && (
+                                            <>
+                                                <div className="w-full h-px bg-gray-100 my-4"></div>
+                                                <div className="space-y-4">
+                                                    {selectedInsurances.map(id => {
+                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                                        if (!option) return null;
+                                                        return (
+                                                            <div key={id}>
+                                                                <div className="flex items-center gap-2.5 mb-3">
+                                                                    {option.logo ? (
+                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
+                                                                    ) : (
+                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
+                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                                                        </div>
+                                                                    )}
+                                                                    <div>
+                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
+                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="space-y-2.5">
+                                                                    <div className="flex justify-between items-center text-sm">
+                                                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {hasPaInsurance && (
+                                                        <div>
+                                                            <div className="flex items-center gap-2.5 mb-3">
+                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                                <div>
+                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
+                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2.5">
+                                                                <div className="flex justify-between items-center text-sm">
+                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* ── Card 2: Summary ── */}
+                                    <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
+                                        <div className="space-y-2.5">
+                                            <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
+                                                <div>
+                                                    <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
+                                                    {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
+                                                    <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="border-t border-gray-100 pt-5">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-gray-500 text-sm font-semibold">
+                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
+                                                    </p>
+                                                </div>
+                                                <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
+                                                    {localPaymentMethod === 'bullet'
+                                                        ? (amount + totalInterest).toLocaleString()
+                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })()}
 
                     {/* Insurance Dialog */}
                     <Dialog open={isInsuranceDialogOpen} onOpenChange={(open) => {
@@ -1504,7 +1629,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </div>
 
                             {/* Bank Account Details */}
-                            <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Select Bank */}
                                 <div className="space-y-1.5">
                                     <Label className="text-sm">ธนาคาร <span className="text-red-500">*</span></Label>
@@ -1655,141 +1780,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     </div>
                 </div>
 
-                {/* Right Column - Loan Breakdown */}
-                <div className="w-full lg:w-[380px] shrink-0">
-                    <div className="lg:sticky lg:top-6">
-                        {/* Consolidated Receipt Card */}
-                        {(() => {
-                            const netAmount = amount + (includeInsuranceInLoan ? calculateTotalInsurancePremium() : 0);
-                            const hasInsurance = includeInsuranceInLoan && calculateTotalInsurancePremium() > 0;
-                            const hasPaInsurance = paInsuranceEnabled;
-                            const isFreebieEligible = ['car', 'moto', 'truck', 'agri'].includes(selectedProduct);
-                            const income = Number(formData?.income) || 0;
-                            const debt = Number(formData?.monthlyDebt) || 0;
-                            const netIncome = Math.max(0, income - debt);
-                            const payment = Math.ceil(monthlyPayment);
-                            const dsrPercentage = netIncome > 0 ? Math.min(100, (payment / netIncome) * 100) : 100;
-                            const isSafe = dsrPercentage <= 60;
 
-                            return (
-                                <div className="rounded-2xl bg-gray-50/80 p-5 flex flex-col space-y-4">
-                                    {/* Header */}
-                                    <div className="flex items-center justify-between pb-1">
-                                        <p className="text-lg font-bold text-foreground">สรุปสินเชื่อ</p>
-                                    </div>
-
-                                    {/* ── Card 1: Loan Info + Insurance (merged) ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                        {/* Product Tag */}
-                                        <div className="mb-2">
-                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
-                                                {displayLoanCode}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
-
-
-
-
-                                        {/* Loan Stats */}
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500">วงเงิน</span>
-                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
-                                            </div>
-
-                                        </div>
-
-                                        {/* Insurance (merged into same card) */}
-                                        {(hasInsurance || hasPaInsurance) && (
-                                            <>
-                                                <div className="w-full h-px bg-gray-100 my-4"></div>
-                                                <div className="space-y-4">
-                                                    {selectedInsurances.map(id => {
-                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                                        if (!option) return null;
-                                                        return (
-                                                            <div key={id}>
-                                                                <div className="flex items-center gap-2.5 mb-3">
-                                                                    {option.logo ? (
-                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
-                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
-                                                                        </div>
-                                                                    )}
-                                                                    <div>
-                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
-                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="space-y-2.5">
-
-                                                                    <div className="flex justify-between items-center text-sm">
-                                                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-
-                                                    {/* PA Insurance in summary */}
-                                                    {hasPaInsurance && (
-                                                        <div>
-                                                            <div className="flex items-center gap-2.5 mb-3">
-                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                <div>
-                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
-                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2.5">
-                                                                <div className="flex justify-between items-center text-sm">
-                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-
-                                    {/* ── Card 2: Summary ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                        <div className="space-y-2.5 mb-3">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <span className="font-bold text-foreground">วงเงินสุทธิ</span>
-                                                    {hasInsurance && <p className="text-[11px] text-gray-400 mt-0.5">*รวมสินเชื่อและประกัน</p>}
-                                                </div>
-                                                <span className="font-black text-chaiyo-blue text-xl">{netAmount.toLocaleString()} <span className="text-xs font-bold text-chaiyo-blue/60">บาท</span></span>
-                                            </div>
-
-                                        </div>
-                                        <div className="border-t border-gray-100 pt-3">
-                                            <div className="flex justify-between items-end">
-                                                <div>
-                                                    <p className="text-gray-500  text-sm">
-                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
-                                                    </p>
-                                                </div>
-                                                <span className="text-foreground text-sm">
-                                                    {localPaymentMethod === 'bullet'
-                                                        ? (amount + totalInterest).toLocaleString()
-                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                    </div>
-                </div>
             </div>
         </div >
     );
