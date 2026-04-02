@@ -375,6 +375,14 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         return () => clearInterval(interval);
     }, [timerActive, timeLeft]);
 
+    // Reset timer when user leaves the page
+    useEffect(() => {
+        return () => {
+            setTimerActive(false);
+            setTimeLeft(60 * 60);
+        };
+    }, []);
+
     const formatTimer = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
