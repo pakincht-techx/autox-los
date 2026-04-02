@@ -5,7 +5,6 @@ import { CollateralStep } from "../../steps/CollateralStepNew";
 import { useApplication } from "../../context/ApplicationContext";
 
 export default function CollateralInfoPage() {
-    const router = useRouter();
     const {
         formData,
         setFormData,
