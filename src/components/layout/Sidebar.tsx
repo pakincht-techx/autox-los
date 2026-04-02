@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { useSidebar } from "@/components/layout/SidebarContext";
+import { getRoleInfo, getRoleDisplayName } from "@/lib/roleConfig";
 
 import {
     Dialog,
@@ -38,13 +39,6 @@ import {
 import { Label } from "@/components/ui/Label";
 
 type UserRole = 'Maker' | 'Checker' | 'Approver';
-
-const mockUser = {
-    name: 'สมหญิง จริงใจ',
-    role: 'Maker' as UserRole,
-    position: 'เจ้าหน้าที่สินเชื่อสาขา',
-    branch: 'สาขาลาดพร้าว'
-};
 
 const branchInfo = {
     code: '108',
@@ -94,6 +88,16 @@ export function Sidebar() {
             setShowAnnouncement(true);
         }
     }, []);
+
+    // Get role-based user info
+    const roleInfo = getRoleInfo(devRole);
+    const mockUser = {
+        name: roleInfo.displayName,
+        role: 'Maker' as UserRole,
+        position: roleInfo.position,
+        branch: 'สาขาลาดพร้าว',
+        initials: roleInfo.initials,
+    };
 
     const filteredGroups = navigationGroups.map(group => ({
         ...group,
@@ -160,13 +164,13 @@ export function Sidebar() {
                         isCollapsed && "justify-center p-1"
                     )}>
                     <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                        JS
+                        {mockUser.initials}
                     </div>
                     {!isCollapsed && (
                         <>
                             <div className="flex-1 overflow-hidden text-left">
                                 <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
-                                <p className="text-[10px] text-white/60 truncate">{devRole === 'branch-staff' ? 'พนักงานสาขา' : 'ทีม Legal'}</p>
+                                <p className="text-[10px] text-white/60 truncate">{getRoleDisplayName(devRole)}</p>
                             </div>
                         </>
                     )}
@@ -281,16 +285,16 @@ export function Sidebar() {
                     </DialogHeader>
                     <div className="grid gap-4 py-4 px-6">
                         <div className="grid grid-cols-5 items-center gap-4">
-                            <Label className="col-span-2 text-left text-muted-foreground">พนักงาน</Label>
-                            <div className="col-span-3 font-medium">1234567</div>
+                            <Label className="col-span-2 text-left text-muted-foreground">บทบาท</Label>
+                            <div className="col-span-3 font-medium">{getRoleDisplayName(devRole)}</div>
                         </div>
                         <div className="grid grid-cols-5 items-center gap-4">
                             <Label className="col-span-2 text-left text-muted-foreground">ชื่อ-สกุล</Label>
-                            <div className="col-span-3 font-medium">นางสาวสมหญิง จริงใจ</div>
+                            <div className="col-span-3 font-medium">{mockUser.name}</div>
                         </div>
                         <div className="grid grid-cols-5 items-center gap-4">
                             <Label className="col-span-2 text-left text-muted-foreground">ตำแหน่ง</Label>
-                            <div className="col-span-3 font-medium">เจ้าหน้าที่สินเชื่อสาขา</div>
+                            <div className="col-span-3 font-medium">{mockUser.position}</div>
                         </div>
                         <div className="border-t border-border-subtle my-2" />
                         <div className="grid grid-cols-5 items-center gap-4">
