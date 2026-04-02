@@ -12,8 +12,8 @@ export default function Home() {
   // Read initial value from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem('devRole');
-    if (stored === 'branch-staff' || stored === 'legal-team') {
-      setDevRole(stored);
+    if (stored === 'branch-staff' || stored === 'legal-team' || stored === 'district-checker' || stored === 'rcco-checker' || stored === 'rcco-approver' || stored === 'credit-committee') {
+      setDevRole(stored as DevRole);
     }
   }, []);
 
@@ -71,6 +71,10 @@ export default function Home() {
             >
               <option value="branch-staff" className="text-gray-900">พนักงานสาขา</option>
               <option value="legal-team" className="text-gray-900">ทีม Legal</option>
+              <option value="district-checker" className="text-gray-900">เขต/ภาค Checker</option>
+              <option value="rcco-checker" className="text-gray-900">RCCO Checker</option>
+              <option value="rcco-approver" className="text-gray-900">RCCO Approver</option>
+              <option value="credit-committee" className="text-gray-900">คณะอนุมัติสินเชื่อ</option>
             </select>
           </div>
 

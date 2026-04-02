@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSidebar } from "@/components/layout/SidebarContext";
 import dynamic from 'next/dynamic';
 import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard, ImagePlus, FileText, CheckCircle2, Plus, Trash2, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -54,6 +55,9 @@ interface CalculatorStepProps {
 }
 
 export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavigation, readOnlyProduct, paymentMethod = 'installment' }: CalculatorStepProps) {
+    const { devRole } = useSidebar();
+    const isRCCOChecker = devRole === 'rcco-checker';
+
     const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 600000);
     const SYSTEM_MAX_AMOUNT = 700000;
     const [interestRateInput, setInterestRateInput] = useState<string>("23.99");
@@ -61,7 +65,15 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
     const [totalInterest, setTotalInterest] = useState<number>(0);
     const [selectedProduct, setSelectedProduct] = useState<string>("car");
-    const [bookBankFile, setBookBankFile] = useState<File | null>(null);
+    // Initialize with mock data for RCCO-Checker
+    const [bookBankFile, setBookBankFile] = useState<File | null>(() => {
+        if (isRCCOChecker) {
+            const mockFile = new File(['mock bank book content'], 'สมุดบัญชีธนาคาร.pdf', { type: 'application/pdf' });
+            Object.defineProperty(mockFile, 'lastModifiedDate', { value: new Date('2026-04-01') });
+            return mockFile;
+        }
+        return null;
+    });
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     // Local Payment Method State
@@ -393,6 +405,18 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
             });
         }
     }, [amount, months, monthlyPayment, totalInterest, selectedProduct, hideNavigation, readOnlyProduct, localPaymentMethod, selectedInsurances, includeInsuranceInLoan, paInsuranceEnabled, setFormData]);
+
+    // Populate mock data for RCCO-Checker
+    useEffect(() => {
+        if (isRCCOChecker && setFormData) {
+            setFormData((prev: any) => ({
+                ...prev,
+                bankName: prev?.bankName || 'KBANK',
+                bankAccountNumber: prev?.bankAccountNumber || '123-4-56789-0',
+                bankAccountName: prev?.bankAccountName || 'นายสมชาย ใจดี',
+            }));
+        }
+    }, [isRCCOChecker, setFormData]);
 
     const calculateLoan = () => {
         if (amount <= 0 || months <= 0) {
@@ -803,12 +827,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 <div className="flex items-center justify-between">
                                     <Label className="text-md font-bold">ประกันภัยรถยนต์/ประกันรถมอเตอไซค์</Label>
                                     <RadioGroup
+                                        disabled={isRCCOChecker}
                                         value={carInsuranceEnabled ? 'yes' : 'no'}
                                         onValueChange={(val) => {
                                             setCarInsuranceEnabled(val === 'yes');
                                             if (val === 'no') setSelectedInsurances([]);
                                         }}
-                                        className="flex items-center gap-4"
+                                        className={cn("flex items-center gap-4", isRCCOChecker && "opacity-60 cursor-not-allowed")}
                                     >
                                         <div className="flex items-center gap-2">
                                             <RadioGroupItem value="yes" id="car-insurance-yes" />
@@ -874,6 +899,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                         ดูใบเสนอราคา
                                                                     </Button>
                                                                     <Button
+                                                                        disabled={isRCCOChecker}
                                                                         variant="outline"
                                                                         size="sm"
                                                                         className="h-8 text-xs"
@@ -913,6 +939,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 <p className="text-sm text-gray-500 font-medium">ยังไม่มีประกันเพิ่มเติม</p>
                                                 <p className="text-xs text-gray-400 mt-1">คลิก "เลือกแผนประกัน" เพื่อเลือกความคุ้มครอง</p>
                                                 <Button
+                                                    disabled={isRCCOChecker}
                                                     size="sm"
                                                     className="h-8 text-xs mt-3"
                                                     onClick={() => {
@@ -936,9 +963,10 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     <div className="flex items-center justify-between">
                                         <Label className="text-md font-bold">ประกันคุ้มครองวงเงินสินเชื่อ</Label>
                                         <RadioGroup
+                                            disabled={isRCCOChecker}
                                             value={paInsuranceEnabled ? 'yes' : 'no'}
                                             onValueChange={(val) => setPaInsuranceEnabled(val === 'yes')}
-                                            className="flex items-center gap-4"
+                                            className={cn("flex items-center gap-4", isRCCOChecker && "opacity-60 cursor-not-allowed")}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <RadioGroupItem value="yes" id="pa-insurance-yes" />
@@ -1595,6 +1623,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     <div className="relative inline-block">
                                                         <Button
                                                             type="button"
+                                                            disabled={isRCCOChecker}
                                                             variant={bookBankFile ? "ghost" : "outline"}
                                                             size="sm"
                                                             onClick={() => {
