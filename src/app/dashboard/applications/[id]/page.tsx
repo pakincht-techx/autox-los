@@ -451,14 +451,33 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                             {devRole === 'rcco-checker' && viewMode === 'approver' && (
-                                <Button
-                                    variant="default"
-                                    onClick={handleClaimTask}
-                                    disabled={timerActive}
-                                    className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                                >
-                                    <Send className="w-4 h-4 mr-2" /> เคลมใบงาน
-                                </Button>
+                                <>
+                                    {!timerActive && (
+                                        <Button
+                                            variant="default"
+                                            onClick={handleClaimTask}
+                                            className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                                        >
+                                            <Send className="w-4 h-4 mr-2" /> เคลมใบงาน
+                                        </Button>
+                                    )}
+                                    {timerActive && (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+                                            >
+                                                ส่งตรวจสอบ Fraud
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                                            >
+                                                ยืนยันการตรวจสอบ
+                                            </Button>
+                                        </>
+                                    )}
+                                </>
                             )}
                             {canEdit && (
                                 <Button
