@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { ClipboardCheck, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -22,6 +22,7 @@ interface PolicyRow {
     customerInfo: string | string[];
     result: PolicyResult;
     badge?: string;
+    waiverAuthority?: string;
 }
 
 interface PolicySection {
@@ -45,6 +46,7 @@ const BORROWER_ROWS: PolicyRow[] = [
         policy: "อายุผู้กู้",
         customerInfo: "22 ปี",
         result: "ไม่ผ่าน",
+        waiverAuthority: "รองประธานเจ้าหน้าที่บริหารสายงานอนุมัติสินเชื่อ หรือ ผู้อำนวยการฝ่ายปฏิบัติการสินเชื่อรายย่อย",
     },
     {
         id: "borrower_age_with_term",
@@ -57,6 +59,7 @@ const BORROWER_ROWS: PolicyRow[] = [
         policy: "อาชีพ",
         customerInfo: ["อาชีพหลัก: นักการเมือง-กำนัน", "อาชีพเสริม: เกษตรกร"],
         result: "ไม่ผ่าน",
+        waiverAuthority: "ประธานเจ้าหน้าที่บริหารกลุ่มงานบริหารความเสี่ยง และ ประธานเจ้าหน้าที่บริหารกลุ่มงานผลิตภัณฑ์",
     },
     {
         id: "borrower_income",
@@ -189,6 +192,7 @@ const GUARANTORS: Guarantor[] = [
                 policy: "IIR ผู้ค้ำประกัน",
                 customerInfo: "1.8 เท่า",
                 result: "ไม่ผ่าน",
+                waiverAuthority: "รองประธานเจ้าหน้าที่บริหารสายงานอนุมัติสินเชื่อ หรือ ผู้อำนวยการฝ่ายปฏิบัติการสินเชื่อรายย่อย",
             },
             {
                 id: "g2_dsr",
@@ -405,7 +409,6 @@ export function PolicyChecklist() {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                                <ClipboardCheck className="w-5 h-5 text-chaiyo-blue" />
                                 Policy Checklist
                             </CardTitle>
                             <Badge variant={overallVariant}>
@@ -413,7 +416,6 @@ export function PolicyChecklist() {
                             </Badge>
                         </div>
                         <div className="flex items-center gap-2">
-                            {hasNotPassed && (
                                 <Button 
                                     size="sm" 
                                     className={cn(
@@ -429,7 +431,6 @@ export function PolicyChecklist() {
                                 >
                                     {waiverSubmitted ? "ดูเหตุผลการขออนุโลม" : "ขออนุโลม"}
                                 </Button>
-                            )}
                             <ChevronDown className={cn("w-5 h-5 text-gray-400 transition-transform duration-200", isOpen && "rotate-180")} />
                         </div>
                     </div>
@@ -488,7 +489,7 @@ export function PolicyChecklist() {
             </Card>
 
             <Dialog open={isFailedDialogOpen} onOpenChange={setIsFailedDialogOpen}>
-                <DialogContent className="sm:max-w-[700px]">
+                <DialogContent size="lg">
                     <DialogHeader>
                         <DialogTitle className="text-gray-900">ขออนุโลม</DialogTitle>
                         <DialogDescription>กรุณาระบุเหตุผลประกอบการพิจารณาให้สำนักงานใหญ่ เพื่ออธิบายว่าถึงแม้ลูกค้าไม่ผ่านเกณฑ์ที่กำหนด แต่มีเหตุผลสมควรที่จะอนุมัติได้</DialogDescription>
@@ -500,9 +501,10 @@ export function PolicyChecklist() {
                                 <Table>
                                     <TableHeader className="bg-gray-50/50">
                                         <TableRow>
-                                            <TableHead className="w-[40%] text-xs">รายการ</TableHead>
-                                            <TableHead className="w-[40%] text-xs">ข้อมูลลูกค้า</TableHead>
-                                            <TableHead className="w-[20%] text-xs text-center">สถานะ</TableHead>
+                                            <TableHead className="w-[25%] text-xs">รายการ</TableHead>
+                                            <TableHead className="w-[25%] text-xs">ข้อมูลลูกค้า</TableHead>
+                                            <TableHead className="w-[35%] text-xs">อำนาจอนุโลม</TableHead>
+                                            <TableHead className="w-[15%] text-xs text-center">สถานะ</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -511,6 +513,9 @@ export function PolicyChecklist() {
                                                 <TableCell className="text-sm font-medium">{row.policy}</TableCell>
                                                 <TableCell className="text-sm text-gray-600">
                                                     {Array.isArray(row.customerInfo) ? row.customerInfo.join(', ') : row.customerInfo}
+                                                </TableCell>
+                                                <TableCell className="text-sm text-gray-600">
+                                                    {row.waiverAuthority || '-'}
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     <Badge variant="danger">ไม่ผ่าน</Badge>

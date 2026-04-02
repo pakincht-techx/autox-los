@@ -30,7 +30,7 @@ export const SensitiveDataConsentStep = ({ onAccept }: SensitiveDataConsentStepP
     const [isConsentAccepted, setIsConsentAccepted] = useState(false);
     const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
     const [showStaffBanner, setShowStaffBanner] = useState(true);
-    const { setHideSaveDraftButton } = useSidebar();
+    const { } = useSidebar();
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -47,13 +47,10 @@ export const SensitiveDataConsentStep = ({ onAccept }: SensitiveDataConsentStepP
         checkScrollable();
         window.addEventListener('resize', checkScrollable);
         
-        setHideSaveDraftButton(true);
-
         return () => {
             window.removeEventListener('resize', checkScrollable);
-            setHideSaveDraftButton(false);
         };
-    }, [consentStep, setHideSaveDraftButton]);
+    }, [consentStep]);
 
     const handleScroll = () => {
         if (scrollRef.current) {

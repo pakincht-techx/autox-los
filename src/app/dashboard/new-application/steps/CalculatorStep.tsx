@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSidebar } from "@/components/layout/SidebarContext";
-import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard, ImagePlus, FileText, CheckCircle2, Plus, Trash2 } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { Calculator, Banknote, Calendar, ChevronRight, ChevronLeft, Car, Bike, Truck, Sprout, MapIcon, Tractor, AlertCircle, ShieldCheck, Info, X, Target, Wallet, Gift, Users, CreditCard, ImagePlus, FileText, CheckCircle2, Plus, Trash2, Printer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +22,11 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { PolicyChecklist } from "@/components/calculator/PolicyChecklist";
 import { DatePickerBE } from "@/components/ui/DatePickerBE";
+
+const PdfViewer = dynamic(
+    () => import('@/components/ui/PdfViewer').then((mod) => mod.PdfViewer),
+    { ssr: false }
+);
 
 const THAI_BANKS = [
     { label: "ธนาคารกสิกรไทย", value: "KBANK", logo: "/bank-logo/Type=KBank.svg" },
@@ -131,6 +137,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     // Dialog State
     const [isInsuranceDialogOpen, setIsInsuranceDialogOpen] = useState(false);
     const [draftInsurances, setDraftInsurances] = useState<string[]>([]);
+    const [detailInsuranceId, setDetailInsuranceId] = useState<string | null>(null);
+    const [currentInsuranceCompany, setCurrentInsuranceCompany] = useState<string>('none');
+    const [isQuotationDialogOpen, setIsQuotationDialogOpen] = useState(false);
 
     // Filter State
     const [filterTier, setFilterTier] = useState<string[]>([]);
@@ -147,12 +156,23 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         land: 0.2399,
     };
 
+    interface InsuranceDetail {
+        vehicleType: string;
+        deductible: string;
+        specialService: string;
+        installment10: { months1to9: number; month10: number };
+        installment12: { months1to11: number; month12: number };
+        vehicleCoverage: { damage: number; fireTheft: number; flood: number; theft: string; naturalDisaster: string };
+        thirdPartyCoverage: { lifePerPerson: number; lifePerIncident: number; propertyPerIncident: number };
+        endorsementCoverage: { accidentPerPerson: string; medicalPerPerson: string; bailPerIncident: number; seatsCovered: number };
+    }
+
     interface InsuranceOption {
         id: string;
         label: string;
         price: number;
-        type: 'car' | 'pa'; // Car Insurance or Personal Accident
-        requiredProduct?: string[]; // If specified, only available for these products
+        type: 'car' | 'pa';
+        requiredProduct?: string[];
         company?: string;
         logo?: string;
         coverage?: number;
@@ -180,12 +200,93 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
     const INSURANCE_OPTIONS = COMPLEX_INSURANCE_OPTIONS;
 
-    // Derived filtered options
+    // Mock detail data for each insurance option
+    const INSURANCE_DETAIL_MAP: Record<string, InsuranceDetail> = {
+        car_viriya_1_center: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 2200, month10: 2200 }, installment12: { months1to11: 1834, month12: 1826 },
+            vehicleCoverage: { damage: 550000, fireTheft: 550000, flood: 550000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_viriya_1_garage: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1800, month10: 1800 }, installment12: { months1to11: 1500, month12: 1500 },
+            vehicleCoverage: { damage: 500000, fireTheft: 500000, flood: 500000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_viriya_2p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1500, month10: 1500 }, installment12: { months1to11: 1250, month12: 1250 },
+            vehicleCoverage: { damage: 300000, fireTheft: 300000, flood: 300000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_viriya_3p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 850, month10: 850 }, installment12: { months1to11: 709, month12: 701 },
+            vehicleCoverage: { damage: 100000, fireTheft: 100000, flood: 100000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_bangkok_1_center: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 2100, month10: 2100 }, installment12: { months1to11: 1750, month12: 1750 },
+            vehicleCoverage: { damage: 520000, fireTheft: 520000, flood: 520000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_bangkok_1_garage: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1750, month10: 1750 }, installment12: { months1to11: 1459, month12: 1451 },
+            vehicleCoverage: { damage: 480000, fireTheft: 480000, flood: 480000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_bangkok_2p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1400, month10: 1400 }, installment12: { months1to11: 1167, month12: 1163 },
+            vehicleCoverage: { damage: 250000, fireTheft: 250000, flood: 250000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_bangkok_3p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 900, month10: 900 }, installment12: { months1to11: 750, month12: 750 },
+            vehicleCoverage: { damage: 120000, fireTheft: 120000, flood: 120000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_muangthai_1: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1950, month10: 1950 }, installment12: { months1to11: 1625, month12: 1625 },
+            vehicleCoverage: { damage: 500000, fireTheft: 500000, flood: 500000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_muangthai_2p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 1250, month10: 1250 }, installment12: { months1to11: 1042, month12: 1038 },
+            vehicleCoverage: { damage: 200000, fireTheft: 200000, flood: 200000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+        car_muangthai_3p: {
+            vehicleType: 'รถยนต์ / กระบะ 4 ประตู (รย.1)', deductible: 'ไม่มี', specialService: 'บริการช่วยเหลือฉุกเฉินบนท้องถนน สดรด 24 ชั่วโมง',
+            installment10: { months1to9: 780, month10: 780 }, installment12: { months1to11: 650, month12: 650 },
+            vehicleCoverage: { damage: 80000, fireTheft: 80000, flood: 80000, theft: 'ไม่คุ้มครอง', naturalDisaster: 'คุ้มครอง' },
+            thirdPartyCoverage: { lifePerPerson: 500000, lifePerIncident: 20000000, propertyPerIncident: 5000000 },
+            endorsementCoverage: { accidentPerPerson: '200,000 x 7 คน', medicalPerPerson: '200,000 x 7 คน', bailPerIncident: 300000, seatsCovered: 7 },
+        },
+    };
+
     const filteredCarInsurances = COMPLEX_INSURANCE_OPTIONS.filter(opt => {
         if (opt.type !== 'car') return false;
         if (filterTier.length > 0 && !filterTier.includes(opt.tier || '')) return false;
         if (filterRepairType.length > 0 && !filterRepairType.includes(opt.repairType || '')) return false;
         if (filterCompany.length > 0 && !filterCompany.includes(opt.company || '')) return false;
+        if (currentInsuranceCompany !== 'none' && opt.tier === '1' && opt.company === currentInsuranceCompany) return false;
         return true;
     });
 
@@ -410,9 +511,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header Removed as per request */}
 
-            <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto w-full">
-                {/* Left Column - Input Sections */}
-                <div className="flex-1 space-y-6 min-w-0">
+            <div className="flex flex-col gap-8 mx-auto w-full pb-8">
+                {/* Main Column - Input Sections */}
+                <div className="w-full space-y-6">
 
                     {/* Product Selection */}
                     {!(readOnlyProduct || (formData && formData.collateralType)) && (
@@ -925,6 +1026,27 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </div>
 
                                 {carInsuranceEnabled && (
+                                    <div className="pt-2 pb-4 border-b border-gray-100">
+                                        <div className="flex flex-col gap-2 max-w-sm">
+                                            <Label className="text-sm font-semibold text-gray-700">
+                                                บริษัทประกันปัจจุบัน<span className="text-red-500 ml-0.5">*</span>
+                                            </Label>
+                                            <Select value={currentInsuranceCompany} onValueChange={setCurrentInsuranceCompany}>
+                                                <SelectTrigger className="h-10">
+                                                    <SelectValue placeholder="เลือกบริษัทประกันปัจจุบัน" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">ไม่มี</SelectItem>
+                                                    {Array.from(new Set(INSURANCE_OPTIONS.filter(opt => opt.type === 'car' && opt.company).map(opt => opt.company as string))).map(company => (
+                                                        <SelectItem key={company} value={company}>{company}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {carInsuranceEnabled && (
                                     <>
                                         {selectedInsurances.length > 0 ? (
                                             <div className="space-y-3">
@@ -946,18 +1068,28 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                         <span className="text-xs text-gray-500">{option.label}</span>
                                                                     </div>
                                                                 </div>
-                                                                <Button
-                                                                    disabled={isRCCOChecker}
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="h-8 text-xs"
-                                                                    onClick={() => {
-                                                                        setDraftInsurances([...selectedInsurances]);
-                                                                        setIsInsuranceDialogOpen(true);
-                                                                    }}
-                                                                >
-                                                                    เปลี่ยนแผนประกัน
-                                                                </Button>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="h-8 text-xs"
+                                                                        onClick={() => setIsQuotationDialogOpen(true)}
+                                                                    >
+                                                                        ดูใบเสนอราคา
+                                                                    </Button>
+                                                                    <Button
+                                                                        disabled={isRCCOChecker}
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="h-8 text-xs"
+                                                                        onClick={() => {
+                                                                            setDraftInsurances([...selectedInsurances]);
+                                                                            setIsInsuranceDialogOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        เปลี่ยนแผนประกัน
+                                                                    </Button>
+                                                                </div>
                                                             </div>
 
                                                             {/* Detail Rows */}
@@ -1109,14 +1241,251 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                         </CardContent>
                     </Card>
 
+                    {/* Consolidated Receipt Card Moved Here */}
+                    {(() => {
+                        const netAmount = amount + (includeInsuranceInLoan ? calculateTotalInsurancePremium() : 0);
+                        const hasInsurance = includeInsuranceInLoan && calculateTotalInsurancePremium() > 0;
+                        const hasPaInsurance = paInsuranceEnabled;
+                        const isFreebieEligible = ['car', 'moto', 'truck', 'agri'].includes(selectedProduct);
+                        const income = Number(formData?.income) || 0;
+                        const debt = Number(formData?.monthlyDebt) || 0;
+                        const netIncome = Math.max(0, income - debt);
+                        const payment = Math.ceil(monthlyPayment);
+                        const dsrPercentage = netIncome > 0 ? Math.min(100, (payment / netIncome) * 100) : 100;
+                        const isSafe = dsrPercentage <= 60;
+
+                        return (
+                            <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500 bg-white">
+                                <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                                    <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                                        สรุปยอดสินเชื่อ
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-6 flex flex-col space-y-5">
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* ── Card 1: Loan Info + Insurance ── */}
+                                    <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
+                                        <div className="mb-2">
+                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
+                                                {displayLoanCode}
+                                            </span>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
+                                        <div className="space-y-2.5">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-500">วงเงิน</span>
+                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                            </div>
+                                        </div>
+                                        {(hasInsurance || hasPaInsurance) && (
+                                            <>
+                                                <div className="w-full h-px bg-gray-100 my-4"></div>
+                                                <div className="space-y-4">
+                                                    {selectedInsurances.map(id => {
+                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                                        if (!option) return null;
+                                                        return (
+                                                            <div key={id}>
+                                                                <div className="flex items-center gap-2.5 mb-3">
+                                                                    {option.logo ? (
+                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
+                                                                    ) : (
+                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
+                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                                                        </div>
+                                                                    )}
+                                                                    <div>
+                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
+                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="space-y-2.5">
+                                                                    <div className="flex justify-between items-center text-sm">
+                                                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {hasPaInsurance && (
+                                                        <div>
+                                                            <div className="flex items-center gap-2.5 mb-3">
+                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                                <div>
+                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
+                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2.5">
+                                                                <div className="flex justify-between items-center text-sm">
+                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* ── Card 2: Summary ── */}
+                                    <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
+                                        <div className="space-y-2.5">
+                                            <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
+                                                <div>
+                                                    <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
+                                                    {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
+                                                    <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="border-t border-gray-100 pt-5">
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <p className="text-gray-500 text-sm font-semibold">
+                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
+                                                    </p>
+                                                </div>
+                                                <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
+                                                    {localPaymentMethod === 'bullet'
+                                                        ? (amount + totalInterest).toLocaleString()
+                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })()}
+
                     {/* Insurance Dialog */}
-                    <Dialog open={isInsuranceDialogOpen} onOpenChange={setIsInsuranceDialogOpen}>
+                    <Dialog open={isInsuranceDialogOpen} onOpenChange={(open) => {
+                        setIsInsuranceDialogOpen(open);
+                        if (!open) setDetailInsuranceId(null);
+                    }}>
                         <DialogContent size="xl" className="p-0 gap-0 overflow-hidden border-border-strong rounded-2xl h-[85vh] flex flex-col">
                             <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100">
                                 <DialogTitle>
-                                    เลือกประกันเพิ่มเติม
+                                    {detailInsuranceId ? (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setDetailInsuranceId(null)}
+                                                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors -ml-1"
+                                            >
+                                                <ChevronLeft className="w-5 h-5 text-gray-600" />
+                                            </button>
+                                            <span>รายละเอียด</span>
+                                        </div>
+                                    ) : (
+                                        'เลือกประกันเพิ่มเติม'
+                                    )}
                                 </DialogTitle>
                             </DialogHeader>
+                            {detailInsuranceId ? (() => {
+                                const detailOption = INSURANCE_OPTIONS.find(opt => opt.id === detailInsuranceId);
+                                const detailData = INSURANCE_DETAIL_MAP[detailInsuranceId];
+                                if (!detailOption || !detailData) return null;
+
+                                const DetailRow = ({ label, value, bold }: { label: string; value: string | number; bold?: boolean }) => (
+                                    <div className="flex items-center justify-between py-3 px-4">
+                                        <span className="text-sm text-gray-500">{label}</span>
+                                        <span className={cn("text-sm text-right", bold ? "font-bold text-gray-900" : "text-gray-800")}>{typeof value === 'number' ? value.toLocaleString(undefined, { minimumFractionDigits: 0 }) : value}</span>
+                                    </div>
+                                );
+
+                                const SectionCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
+                                    <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
+                                        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                                            <h4 className="text-sm font-bold text-gray-800">{title}</h4>
+                                        </div>
+                                        <div className="divide-y divide-gray-100">
+                                            {children}
+                                        </div>
+                                    </div>
+                                );
+
+                                return (
+                                    <div className="flex-1 overflow-y-auto bg-gray-50/50">
+                                        <div className="max-w-2xl mx-auto px-6 py-6 space-y-4">
+
+                                            {/* Insurance Title Card */}
+                                            <div className="rounded-xl border border-gray-200 bg-white p-5">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-3">ประกันรถยนต์คุ้มครอง 1 ปี</h3>
+                                                <div className="flex items-center gap-3">
+                                                    {detailOption.logo && (
+                                                        <img src={detailOption.logo} alt={detailOption.company || ''} className="w-12 h-12 object-contain rounded-xl border border-gray-100 p-1 shrink-0 bg-white" />
+                                                    )}
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-gray-800">{detailOption.company}</p>
+                                                        <p className="text-xs text-gray-500">ชั้น {detailOption.tier} · ซ่อม{detailOption.repairType}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* ค่าเบี้ยประกัน */}
+                                            <SectionCard title="ค่าเบี้ยประกัน">
+                                                <div className="flex items-center justify-between py-3 px-4">
+                                                    <span className="text-sm text-gray-500">ค่าเบี้ยประกัน 1 ปี</span>
+                                                    <span className="text-lg font-bold text-chaiyo-blue">{detailOption.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                                <div className="px-4 py-2 bg-gray-50/50">
+                                                    <p className="text-xs text-gray-400 font-medium">ผ่อนจ่าย จำ 10 เดือน</p>
+                                                </div>
+                                                <DetailRow label="เดือนที่ 1-9" value={detailData.installment10.months1to9.toLocaleString(undefined, { minimumFractionDigits: 2 })} bold />
+                                                <DetailRow label="เดือนที่ 10" value={detailData.installment10.month10.toLocaleString(undefined, { minimumFractionDigits: 2 })} bold />
+                                                <div className="px-4 py-2 bg-gray-50/50">
+                                                    <p className="text-xs text-gray-400 font-medium">ผ่อนจ่าย จำ 12 เดือน</p>
+                                                </div>
+                                                <DetailRow label="เดือนที่ 1-11" value={detailData.installment12.months1to11.toLocaleString(undefined, { minimumFractionDigits: 2 })} bold />
+                                                <DetailRow label="เดือนที่ 12" value={detailData.installment12.month12.toLocaleString(undefined, { minimumFractionDigits: 2 })} bold />
+                                            </SectionCard>
+
+                                            {/* รายละเอียด */}
+                                            <SectionCard title="รายละเอียด">
+                                                <DetailRow label="ประเภทรถ" value={detailData.vehicleType} />
+                                                <DetailRow label="การซ่อม" value={`ซ่อม${detailOption.repairType}`} />
+                                                <DetailRow label="ทุนประกัน" value={detailOption.coverage || 0} />
+                                                <DetailRow label="ค่าเสียหายส่วนแรก" value={detailData.deductible} />
+                                                <DetailRow label="บริการพิเศษ" value={detailData.specialService} />
+                                            </SectionCard>
+
+                                            {/* ความคุ้มครองรถยนต์ */}
+                                            <SectionCard title="ความคุ้มครองรถยนต์">
+                                                <DetailRow label="ความเสียหายต่อรถยนต์" value={detailData.vehicleCoverage.damage} />
+                                                <DetailRow label="ไฟไหม้ / สูญหาย" value={detailData.vehicleCoverage.fireTheft} />
+                                                <DetailRow label="น้ำท่วม" value={detailData.vehicleCoverage.flood} />
+                                                <DetailRow label="ลักทรัพย์ภาย" value={detailData.vehicleCoverage.theft} />
+                                                <DetailRow label="ภัยธรรมชาติ (แผ่นดินไหว ลูกเห็บ แลภพายุ)" value={detailData.vehicleCoverage.naturalDisaster} />
+                                            </SectionCard>
+
+                                            {/* ความคุ้มครองบุคคลภายนอก */}
+                                            <SectionCard title="ความคุ้มครองบุคคลภายนอก">
+                                                <DetailRow label="คุ้มครองชีวิต (ต่อคน)" value={detailData.thirdPartyCoverage.lifePerPerson} />
+                                                <DetailRow label="คุ้มครองชีวิต (ต่อครั้ง)" value={detailData.thirdPartyCoverage.lifePerIncident} />
+                                                <DetailRow label="คุ้มครองทรัพย์สิน (ต่อครั้ง)" value={detailData.thirdPartyCoverage.propertyPerIncident} />
+                                            </SectionCard>
+
+                                            {/* ความคุ้มครองตามเอกสารแนบท้าย */}
+                                            <SectionCard title="ความคุ้มครองตามเอกสารแนบท้าย">
+                                                <DetailRow label="อุบัติเหตุส่วนบุคคล (ต่อคน)" value={detailData.endorsementCoverage.accidentPerPerson} />
+                                                <DetailRow label="ค่ารักษาพยาบาล (ต่อคน)" value={detailData.endorsementCoverage.medicalPerPerson} />
+                                                <DetailRow label="ค่าประกันตัว (ต่อครั้ง)" value={detailData.endorsementCoverage.bailPerIncident} />
+                                                <DetailRow label="จำนวนที่นั่งที่คุ้มครอง (ผู้ขับขี่+ผู้โดยสาร)" value={detailData.endorsementCoverage.seatsCovered} />
+                                            </SectionCard>
+
+                                        </div>
+                                    </div>
+                                );
+                            })() : (
                             <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
                                 {/* Sidebar Filters */}
                                 <div className="w-full md:w-56 bg-white border-r border-gray-100 overflow-y-auto shrink-0 shadow-sm flex flex-col">
@@ -1238,8 +1607,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                             <TableHead className="font-medium text-gray-400 text-xs">บริษัทประกัน</TableHead>
                                                             <TableHead className="text-right font-medium text-gray-400 text-xs">ทุนประกันภัย</TableHead>
                                                             <TableHead className="text-right font-medium text-gray-400 text-xs">ค่าเบี้ยประกัน</TableHead>
-                                                            <TableHead className="text-right font-medium text-gray-400 text-xs whitespace-nowrap">ผ่อน 0% (12 ด.)</TableHead>
                                                             <TableHead className="text-center font-medium text-gray-400 text-xs">การซ่อม</TableHead>
+                                                            <TableHead className="w-[120px]"></TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -1283,7 +1652,6 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                     </TableCell>
                                                                     <TableCell className="text-right font-mono py-4 text-[14px]">{option.coverage?.toLocaleString()}</TableCell>
                                                                     <TableCell className="text-right font-mono font-bold text-chaiyo-blue py-4 text-[15px]">{option.price.toLocaleString()}</TableCell>
-                                                                    <TableCell className="text-right font-mono py-4 text-gray-600 text-[14px]">{option.installment?.toLocaleString()}</TableCell>
                                                                     <TableCell className="text-center py-4">
                                                                         <Badge variant="outline" className={cn(
                                                                             "font-normal",
@@ -1291,6 +1659,20 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                         )}>
                                                                             ซ่อม{option.repairType}
                                                                         </Badge>
+                                                                    </TableCell>
+                                                                    <TableCell className="py-4 text-right">
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            className="h-8 text-xs font-medium text-gray-600 border-gray-200 hover:bg-gray-50"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setDetailInsuranceId(option.id);
+                                                                            }}
+                                                                        >
+                                                                            ดูรายละเอียด
+                                                                        </Button>
                                                                     </TableCell>
                                                                 </TableRow>
                                                             ))
@@ -1310,23 +1692,58 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                                 </div>
                             </div>
+                            )}
 
-                            {/* Footer */}
-                            <DialogFooter className="px-6 py-3 bg-white border-t border-gray-100 flex flex-row justify-between items-center sm:justify-between shrink-0 z-10">
-                                <div className="text-sm font-medium text-gray-600 flex items-center gap-2 leading-tight">
-                                    <span className="text-gray-400 text-xs">ค่าเบี้ยประกัน</span>
-                                    <span className="text-lg font-black text-chaiyo-blue">{draftInsurances.reduce((total, id) => {
-                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                        return total + (option ? option.price : 0);
-                                    }, 0).toLocaleString()}</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" className="h-9 px-4 rounded-lg text-sm text-gray-600 border-gray-200 hover:bg-gray-50" onClick={() => setIsInsuranceDialogOpen(false)}>ยกเลิก</Button>
-                                    <Button className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white text-sm" onClick={() => {
-                                        setSelectedInsurances(draftInsurances);
-                                        setIsInsuranceDialogOpen(false);
-                                    }} >ยืนยันการเลือก</Button>
-                                </div>
+                            {/* Footer - only show on list view */}
+                            {!detailInsuranceId && (
+                                <DialogFooter className="px-6 py-3 bg-white border-t border-gray-100 flex flex-row justify-between items-center sm:justify-between shrink-0 z-10">
+                                    <div className="text-sm font-medium text-gray-600 flex items-center gap-2 leading-tight">
+                                        <span className="text-gray-400 text-xs">ค่าเบี้ยประกัน</span>
+                                        <span className="text-lg font-black text-chaiyo-blue">{draftInsurances.reduce((total, id) => {
+                                            const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                            return total + (option ? option.price : 0);
+                                        }, 0).toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" className="h-9 px-4 rounded-lg text-sm text-gray-600 border-gray-200 hover:bg-gray-50" onClick={() => setIsInsuranceDialogOpen(false)}>ยกเลิก</Button>
+                                        <Button className="h-9 px-5 rounded-lg bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white text-sm" onClick={() => {
+                                            setSelectedInsurances(draftInsurances);
+                                            setIsInsuranceDialogOpen(false);
+                                        }} >ยืนยันการเลือก</Button>
+                                    </div>
+                                </DialogFooter>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Quotation Dialog */}
+                    <Dialog open={isQuotationDialogOpen} onOpenChange={setIsQuotationDialogOpen}>
+                        <DialogContent size="xl" className="p-0 gap-0 overflow-hidden border-border-strong rounded-2xl h-[90vh] flex flex-col">
+                            <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100">
+                                <DialogTitle>ใบเสนอราคา</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex-1 overflow-hidden bg-gray-800 flex items-center justify-center">
+                                <PdfViewer
+                                    url="/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf"
+                                    rotation={90}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    variant="outline"
+                                    className="min-w-[120px]"
+                                    onClick={() => setIsQuotationDialogOpen(false)}
+                                >
+                                    ปิด
+                                </Button>
+                                <Button
+                                    className="min-w-[120px]"
+                                    onClick={() => {
+                                        window.open('/salesheets/Sale Sheet_รถ บุคคลทั่วไป V8.0 2.pdf', '_blank');
+                                    }}
+                                >
+                                    <Printer className="w-4 h-4" /> พิมพ์
+                                </Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
@@ -1420,7 +1837,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </div>
 
                             {/* Bank Account Details */}
-                            <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Select Bank */}
                                 <div className="space-y-1.5">
                                     <Label className="text-sm">ธนาคาร <span className="text-red-500">*</span></Label>
@@ -1571,141 +1988,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     </div>
                 </div>
 
-                {/* Right Column - Loan Breakdown */}
-                <div className="w-full lg:w-[380px] shrink-0">
-                    <div className="lg:sticky lg:top-6">
-                        {/* Consolidated Receipt Card */}
-                        {(() => {
-                            const netAmount = amount + (includeInsuranceInLoan ? calculateTotalInsurancePremium() : 0);
-                            const hasInsurance = includeInsuranceInLoan && calculateTotalInsurancePremium() > 0;
-                            const hasPaInsurance = paInsuranceEnabled;
-                            const isFreebieEligible = ['car', 'moto', 'truck', 'agri'].includes(selectedProduct);
-                            const income = Number(formData?.income) || 0;
-                            const debt = Number(formData?.monthlyDebt) || 0;
-                            const netIncome = Math.max(0, income - debt);
-                            const payment = Math.ceil(monthlyPayment);
-                            const dsrPercentage = netIncome > 0 ? Math.min(100, (payment / netIncome) * 100) : 100;
-                            const isSafe = dsrPercentage <= 60;
 
-                            return (
-                                <div className="rounded-2xl bg-gray-50/80 p-5 flex flex-col space-y-4">
-                                    {/* Header */}
-                                    <div className="flex items-center justify-between pb-1">
-                                        <p className="text-lg font-bold text-foreground">สรุปสินเชื่อ</p>
-                                    </div>
-
-                                    {/* ── Card 1: Loan Info + Insurance (merged) ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                        {/* Product Tag */}
-                                        <div className="mb-2">
-                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
-                                                {displayLoanCode}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
-
-
-
-
-                                        {/* Loan Stats */}
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500">วงเงิน</span>
-                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
-                                            </div>
-
-                                        </div>
-
-                                        {/* Insurance (merged into same card) */}
-                                        {(hasInsurance || hasPaInsurance) && (
-                                            <>
-                                                <div className="w-full h-px bg-gray-100 my-4"></div>
-                                                <div className="space-y-4">
-                                                    {selectedInsurances.map(id => {
-                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                                        if (!option) return null;
-                                                        return (
-                                                            <div key={id}>
-                                                                <div className="flex items-center gap-2.5 mb-3">
-                                                                    {option.logo ? (
-                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
-                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
-                                                                        </div>
-                                                                    )}
-                                                                    <div>
-                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
-                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="space-y-2.5">
-
-                                                                    <div className="flex justify-between items-center text-sm">
-                                                                        <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-
-                                                    {/* PA Insurance in summary */}
-                                                    {hasPaInsurance && (
-                                                        <div>
-                                                            <div className="flex items-center gap-2.5 mb-3">
-                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                <div>
-                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
-                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2.5">
-                                                                <div className="flex justify-between items-center text-sm">
-                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-
-                                    {/* ── Card 2: Summary ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100/50">
-                                        <div className="space-y-2.5 mb-3">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <span className="font-bold text-foreground">วงเงินสุทธิ</span>
-                                                    {hasInsurance && <p className="text-[11px] text-gray-400 mt-0.5">*รวมสินเชื่อและประกัน</p>}
-                                                </div>
-                                                <span className="font-black text-chaiyo-blue text-xl">{netAmount.toLocaleString()} <span className="text-xs font-bold text-chaiyo-blue/60">บาท</span></span>
-                                            </div>
-
-                                        </div>
-                                        <div className="border-t border-gray-100 pt-3">
-                                            <div className="flex justify-between items-end">
-                                                <div>
-                                                    <p className="text-gray-500  text-sm">
-                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
-                                                    </p>
-                                                </div>
-                                                <span className="text-foreground text-sm">
-                                                    {localPaymentMethod === 'bullet'
-                                                        ? (amount + totalInterest).toLocaleString()
-                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-
-                    </div>
-                </div>
             </div>
         </div >
     );

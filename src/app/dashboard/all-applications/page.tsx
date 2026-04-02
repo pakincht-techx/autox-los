@@ -259,14 +259,16 @@ export default function AllApplicationsPage() {
         ]
         : [
             { label: "ทั้งหมด", value: "all" },
-            { label: "แบบร่าง", value: "Draft" },
-            { label: "ส่งกลับ", value: "Sent Back" },
-            { label: "อนุมัติ", value: "Approved" },
-            { label: "ถูกปฎิเสธ", value: "Rejected" },
-            { label: "ยกเลิกใบสมัคร", value: "Cancelled" },
+            { label: "รอพิจารณา", value: "In Review" },
         ];
 
+    const excludedStatuses: ApplicationStatus[] = devRole === 'branch-staff'
+        ? []
+        : ['Approved', 'Rejected', 'Cancelled', 'Draft', 'Sent Back'];
+
     const filteredData = MOCK_DATA.filter((app) => {
+        if (excludedStatuses.includes(app.status)) return false;
+
         // Tab Filter
         const matchesTab = currentTab === "all" || app.status === currentTab;
 

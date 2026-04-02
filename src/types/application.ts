@@ -23,6 +23,8 @@ export interface BankAccount {
     bankName?: string;
     accountNo?: string;
     accountName?: string;
+    isCorporateAccount?: boolean;
+    corporateAccountName?: string;
 }
 
 export interface SAIncome {
@@ -137,6 +139,7 @@ export interface IncomeOccupation {
     currentTenureMonth?: string;
     prevTenureYear?: string;
     prevTenureMonth?: string;
+    referencePersons?: ReferencePerson[];
     employeeCount?: string;
     businessAgeYear?: string;
     isSameAsMainAddress?: string;
@@ -205,6 +208,24 @@ export interface IncomeOccupation {
     tavi50MonthlyMonths?: string[];
     // Slip count per tavi 50 month: key = month index, value = number of slips
     tavi50MonthlySlipCounts?: Record<string, number>;
+    // Unified Tavi 50 Yearly Tracker
+    hasTavi50Yearly?: boolean;
+
+    // Selected Income Calculation Methods (SE only)
+    useBankStatementIncome?: boolean;
+    useInquiredIncome?: boolean;
+
+    // SE Statement Items (OCR-read line items from statement)
+    seStatementItems?: {
+        code: string;
+        dateTime?: string;
+        type?: "in" | "out";
+        description: string;
+        amount: number | string;
+        included: boolean;
+        excludeReason?: string;
+        isManual?: boolean;
+    }[];
 
     // Statement month tracking per bank account
     // Key: bank account index (e.g. "0", "1"), Value: array of month labels (e.g. ["ม.ค.", "ก.พ."])
@@ -215,6 +236,9 @@ export interface IncomeOccupation {
     workplaceAssessorId?: string;
     workplaceAssessorPhone?: string;
     workplaceAssessmentDate?: string;
+
+    // Reference person source (for secondary occupations)
+    referenceSource?: string; // occupation id to reference from, empty = own
 }
 
 export interface Child {
