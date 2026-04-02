@@ -21,6 +21,17 @@ import { CHECKER_MOCK_DATA } from "@/data/checkerMockData";
 // Mock Data
 const MOCK_DATA: Application[] = [
     {
+        id: "mock-6",
+        applicationNo: "25690106ULCRL0006",
+        applicantName: "อภิชาติ ธนากิจ",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "06/01/2569 09:00",
+        requestedAmount: 150000,
+        status: "In Review",
+        productType: "จำนำรถยนต์ผ่อนรายเดือน",
+        lastActionTime: "06/01/2569 14:20"
+    },
+    {
         id: "mock-4",
         applicationNo: "25690317TLTDL0009",
         applicantName: "สมศักดิ์ ที่ดินทอง",

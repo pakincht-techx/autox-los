@@ -14,6 +14,29 @@ export interface CheckerApplication extends Application {
 }
 
 export const CHECKER_MOCK_DATA: CheckerApplication[] = [
+    // Scenario: RCCO Checker - Pending verification
+    {
+        id: "checker-rcco-6",
+        applicationNo: "25690106ULCRL0006",
+        applicantName: "อภิชาติ ธนากิจ",
+        makerName: "สมหญิง ใจดี",
+        submissionDate: "06/01/2569 09:00",
+        requestedAmount: 150000,
+        status: "In Review",
+        productType: "จำนำรถยนต์ผ่อนรายเดือน",
+        previousProcessorName: "มาลี ศรีเมือง",
+        lastActionTime: "06/01/2569 14:20",
+        overallReviewStatus: 'needs-review',
+        reviewStatus: [
+            { fieldName: "ข้อมูลส่วนบุคคล", status: "approved" },
+            { fieldName: "สำมะโนประชากร", status: "approved" },
+            { fieldName: "หลักประกัน/สินทรัพย์", status: "caution", remark: "รอการตรวจสอบโครงสร้างสินทรัพย์" },
+            { fieldName: "เอกสารและการยืนยัน", status: "approved" },
+            { fieldName: "ประวัติการออม", status: "approved" },
+            { fieldName: "ประเมินความเสี่ยง", status: "approved" },
+        ]
+    },
+
     // Scenario 1: All fields checked and approved
     {
         id: "checker-1",
