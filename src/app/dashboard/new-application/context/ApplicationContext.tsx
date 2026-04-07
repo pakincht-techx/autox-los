@@ -291,6 +291,83 @@ export function ApplicationProvider({ children }: { children: ReactNode }) {
                 // Only override if not already populated with mock data (basic check)
                 if (prev.firstName) return prev;
 
+                // Special handling for application 25690106ULCRL0006
+                if (appId === '25690106ULCRL0006') {
+                    return {
+                        ...prev,
+                        idNumber: "1-1004-00123-45-6",
+                        firstName: "สมชาย",
+                        lastName: "ใจดี",
+                        phone: "081-234-5678",
+                        chaiyoLoans: [
+                            { type: "สินเชื่อรถยนต์", amount: 5500 },
+                            { type: "สินเชื่อจำนองที่ดิน", amount: 2600 }
+                        ],
+                        chaiyoInsuranceInstallment: 450,
+                        totalChaiyoDebt: 8550,
+                        occupations: [
+                            {
+                                id: 'main',
+                                isMain: true,
+                                employmentType: 'SA',
+                                occupationName: 'สถาปนิก',
+                                occupationCode: 'สถาปนิก',
+                                jobTitle: 'พนักงานทั่วไป',
+                                workAddress: '25 ถนนสีลม แขวงสีลม เขตบางรัก กรุงเทพมหานคร 10500',
+                                workProvince: 'กรุงเทพมหานคร',
+                                businessStatus: 'active',
+                                incomeChannels: ['payslip'],
+                                incomeDocuments: [
+                                    {
+                                        id: 'doc-1',
+                                        type: 'payslip',
+                                        documentName: 'Payslip - January 2025',
+                                        documentType: 'image',
+                                        url: 'data:image/png;base64,',
+                                        uploadDate: '2025-01-15'
+                                    }
+                                ],
+                                saIncomes: [
+                                    { type: 'salary', amount: 38000 }
+                                ],
+                                totalIncome: 38000,
+                                verificationLinks: [
+                                    { label: 'DBD', url: 'https://www.dbd.go.th/' },
+                                    { label: 'DBD2', url: 'https://www.dbd.go.th/' },
+                                    { label: 'สปสช', url: 'https://www.acm.go.th/' }
+                                ]
+                            }
+                        ],
+                        personalDebts: [
+                            { type: 'personal', amount: '3500' },
+                            { type: 'housing', amount: '8000' }
+                        ],
+                        totalPersonalDebt: '11500',
+                        incomeRemarks: "พนักงานประจำ เงินเดือน 38,000 บาท",
+                        referencePersons: [],
+                        // Refinance mockup data
+                        financeCompany: 'scb',
+                        financeCompanyBranch: 'สาขาสีลม',
+                        contractNo: 'SCB-2024-001234',
+                        contractDate: '15/01/2024',
+                        loanAmount: '500,000.00',
+                        loanTerm: '60',
+                        monthlyInstallment: '10,500.00',
+                        hasCashCard: false,
+                        hasApplication: false,
+                        closureAmount: '485,000.00',
+                        hasPenalty: false,
+                        penaltyAmount: '',
+                        feeAmount: '',
+                        hasOtherLoans: false,
+                        otherLoans: [],
+                        paymentMethod: 'transfer',
+                        paymentMethodOther: '',
+                        hasOverdue: false,
+                        overdueInstallments: ''
+                    };
+                }
+
                 return {
                     ...prev,
                     idNumber: "1-1004-00123-45-6",

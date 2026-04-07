@@ -60,6 +60,10 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const isBranchStaff = devRole === 'branch-staff';
 
     const [amount, setAmount] = useState<number>(Number(formData?.requestedAmount) || 600000);
+    const [branchAmount, setBranchAmount] = useState<number>(() => {
+        const systemAmount = Number(formData?.requestedAmount) || 600000;
+        return Math.floor(systemAmount * 0.85); // Branch amount is 85% of system recommended
+    });
     const SYSTEM_MAX_AMOUNT = 700000;
     const [interestRateInput, setInterestRateInput] = useState<string>("23.99");
     const [months, setMonths] = useState<number>(formData?.requestedDuration || 24);
@@ -86,7 +90,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [seasonalStartMonth, setSeasonalStartMonth] = useState<string>("5");
 
     // New State for Max Loan Logic
-    const [maxLoanAmount, setMaxLoanAmount] = useState<number>(500000);
+    const [maxLoanAmount, setMaxLoanAmount] = useState<number>(50e0000);
     const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
     // RCCO Checker Loan Breakdown Overrides
@@ -140,6 +144,11 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const [detailInsuranceId, setDetailInsuranceId] = useState<string | null>(null);
     const [currentInsuranceCompany, setCurrentInsuranceCompany] = useState<string>('none');
     const [isQuotationDialogOpen, setIsQuotationDialogOpen] = useState(false);
+    const [isBankBookPreviewOpen, setIsBankBookPreviewOpen] = useState(false);
+
+    // Bank Account Verification
+    const [bankVerificationStatus, setBankVerificationStatus] = useState<'idle' | 'checking' | 'matched' | 'mismatched'>("idle");
+    const [bankVerificationMessage, setBankVerificationMessage] = useState<string>("");
 
     // Filter State
     const [filterTier, setFilterTier] = useState<string[]>([]);
@@ -420,12 +429,13 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
         if (isRCCOChecker && setFormData) {
             setFormData((prev: any) => ({
                 ...prev,
-                bankName: prev?.bankName || 'KBANK',
-                bankAccountNumber: prev?.bankAccountNumber || '123-4-56789-0',
-                bankAccountName: prev?.bankAccountName || 'นายสมชาย ใจดี',
+                // Bank fields should be empty for RCCO checker to fill
+                bankName: '',
+                bankAccountNumber: '',
+                bankAccountName: '',
             }));
         }
-    }, [isRCCOChecker, setFormData]);
+    }, [isRCCOChecker]);
 
     const calculateLoan = () => {
         if (amount <= 0 || months <= 0) {
@@ -438,7 +448,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
         // Insurance Logic
         const insurancePremium = calculateTotalInsurancePremium();
-        const principal = amount + (includeInsuranceInLoan ? insurancePremium : 0);
+        const principal = branchAmount + (includeInsuranceInLoan ? insurancePremium : 0);
 
         const totalInt = principal * rate * years;
         const total = principal + totalInt;
@@ -457,7 +467,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
     const handleNext = () => {
         const data = {
-            requestedAmount: amount,
+            requestedAmount: branchAmount,
             requestedDuration: months,
             estimatedMonthlyPayment: monthlyPayment,
             totalInterest: totalInterest,
@@ -503,8 +513,8 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
     const getMonthlyForDuration = (m: number) => {
         const rate = INTEREST_RATES[selectedProduct] || 0.2399;
         const years = m / 12;
-        const totalInt = amount * rate * years;
-        return (amount + totalInt) / m;
+        const totalInt = branchAmount * rate * years;
+        return (branchAmount + totalInt) / m;
     };
 
     return (
@@ -548,7 +558,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            รายละเอียดวงเงินและระยะเวลาผ่อน
+                                รายละเอียดวงเงินและระยะเวลาผ่อน
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6 px-6 pb-6 pt-5">
@@ -606,7 +616,10 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                         value={amount.toLocaleString()}
                                                         onChange={(e) => {
                                                             const numericValue = Number(e.target.value.replace(/,/g, ''));
-                                                            if (!isNaN(numericValue)) setAmount(numericValue);
+                                                            if (!isNaN(numericValue)) {
+                                                                setAmount(numericValue);
+                                                                setBranchAmount(Math.floor(numericValue * 0.85));
+                                                            }
                                                         }}
                                                         className={cn(
                                                             "pl-4 pr-14 text-lg font-semibold font-mono h-12 bg-white border-gray-200 focus:bg-white transition-all text-left",
@@ -808,179 +821,179 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
 
                     {/* Loan Breakdown Comparison Table Section */}
                     {!isBranchStaff && (
-                    <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
-                        <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
-                            <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            การเปรียบเทียบวงเงิน
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-6 pb-6 pt-5">
-                            <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
-                                    <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-200">
-                                            <th className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-r border-gray-200">รายการ</th>
-                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ระบบ Recommended</th>
-                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">ลูกค้าต้องการ</th>
-                                            <th className="px-4 py-3 text-center text-sm font-bold text-gray-800">RC Checker</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {/* วงเงินก่อนรวมประกัน */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินก่อนรวมประกัน</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{amount.toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{amount.toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoAmountBeforeInsurance || amount.toString()}
-                                                        onChange={(e) => setRccoAmountBeforeInsurance(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={amount.toString()}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{amount.toLocaleString('th-TH')}</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                        <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
+                            <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
+                                <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
+                                    การเปรียบเทียบวงเงิน
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="px-6 pb-6 pt-5">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse">
+                                        <thead>
+                                            <tr className="bg-gray-50 border-b border-gray-200">
+                                                <th className="px-4 py-3 text-left text-sm font-bold text-gray-800 border-r border-gray-200">รายการ</th>
+                                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">วงเงินที่ระบบแนะนำ</th>
+                                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-800 border-r border-gray-200">วงเงินจากสาขา</th>
+                                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-800">RCCO Checker</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {/* วงเงินก่อนรวมประกัน */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินก่อนรวมประกัน</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{amount.toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{branchAmount.toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoAmountBeforeInsurance || branchAmount.toString()}
+                                                            onChange={(e) => setRccoAmountBeforeInsurance(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={branchAmount.toString()}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{branchAmount.toLocaleString('th-TH')}</div>
+                                                    )}
+                                                </td>
+                                            </tr>
 
-                                        {/* ค่าเบี้ยประกัน */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่าเบี้ยประกัน</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoInsurancePremium || calculateTotalInsurancePremium().toString()}
-                                                        onChange={(e) => setRccoInsurancePremium(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={calculateTotalInsurancePremium().toString()}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                                            {/* ค่าเบี้ยประกัน */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่าเบี้ยประกัน</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoInsurancePremium || calculateTotalInsurancePremium().toString()}
+                                                            onChange={(e) => setRccoInsurancePremium(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={calculateTotalInsurancePremium().toString()}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{calculateTotalInsurancePremium().toLocaleString('th-TH')}</div>
+                                                    )}
+                                                </td>
+                                            </tr>
 
-                                        {/* วงเงินสินเชื่อรวมประกัน */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินสินเชื่อรวมประกัน</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoAmountWithInsurance || (amount + calculateTotalInsurancePremium()).toString()}
-                                                        onChange={(e) => setRccoAmountWithInsurance(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={(amount + calculateTotalInsurancePremium()).toString()}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                                            {/* วงเงินสินเชื่อรวมประกัน */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">วงเงินสินเชื่อรวมประกัน</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoAmountWithInsurance || (amount + calculateTotalInsurancePremium()).toString()}
+                                                            onChange={(e) => setRccoAmountWithInsurance(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={(amount + calculateTotalInsurancePremium()).toString()}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{(amount + calculateTotalInsurancePremium()).toLocaleString('th-TH')}</div>
+                                                    )}
+                                                </td>
+                                            </tr>
 
-                                        {/* ระยะเวลาผ่อน */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ระยะเวลาผ่อน</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoDuration || months.toString()}
-                                                        onChange={(e) => setRccoDuration(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={months.toString()}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{months} เดือน</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                                            {/* ระยะเวลาผ่อน */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ระยะเวลาผ่อน</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{months} เดือน</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoDuration || months.toString()}
+                                                            onChange={(e) => setRccoDuration(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={months.toString()}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{months} เดือน</div>
+                                                    )}
+                                                </td>
+                                            </tr>
 
-                                        {/* ดอกเบี้ย */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ดอกเบี้ย</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoInterestRate || (INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
-                                                        onChange={(e) => setRccoInterestRate(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
-                                                )}
-                                            </td>
-                                        </tr>
+                                            {/* ดอกเบี้ย */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ดอกเบี้ย</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoInterestRate || (INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
+                                                            onChange={(e) => setRccoInterestRate(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{(INTEREST_RATES[selectedProduct] * 100).toFixed(2)}%</div>
+                                                    )}
+                                                </td>
+                                            </tr>
 
-                                        {/* ค่างวด */}
-                                        <tr className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่างวด</td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center border-r border-gray-200">
-                                                <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
-                                            </td>
-                                            <td className="px-4 py-3 text-center">
-                                                {isRCCOChecker ? (
-                                                    <Input
-                                                        type="number"
-                                                        value={rccoMonthlyPayment || monthlyPayment.toFixed(2)}
-                                                        onChange={(e) => setRccoMonthlyPayment(e.target.value)}
-                                                        className="text-center text-sm font-semibold"
-                                                        placeholder={monthlyPayment.toFixed(2)}
-                                                    />
-                                                ) : (
-                                                    <div className="text-sm font-bold text-gray-500">{monthlyPayment.toLocaleString('th-TH', {maximumFractionDigits: 2})}</div>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
+                                            {/* ค่างวด */}
+                                            <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-semibold text-gray-700 border-r border-gray-200">ค่างวด</td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', { maximumFractionDigits: 2 })}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center border-r border-gray-200">
+                                                    <div className="text-sm font-bold text-gray-800">{monthlyPayment.toLocaleString('th-TH', { maximumFractionDigits: 2 })}</div>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {isRCCOChecker ? (
+                                                        <Input
+                                                            type="number"
+                                                            value={rccoMonthlyPayment || monthlyPayment.toFixed(2)}
+                                                            onChange={(e) => setRccoMonthlyPayment(e.target.value)}
+                                                            className="text-center text-sm font-semibold"
+                                                            placeholder={monthlyPayment.toFixed(2)}
+                                                        />
+                                                    ) : (
+                                                        <div className="text-sm font-bold text-gray-500">{monthlyPayment.toLocaleString('th-TH', { maximumFractionDigits: 2 })}</div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
                     )}
 
                     {/* Insurance Section */}
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            ประกันภัย
+                                ประกันภัย
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="px-6 pb-6 pt-5 space-y-4">
@@ -1263,104 +1276,104 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </CardHeader>
                                 <CardContent className="p-6 flex flex-col space-y-5">
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* ── Card 1: Loan Info + Insurance ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
-                                        <div className="mb-2">
-                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
-                                                {displayLoanCode}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500">วงเงิน</span>
-                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* ── Card 1: Loan Info + Insurance ── */}
+                                        <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
+                                            <div className="mb-2">
+                                                <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
+                                                    {displayLoanCode}
+                                                </span>
                                             </div>
-                                        </div>
-                                        {(hasInsurance || hasPaInsurance) && (
-                                            <>
-                                                <div className="w-full h-px bg-gray-100 my-4"></div>
-                                                <div className="space-y-4">
-                                                    {selectedInsurances.map(id => {
-                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                                        if (!option) return null;
-                                                        return (
-                                                            <div key={id}>
-                                                                <div className="flex items-center gap-2.5 mb-3">
-                                                                    {option.logo ? (
-                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
-                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                            <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
+                                            <div className="space-y-2.5">
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-500">วงเงิน</span>
+                                                    <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                                </div>
+                                            </div>
+                                            {(hasInsurance || hasPaInsurance) && (
+                                                <>
+                                                    <div className="w-full h-px bg-gray-100 my-4"></div>
+                                                    <div className="space-y-4">
+                                                        {selectedInsurances.map(id => {
+                                                            const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                                            if (!option) return null;
+                                                            return (
+                                                                <div key={id}>
+                                                                    <div className="flex items-center gap-2.5 mb-3">
+                                                                        {option.logo ? (
+                                                                            <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
+                                                                        ) : (
+                                                                            <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
+                                                                                <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
+                                                                            <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
                                                                         </div>
-                                                                    )}
+                                                                    </div>
+                                                                    <div className="space-y-2.5">
+                                                                        <div className="flex justify-between items-center text-sm">
+                                                                            <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                            <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {hasPaInsurance && (
+                                                            <div>
+                                                                <div className="flex items-center gap-2.5 mb-3">
+                                                                    <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                                                     <div>
-                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
-                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
+                                                                        <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
+                                                                        <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
                                                                     </div>
                                                                 </div>
                                                                 <div className="space-y-2.5">
                                                                     <div className="flex justify-between items-center text-sm">
                                                                         <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                        <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        );
-                                                    })}
-                                                    {hasPaInsurance && (
-                                                        <div>
-                                                            <div className="flex items-center gap-2.5 mb-3">
-                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                <div>
-                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
-                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2.5">
-                                                                <div className="flex justify-between items-center text-sm">
-                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
 
-                                    {/* ── Card 2: Summary ── */}
-                                    <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
-                                                <div>
-                                                    <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
-                                                    {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
-                                                    <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                        {/* ── Card 2: Summary ── */}
+                                        <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
+                                            <div className="space-y-2.5">
+                                                <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
+                                                    <div>
+                                                        <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
+                                                        {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
+                                                        <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="border-t border-gray-100 pt-5">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="text-gray-500 text-sm font-semibold">
-                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
-                                                    </p>
+                                            <div className="border-t border-gray-100 pt-5">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm font-semibold">
+                                                            {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
+                                                        </p>
+                                                    </div>
+                                                    <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
+                                                        {localPaymentMethod === 'bullet'
+                                                            ? (amount + totalInterest).toLocaleString()
+                                                            : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
+                                                    </span>
                                                 </div>
-                                                <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
-                                                    {localPaymentMethod === 'bullet'
-                                                        ? (amount + totalInterest).toLocaleString()
-                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                                 </CardContent>
                             </Card>
                         );
@@ -1486,212 +1499,212 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     </div>
                                 );
                             })() : (
-                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
-                                {/* Sidebar Filters */}
-                                <div className="w-full md:w-56 bg-white border-r border-gray-100 overflow-y-auto shrink-0 shadow-sm flex flex-col">
-                                    <div className="p-4 bg-gray-50/50 border-b border-gray-100 shrink-0">
-                                        <h3 className="font-bold text-sm text-gray-700 flex items-center justify-between">
-                                            ตัวกรอง
-                                            {(filterTier.length > 0 || filterRepairType.length > 0 || filterCompany.length > 0) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-6 px-2 text-[10px] text-chaiyo-blue"
-                                                    onClick={() => {
-                                                        setFilterTier([]);
-                                                        setFilterRepairType([]);
-                                                        setFilterCompany([]);
-                                                    }}
-                                                >
-                                                    ล้างทั้งหมด
-                                                </Button>
-                                            )}
-                                        </h3>
-                                    </div>
-                                    <Accordion type="multiple" defaultValue={["tier", "repair", "company"]} className="w-full px-2 mt-2">
-                                        <AccordionItem value="tier" className="border-b-0 px-2">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">ชั้นประกัน</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {['1', '2+', '3+'].map(tier => (
-                                                        <div key={tier} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`tier-${tier}`}
-                                                                checked={filterTier.includes(tier)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterTier([...filterTier, tier]);
-                                                                    } else {
-                                                                        setFilterTier(filterTier.filter(t => t !== tier));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            <Label htmlFor={`tier-${tier}`} className="cursor-pointer text-sm text-gray-600">ชั้น {tier}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-
-                                        <AccordionItem value="repair" className="border-b-0 px-2 border-t border-gray-100 mt-2">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">การซ่อม</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {[
-                                                        { value: 'ศูนย์', label: 'ซ่อมศูนย์' },
-                                                        { value: 'อู่', label: 'ซ่อมอู่' }
-                                                    ].map(repair => (
-                                                        <div key={repair.value} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`repair-${repair.value}`}
-                                                                checked={filterRepairType.includes(repair.value)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterRepairType([...filterRepairType, repair.value]);
-                                                                    } else {
-                                                                        setFilterRepairType(filterRepairType.filter(r => r !== repair.value));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            <Label htmlFor={`repair-${repair.value}`} className="cursor-pointer text-sm text-gray-600">{repair.label}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-
-                                        <AccordionItem value="company" className="border-b-0 px-2 border-t border-gray-100 mt-2 pb-4">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">บริษัทประกัน</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {uniqueCompanies.map(comp => comp && (
-                                                        <div key={comp} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`comp-${comp}`}
-                                                                checked={filterCompany.includes(comp)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterCompany([...filterCompany, comp]);
-                                                                    } else {
-                                                                        setFilterCompany(filterCompany.filter(c => c !== comp));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            {companyLogoMap[comp] && (
-                                                                <img src={companyLogoMap[comp]} alt={comp} className="w-5 h-5 object-contain rounded shrink-0" />
-                                                            )}
-                                                            <Label htmlFor={`comp-${comp}`} className="cursor-pointer text-sm text-gray-600">{comp}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    </Accordion>
-                                </div>
-
-                                {/* Main Content - Tables */}
-                                <div className="flex-1 overflow-y-auto space-y-8">
-                                    {/* Car Insurance Table */}
-                                    {(selectedProduct === 'car' || selectedProduct === 'truck') && (
-                                        <div className="space-y-4">
-
-
-                                            <div className="bg-white rounded-none border-y border-gray-200">
-                                                <Table>
-                                                    <TableHeader className="bg-gray-50/80 sticky top-0 z-10">
-                                                        <TableRow className="hover:bg-transparent">
-                                                            <TableHead className="w-[50px]"></TableHead>
-                                                            <TableHead className="font-medium text-gray-400 text-xs">บริษัทประกัน</TableHead>
-                                                            <TableHead className="text-right font-medium text-gray-400 text-xs">ทุนประกันภัย</TableHead>
-                                                            <TableHead className="text-right font-medium text-gray-400 text-xs">ค่าเบี้ยประกัน</TableHead>
-                                                            <TableHead className="text-center font-medium text-gray-400 text-xs">การซ่อม</TableHead>
-                                                            <TableHead className="w-[120px]"></TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {filteredCarInsurances.length > 0 ? (
-                                                            filteredCarInsurances.map(option => (
-                                                                <TableRow
-                                                                    key={option.id}
-                                                                    className={cn(
-                                                                        "cursor-pointer transition-colors group",
-                                                                        draftInsurances.includes(option.id) ? "bg-blue-50/50 hover:bg-blue-50/80" : "hover:bg-gray-50/80"
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        const current = draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car');
-                                                                        if (current === option.id) {
-                                                                            setDraftInsurances(draftInsurances.filter(id => id !== option.id));
+                                <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
+                                    {/* Sidebar Filters */}
+                                    <div className="w-full md:w-56 bg-white border-r border-gray-100 overflow-y-auto shrink-0 shadow-sm flex flex-col">
+                                        <div className="p-4 bg-gray-50/50 border-b border-gray-100 shrink-0">
+                                            <h3 className="font-bold text-sm text-gray-700 flex items-center justify-between">
+                                                ตัวกรอง
+                                                {(filterTier.length > 0 || filterRepairType.length > 0 || filterCompany.length > 0) && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 px-2 text-[10px] text-chaiyo-blue"
+                                                        onClick={() => {
+                                                            setFilterTier([]);
+                                                            setFilterRepairType([]);
+                                                            setFilterCompany([]);
+                                                        }}
+                                                    >
+                                                        ล้างทั้งหมด
+                                                    </Button>
+                                                )}
+                                            </h3>
+                                        </div>
+                                        <Accordion type="multiple" defaultValue={["tier", "repair", "company"]} className="w-full px-2 mt-2">
+                                            <AccordionItem value="tier" className="border-b-0 px-2">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">ชั้นประกัน</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {['1', '2+', '3+'].map(tier => (
+                                                            <div key={tier} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`tier-${tier}`}
+                                                                    checked={filterTier.includes(tier)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterTier([...filterTier, tier]);
                                                                         } else {
-                                                                            const others = draftInsurances.filter(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type !== 'car');
-                                                                            setDraftInsurances([...others, option.id]);
+                                                                            setFilterTier(filterTier.filter(t => t !== tier));
                                                                         }
                                                                     }}
-                                                                >
-                                                                    <TableCell className="py-4">
-                                                                        <RadioGroup value={draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car') || ""}>
-                                                                            <RadioGroupItem
-                                                                                value={option.id}
-                                                                                id={`tbl-${option.id}`}
-                                                                                className="border-gray-300 text-chaiyo-blue group-hover:border-chaiyo-blue/50 data-[state=checked]:border-chaiyo-blue pointer-events-none"
-                                                                            />
-                                                                        </RadioGroup>
-                                                                    </TableCell>
-                                                                    <TableCell className="font-medium text-gray-800 py-4">
-                                                                        <div className="flex items-center gap-3">
-                                                                            {option.logo && (
-                                                                                <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                            )}
-                                                                            <div className="flex flex-col">
-                                                                                <span className="text-[15px]">{option.company}</span>
-                                                                                <span className="text-[11px] text-gray-500 mt-0.5">{option.label}</span>
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                <Label htmlFor={`tier-${tier}`} className="cursor-pointer text-sm text-gray-600">ชั้น {tier}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+
+                                            <AccordionItem value="repair" className="border-b-0 px-2 border-t border-gray-100 mt-2">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">การซ่อม</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {[
+                                                            { value: 'ศูนย์', label: 'ซ่อมศูนย์' },
+                                                            { value: 'อู่', label: 'ซ่อมอู่' }
+                                                        ].map(repair => (
+                                                            <div key={repair.value} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`repair-${repair.value}`}
+                                                                    checked={filterRepairType.includes(repair.value)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterRepairType([...filterRepairType, repair.value]);
+                                                                        } else {
+                                                                            setFilterRepairType(filterRepairType.filter(r => r !== repair.value));
+                                                                        }
+                                                                    }}
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                <Label htmlFor={`repair-${repair.value}`} className="cursor-pointer text-sm text-gray-600">{repair.label}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+
+                                            <AccordionItem value="company" className="border-b-0 px-2 border-t border-gray-100 mt-2 pb-4">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">บริษัทประกัน</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {uniqueCompanies.map(comp => comp && (
+                                                            <div key={comp} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`comp-${comp}`}
+                                                                    checked={filterCompany.includes(comp)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterCompany([...filterCompany, comp]);
+                                                                        } else {
+                                                                            setFilterCompany(filterCompany.filter(c => c !== comp));
+                                                                        }
+                                                                    }}
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                {companyLogoMap[comp] && (
+                                                                    <img src={companyLogoMap[comp]} alt={comp} className="w-5 h-5 object-contain rounded shrink-0" />
+                                                                )}
+                                                                <Label htmlFor={`comp-${comp}`} className="cursor-pointer text-sm text-gray-600">{comp}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        </Accordion>
+                                    </div>
+
+                                    {/* Main Content - Tables */}
+                                    <div className="flex-1 overflow-y-auto space-y-8">
+                                        {/* Car Insurance Table */}
+                                        {(selectedProduct === 'car' || selectedProduct === 'truck') && (
+                                            <div className="space-y-4">
+
+
+                                                <div className="bg-white rounded-none border-y border-gray-200">
+                                                    <Table>
+                                                        <TableHeader className="bg-gray-50/80 sticky top-0 z-10">
+                                                            <TableRow className="hover:bg-transparent">
+                                                                <TableHead className="w-[50px]"></TableHead>
+                                                                <TableHead className="font-medium text-gray-400 text-xs">บริษัทประกัน</TableHead>
+                                                                <TableHead className="text-right font-medium text-gray-400 text-xs">ทุนประกันภัย</TableHead>
+                                                                <TableHead className="text-right font-medium text-gray-400 text-xs">ค่าเบี้ยประกัน</TableHead>
+                                                                <TableHead className="text-center font-medium text-gray-400 text-xs">การซ่อม</TableHead>
+                                                                <TableHead className="w-[120px]"></TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {filteredCarInsurances.length > 0 ? (
+                                                                filteredCarInsurances.map(option => (
+                                                                    <TableRow
+                                                                        key={option.id}
+                                                                        className={cn(
+                                                                            "cursor-pointer transition-colors group",
+                                                                            draftInsurances.includes(option.id) ? "bg-blue-50/50 hover:bg-blue-50/80" : "hover:bg-gray-50/80"
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            const current = draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car');
+                                                                            if (current === option.id) {
+                                                                                setDraftInsurances(draftInsurances.filter(id => id !== option.id));
+                                                                            } else {
+                                                                                const others = draftInsurances.filter(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type !== 'car');
+                                                                                setDraftInsurances([...others, option.id]);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <TableCell className="py-4">
+                                                                            <RadioGroup value={draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car') || ""}>
+                                                                                <RadioGroupItem
+                                                                                    value={option.id}
+                                                                                    id={`tbl-${option.id}`}
+                                                                                    className="border-gray-300 text-chaiyo-blue group-hover:border-chaiyo-blue/50 data-[state=checked]:border-chaiyo-blue pointer-events-none"
+                                                                                />
+                                                                            </RadioGroup>
+                                                                        </TableCell>
+                                                                        <TableCell className="font-medium text-gray-800 py-4">
+                                                                            <div className="flex items-center gap-3">
+                                                                                {option.logo && (
+                                                                                    <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                                                )}
+                                                                                <div className="flex flex-col">
+                                                                                    <span className="text-[15px]">{option.company}</span>
+                                                                                    <span className="text-[11px] text-gray-500 mt-0.5">{option.label}</span>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </TableCell>
-                                                                    <TableCell className="text-right font-mono py-4 text-[14px]">{option.coverage?.toLocaleString()}</TableCell>
-                                                                    <TableCell className="text-right font-mono font-bold text-chaiyo-blue py-4 text-[15px]">{option.price.toLocaleString()}</TableCell>
-                                                                    <TableCell className="text-center py-4">
-                                                                        <Badge variant="outline" className={cn(
-                                                                            "font-normal",
-                                                                            option.repairType === 'ศูนย์' ? "bg-blue-50 text-chaiyo-blue border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"
-                                                                        )}>
-                                                                            ซ่อม{option.repairType}
-                                                                        </Badge>
-                                                                    </TableCell>
-                                                                    <TableCell className="py-4 text-right">
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="h-8 text-xs font-medium text-gray-600 border-gray-200 hover:bg-gray-50"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setDetailInsuranceId(option.id);
-                                                                            }}
-                                                                        >
-                                                                            ดูรายละเอียด
-                                                                        </Button>
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right font-mono py-4 text-[14px]">{option.coverage?.toLocaleString()}</TableCell>
+                                                                        <TableCell className="text-right font-mono font-bold text-chaiyo-blue py-4 text-[15px]">{option.price.toLocaleString()}</TableCell>
+                                                                        <TableCell className="text-center py-4">
+                                                                            <Badge variant="outline" className={cn(
+                                                                                "font-normal",
+                                                                                option.repairType === 'ศูนย์' ? "bg-blue-50 text-chaiyo-blue border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"
+                                                                            )}>
+                                                                                ซ่อม{option.repairType}
+                                                                            </Badge>
+                                                                        </TableCell>
+                                                                        <TableCell className="py-4 text-right">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                className="h-8 text-xs font-medium text-gray-600 border-gray-200 hover:bg-gray-50"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setDetailInsuranceId(option.id);
+                                                                                }}
+                                                                            >
+                                                                                ดูรายละเอียด
+                                                                            </Button>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))
+                                                            ) : (
+                                                                <TableRow>
+                                                                    <TableCell colSpan={6} className="h-32 text-center text-gray-500">
+                                                                        ไม่พบข้อมูลประกันภัยที่ตรงกับเงื่อนไขการกรอง
                                                                     </TableCell>
                                                                 </TableRow>
-                                                            ))
-                                                        ) : (
-                                                            <TableRow>
-                                                                <TableCell colSpan={6} className="h-32 text-center text-gray-500">
-                                                                    ไม่พบข้อมูลประกันภัยที่ตรงกับเงื่อนไขการกรอง
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
 
+                                    </div>
                                 </div>
-                            </div>
                             )}
 
                             {/* Footer - only show on list view */}
@@ -1752,7 +1765,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            รายละเอียดบัญชีรับโอนเงินกู้
+                                รายละเอียดบัญชีรับโอนเงินกู้
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 px-6 pb-6 pt-5">
@@ -1789,7 +1802,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                     {bookBankFile ? (
                                                         <button
                                                             type="button"
-                                                            onClick={() => window.open(URL.createObjectURL(bookBankFile), '_blank')}
+                                                            onClick={() => setIsBankBookPreviewOpen(true)}
                                                             className="flex items-center gap-1.5 text-xs text-chaiyo-blue font-medium hover:underline cursor-pointer"
                                                         >
                                                             <FileText className="w-3.5 h-3.5" /> 1 ไฟล์
@@ -1800,23 +1813,24 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="relative inline-block">
-                                                        <Button
-                                                            type="button"
-                                                            disabled={isRCCOChecker}
-                                                            variant={bookBankFile ? "ghost" : "outline"}
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                if (bookBankFile) setIsDeleteDialogOpen(true);
-                                                            }}
-                                                            className={cn(
-                                                                "h-8 text-xs gap-1.5 font-medium relative",
-                                                                bookBankFile ? "w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50" : ""
-                                                            )}
-                                                            title={bookBankFile ? "ลบไฟล์" : "อัพโหลดไฟล์"}
-                                                        >
-                                                            {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัพโหลดไฟล์</>}
-                                                        </Button>
-                                                        {!bookBankFile && (
+                                                        {!isRCCOChecker && (
+                                                            <Button
+                                                                type="button"
+                                                                variant={bookBankFile ? "ghost" : "outline"}
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    if (bookBankFile) setIsDeleteDialogOpen(true);
+                                                                }}
+                                                                className={cn(
+                                                                    "h-8 text-xs gap-1.5 font-medium relative",
+                                                                    bookBankFile ? "w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50" : ""
+                                                                )}
+                                                                title={bookBankFile ? "ลบไฟล์" : "อัพโหลดไฟล์"}
+                                                            >
+                                                                {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัพโหลดไฟล์</>}
+                                                            </Button>
+                                                        )}
+                                                        {!bookBankFile && !isRCCOChecker && (
                                                             <input
                                                                 type="file"
                                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -1839,13 +1853,19 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             {/* Bank Account Details */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {/* Select Bank */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 relative">
                                     <Label className="text-sm">ธนาคาร <span className="text-red-500">*</span></Label>
                                     <Select
                                         value={formData?.bankName || ''}
-                                        onValueChange={(val) => setFormData?.({ ...formData, bankName: val })}
+                                        onValueChange={(val) => {
+                                            setFormData?.({ ...formData, bankName: val });
+                                            setBankVerificationStatus("idle");
+                                        }}
                                     >
-                                        <SelectTrigger className="w-full text-sm">
+                                        <SelectTrigger className={cn(
+                                            "w-full text-sm pr-10",
+                                            bankVerificationStatus === "matched" && "border-green-500 border-2"
+                                        )}>
                                             <SelectValue placeholder="-- เลือกธนาคาร --">
                                                 {formData?.bankName && (
                                                     <div className="flex items-center gap-2">
@@ -1870,60 +1890,120 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {bankVerificationStatus === "matched" && (
+                                        <CheckCircle2 className="absolute right-3 top-9 w-5 h-5 text-green-500" />
+                                    )}
                                 </div>
 
 
 
                                 {/* Bank Account Number */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 relative">
                                     <Label className="text-sm">เลขที่บัญชี <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        placeholder="กรอกเลขที่บัญชีธนาคาร"
-                                        value={formData?.bankAccountNumber || ''}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            const bankName = formData?.bankName;
-                                            let finalValue = value;
-                                            const numbers = value.replace(/\D/g, '');
-                                            if (bankName === 'TRUEMONEY') {
-                                                const digits = numbers.slice(0, 10);
-                                                if (digits.length > 0) {
-                                                    finalValue = digits.slice(0, 3);
-                                                    if (digits.length > 3) {
-                                                        finalValue += "-" + digits.slice(3, 6);
-                                                        if (digits.length > 6) {
-                                                            finalValue += "-" + digits.slice(6, 10);
+                                    <div className="relative">
+                                        <Input
+                                            placeholder="กรอกเลขที่บัญชีธนาคาร"
+                                            value={formData?.bankAccountNumber || ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                const bankName = formData?.bankName;
+                                                let finalValue = value;
+                                                const numbers = value.replace(/\D/g, '');
+                                                if (bankName === 'TRUEMONEY') {
+                                                    const digits = numbers.slice(0, 10);
+                                                    if (digits.length > 0) {
+                                                        finalValue = digits.slice(0, 3);
+                                                        if (digits.length > 3) {
+                                                            finalValue += "-" + digits.slice(3, 6);
+                                                            if (digits.length > 6) {
+                                                                finalValue += "-" + digits.slice(6, 10);
+                                                            }
                                                         }
                                                     }
-                                                }
-                                            } else {
-                                                const digits = numbers.slice(0, 10);
-                                                if (digits.length > 0) {
-                                                    finalValue = digits.slice(0, 3);
-                                                    if (digits.length > 3) {
-                                                        finalValue += "-" + digits.slice(3, 4);
-                                                        if (digits.length > 4) {
-                                                            finalValue += "-" + digits.slice(4, 9);
-                                                            if (digits.length > 9) {
-                                                                finalValue += "-" + digits.slice(9, 10);
+                                                } else {
+                                                    const digits = numbers.slice(0, 10);
+                                                    if (digits.length > 0) {
+                                                        finalValue = digits.slice(0, 3);
+                                                        if (digits.length > 3) {
+                                                            finalValue += "-" + digits.slice(3, 4);
+                                                            if (digits.length > 4) {
+                                                                finalValue += "-" + digits.slice(4, 9);
+                                                                if (digits.length > 9) {
+                                                                    finalValue += "-" + digits.slice(9, 10);
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
-                                            setFormData?.({ ...formData, bankAccountNumber: finalValue });
-                                        }}
-                                        className="font-mono text-base"
-                                    />
+                                                setFormData?.({ ...formData, bankAccountNumber: finalValue });
+                                                setBankVerificationStatus("idle");
+                                            }}
+                                            className={cn(
+                                                "font-mono text-base pr-10",
+                                                bankVerificationStatus === "matched" && "border-green-500 border-2"
+                                            )}
+                                        />
+                                        {bankVerificationStatus === "matched" && (
+                                            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                                        )}
+                                    </div>
                                 </div>
                                 {/* Bank Account Name */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 relative">
                                     <Label className="text-sm">ชื่อบัญชี <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
-                                        value={formData?.bankAccountName || ''}
-                                        onChange={(e) => setFormData?.({ ...formData, bankAccountName: e.target.value })}
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            placeholder="ชื่อ-นามสกุล เจ้าของบัญชี"
+                                            value={formData?.bankAccountName || ''}
+                                            onChange={(e) => {
+                                                setFormData?.({ ...formData, bankAccountName: e.target.value });
+                                                setBankVerificationStatus("idle");
+                                            }}
+                                            className={cn(
+                                                "pr-10",
+                                                bankVerificationStatus === "matched" && "border-green-500 border-2"
+                                            )}
+                                        />
+                                        {bankVerificationStatus === "matched" && (
+                                            <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                                        )}
+                                    </div>
+                                    {isRCCOChecker && (
+                                        <Button
+                                            type="button"
+                                            onClick={() => {
+                                                setBankVerificationStatus("checking");
+                                                // Simulate verification process
+                                                setTimeout(() => {
+                                                    const makerBankName = 'KBANK';
+                                                    const makerBankAccountNumber = '123-4-56789-0';
+                                                    const makerBankAccountName = 'นายสมชาย ใจดี';
+
+                                                    const isMatched =
+                                                        formData?.bankName === makerBankName &&
+                                                        formData?.bankAccountNumber === makerBankAccountNumber &&
+                                                        formData?.bankAccountName.toLowerCase().trim() === makerBankAccountName.toLowerCase().trim();
+
+                                                    if (isMatched) {
+                                                        setBankVerificationStatus("matched");
+                                                        setBankVerificationMessage("✓ ข้อมูลบัญชีตรงกับข้อมูลจากสาขา");
+                                                    } else {
+                                                        setBankVerificationStatus("mismatched");
+                                                        setBankVerificationMessage("✗ ข้อมูลบัญชีไม่ตรงกับข้อมูลจากสาขา กรุณาตรวจสอบใหม่");
+                                                    }
+                                                }, 800);
+                                            }}
+                                            disabled={bankVerificationStatus === "checking" || !formData?.bankName || !formData?.bankAccountNumber || !formData?.bankAccountName}
+                                            className="w-full h-10 bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-medium rounded-lg transition-all"
+                                        >
+                                            {bankVerificationStatus === "checking" ? "กำลังตรวจสอบ..." : "ตรวจสอบบัญชี"}
+                                        </Button>
+                                    )}
+                                    {bankVerificationStatus === "mismatched" && (
+                                        <div className="mt-2 p-3 rounded-lg text-sm font-medium text-center bg-red-50 text-red-700 border border-red-200">
+                                            {bankVerificationMessage}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -1955,6 +2035,67 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+
+                    {/* Bank Book Preview Dialog */}
+                    <Dialog open={isBankBookPreviewOpen} onOpenChange={setIsBankBookPreviewOpen}>
+                        <DialogContent size="xl" className="p-0 gap-0 overflow-hidden border-border-strong rounded-2xl">
+                            <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-white border-b border-gray-100">
+                                <DialogTitle>หน้าสมุดบัญชีธนาคาร</DialogTitle>
+                            </DialogHeader>
+                            <div className="flex-1 overflow-auto bg-gray-50 p-6 flex items-center justify-center min-h-[500px]">
+                                {isRCCOChecker ? (
+                                    <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8 border border-gray-200">
+                                        {/* Thai Bank Book Mockup */}
+                                        <div className="space-y-4">
+                                            <div className="text-center pb-4 border-b border-gray-200">
+                                                <p className="text-sm font-bold text-gray-700">สมุดบัญชีธนาคาร</p>
+                                                <p className="text-xs text-gray-500 mt-1">Bank Account Book</p>
+                                            </div>
+                                            <div className="space-y-3 text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">ชื่อ :</span>
+                                                    <span className="font-medium text-gray-800">นายสมชาย ใจดี</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">ธนาคาร :</span>
+                                                    <span className="font-medium text-gray-800">กสิกรไทย</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">เลขบัญชี :</span>
+                                                    <span className="font-medium text-gray-800 font-mono">123-4-56789-0</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-gray-600">วันที่ :</span>
+                                                    <span className="font-medium text-gray-800">15 กรกฎาคม 2568</span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-6 p-4 bg-blue-50 rounded border border-blue-100">
+                                                <p className="text-xs text-blue-700 text-center">เอกสารนี้อัพโหลดโดยผู้สมัคร (Maker)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="w-full max-w-2xl">
+                                        {bookBankFile?.type.startsWith('image/') ? (
+                                            <img
+                                                src={URL.createObjectURL(bookBankFile)}
+                                                alt="Bank Book"
+                                                className="w-full rounded-lg shadow-lg"
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg border border-gray-200">
+                                                <FileText className="w-16 h-16 text-gray-400 mb-4" />
+                                                <p className="text-gray-600 font-medium">{bookBankFile?.name}</p>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                    ไฟล์นี้เป็น {bookBankFile?.type === 'application/pdf' ? 'PDF' : 'เอกสาร'} ที่ได้รับการอัพโหลด
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Policy Checklist - Last Section */}
                     <PolicyChecklist />

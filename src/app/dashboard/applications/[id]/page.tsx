@@ -397,6 +397,21 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
         });
     };
 
+    const handleResetTaskClaim = () => {
+        setTimerActive(false);
+        setTimeLeft(60 * 60);
+        toast.info("รีเซ็ตการเคลมใบงาน", {
+            description: "กลับไปสู่สถานะก่อนเคลมใบงาน",
+        });
+    };
+
+    // Expose reset function for testing purposes
+    useEffect(() => {
+        if (app.applicationNo === "25690106ULCRL0006") {
+            (window as any).__resetTaskClaim = handleResetTaskClaim;
+        }
+    }, [app.applicationNo]);
+
     // ── Set breadcrumbs + right content ──────────────────────────────────
     useEffect(() => {
         // If redirected from soft block, change status to In Review

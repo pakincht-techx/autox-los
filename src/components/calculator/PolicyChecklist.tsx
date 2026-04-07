@@ -23,6 +23,10 @@ interface PolicyRow {
     result: PolicyResult;
     badge?: string;
     waiverAuthority?: string;
+    branchInfo?: string | string[];
+    rcInput?: string | string[];
+    branchResult?: PolicyResult;
+    rcResult?: PolicyResult;
 }
 
 interface PolicySection {
@@ -44,6 +48,10 @@ const BORROWER_ROWS: PolicyRow[] = [
     {
         id: "borrower_age",
         policy: "อายุผู้กู้",
+        branchInfo: "22 ปี",
+        rcInput: "22 ปี",
+        branchResult: "ไม่ผ่าน",
+        rcResult: "ไม่ผ่าน",
         customerInfo: "22 ปี",
         result: "ไม่ผ่าน",
         waiverAuthority: "รองประธานเจ้าหน้าที่บริหารสายงานอนุมัติสินเชื่อ หรือ ผู้อำนวยการฝ่ายปฏิบัติการสินเชื่อรายย่อย",
@@ -51,12 +59,20 @@ const BORROWER_ROWS: PolicyRow[] = [
     {
         id: "borrower_age_with_term",
         policy: "อายุผู้กู้รวมระยะเวลาผ่อน",
+        branchInfo: "54 ปี",
+        rcInput: "54 ปี",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "54 ปี",
         result: "ผ่าน",
     },
     {
         id: "borrower_occupation",
         policy: "อาชีพ",
+        branchInfo: ["อาชีพหลัก: นักการเมือง-กำนัน", "อาชีพเสริม: เกษตรกร"],
+        rcInput: ["อาชีพหลัก: สถาปนิก", "อาชีพเสริม: ที่ปรึกษาการเงิน"],
+        branchResult: "ไม่ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: ["อาชีพหลัก: นักการเมือง-กำนัน", "อาชีพเสริม: เกษตรกร"],
         result: "ไม่ผ่าน",
         waiverAuthority: "ประธานเจ้าหน้าที่บริหารกลุ่มงานบริหารความเสี่ยง และ ประธานเจ้าหน้าที่บริหารกลุ่มงานผลิตภัณฑ์",
@@ -64,30 +80,50 @@ const BORROWER_ROWS: PolicyRow[] = [
     {
         id: "borrower_income",
         policy: "รายได้ก่อนหักค่าใช้จ่าย",
+        branchInfo: "30,000 บาท",
+        rcInput: "38,000 บาท",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "30,000 บาท",
         result: "ผ่าน",
     },
     {
         id: "borrower_residual_income",
         policy: "เงินคงเหลือสุทธิ (Residual Income)",
+        branchInfo: "20,000 บาท",
+        rcInput: "22,000 บาท",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "20,000 บาท",
         result: "ผ่าน",
     },
     {
         id: "borrower_iir",
         policy: "IIR",
+        branchInfo: "2.4 เท่า",
+        rcInput: "2.5 เท่า",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "2.4 เท่า",
         result: "ผ่าน",
     },
     {
         id: "borrower_dsr",
         policy: "DSR",
+        branchInfo: "70.00 %",
+        rcInput: "68.00 %",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "70.00 %",
         result: "ผ่าน",
     },
     {
         id: "borrower_service_area",
         policy: "พื้นที่การให้บริการ",
+        branchInfo: "48.00 กิโลเมตร",
+        rcInput: "48.00 กิโลเมตร",
+        branchResult: "ผ่าน",
+        rcResult: "ผ่าน",
         customerInfo: "48.00 กิโลเมตร",
         result: "ผ่าน",
     },
@@ -101,48 +137,80 @@ const GUARANTORS: Guarantor[] = [
             {
                 id: "g1_has_guarantor",
                 policy: "มีผู้ค้ำประกัน",
+                branchInfo: "มี",
+                rcInput: "มี",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "มี",
                 result: "ผ่าน",
             },
             {
                 id: "g1_guarantor_type",
                 policy: "ประเภทผู้ค้ำประกัน",
+                branchInfo: "เจ้าของกรรมสิทธ์ร่วม",
+                rcInput: "เจ้าของกรรมสิทธ์ร่วม",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "เจ้าของกรรมสิทธ์ร่วม",
                 result: "ผ่าน",
             },
             {
                 id: "g1_guarantee_type",
                 policy: "ประเภทการค้ำประกัน",
+                branchInfo: "ค้ำประกันแบบไม่รวมรายได้",
+                rcInput: "ค้ำประกันแบบไม่รวมรายได้",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "ค้ำประกันแบบไม่รวมรายได้",
                 result: "ผ่าน",
             },
             {
                 id: "g1_age",
                 policy: "อายุผู้ค้ำประกัน",
+                branchInfo: "60 ปี",
+                rcInput: "60 ปี",
+                branchResult: null,
+                rcResult: null,
                 customerInfo: "60 ปี",
                 result: null,
             },
             {
                 id: "g1_income",
                 policy: "รายได้ก่อนหักค่าใช้จ่ายผู้ค้ำประกัน",
+                branchInfo: "30,000 บาท",
+                rcInput: "32,000 บาท",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "30,000 บาท",
                 result: "ผ่าน",
             },
             {
                 id: "g1_residual_income",
                 policy: "เงินคงเหลือสุทธิ (Residual Income) ผู้ค้ำประกัน",
+                branchInfo: "20,000 บาท",
+                rcInput: "21,000 บาท",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "20,000 บาท",
                 result: "ผ่าน",
             },
             {
                 id: "g1_iir",
                 policy: "IIR ผู้ค้ำประกัน",
+                branchInfo: "2.4 เท่า",
+                rcInput: "2.5 เท่า",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "2.4 เท่า",
                 result: "ผ่าน",
             },
             {
                 id: "g1_dsr",
                 policy: "DSR ผู้ค้ำประกัน",
+                branchInfo: "70.00 %",
+                rcInput: "68.00 %",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "70.00 %",
                 result: "ผ่าน",
             },
@@ -154,42 +222,70 @@ const GUARANTORS: Guarantor[] = [
             {
                 id: "g2_has_guarantor",
                 policy: "มีผู้ค้ำประกัน",
+                branchInfo: "มี",
+                rcInput: "มี",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "มี",
                 result: "ผ่าน",
             },
             {
                 id: "g2_guarantor_type",
                 policy: "ประเภทผู้ค้ำประกัน",
+                branchInfo: "ไม่ใช่เจ้าของกรรมสิทธิ์ร่วม",
+                rcInput: "ไม่ใช่เจ้าของกรรมสิทธิ์ร่วม",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "ไม่ใช่เจ้าของกรรมสิทธิ์ร่วม",
                 result: "ผ่าน",
             },
             {
                 id: "g2_guarantee_type",
                 policy: "ประเภทการค้ำประกัน",
+                branchInfo: "ค้ำประกันแบบรวมรายได้",
+                rcInput: "ค้ำประกันแบบรวมรายได้",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "ค้ำประกันแบบรวมรายได้",
                 result: "ผ่าน",
             },
             {
                 id: "g2_age",
                 policy: "อายุผู้ค้ำประกัน",
+                branchInfo: "45 ปี",
+                rcInput: "45 ปี",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "45 ปี",
                 result: "ผ่าน",
             },
             {
                 id: "g2_income",
                 policy: "รายได้ก่อนหักค่าใช้จ่ายผู้ค้ำประกัน",
+                branchInfo: "25,000 บาท",
+                rcInput: "26,500 บาท",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "25,000 บาท",
                 result: "ผ่าน",
             },
             {
                 id: "g2_residual_income",
                 policy: "เงินคงเหลือสุทธิ (Residual Income) ผู้ค้ำประกัน",
+                branchInfo: "15,000 บาท",
+                rcInput: "16,500 บาท",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "15,000 บาท",
                 result: "ผ่าน",
             },
             {
                 id: "g2_iir",
                 policy: "IIR ผู้ค้ำประกัน",
+                branchInfo: "1.8 เท่า",
+                rcInput: "1.9 เท่า",
+                branchResult: "ไม่ผ่าน",
+                rcResult: "ไม่ผ่าน",
                 customerInfo: "1.8 เท่า",
                 result: "ไม่ผ่าน",
                 waiverAuthority: "รองประธานเจ้าหน้าที่บริหารสายงานอนุมัติสินเชื่อ หรือ ผู้อำนวยการฝ่ายปฏิบัติการสินเชื่อรายย่อย",
@@ -197,6 +293,10 @@ const GUARANTORS: Guarantor[] = [
             {
                 id: "g2_dsr",
                 policy: "DSR ผู้ค้ำประกัน",
+                branchInfo: "65.00 %",
+                rcInput: "63.00 %",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "65.00 %",
                 result: "ผ่าน",
             },
@@ -233,12 +333,20 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
             {
                 id: "bg_iir",
                 policy: "IIR (กรณีรวมรายได้)",
+                branchInfo: "2.4 เท่า",
+                rcInput: "2.5 เท่า",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "2.4 เท่า",
                 result: "ผ่าน",
             },
             {
                 id: "bg_dsr",
                 policy: "DSR ผู้ค้ำประกัน (กรณีรวมรายได้)",
+                branchInfo: "70.00 %",
+                rcInput: "68.00 %",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "70.00 %",
                 result: "ผ่าน",
             },
@@ -251,18 +359,30 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
             {
                 id: "col_car_age",
                 policy: "อายุรถ",
+                branchInfo: "3 ปี",
+                rcInput: "3 ปี",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "3 ปี",
                 result: "ผ่าน",
             },
             {
                 id: "col_ownership_duration",
                 policy: "ระยะเวลาครอบครองกรรมสิทธ์รถยนต์",
+                branchInfo: "90 วัน",
+                rcInput: "90 วัน",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "90 วัน",
                 result: "ผ่าน",
             },
             {
                 id: "col_ltv",
                 policy: "LTV",
+                branchInfo: "65 %",
+                rcInput: "63 %",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "65 %",
                 result: "ผ่าน",
             },
@@ -275,12 +395,20 @@ const AFTER_GUARANTOR_SECTIONS: PolicySection[] = [
             {
                 id: "loan_account_status",
                 policy: "สถานะบัญชี ณ วันขอสินเชื่อ",
+                branchInfo: "0 งวด",
+                rcInput: "0 งวด",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "0 งวด",
                 result: "ผ่าน",
             },
             {
                 id: "loan_installment",
                 policy: "ค่างวดกับไฟแนนซ์เดิม",
+                branchInfo: "1,500 บาท",
+                rcInput: "1,500 บาท",
+                branchResult: "ผ่าน",
+                rcResult: "ผ่าน",
                 customerInfo: "1,500 บาท",
                 result: "ผ่าน",
             },
@@ -376,6 +504,85 @@ function PlaceholderRow() {
     );
 }
 
+function SectionHeaderWithColumns() {
+    return (
+        <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[35%]">
+                เกณฑ์
+            </TableCell>
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-white bg-blue-500 text-center w-[32.5%]">
+                ผลตรวจสอบสาขา
+            </TableCell>
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-white bg-amber-500 text-center w-[32.5%]">
+                ผลตรวจสอบ RC
+            </TableCell>
+        </TableRow>
+    );
+}
+
+function PolicyRowsWithColumns({ rows }: { rows: PolicyRow[] }) {
+    return (
+        <>
+            {rows.map((row) => (
+                <TableRow
+                    key={row.id}
+                    className="hover:bg-gray-50/50 transition-colors"
+                >
+                    <TableCell className="px-4 py-3 text-sm text-gray-500 w-[35%]">
+                        {row.policy}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-900 font-semibold text-center w-[32.5%]">
+                        <div className="flex flex-col items-center gap-1">
+                            {Array.isArray(row.branchInfo) ? (
+                                <div className="flex flex-col gap-1 text-center">
+                                    {row.branchInfo.map((line, i) => {
+                                        const colonIdx = line.indexOf(':');
+                                        if (colonIdx > -1) {
+                                            const value = line.slice(colonIdx + 1).trim();
+                                            return (
+                                                <span key={i} className="text-sm text-gray-700">
+                                                    {value}
+                                                </span>
+                                            );
+                                        }
+                                        return <span key={i} className="text-sm text-gray-700">{line}</span>;
+                                    })}
+                                </div>
+                            ) : (
+                                <span className="text-sm text-gray-700">{row.branchInfo}</span>
+                            )}
+                            <ResultBadge result={row.branchResult} />
+                        </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-900 font-semibold text-center w-[32.5%]">
+                        <div className="flex flex-col items-center gap-1">
+                            {Array.isArray(row.rcInput) ? (
+                                <div className="flex flex-col gap-1 text-center">
+                                    {row.rcInput.map((line, i) => {
+                                        const colonIdx = line.indexOf(':');
+                                        if (colonIdx > -1) {
+                                            const value = line.slice(colonIdx + 1).trim();
+                                            return (
+                                                <span key={i} className="text-sm text-gray-700">
+                                                    {value}
+                                                </span>
+                                            );
+                                        }
+                                        return <span key={i} className="text-sm text-gray-700">{line}</span>;
+                                    })}
+                                </div>
+                            ) : (
+                                <span className="text-sm text-gray-700">{row.rcInput}</span>
+                            )}
+                            <ResultBadge result={row.rcResult} />
+                        </div>
+                    </TableCell>
+                </TableRow>
+            ))}
+        </>
+    );
+}
+
 // ── Main Component ───────────────────────────────────────
 
 export function PolicyChecklist() {
@@ -442,27 +649,58 @@ export function PolicyChecklist() {
 
                             <TableBody>
                                 {/* 1. ข้อมูลผู้กู้ */}
-                                {STANDARD_SECTIONS.map((section) => (
-                                    <React.Fragment key={section.id}>
-                                        <SectionHeader label={section.label} note={section.note} />
-                                        {section.rows.length > 0 ? (
-                                            <PolicyRows rows={section.rows} />
-                                        ) : (
-                                            <PlaceholderRow />
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                {STANDARD_SECTIONS.map((section) => {
+                                    const hasVerificationColumns = section.rows.length > 0 && section.rows[0].branchInfo;
+                                    return (
+                                        <React.Fragment key={section.id}>
+                                            {hasVerificationColumns ? (
+                                                <>
+                                                    <SectionHeaderWithColumns />
+                                                    <PolicyRowsWithColumns rows={section.rows} />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <SectionHeader label={section.label} note={section.note} />
+                                                    {section.rows.length > 0 ? (
+                                                        <PolicyRows rows={section.rows} />
+                                                    ) : (
+                                                        <PlaceholderRow />
+                                                    )}
+                                                </>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
 
                                 {/* 2. ข้อมูลผู้ค้ำประกัน — repeats per guarantor */}
                                 {GUARANTORS.length > 0 ? (
-                                    GUARANTORS.map((guarantor, index) => (
-                                        <React.Fragment key={`guarantor-${index}`}>
-                                            <SectionHeader
-                                                label={`ข้อมูลผู้ค้ำประกัน คนที่ ${index + 1} - ${guarantor.name}`}
-                                            />
-                                            <PolicyRows rows={guarantor.rows} />
-                                        </React.Fragment>
-                                    ))
+                                    GUARANTORS.map((guarantor, index) => {
+                                        const hasVerificationColumns = guarantor.rows.length > 0 && guarantor.rows[0].branchInfo;
+                                        return (
+                                            <React.Fragment key={`guarantor-${index}`}>
+                                                {hasVerificationColumns ? (
+                                                    <>
+                                                        <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
+                                                            <TableCell colSpan={3} className="px-4 py-3.5">
+                                                                <span className="text-sm font-bold text-gray-700">
+                                                                    ข้อมูลผู้ค้ำประกัน คนที่ {index + 1} - {guarantor.name}
+                                                                </span>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                        <SectionHeaderWithColumns />
+                                                        <PolicyRowsWithColumns rows={guarantor.rows} />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <SectionHeader
+                                                            label={`ข้อมูลผู้ค้ำประกัน คนที่ ${index + 1} - ${guarantor.name}`}
+                                                        />
+                                                        <PolicyRows rows={guarantor.rows} />
+                                                    </>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })
                                 ) : (
                                     <>
                                         <SectionHeader label="ข้อมูลผู้ค้ำประกัน" note="สามารถมีได้หลายคน" />
@@ -471,16 +709,44 @@ export function PolicyChecklist() {
                                 )}
 
                                 {/* 3-5. Remaining sections */}
-                                {AFTER_GUARANTOR_SECTIONS.map((section) => (
-                                    <React.Fragment key={section.id}>
-                                        <SectionHeader label={section.label} note={section.note} />
-                                        {section.rows.length > 0 ? (
-                                            <PolicyRows rows={section.rows} />
-                                        ) : (
-                                            <PlaceholderRow />
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                {AFTER_GUARANTOR_SECTIONS.map((section) => {
+                                    const hasVerificationColumns = section.rows.length > 0 && section.rows[0].branchInfo;
+                                    return (
+                                        <React.Fragment key={section.id}>
+                                            {hasVerificationColumns ? (
+                                                <>
+                                                    <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
+                                                        <TableCell colSpan={3} className="px-4 py-3.5">
+                                                            <span className="text-sm font-bold text-gray-700">
+                                                                {section.label}
+                                                            </span>
+                                                            {section.note && (
+                                                                <span className="text-xs text-gray-400 ml-2">
+                                                                    ({section.note})
+                                                                </span>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                    <SectionHeaderWithColumns />
+                                                    {section.rows.length > 0 ? (
+                                                        <PolicyRowsWithColumns rows={section.rows} />
+                                                    ) : (
+                                                        <PlaceholderRow />
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <SectionHeader label={section.label} note={section.note} />
+                                                    {section.rows.length > 0 ? (
+                                                        <PolicyRows rows={section.rows} />
+                                                    ) : (
+                                                        <PlaceholderRow />
+                                                    )}
+                                                </>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </div>

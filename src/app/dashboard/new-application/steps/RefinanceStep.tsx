@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Phone, Info, Plus, Trash2, Home, ClipboardCheck, Calendar } from "lucide-react";
+import { useSidebar } from "@/components/layout/SidebarContext";
 import {
     Select,
     SelectContent,
@@ -59,6 +60,9 @@ const FINANCE_COMPANIES = [
 
 
 export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
+    const { devRole } = useSidebar();
+    const isRCCOChecker = devRole === 'rcco-checker';
+
     // Section 1 state
     const [financeCompany, setFinanceCompany] = useState("");
     const [financeCompanyOther, setFinanceCompanyOther] = useState("");
@@ -68,6 +72,29 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
     const [loanAmount, setLoanAmount] = useState("");
     const [loanTerm, setLoanTerm] = useState("");
     const [monthlyInstallment, setMonthlyInstallment] = useState("");
+
+    // Initialize from formData if available (for mock data)
+    useEffect(() => {
+        const data = formData as any;
+        if (data.financeCompany) setFinanceCompany(data.financeCompany as string);
+        if (data.financeCompanyBranch) setFinanceCompanyBranch(data.financeCompanyBranch as string);
+        if (data.contractNo) setContractNo(data.contractNo as string);
+        if (data.contractDate) setContractDate(data.contractDate as string);
+        if (data.loanAmount) setLoanAmount(data.loanAmount as string);
+        if (data.loanTerm) setLoanTerm(data.loanTerm as string);
+        if (data.monthlyInstallment) setMonthlyInstallment(data.monthlyInstallment as string);
+        if (data.hasCashCard) setHasCashCard(data.hasCashCard as boolean);
+        if (data.hasApplication) setHasApplication(data.hasApplication as boolean);
+        if (data.closureAmount) setClosureAmount(data.closureAmount as string);
+        if (data.penaltyAmount) setPenaltyAmount(data.penaltyAmount as string);
+        if (data.feeAmount) setFeeAmount(data.feeAmount as string);
+        if (data.paymentMethod) setPaymentMethod(data.paymentMethod as string);
+        if (data.paymentMethodOther) setPaymentMethodOther(data.paymentMethodOther as string);
+        if (data.hasOtherLoans !== undefined && data.hasOtherLoans !== null) setHasOtherLoans(data.hasOtherLoans as boolean);
+        if (data.otherLoans) setOtherLoans(data.otherLoans as any);
+        if (data.hasOverdue) setHasOverdue(data.hasOverdue as boolean);
+        if (data.overdueInstallments) setOverdueInstallments(data.overdueInstallments as string);
+    }, []);
 
     // Section 2 state
     const [hasCashCard, setHasCashCard] = useState(false);
@@ -145,10 +172,12 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                 <span className="text-red-500">*</span>
                             </Label>
                             <Select value={financeCompany} onValueChange={(val) => {
-                                setFinanceCompany(val);
-                                if (val !== "other") setFinanceCompanyOther("");
-                            }}>
-                                <SelectTrigger className="h-11 bg-white">
+                                if (!isRCCOChecker) {
+                                    setFinanceCompany(val);
+                                    if (val !== "other") setFinanceCompanyOther("");
+                                }
+                            }} disabled={isRCCOChecker}>
+                                <SelectTrigger className="h-11 bg-white" disabled={isRCCOChecker}>
                                     <SelectValue placeholder="เลือกชื่อไฟแนนซ์">
                                         {financeCompany && (() => {
                                             const selected = FINANCE_COMPANIES.find(fc => fc.value === financeCompany);
@@ -182,9 +211,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             {financeCompany === "other" && (
                                 <Input
                                     value={financeCompanyOther}
-                                    onChange={(e) => setFinanceCompanyOther(e.target.value)}
+                                    onChange={(e) => !isRCCOChecker && setFinanceCompanyOther(e.target.value)}
                                     placeholder="ระบุชื่อสถาบันการเงิน/ไฟแนนซ์"
                                     className="h-11 bg-white mt-2 animate-in fade-in slide-in-from-top-1 duration-200"
+                                    disabled={isRCCOChecker}
                                 />
                             )}
                         </div>
@@ -196,9 +226,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             </Label>
                             <Input
                                 value={financeCompanyBranch}
-                                onChange={(e) => setFinanceCompanyBranch(e.target.value)}
+                                onChange={(e) => !isRCCOChecker && setFinanceCompanyBranch(e.target.value)}
                                 placeholder="ระบุชื่อสาขา"
                                 className="h-11 bg-white"
+                                disabled={isRCCOChecker}
                             />
                         </div>
 
@@ -209,9 +240,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             </Label>
                             <Input
                                 value={contractNo}
-                                onChange={(e) => setContractNo(e.target.value)}
+                                onChange={(e) => !isRCCOChecker && setContractNo(e.target.value)}
                                 placeholder="ระบุเลขที่สัญญา"
                                 className="h-11 bg-white"
+                                disabled={isRCCOChecker}
                             />
                         </div>
 
@@ -222,8 +254,9 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             </Label>
                             <DatePickerBE
                                 value={contractDate}
-                                onChange={setContractDate}
+                                onChange={(val) => !isRCCOChecker && setContractDate(val)}
                                 placeholder="DD/MM/YYYY"
+                                disabled={isRCCOChecker}
                             />
                         </div>
 
@@ -235,9 +268,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             <div className="relative">
                                 <Input
                                     value={loanAmount}
-                                    onChange={handleAmountChange(setLoanAmount)}
+                                    onChange={(e) => !isRCCOChecker && handleAmountChange(setLoanAmount)(e)}
                                     placeholder="0.00"
                                     className="pr-12 h-11 bg-white"
+                                    disabled={isRCCOChecker}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                                     บาท
@@ -253,9 +287,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             <div className="relative">
                                 <Input
                                     value={loanTerm}
-                                    onChange={handleTermChange}
+                                    onChange={(e) => !isRCCOChecker && handleTermChange(e)}
                                     placeholder="0"
                                     className="pr-14 h-11 bg-white"
+                                    disabled={isRCCOChecker}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                                     เดือน
@@ -271,9 +306,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             <div className="relative">
                                 <Input
                                     value={monthlyInstallment}
-                                    onChange={handleAmountChange(setMonthlyInstallment)}
+                                    onChange={(e) => !isRCCOChecker && handleAmountChange(setMonthlyInstallment)(e)}
                                     placeholder="0.00"
                                     className="pr-12 h-11 bg-white"
+                                    disabled={isRCCOChecker}
                                 />
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                                     บาท
@@ -295,7 +331,8 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     <Checkbox
                                         id="hasCashCard"
                                         checked={hasCashCard}
-                                        onCheckedChange={(checked) => setHasCashCard(!!checked)}
+                                        onCheckedChange={(checked) => !isRCCOChecker && setHasCashCard(!!checked)}
+                                        disabled={isRCCOChecker}
                                     />
                                     <Label htmlFor="hasCashCard" className="text-sm font-medium text-gray-700 cursor-pointer">
                                         มีบัตรกดเงินสด
@@ -306,7 +343,8 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     <Checkbox
                                         id="hasApplication"
                                         checked={hasApplication}
-                                        onCheckedChange={(checked) => setHasApplication(!!checked)}
+                                        onCheckedChange={(checked) => !isRCCOChecker && setHasApplication(!!checked)}
+                                        disabled={isRCCOChecker}
                                     />
                                     <Label htmlFor="hasApplication" className="text-sm font-medium text-gray-700 cursor-pointer">
                                         มี Application
@@ -394,9 +432,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                             <div className="max-w-[200px] ml-auto">
                                                 <Input
                                                     value={closureAmount}
-                                                    onChange={handleAmountChange(setClosureAmount)}
+                                                    onChange={(e) => !isRCCOChecker && handleAmountChange(setClosureAmount)(e)}
                                                     placeholder="0.00"
                                                     className="h-9 bg-white text-right"
+                                                    disabled={isRCCOChecker}
                                                 />
                                             </div>
                                         </TableCell>
@@ -413,9 +452,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                             <div className="max-w-[200px] ml-auto">
                                                 <Input
                                                     value={penaltyAmount}
-                                                    onChange={handleAmountChange(setPenaltyAmount)}
+                                                    onChange={(e) => !isRCCOChecker && handleAmountChange(setPenaltyAmount)(e)}
                                                     placeholder="0.00"
                                                     className="h-9 bg-white text-right"
+                                                    disabled={isRCCOChecker}
                                                 />
                                             </div>
                                         </TableCell>
@@ -432,9 +472,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                             <div className="max-w-[200px] ml-auto">
                                                 <Input
                                                     value={feeAmount}
-                                                    onChange={handleAmountChange(setFeeAmount)}
+                                                    onChange={(e) => !isRCCOChecker && handleAmountChange(setFeeAmount)(e)}
                                                     placeholder="0.00"
                                                     className="h-9 bg-white text-right"
+                                                    disabled={isRCCOChecker}
                                                 />
                                             </div>
                                         </TableCell>
@@ -469,10 +510,12 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     วิธีชำระหนี้ปิดบัญชี <span className="text-red-500">*</span>
                                 </Label>
                                 <Select value={paymentMethod} onValueChange={(val) => {
-                                    setPaymentMethod(val);
-                                    if (val !== "other") setPaymentMethodOther("");
-                                }}>
-                                    <SelectTrigger className="h-11 bg-white">
+                                    if (!isRCCOChecker) {
+                                        setPaymentMethod(val);
+                                        if (val !== "other") setPaymentMethodOther("");
+                                    }
+                                }} disabled={isRCCOChecker}>
+                                    <SelectTrigger className="h-11 bg-white" disabled={isRCCOChecker}>
                                         <SelectValue placeholder="เลือกวิธีชำระ" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -490,9 +533,10 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     </Label>
                                     <Input
                                         value={paymentMethodOther}
-                                        onChange={(e) => setPaymentMethodOther(e.target.value)}
+                                        onChange={(e) => !isRCCOChecker && setPaymentMethodOther(e.target.value)}
                                         placeholder="ระบุวิธีชำระ"
                                         className="h-11 bg-white"
+                                        disabled={isRCCOChecker}
                                     />
                                 </div>
                             )}
@@ -510,20 +554,23 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         <RadioGroup
                             value={hasOtherLoans === true ? "yes" : hasOtherLoans === false ? "no" : ""}
                             onValueChange={(val) => {
-                                const isYes = val === "yes";
-                                setHasOtherLoans(isYes);
-                                if (!isYes) setOtherLoans([]);
+                                if (!isRCCOChecker) {
+                                    const isYes = val === "yes";
+                                    setHasOtherLoans(isYes);
+                                    if (!isYes) setOtherLoans([]);
+                                }
                             }}
                             className="flex items-center gap-6 pl-1"
+                            disabled={isRCCOChecker}
                         >
                             <div className="flex items-center gap-2.5">
-                                <RadioGroupItem value="yes" id="otherLoansYes" />
+                                <RadioGroupItem value="yes" id="otherLoansYes" disabled={isRCCOChecker} />
                                 <Label htmlFor="otherLoansYes" className="text-sm font-medium text-gray-700 cursor-pointer">
                                     มี
                                 </Label>
                             </div>
                             <div className="flex items-center gap-2.5">
-                                <RadioGroupItem value="no" id="otherLoansNo" />
+                                <RadioGroupItem value="no" id="otherLoansNo" disabled={isRCCOChecker} />
                                 <Label htmlFor="otherLoansNo" className="text-sm font-medium text-gray-700 cursor-pointer">
                                     ไม่มี
                                 </Label>
@@ -544,11 +591,14 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                         variant="outline"
                                         size="sm"
                                         className="h-8 text-xs"
+                                        disabled={isRCCOChecker}
                                         onClick={() => {
-                                            setOtherLoans((prev) => [
-                                                ...prev,
-                                                { id: Date.now(), name: "" },
-                                            ]);
+                                            if (!isRCCOChecker) {
+                                                setOtherLoans((prev) => [
+                                                    ...prev,
+                                                    { id: Date.now(), name: "" },
+                                                ]);
+                                            }
                                         }}
                                     >
                                         <Plus className="w-3.5 h-3.5 mr-1" />
@@ -576,25 +626,31 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                                             <Input
                                                                 value={loan.name}
                                                                 onChange={(e) => {
-                                                                    setOtherLoans((prev) =>
-                                                                        prev.map((l) =>
-                                                                            l.id === loan.id
-                                                                                ? { ...l, name: e.target.value }
-                                                                                : l
-                                                                        )
-                                                                    );
+                                                                    if (!isRCCOChecker) {
+                                                                        setOtherLoans((prev) =>
+                                                                            prev.map((l) =>
+                                                                                l.id === loan.id
+                                                                                    ? { ...l, name: e.target.value }
+                                                                                    : l
+                                                                            )
+                                                                        );
+                                                                    }
                                                                 }}
                                                                 placeholder="ระบุชื่อสินเชื่อ"
                                                                 className="h-9 bg-white border-gray-200"
+                                                                disabled={isRCCOChecker}
                                                             />
                                                         </TableCell>
                                                         <TableCell className="text-center">
                                                             <button
-                                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                disabled={isRCCOChecker}
                                                                 onClick={() => {
-                                                                    setOtherLoans((prev) =>
-                                                                        prev.filter((l) => l.id !== loan.id)
-                                                                    );
+                                                                    if (!isRCCOChecker) {
+                                                                        setOtherLoans((prev) =>
+                                                                            prev.filter((l) => l.id !== loan.id)
+                                                                        );
+                                                                    }
                                                                 }}
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
@@ -626,20 +682,23 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         <RadioGroup
                             value={hasOverdue ? "yes" : "no"}
                             onValueChange={(val) => {
-                                const isYes = val === "yes";
-                                setHasOverdue(isYes);
-                                if (!isYes) setOverdueInstallments("");
+                                if (!isRCCOChecker) {
+                                    const isYes = val === "yes";
+                                    setHasOverdue(isYes);
+                                    if (!isYes) setOverdueInstallments("");
+                                }
                             }}
                             className="flex items-center gap-6 pl-1"
+                            disabled={isRCCOChecker}
                         >
                             <div className="flex items-center gap-2.5">
-                                <RadioGroupItem value="yes" id="overdueYes" />
+                                <RadioGroupItem value="yes" id="overdueYes" disabled={isRCCOChecker} />
                                 <Label htmlFor="overdueYes" className="text-sm font-medium text-gray-700 cursor-pointer">
                                     มีการค้างชำระ
                                 </Label>
                             </div>
                             <div className="flex items-center gap-2.5">
-                                <RadioGroupItem value="no" id="overdueNo" />
+                                <RadioGroupItem value="no" id="overdueNo" disabled={isRCCOChecker} />
                                 <Label htmlFor="overdueNo" className="text-sm font-medium text-gray-700 cursor-pointer">
                                     ไม่มีการค้างชำระ
                                 </Label>
@@ -655,11 +714,14 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     <Input
                                         value={overdueInstallments}
                                         onChange={(e) => {
-                                            const raw = e.target.value.replace(/[^0-9]/g, "");
-                                            setOverdueInstallments(raw);
+                                            if (!isRCCOChecker) {
+                                                const raw = e.target.value.replace(/[^0-9]/g, "");
+                                                setOverdueInstallments(raw);
+                                            }
                                         }}
                                         placeholder="0"
                                         className="pr-14 h-11 bg-white"
+                                        disabled={isRCCOChecker}
                                     />
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                                         งวด

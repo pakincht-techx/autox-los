@@ -215,27 +215,27 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
 
                 {/* ── APPLICATION PHASE: Clean card wrapper ─────────── */}
                 {isApplicationPhase && (
-                    <>
-                        <div className="lg:col-span-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                            <Card className="min-h-[600px] border-none shadow-none bg-transparent">
-                                <CardContent className={cn("p-0 w-full", isReadonly && "relative")}>
-                                    {isReadonly && (
-                                        <div className="absolute inset-0 z-20" style={{ pointerEvents: 'all' }}>
-                                            <div className="pointer-events-none" />
-                                        </div>
-                                    )}
-                                    <div className={cn(isReadonly && "pointer-events-none select-none opacity-90")}>
-                                        {children}
+                    <div className="lg:col-span-2 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <Card className="min-h-[600px] border-none shadow-none bg-transparent">
+                            <CardContent className={cn("p-0 w-full", isReadonly && "relative")}>
+                                {isReadonly && (
+                                    <div className="absolute inset-0 z-20" style={{ pointerEvents: 'all' }}>
+                                        <div className="pointer-events-none" />
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                )}
+                                <div className={cn(isReadonly && "pointer-events-none select-none opacity-90")}>
+                                    {children}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
-                        {/* RCCO Checker Sidebar */}
-                        <div className="lg:col-span-1 animate-in fade-in slide-in-from-right-8 duration-700">
-                            <RCCOCheckerSidebar />
-                        </div>
-                    </>
+                {/* RCCO Checker Review Section - Bottom of page for RCCO checker */}
+                {isApplicationPhase && (
+                    <div className="lg:col-span-2 mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <RCCOCheckerSidebar />
+                    </div>
                 )}
             </div>
             )}

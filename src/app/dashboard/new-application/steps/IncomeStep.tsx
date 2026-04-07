@@ -10124,6 +10124,83 @@ export function IncomeStep({
         </Card>
       </div>
 
+      {/* Business Status Verification Links Section */}
+      <div className="w-full">
+        <Card className="border-border-strong overflow-hidden">
+          <CardHeader className="bg-gray-50/80 border-b border-border-strong pb-3 pt-4">
+            <CardTitle className="text-base flex items-center gap-2 text-gray-800">
+              สถานะกิจการปัจจุบัน
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-500 mt-1">
+              ลิงก์สำหรับตรวจสอบสถานะการจดทะเบียนกิจการ
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* DBD Link */}
+              <a
+                href="https://www.dbd.go.th/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-chaiyo-blue hover:bg-blue-50/40 transition-all cursor-pointer group"
+              >
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Globe className="w-5 h-5 text-chaiyo-blue group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-sm font-medium text-chaiyo-blue group-hover:underline">
+                    DBD
+                  </span>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Department of Business Development
+                  </p>
+                </div>
+              </a>
+
+              {/* DBD2 Link */}
+              <a
+                href="https://www.dbd.go.th/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-chaiyo-blue hover:bg-blue-50/40 transition-all cursor-pointer group"
+              >
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Globe className="w-5 h-5 text-chaiyo-blue group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-sm font-medium text-chaiyo-blue group-hover:underline">
+                    DBD2
+                  </span>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Business Online System
+                  </p>
+                </div>
+              </a>
+
+              {/* สปสช Link */}
+              <a
+                href="https://www.acm.go.th/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-chaiyo-blue hover:bg-blue-50/40 transition-all cursor-pointer group"
+              >
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-2">
+                    <Globe className="w-5 h-5 text-chaiyo-blue group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-sm font-medium text-chaiyo-blue group-hover:underline">
+                    สปสช
+                  </span>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Anti-Corruption Commission
+                  </p>
+                </div>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Summary breakdown */}
       <div className="w-full space-y-4">
         <Card className="border-border-strong overflow-hidden">
