@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
+import { useSidebar } from "@/components/layout/SidebarContext";
 
 // Policy row types
 type PolicyResult = "ผ่าน" | "ไม่ผ่าน" | "ขออนุโลมได้" | null;
@@ -497,7 +498,7 @@ function SectionHeader({ label, note }: { label: string; note?: string }) {
 function PlaceholderRow() {
     return (
         <TableRow className="hover:bg-gray-50/50 transition-colors">
-            <TableCell colSpan={3} className="px-4 py-4 text-center">
+            <TableCell colSpan={4} className="px-4 py-4 text-center">
                 <span className="text-sm text-gray-400">รอกำหนด Policy</span>
             </TableCell>
         </TableRow>
@@ -507,13 +508,16 @@ function PlaceholderRow() {
 function SectionHeaderWithColumns() {
     return (
         <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[35%]">
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[25%]">
                 เกณฑ์
             </TableCell>
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-white bg-blue-500 text-center w-[32.5%]">
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[35%]">
+                ข้อมูล
+            </TableCell>
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 text-center w-[20%]">
                 ผลตรวจสอบสาขา
             </TableCell>
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-white bg-amber-500 text-center w-[32.5%]">
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 text-center w-[20%]">
                 ผลตรวจสอบ RC
             </TableCell>
         </TableRow>
@@ -521,64 +525,90 @@ function SectionHeaderWithColumns() {
 }
 
 function PolicyRowsWithColumns({ rows }: { rows: PolicyRow[] }) {
+    const compareValues = (branch: string | string[], rc: string | string[]): boolean => {
+        if (Array.isArray(branch) && Array.isArray(rc)) {
+            return JSON.stringify(branch) === JSON.stringify(rc);
+        }
+        return branch === rc;
+    };
+
+    const renderValue = (value: string | string[]): React.ReactNode => {
+        if (Array.isArray(value)) {
+            return value.map((line, i) => {
+                const colonIdx = line.indexOf(':');
+                if (colonIdx > -1) {
+                    const label = line.slice(0, colonIdx + 1);
+                    const val = line.slice(colonIdx + 1).trim();
+                    return (
+                        <div key={i} className="flex gap-1">
+                            <span className="text-gray-400 font-normal">{label}</span>
+                            <span className="text-gray-900 font-semibold">{val}</span>
+                        </div>
+                    );
+                }
+                return <div key={i} className="text-gray-900 font-semibold">{line}</div>;
+            });
+        }
+        return <span className="text-gray-900 font-semibold">{value}</span>;
+    };
+
     return (
         <>
-            {rows.map((row) => (
-                <TableRow
-                    key={row.id}
-                    className="hover:bg-gray-50/50 transition-colors"
-                >
-                    <TableCell className="px-4 py-3 text-sm text-gray-500 w-[35%]">
-                        {row.policy}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-gray-900 font-semibold text-center w-[32.5%]">
-                        <div className="flex flex-col items-center gap-1">
-                            {Array.isArray(row.branchInfo) ? (
-                                <div className="flex flex-col gap-1 text-center">
-                                    {row.branchInfo.map((line, i) => {
-                                        const colonIdx = line.indexOf(':');
-                                        if (colonIdx > -1) {
-                                            const value = line.slice(colonIdx + 1).trim();
-                                            return (
-                                                <span key={i} className="text-sm text-gray-700">
-                                                    {value}
-                                                </span>
-                                            );
-                                        }
-                                        return <span key={i} className="text-sm text-gray-700">{line}</span>;
-                                    })}
-                                </div>
-                            ) : (
-                                <span className="text-sm text-gray-700">{row.branchInfo}</span>
-                            )}
+            {rows.map((row) => {
+                const isSameValue = compareValues(row.branchInfo || "", row.rcInput || "");
+
+                return (
+                    <TableRow
+                        key={row.id}
+                        className="hover:bg-gray-50/50 transition-colors"
+                    >
+                        <TableCell className="px-4 py-3 text-sm text-gray-500 w-[25%]">
+                            {row.policy}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-sm w-[35%]">
+                            <div className="flex flex-col gap-2">
+                                {isSameValue ? (
+                                    renderValue(row.branchInfo || "")
+                                ) : (
+                                    <>
+                                        {/* Branch value with strikethrough */}
+                                        <div className="flex flex-col gap-1">
+                                            {Array.isArray(row.branchInfo) ? (
+                                                row.branchInfo.map((line, i) => {
+                                                    const colonIdx = line.indexOf(':');
+                                                    if (colonIdx > -1) {
+                                                        const label = line.slice(0, colonIdx + 1);
+                                                        const val = line.slice(colonIdx + 1).trim();
+                                                        return (
+                                                            <div key={i} className="flex gap-1">
+                                                                <span className="text-gray-300 font-normal line-through">{label}</span>
+                                                                <span className="text-gray-400 font-semibold line-through">{val}</span>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return <div key={i} className="text-gray-400 font-semibold line-through">{line}</div>;
+                                                })
+                                            ) : (
+                                                <span className="text-gray-400 font-semibold line-through">{row.branchInfo}</span>
+                                            )}
+                                        </div>
+                                        {/* RCCO value */}
+                                        <div className="flex flex-col gap-1">
+                                            {renderValue(row.rcInput || "")}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-sm text-center w-[20%]">
                             <ResultBadge result={row.branchResult} />
-                        </div>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-gray-900 font-semibold text-center w-[32.5%]">
-                        <div className="flex flex-col items-center gap-1">
-                            {Array.isArray(row.rcInput) ? (
-                                <div className="flex flex-col gap-1 text-center">
-                                    {row.rcInput.map((line, i) => {
-                                        const colonIdx = line.indexOf(':');
-                                        if (colonIdx > -1) {
-                                            const value = line.slice(colonIdx + 1).trim();
-                                            return (
-                                                <span key={i} className="text-sm text-gray-700">
-                                                    {value}
-                                                </span>
-                                            );
-                                        }
-                                        return <span key={i} className="text-sm text-gray-700">{line}</span>;
-                                    })}
-                                </div>
-                            ) : (
-                                <span className="text-sm text-gray-700">{row.rcInput}</span>
-                            )}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-sm text-center w-[20%]">
                             <ResultBadge result={row.rcResult} />
-                        </div>
-                    </TableCell>
-                </TableRow>
-            ))}
+                        </TableCell>
+                    </TableRow>
+                );
+            })}
         </>
     );
 }
@@ -586,6 +616,8 @@ function PolicyRowsWithColumns({ rows }: { rows: PolicyRow[] }) {
 // ── Main Component ───────────────────────────────────────
 
 export function PolicyChecklist() {
+    const { devRole } = useSidebar();
+    const isRCCOChecker = devRole === 'rcco-checker';
 
     // Compute overall status
     const allRows: PolicyRow[] = [
@@ -605,6 +637,8 @@ export function PolicyChecklist() {
     const [waiverStatus, setWaiverStatus] = useState<string>("");
     const [waiverReason, setWaiverReason] = useState("");
     const [waiverSubmitted, setWaiverSubmitted] = useState(false);
+    const [rccoWaiverStatus, setRccoWaiverStatus] = useState<string>("");
+    const [rccoWaiverReason, setRccoWaiverReason] = useState("");
 
     return (
         <>
@@ -681,7 +715,7 @@ export function PolicyChecklist() {
                                                 {hasVerificationColumns ? (
                                                     <>
                                                         <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-                                                            <TableCell colSpan={3} className="px-4 py-3.5">
+                                                            <TableCell colSpan={4} className="px-4 py-3.5">
                                                                 <span className="text-sm font-bold text-gray-700">
                                                                     ข้อมูลผู้ค้ำประกัน คนที่ {index + 1} - {guarantor.name}
                                                                 </span>
@@ -716,7 +750,7 @@ export function PolicyChecklist() {
                                             {hasVerificationColumns ? (
                                                 <>
                                                     <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-                                                        <TableCell colSpan={3} className="px-4 py-3.5">
+                                                        <TableCell colSpan={4} className="px-4 py-3.5">
                                                             <span className="text-sm font-bold text-gray-700">
                                                                 {section.label}
                                                             </span>
@@ -755,12 +789,12 @@ export function PolicyChecklist() {
             </Card>
 
             <Dialog open={isFailedDialogOpen} onOpenChange={setIsFailedDialogOpen}>
-                <DialogContent size="lg">
-                    <DialogHeader>
+                <DialogContent size="lg" className="flex flex-col max-h-[90vh]">
+                    <DialogHeader className="flex-shrink-0 border-b border-border-strong pb-4">
                         <DialogTitle className="text-gray-900">ขออนุโลม</DialogTitle>
                         <DialogDescription>กรุณาระบุเหตุผลประกอบการพิจารณาให้สำนักงานใหญ่ เพื่ออธิบายว่าถึงแม้ลูกค้าไม่ผ่านเกณฑ์ที่กำหนด แต่มีเหตุผลสมควรที่จะอนุมัติได้</DialogDescription>
                     </DialogHeader>
-                    <DialogBody>
+                    <DialogBody className="flex-1 overflow-y-auto">
                         <div className="space-y-6 pb-2 pt-1">
                             {/* Table List */}
                             <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -792,17 +826,24 @@ export function PolicyChecklist() {
                                 </Table>
                             </div>
 
-                            {/* Waiver Options */}
-                            <div className="space-y-4">
+                            {/* Branch Staff Waiver Options */}
+                            <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="font-semibold text-sm text-blue-900">ข้อมูลการขออนุโลมจากสาขา</div>
+
                                 <Label className="text-sm font-bold text-gray-900">การขออนุโลม <span className="text-red-500">*</span></Label>
-                                <RadioGroup value={waiverStatus} onValueChange={setWaiverStatus} className="flex gap-6">
+                                <RadioGroup
+                                    value={waiverStatus}
+                                    onValueChange={isRCCOChecker ? undefined : setWaiverStatus}
+                                    className="flex gap-6"
+                                    disabled={isRCCOChecker}
+                                >
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="ขออนุโลม" id="waiver-yes" />
-                                        <Label htmlFor="waiver-yes" className="font-normal cursor-pointer text-sm">ขออนุโลม</Label>
+                                        <RadioGroupItem value="ขออนุโลม" id="waiver-yes" disabled={isRCCOChecker} />
+                                        <Label htmlFor="waiver-yes" className={`font-normal cursor-pointer text-sm ${isRCCOChecker ? 'text-gray-400' : ''}`}>ขออนุโลม</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="ไม่ขออนุโลม" id="waiver-no" />
-                                        <Label htmlFor="waiver-no" className="font-normal cursor-pointer text-sm">ไม่ขออนุโลม</Label>
+                                        <RadioGroupItem value="ไม่ขออนุโลม" id="waiver-no" disabled={isRCCOChecker} />
+                                        <Label htmlFor="waiver-no" className={`font-normal cursor-pointer text-sm ${isRCCOChecker ? 'text-gray-400' : ''}`}>ไม่ขออนุโลม</Label>
                                     </div>
                                 </RadioGroup>
 
@@ -812,25 +853,63 @@ export function PolicyChecklist() {
                                         <Textarea
                                             placeholder="กรอกเหตุผลที่ขออนุโลม..."
                                             value={waiverReason}
-                                            onChange={(e) => setWaiverReason(e.target.value)}
-                                            className="min-h-[100px] bg-white border-gray-200"
+                                            onChange={(e) => isRCCOChecker ? null : setWaiverReason(e.target.value)}
+                                            disabled={isRCCOChecker}
+                                            className={`min-h-[100px] bg-white border-gray-200 ${isRCCOChecker ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                                         />
                                     </div>
                                 )}
                             </div>
+
+                            {/* RCCO Checker Waiver Options */}
+                            {isRCCOChecker && (
+                                <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                    <div className="font-semibold text-sm text-amber-900">ข้อมูลการขออนุโลมจาก RCCO Checker</div>
+
+                                    <div>
+                                        <Label className="text-sm font-bold text-gray-900">การขออนุโลม <span className="text-red-500">*</span></Label>
+                                        <RadioGroup value={rccoWaiverStatus} onValueChange={setRccoWaiverStatus} className="flex gap-6 mt-2">
+                                            <div className="flex items-center space-x-2">
+                                                <RadioGroupItem value="ขออนุโลม" id="rcco-waiver-yes" />
+                                                <Label htmlFor="rcco-waiver-yes" className="font-normal cursor-pointer text-sm">ขออนุโลม</Label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <RadioGroupItem value="ไม่ขออนุโลม" id="rcco-waiver-no" />
+                                                <Label htmlFor="rcco-waiver-no" className="font-normal cursor-pointer text-sm">ไม่ขออนุโลม</Label>
+                                            </div>
+                                        </RadioGroup>
+                                    </div>
+
+                                    {rccoWaiverStatus === "ขออนุโลม" && (
+                                        <div className="space-y-2 animate-in fade-in duration-300">
+                                            <Label className="text-sm font-bold text-gray-900">เหตุผลที่ขออนุโลม <span className="text-red-500">*</span></Label>
+                                            <Textarea
+                                                placeholder="กรอกเหตุผลที่ขออนุโลม..."
+                                                value={rccoWaiverReason}
+                                                onChange={(e) => setRccoWaiverReason(e.target.value)}
+                                                className="min-h-[100px] bg-white border-gray-200"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </DialogBody>
-                    <DialogFooter>
-                        <Button 
-                            variant="outline" 
-                            className="min-w-[120px] font-bold shadow-none" 
+                    <DialogFooter className="flex-shrink-0 border-t border-border-strong pt-4 mt-4">
+                        <Button
+                            variant="outline"
+                            className="min-w-[120px] font-bold shadow-none"
                             onClick={() => setIsFailedDialogOpen(false)}
                         >
                             ปิด
                         </Button>
                         <Button
                             className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                            disabled={!waiverStatus || (waiverStatus === "ขออนุโลม" && !waiverReason.trim())}
+                            disabled={
+                                isRCCOChecker
+                                    ? !rccoWaiverStatus || (rccoWaiverStatus === "ขออนุโลม" && !rccoWaiverReason.trim())
+                                    : !waiverStatus || (waiverStatus === "ขออนุโลม" && !waiverReason.trim())
+                            }
                             onClick={() => {
                                 setWaiverSubmitted(true);
                                 setIsFailedDialogOpen(false);
