@@ -240,11 +240,11 @@ const OCCUPATIONS = [
 
 // Mock staff list — replace with API data in production
 const MOCK_STAFF_LIST = [
-  { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
-  { id: "S002", code: "S002", name: "สุดา รักงาน", phone: "089-876-5432" },
-  { id: "S003", code: "S003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
-  { id: "S004", code: "S004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
-  { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
+  { id: "y1008001", code: "y1008001", name: "สมชาย ใจดี", phone: "081-234-5678" },
+  { id: "y1008002", code: "y1008002", name: "สุดา รักงาน", phone: "089-876-5432" },
+  { id: "y1008003", code: "y1008003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
+  { id: "y1008004", code: "y1008004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
+  { id: "y1008005", code: "y1008005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
 export function IncomeStep({
@@ -319,17 +319,17 @@ export function IncomeStep({
     hasDocuments?: boolean;
     documentCount?: number;
     type:
-      | "special"
-      | "reference"
-      | "photo"
-      | "bankAccount"
-      | "incomeDocument"
-      | "saIncomeRow"
-      | "seIncomeRow"
-      | "seCostRow"
-      | "debtRow"
-      | "categorizedPhoto"
-      | "occupation";
+    | "special"
+    | "reference"
+    | "photo"
+    | "bankAccount"
+    | "incomeDocument"
+    | "saIncomeRow"
+    | "seIncomeRow"
+    | "seCostRow"
+    | "debtRow"
+    | "categorizedPhoto"
+    | "occupation";
   } | null>(null);
 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -1926,16 +1926,16 @@ export function IncomeStep({
   ];
 
   const FARM_STANDARD_PRICES: Record<string, { sales: number; cost: number }> =
-    {
-      ข้าวนาปี: { sales: 8000, cost: 4500 },
-      ข้าวนาปรัง: { sales: 9500, cost: 5500 },
-      ข้าวโพด: { sales: 7500, cost: 4000 },
-      อ้อย: { sales: 13000, cost: 7000 },
-      มันสำปะหลัง: { sales: 11000, cost: 5000 },
-      ยางพารา: { sales: 16000, cost: 8000 },
-      ปาร์มน้ำมัน: { sales: 15000, cost: 7500 },
-      others: { sales: 0, cost: 0 },
-    };
+  {
+    ข้าวนาปี: { sales: 8000, cost: 4500 },
+    ข้าวนาปรัง: { sales: 9500, cost: 5500 },
+    ข้าวโพด: { sales: 7500, cost: 4000 },
+    อ้อย: { sales: 13000, cost: 7000 },
+    มันสำปะหลัง: { sales: 11000, cost: 5000 },
+    ยางพารา: { sales: 16000, cost: 8000 },
+    ปาร์มน้ำมัน: { sales: 15000, cost: 7500 },
+    others: { sales: 0, cost: 0 },
+  };
 
   const LIVESTOCK_STANDARD_PRICES: Record<
     string,
@@ -2462,8 +2462,8 @@ export function IncomeStep({
                     {occupations.map((occ: IncomeOccupation, index: number) => {
                       const occName = occ.occupationCode
                         ? OCCUPATIONS.find(
-                            (o) => (o.value || o.label) === occ.occupationCode,
-                          )?.label
+                          (o) => (o.value || o.label) === occ.occupationCode,
+                        )?.label
                         : undefined;
 
                       // Compute per-occupation net income
@@ -2494,8 +2494,8 @@ export function IncomeStep({
                           occIncome = Math.max(
                             0,
                             ((salesValue - costValue) * totalAreaRai * cycles) /
-                              12 /
-                              laborers,
+                            12 /
+                            laborers,
                           );
                         } else if (occ.occupationCode === "LIVESTOCK") {
                           const totalNet = (occ.livestockCycles || []).reduce(
@@ -2558,10 +2558,10 @@ export function IncomeStep({
                                 e.stopPropagation();
                                 const occLabel = occ.occupationCode
                                   ? OCCUPATIONS.find(
-                                      (o) =>
-                                        (o.value || o.label) ===
-                                        occ.occupationCode,
-                                    )?.label
+                                    (o) =>
+                                      (o.value || o.label) ===
+                                      occ.occupationCode,
+                                  )?.label
                                   : undefined;
                                 setItemToDelete({
                                   id: occ.id,
@@ -2956,8 +2956,8 @@ export function IncomeStep({
                 // SE Statement: summary-only table with "จัดการรายการ" button
                 const seStatementSection =
                   occ.employmentType === "SE" &&
-                  occ.useBankStatementIncome &&
-                  statementUploaded.length > 0 ? (
+                    occ.useBankStatementIncome &&
+                    statementUploaded.length > 0 ? (
                     <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500 mb-6 mt-6">
                       {statementUploaded.map((dt) => {
                         const accIdx = Number(dt.replace("statement_", ""));
@@ -3051,9 +3051,14 @@ export function IncomeStep({
                                     </span>
                                   </TableCell>
                                   <TableCell className="py-3.5 text-right pr-6">
-                                    <span className="text-base font-bold font-mono text-gray-800">
-                                      {formatNumberWithCommas(seTotalIncome)}
-                                    </span>
+                                    <div className="flex flex-col items-end">
+                                      <span className="text-base font-bold font-mono text-gray-800">
+                                        {formatNumberWithCommas(seTotalIncome)}
+                                      </span>
+                                      <span className="text-[11px] text-muted-foreground mt-0.5">
+                                        หมายเหตุ รายได้จากรายการเดินบัญชีนี้ เป็นการประมาณการเบื้องต้น
+                                      </span>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               </TableBody>
@@ -3063,7 +3068,7 @@ export function IncomeStep({
                             <div className="px-5 py-4 border-t border-border-color bg-gray-50/20">
                               <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200/60 px-2.5 py-1.5 rounded-md w-fit">
                                 <Info className="w-4 h-4" />
-                                <span>เนื่องจากบัญชีผู้กู้ไม่ตรงกับชื่อผู้กู้</span>
+                                <span>ชื่อบัญชีธนาคารไม่ตรงกับชื่อผู้กู้</span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Checkbox
@@ -3291,18 +3296,18 @@ export function IncomeStep({
                                           )}
                                           {occ.employmentType ===
                                             "UNEMPLOYED" && (
-                                            <>
-                                              <SelectItem value="retired">
-                                                เกษียณ
-                                              </SelectItem>
-                                              <SelectItem value="unemployed">
-                                                ว่างงาน
-                                              </SelectItem>
-                                              <SelectItem value="other">
-                                                อื่นๆ โปรดระบุ
-                                              </SelectItem>
-                                            </>
-                                          )}
+                                              <>
+                                                <SelectItem value="retired">
+                                                  เกษียณ
+                                                </SelectItem>
+                                                <SelectItem value="unemployed">
+                                                  ว่างงาน
+                                                </SelectItem>
+                                                <SelectItem value="other">
+                                                  อื่นๆ โปรดระบุ
+                                                </SelectItem>
+                                              </>
+                                            )}
                                         </SelectContent>
                                       </Select>
                                       {occ.jobPosition === "other" && (
@@ -3441,9 +3446,9 @@ export function IncomeStep({
                               formData={
                                 occ.isSameAsMainAddress
                                   ? formData.occupations?.find(
-                                      (o: IncomeOccupation) =>
-                                        o.id === occ.isSameAsMainAddress,
-                                    ) || {}
+                                    (o: IncomeOccupation) =>
+                                      o.id === occ.isSameAsMainAddress,
+                                  ) || {}
                                   : occ
                               }
                               onChange={(field, val) =>
@@ -3453,18 +3458,18 @@ export function IncomeStep({
                               requiredFields={
                                 occ.employmentType === "SA"
                                   ? [
-                                      "houseNumber",
-                                      "province",
-                                      "district",
-                                      "subDistrict",
-                                      "zipCode",
-                                    ]
+                                    "houseNumber",
+                                    "province",
+                                    "district",
+                                    "subDistrict",
+                                    "zipCode",
+                                  ]
                                   : [
-                                      "province",
-                                      "district",
-                                      "subDistrict",
-                                      "zipCode",
-                                    ]
+                                    "province",
+                                    "district",
+                                    "subDistrict",
+                                    "zipCode",
+                                  ]
                               }
                               groupRequiredNote={
                                 occ.employmentType === "SA"
@@ -3508,10 +3513,10 @@ export function IncomeStep({
                                                 : `อาชีพเสริม ${occupations.filter((x: IncomeOccupation) => !x.isMain).findIndex((x: IncomeOccupation) => x.id === o.id) + 1}`;
                                               const occName = o.occupationCode
                                                 ? OCCUPATIONS.find(
-                                                    (oc) =>
-                                                      (oc.value || oc.label) ===
-                                                      o.occupationCode,
-                                                  )?.label
+                                                  (oc) =>
+                                                    (oc.value || oc.label) ===
+                                                    o.occupationCode,
+                                                )?.label
                                                 : undefined;
                                               return (
                                                 <SelectItem
@@ -3559,12 +3564,12 @@ export function IncomeStep({
                                         value={
                                           (occ.isSameAsMainAddress
                                             ? (
-                                                formData.occupations?.find(
-                                                  (o: IncomeOccupation) =>
-                                                    o.id ===
-                                                    occ.isSameAsMainAddress,
-                                                ) || ({} as IncomeOccupation)
-                                              ).workLandmark
+                                              formData.occupations?.find(
+                                                (o: IncomeOccupation) =>
+                                                  o.id ===
+                                                  occ.isSameAsMainAddress,
+                                              ) || ({} as IncomeOccupation)
+                                            ).workLandmark
                                             : occ.workLandmark) || ""
                                         }
                                         onChange={(e) =>
@@ -3589,12 +3594,12 @@ export function IncomeStep({
                                           value={
                                             (occ.isSameAsMainAddress
                                               ? (
-                                                  formData.occupations?.find(
-                                                    (o: IncomeOccupation) =>
-                                                      o.id ===
-                                                      occ.isSameAsMainAddress,
-                                                  ) || ({} as IncomeOccupation)
-                                                ).workLocationType
+                                                formData.occupations?.find(
+                                                  (o: IncomeOccupation) =>
+                                                    o.id ===
+                                                    occ.isSameAsMainAddress,
+                                                ) || ({} as IncomeOccupation)
+                                              ).workLocationType
                                               : occ.workLocationType) || ""
                                           }
                                           onValueChange={(val) =>
@@ -3638,18 +3643,18 @@ export function IncomeStep({
                                         </Select>
                                         {(occ.isSameAsMainAddress
                                           ? (
-                                              formData.occupations?.find(
-                                                (o: IncomeOccupation) =>
-                                                  o.id ===
-                                                  occ.isSameAsMainAddress,
-                                              ) || ({} as IncomeOccupation)
-                                            ).workLocationType
+                                            formData.occupations?.find(
+                                              (o: IncomeOccupation) =>
+                                                o.id ===
+                                                occ.isSameAsMainAddress,
+                                            ) || ({} as IncomeOccupation)
+                                          ).workLocationType
                                           : occ.workLocationType) ===
                                           "other" && (
-                                          <Input
-                                            value={
-                                              (occ.isSameAsMainAddress
-                                                ? (
+                                            <Input
+                                              value={
+                                                (occ.isSameAsMainAddress
+                                                  ? (
                                                     formData.occupations?.find(
                                                       (o: IncomeOccupation) =>
                                                         o.id ===
@@ -3657,21 +3662,21 @@ export function IncomeStep({
                                                     ) ||
                                                     ({} as IncomeOccupation)
                                                   ).workLocationTypeOther
-                                                : occ.workLocationTypeOther) ||
-                                              ""
-                                            }
-                                            onChange={(e) =>
-                                              handleOccupationChange(
-                                                occ.id,
-                                                "workLocationTypeOther",
-                                                e.target.value,
-                                              )
-                                            }
-                                            placeholder="โปรดระบุรายละเอียด"
-                                            className="h-12 bg-white"
-                                            disabled={!!occ.isSameAsMainAddress}
-                                          />
-                                        )}
+                                                  : occ.workLocationTypeOther) ||
+                                                ""
+                                              }
+                                              onChange={(e) =>
+                                                handleOccupationChange(
+                                                  occ.id,
+                                                  "workLocationTypeOther",
+                                                  e.target.value,
+                                                )
+                                              }
+                                              placeholder="โปรดระบุรายละเอียด"
+                                              className="h-12 bg-white"
+                                              disabled={!!occ.isSameAsMainAddress}
+                                            />
+                                          )}
                                       </div>
                                     </div>
                                   </div>
@@ -3682,72 +3687,72 @@ export function IncomeStep({
                                       occ.occupationCode || "",
                                     )
                                   ) && (
-                                    <div className="pt-4 border-t border-gray-100">
-                                      <div className="space-y-3">
-                                        <Label className="text-xs text-muted-foreground">
-                                          สถานะกิจการปัจจุบัน{" "}
-                                          {occ.employmentType === "SA" && (
-                                            <span className="text-red-500">
-                                              *
-                                            </span>
-                                          )}
-                                        </Label>
-                                        <RadioGroup
-                                          value={
-                                            (occ.isSameAsMainAddress
-                                              ? (
+                                      <div className="pt-4 border-t border-gray-100">
+                                        <div className="space-y-3">
+                                          <Label className="text-xs text-muted-foreground">
+                                            สถานะกิจการปัจจุบัน{" "}
+                                            {occ.employmentType === "SA" && (
+                                              <span className="text-red-500">
+                                                *
+                                              </span>
+                                            )}
+                                          </Label>
+                                          <RadioGroup
+                                            value={
+                                              (occ.isSameAsMainAddress
+                                                ? (
                                                   formData.occupations?.find(
                                                     (o: IncomeOccupation) =>
                                                       o.id ===
                                                       occ.isSameAsMainAddress,
                                                   ) || ({} as IncomeOccupation)
                                                 ).businessStatus
-                                              : occ.businessStatus) || ""
-                                          }
-                                          onValueChange={(val) =>
-                                            handleOccupationChange(
-                                              occ.id,
-                                              "businessStatus",
-                                              val,
-                                            )
-                                          }
-                                          className="flex gap-6 pt-1"
-                                          disabled={!!occ.isSameAsMainAddress}
-                                        >
-                                          <div className="flex items-center space-x-2">
-                                            <RadioGroupItem
-                                              value="active"
-                                              id={`${occ.id}-active`}
-                                              disabled={
-                                                !!occ.isSameAsMainAddress
-                                              }
-                                            />
-                                            <Label
-                                              htmlFor={`${occ.id}-active`}
-                                              className="font-normal cursor-pointer"
-                                            >
-                                              ดำเนินกิจการอยู่
-                                            </Label>
-                                          </div>
-                                          <div className="flex items-center space-x-2">
-                                            <RadioGroupItem
-                                              value="closed"
-                                              id={`${occ.id}-closed`}
-                                              disabled={
-                                                !!occ.isSameAsMainAddress
-                                              }
-                                            />
-                                            <Label
-                                              htmlFor={`${occ.id}-closed`}
-                                              className="font-normal cursor-pointer"
-                                            >
-                                              ปิดกิจการ
-                                            </Label>
-                                          </div>
-                                        </RadioGroup>
+                                                : occ.businessStatus) || ""
+                                            }
+                                            onValueChange={(val) =>
+                                              handleOccupationChange(
+                                                occ.id,
+                                                "businessStatus",
+                                                val,
+                                              )
+                                            }
+                                            className="flex gap-6 pt-1"
+                                            disabled={!!occ.isSameAsMainAddress}
+                                          >
+                                            <div className="flex items-center space-x-2">
+                                              <RadioGroupItem
+                                                value="active"
+                                                id={`${occ.id}-active`}
+                                                disabled={
+                                                  !!occ.isSameAsMainAddress
+                                                }
+                                              />
+                                              <Label
+                                                htmlFor={`${occ.id}-active`}
+                                                className="font-normal cursor-pointer"
+                                              >
+                                                ดำเนินกิจการอยู่
+                                              </Label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                              <RadioGroupItem
+                                                value="closed"
+                                                id={`${occ.id}-closed`}
+                                                disabled={
+                                                  !!occ.isSameAsMainAddress
+                                                }
+                                              />
+                                              <Label
+                                                htmlFor={`${occ.id}-closed`}
+                                                className="font-normal cursor-pointer"
+                                              >
+                                                ปิดกิจการ
+                                              </Label>
+                                            </div>
+                                          </RadioGroup>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
                                 </div>
                               }
                             />
@@ -3848,7 +3853,7 @@ export function IncomeStep({
                                       </TableHeader>
                                       <TableBody>
                                         {!occ.bankAccounts ||
-                                        occ.bankAccounts.length === 0 ? (
+                                          occ.bankAccounts.length === 0 ? (
                                           <TableRow>
                                             <TableCell
                                               colSpan={3}
@@ -3943,7 +3948,7 @@ export function IncomeStep({
                                                     }
                                                     placeholder={
                                                       account.bankName ===
-                                                      "TRUEMONEY"
+                                                        "TRUEMONEY"
                                                         ? "0XX-XXX-XXXX"
                                                         : "000-0-00000-0"
                                                     }
@@ -4031,7 +4036,7 @@ export function IncomeStep({
                                           ประเภทเอกสาร
                                         </TableHead>
                                         <TableHead className="w-[40%] text-xs">
-                                          ไฟล์ที่อัพโหลด
+                                          ไฟล์ที่อัปโหลด
                                         </TableHead>
                                         <TableHead className="w-[15%] text-right text-xs">
                                           จัดการ
@@ -4092,7 +4097,7 @@ export function IncomeStep({
                                                 (mLabel, mIdx) => {
                                                   const slipCount =
                                                     tavi50SlipCounts[
-                                                      String(mIdx)
+                                                    String(mIdx)
                                                     ] || 0;
                                                   for (
                                                     let sIdx = 0;
@@ -4144,8 +4149,8 @@ export function IncomeStep({
                                                 ? d.type?.startsWith("payslip_")
                                                 : docType.id === "tavi50"
                                                   ? d.type?.startsWith(
-                                                      "tavi50_",
-                                                    )
+                                                    "tavi50_",
+                                                  )
                                                   : d.type === docType.id,
                                             );
 
@@ -4165,7 +4170,7 @@ export function IncomeStep({
                                                       )}
                                                     >
                                                       {uploadedDocs.length >
-                                                      0 ? (
+                                                        0 ? (
                                                         <CheckCircle2 className="w-4 h-4" />
                                                       ) : (
                                                         <FileText className="w-4 h-4" />
@@ -4184,13 +4189,13 @@ export function IncomeStep({
                                                               label: string;
                                                             }) =>
                                                               ct.id ===
-                                                              docType.id
+                                                                docType.id
                                                                 ? {
-                                                                    ...ct,
-                                                                    label:
-                                                                      e.target
-                                                                        .value,
-                                                                  }
+                                                                  ...ct,
+                                                                  label:
+                                                                    e.target
+                                                                      .value,
+                                                                }
                                                                 : ct,
                                                           );
                                                           handleOccupationChange(
@@ -4344,7 +4349,7 @@ export function IncomeStep({
                                           ประเภทเอกสาร
                                         </TableHead>
                                         <TableHead className="w-[40%] text-xs">
-                                          ไฟล์ที่อัพโหลด
+                                          ไฟล์ที่อัปโหลด
                                         </TableHead>
                                         <TableHead className="w-[15%] text-right text-xs">
                                           จัดการ
@@ -4409,11 +4414,11 @@ export function IncomeStep({
                                                         }) =>
                                                           ct.id === docType.id
                                                             ? {
-                                                                ...ct,
-                                                                label:
-                                                                  e.target
-                                                                    .value,
-                                                              }
+                                                              ...ct,
+                                                              label:
+                                                                e.target
+                                                                  .value,
+                                                            }
                                                             : ct,
                                                       );
                                                       handleOccupationChange(
@@ -4687,13 +4692,13 @@ export function IncomeStep({
                                               ) => {
                                                 const monthFullName =
                                                   THAI_MONTHS_FULL[
-                                                    THAI_MONTHS_SHORT.indexOf(
-                                                      monthLabel,
-                                                    )
+                                                  THAI_MONTHS_SHORT.indexOf(
+                                                    monthLabel,
+                                                  )
                                                   ] || monthLabel;
                                                 const slipCount =
                                                   payslipSlipCounts[
-                                                    String(mIdx)
+                                                  String(mIdx)
                                                   ] || 0;
                                                 return (
                                                   <TabsContent
@@ -4768,7 +4773,7 @@ export function IncomeStep({
                                                               const slipSourceKey = `payslip_${mIdx}_slip_${sIdx}`;
                                                               const slipIncomes =
                                                                 incomesBySource[
-                                                                  slipSourceKey
+                                                                slipSourceKey
                                                                 ] || [];
                                                               const slipDefaultLabel = `Payslip ${String(sIdx + 1).padStart(2, "0")}`;
                                                               const payslipDocs =
@@ -4777,22 +4782,22 @@ export function IncomeStep({
                                                                     d: IncomeDocument,
                                                                   ) =>
                                                                     d.type ===
-                                                                      slipSourceKey ||
+                                                                    slipSourceKey ||
                                                                     d.type ===
-                                                                      `payslip_${mIdx}` ||
+                                                                    `payslip_${mIdx}` ||
                                                                     d.type ===
-                                                                      `payslip_${sIdx}`,
+                                                                    `payslip_${sIdx}`,
                                                                 );
                                                               const sourceDoc =
                                                                 payslipDocs.length >
-                                                                0
+                                                                  0
                                                                   ? payslipDocs[0]
                                                                   : undefined;
                                                               const slipLabel =
                                                                 sourceDoc
                                                                   ? sourceDoc.name ||
-                                                                    sourceDoc.originalName ||
-                                                                    slipDefaultLabel
+                                                                  sourceDoc.originalName ||
+                                                                  slipDefaultLabel
                                                                   : slipDefaultLabel;
 
                                                               return (
@@ -4831,23 +4836,23 @@ export function IncomeStep({
                                                                     <div className="flex items-center gap-2">
                                                                       {slipCount >
                                                                         1 && (
-                                                                        <Button
-                                                                          type="button"
-                                                                          variant="outline"
-                                                                          size="sm"
-                                                                          onClick={() =>
-                                                                            handleRemovePayslipSlip(
-                                                                              occ.id,
-                                                                              mIdx,
-                                                                              sIdx,
-                                                                            )
-                                                                          }
-                                                                          className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
-                                                                          title="ลบ Slip นี้"
-                                                                        >
-                                                                          <Trash2 className="w-4 h-4" />
-                                                                        </Button>
-                                                                      )}
+                                                                          <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            onClick={() =>
+                                                                              handleRemovePayslipSlip(
+                                                                                occ.id,
+                                                                                mIdx,
+                                                                                sIdx,
+                                                                              )
+                                                                            }
+                                                                            className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                            title="ลบ Slip นี้"
+                                                                          >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                          </Button>
+                                                                        )}
                                                                       <Button
                                                                         type="button"
                                                                         variant="outline"
@@ -4894,7 +4899,7 @@ export function IncomeStep({
                                                                       </TableHeader>
                                                                       <TableBody>
                                                                         {slipIncomes.length ===
-                                                                        0 ? (
+                                                                          0 ? (
                                                                           <TableRow>
                                                                             <TableCell
                                                                               colSpan={
@@ -4989,7 +4994,7 @@ export function IncomeStep({
                                                                                       type="text"
                                                                                       value={formatNumberWithCommas(
                                                                                         item.amount ??
-                                                                                          "",
+                                                                                        "",
                                                                                       )}
                                                                                       onChange={(
                                                                                         e,
@@ -5046,44 +5051,44 @@ export function IncomeStep({
                                                                       </TableBody>
                                                                       {slipIncomes.length >
                                                                         0 && (
-                                                                        <TableFooter>
-                                                                          <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
-                                                                            <TableCell
-                                                                              colSpan={
-                                                                                2
-                                                                              }
-                                                                              className="text-right font-bold py-3 text-xs text-gray-700"
-                                                                            >
-                                                                              รวมยอดจาก
-                                                                              Slip
-                                                                              นี้:
-                                                                            </TableCell>
-                                                                            <TableCell
-                                                                              colSpan={
-                                                                                2
-                                                                              }
-                                                                              className="text-right pr-[4.5rem] py-3"
-                                                                            >
-                                                                              <div className="text-sm font-semibold font-mono text-gray-700">
-                                                                                {formatNumberWithCommas(
-                                                                                  slipIncomes.reduce(
-                                                                                    (
-                                                                                      sum,
-                                                                                      item,
-                                                                                    ) =>
-                                                                                      sum +
-                                                                                      (Number(
-                                                                                        item.amount,
-                                                                                      ) ||
-                                                                                        0),
-                                                                                    0,
-                                                                                  ),
-                                                                                )}
-                                                                              </div>
-                                                                            </TableCell>
-                                                                          </TableRow>
-                                                                        </TableFooter>
-                                                                      )}
+                                                                          <TableFooter>
+                                                                            <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
+                                                                              <TableCell
+                                                                                colSpan={
+                                                                                  2
+                                                                                }
+                                                                                className="text-right font-bold py-3 text-xs text-gray-700"
+                                                                              >
+                                                                                รวมยอดจาก
+                                                                                Slip
+                                                                                นี้:
+                                                                              </TableCell>
+                                                                              <TableCell
+                                                                                colSpan={
+                                                                                  2
+                                                                                }
+                                                                                className="text-right pr-[4.5rem] py-3"
+                                                                              >
+                                                                                <div className="text-sm font-semibold font-mono text-gray-700">
+                                                                                  {formatNumberWithCommas(
+                                                                                    slipIncomes.reduce(
+                                                                                      (
+                                                                                        sum,
+                                                                                        item,
+                                                                                      ) =>
+                                                                                        sum +
+                                                                                        (Number(
+                                                                                          item.amount,
+                                                                                        ) ||
+                                                                                          0),
+                                                                                      0,
+                                                                                    ),
+                                                                                  )}
+                                                                                </div>
+                                                                              </TableCell>
+                                                                            </TableRow>
+                                                                          </TableFooter>
+                                                                        )}
                                                                     </Table>
                                                                   </div>
                                                                 </div>
@@ -5118,9 +5123,9 @@ export function IncomeStep({
                                         const account = bankAccounts[accIdx];
                                         const bankInfo = account
                                           ? THAI_BANKS.find(
-                                              (b) =>
-                                                b.value === account.bankName,
-                                            )
+                                            (b) =>
+                                              b.value === account.bankName,
+                                          )
                                           : undefined;
                                         const bankLabel =
                                           bankInfo?.label ||
@@ -5133,7 +5138,7 @@ export function IncomeStep({
                                         const bankKey = String(accIdx);
                                         const monthsForBank =
                                           (occ.statementMonths || {})[
-                                            bankKey
+                                          bankKey
                                           ] || [];
 
                                         return (
@@ -5228,13 +5233,13 @@ export function IncomeStep({
                                                     const monthSourceKey = `statement_${accIdx}_month_${mIdx}`;
                                                     const monthIncomes =
                                                       incomesBySource[
-                                                        monthSourceKey
+                                                      monthSourceKey
                                                       ] || [];
                                                     const monthFullName =
                                                       THAI_MONTHS_FULL[
-                                                        THAI_MONTHS_SHORT.indexOf(
-                                                          monthLabel,
-                                                        )
+                                                      THAI_MONTHS_SHORT.indexOf(
+                                                        monthLabel,
+                                                      )
                                                       ] || monthLabel;
                                                     return (
                                                       <TabsContent
@@ -5324,7 +5329,7 @@ export function IncomeStep({
                                                 (() => {
                                                   const sourceIncomes =
                                                     incomesBySource[
-                                                      "tavi50_yearly"
+                                                    "tavi50_yearly"
                                                     ] || [];
                                                   const tavi50YearlyDocs =
                                                     allDocs.filter(
@@ -5390,9 +5395,9 @@ export function IncomeStep({
                                                       ) => {
                                                         const monthFullName =
                                                           THAI_MONTHS_FULL[
-                                                            THAI_MONTHS_SHORT.indexOf(
-                                                              monthLabel,
-                                                            )
+                                                          THAI_MONTHS_SHORT.indexOf(
+                                                            monthLabel,
+                                                          )
                                                           ] || monthLabel;
                                                         const monthDocs = allDocs.filter(
                                                           (d: IncomeDocument) =>
@@ -5402,7 +5407,7 @@ export function IncomeStep({
                                                         const monthDoc = monthDocs.length > 0 ? monthDocs[0] : undefined;
                                                         const slipCount =
                                                           tavi50SlipCounts[
-                                                            String(mIdx)
+                                                          String(mIdx)
                                                           ] || 0;
                                                         return (
                                                           <TabsContent
@@ -5500,7 +5505,7 @@ export function IncomeStep({
                                                                       const slipSourceKey = `tavi50_monthly_${mIdx}_slip_${sIdx}`;
                                                                       const slipIncomes =
                                                                         incomesBySource[
-                                                                          slipSourceKey
+                                                                        slipSourceKey
                                                                         ] || [];
                                                                       const slipDefaultLabel = `50 ทวิ (หนังสือรับรองการหักภาษี ณ ที่จ่าย) (รายเดือน) ${String(sIdx + 1).padStart(2, "0")}`;
                                                                       const tavi50Docs =
@@ -5509,22 +5514,22 @@ export function IncomeStep({
                                                                             d: IncomeDocument,
                                                                           ) =>
                                                                             d.type ===
-                                                                              slipSourceKey ||
+                                                                            slipSourceKey ||
                                                                             d.type ===
-                                                                              `tavi50_monthly_${mIdx}` ||
+                                                                            `tavi50_monthly_${mIdx}` ||
                                                                             d.type ===
-                                                                              `tavi50_monthly_${sIdx}`,
+                                                                            `tavi50_monthly_${sIdx}`,
                                                                         );
                                                                       const sourceDoc =
                                                                         tavi50Docs.length >
-                                                                        0
+                                                                          0
                                                                           ? tavi50Docs[0]
                                                                           : undefined;
                                                                       const slipLabel =
                                                                         sourceDoc
                                                                           ? sourceDoc.name ||
-                                                                            sourceDoc.originalName ||
-                                                                            slipDefaultLabel
+                                                                          sourceDoc.originalName ||
+                                                                          slipDefaultLabel
                                                                           : slipDefaultLabel;
 
                                                                       return (
@@ -5563,23 +5568,23 @@ export function IncomeStep({
                                                                             <div className="flex items-center gap-2">
                                                                               {slipCount >
                                                                                 1 && (
-                                                                                <Button
-                                                                                  type="button"
-                                                                                  variant="outline"
-                                                                                  size="sm"
-                                                                                  onClick={() =>
-                                                                                    handleRemoveTavi50Slip(
-                                                                                      occ.id,
-                                                                                      mIdx,
-                                                                                      sIdx,
-                                                                                    )
-                                                                                  }
-                                                                                  className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
-                                                                                  title="ลบเอกสารนี้"
-                                                                                >
-                                                                                  <Trash2 className="w-4 h-4" />
-                                                                                </Button>
-                                                                              )}
+                                                                                  <Button
+                                                                                    type="button"
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                    onClick={() =>
+                                                                                      handleRemoveTavi50Slip(
+                                                                                        occ.id,
+                                                                                        mIdx,
+                                                                                        sIdx,
+                                                                                      )
+                                                                                    }
+                                                                                    className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                                                    title="ลบเอกสารนี้"
+                                                                                  >
+                                                                                    <Trash2 className="w-4 h-4" />
+                                                                                  </Button>
+                                                                                )}
                                                                               <Button
                                                                                 type="button"
                                                                                 variant="outline"
@@ -5626,7 +5631,7 @@ export function IncomeStep({
                                                                               </TableHeader>
                                                                               <TableBody>
                                                                                 {slipIncomes.length ===
-                                                                                0 ? (
+                                                                                  0 ? (
                                                                                   <TableRow>
                                                                                     <TableCell
                                                                                       colSpan={
@@ -5721,7 +5726,7 @@ export function IncomeStep({
                                                                                               type="text"
                                                                                               value={formatNumberWithCommas(
                                                                                                 item.amount ??
-                                                                                                  "",
+                                                                                                "",
                                                                                               )}
                                                                                               onChange={(
                                                                                                 e,
@@ -5778,42 +5783,42 @@ export function IncomeStep({
                                                                               </TableBody>
                                                                               {slipIncomes.length >
                                                                                 0 && (
-                                                                                <TableFooter>
-                                                                                  <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
-                                                                                    <TableCell
-                                                                                      colSpan={
-                                                                                        2
-                                                                                      }
-                                                                                      className="text-right font-bold py-3 text-xs text-gray-700"
-                                                                                    >
-                                                                                      รวมยอดจากเอกสารนี้:
-                                                                                    </TableCell>
-                                                                                    <TableCell
-                                                                                      colSpan={
-                                                                                        2
-                                                                                      }
-                                                                                      className="text-right pr-[4.5rem] py-3"
-                                                                                    >
-                                                                                      <div className="text-sm font-semibold font-mono text-gray-700">
-                                                                                        {formatNumberWithCommas(
-                                                                                          slipIncomes.reduce(
-                                                                                            (
-                                                                                              sum,
-                                                                                              item,
-                                                                                            ) =>
-                                                                                              sum +
-                                                                                              (Number(
-                                                                                                item.amount,
-                                                                                              ) ||
-                                                                                                0),
-                                                                                            0,
-                                                                                          ),
-                                                                                        )}
-                                                                                      </div>
-                                                                                    </TableCell>
-                                                                                  </TableRow>
-                                                                                </TableFooter>
-                                                                              )}
+                                                                                  <TableFooter>
+                                                                                    <TableRow className="bg-gray-50/50 hover:bg-gray-50/50 transition-none">
+                                                                                      <TableCell
+                                                                                        colSpan={
+                                                                                          2
+                                                                                        }
+                                                                                        className="text-right font-bold py-3 text-xs text-gray-700"
+                                                                                      >
+                                                                                        รวมยอดจากเอกสารนี้:
+                                                                                      </TableCell>
+                                                                                      <TableCell
+                                                                                        colSpan={
+                                                                                          2
+                                                                                        }
+                                                                                        className="text-right pr-[4.5rem] py-3"
+                                                                                      >
+                                                                                        <div className="text-sm font-semibold font-mono text-gray-700">
+                                                                                          {formatNumberWithCommas(
+                                                                                            slipIncomes.reduce(
+                                                                                              (
+                                                                                                sum,
+                                                                                                item,
+                                                                                              ) =>
+                                                                                                sum +
+                                                                                                (Number(
+                                                                                                  item.amount,
+                                                                                                ) ||
+                                                                                                  0),
+                                                                                              0,
+                                                                                            ),
+                                                                                          )}
+                                                                                        </div>
+                                                                                      </TableCell>
+                                                                                    </TableRow>
+                                                                                  </TableFooter>
+                                                                                )}
                                                                             </Table>
                                                                           </div>
                                                                         </div>
@@ -5966,7 +5971,7 @@ export function IncomeStep({
                                       <div className="mt-6 border-t border-border-strong pt-4">
                                         <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
                                           <span className="text-sm font-bold">
-                                            รายได้รวมทุกแหล่ง (ต่อเดือน):
+                                            รายได้เฉลี่ยต่อเดือน:
                                           </span>
                                           <span className="text-xl font-bold font-mono tracking-tight">
                                             {formatNumberWithCommas(
@@ -6207,13 +6212,13 @@ export function IncomeStep({
                                                   onCheckedChange={() => {
                                                     const newHours = isChecked
                                                       ? currentHours.filter(
-                                                          (h: string) =>
-                                                            h !== hour.value,
-                                                        )
+                                                        (h: string) =>
+                                                          h !== hour.value,
+                                                      )
                                                       : [
-                                                          ...currentHours,
-                                                          hour.value,
-                                                        ];
+                                                        ...currentHours,
+                                                        hour.value,
+                                                      ];
                                                     handleUpdateSEIncomeRow(
                                                       occ.id,
                                                       0,
@@ -6242,58 +6247,56 @@ export function IncomeStep({
                                 {occ.businessStatus !== "closed" && (
                                   <>
                                     {/* SE Income Method Checkboxes */}
-                                    {devRole !== 'branch-staff' && (
-                                      <div className="space-y-3 mt-6 mb-2">
-                                        <Label className="font-bold text-gray-800">
-                                          แหล่งรายได้ที่นำมาคำนวณ
-                                        </Label>
-                                        <div className="flex items-center gap-6">
-                                          <div className="flex items-center gap-2">
-                                            <Checkbox
-                                              id={`use-statement-main-${occ.id}`}
-                                              checked={
-                                                occ.useBankStatementIncome ||
-                                                false
-                                              }
-                                              onCheckedChange={(checked) =>
-                                                handleOccupationChange(
-                                                  occ.id,
-                                                  "useBankStatementIncome",
-                                                  !!checked,
-                                                )
-                                              }
-                                            />
-                                            <Label
-                                              htmlFor={`use-statement-main-${occ.id}`}
-                                              className="cursor-pointer font-medium"
-                                            >
-                                              ใช้รายได้จากบัญชีธนาคาร
-                                            </Label>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <Checkbox
-                                              id={`use-inquired-main-${occ.id}`}
-                                              checked={
-                                                occ.useInquiredIncome || false
-                                              }
-                                              onCheckedChange={(checked) =>
-                                                handleOccupationChange(
-                                                  occ.id,
-                                                  "useInquiredIncome",
-                                                  !!checked,
-                                                )
-                                              }
-                                            />
-                                            <Label
-                                              htmlFor={`use-inquired-main-${occ.id}`}
-                                              className="cursor-pointer font-medium"
-                                            >
-                                              ใช้รายได้จากการสอบถาม
-                                            </Label>
-                                          </div>
+                                    <div className="space-y-3 mt-6 mb-2">
+                                      <Label className="font-bold text-gray-800">
+                                        แหล่งรายได้ที่นำมาคำนวณ
+                                      </Label>
+                                      <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox
+                                            id={`use-statement-main-${occ.id}`}
+                                            checked={
+                                              occ.useBankStatementIncome ||
+                                              false
+                                            }
+                                            onCheckedChange={(checked) =>
+                                              handleOccupationChange(
+                                                occ.id,
+                                                "useBankStatementIncome",
+                                                !!checked,
+                                              )
+                                            }
+                                          />
+                                          <Label
+                                            htmlFor={`use-statement-main-${occ.id}`}
+                                            className="cursor-pointer font-medium"
+                                          >
+                                            ใช้รายได้จากบัญชีธนาคาร
+                                          </Label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Checkbox
+                                            id={`use-inquired-main-${occ.id}`}
+                                            checked={
+                                              occ.useInquiredIncome || false
+                                            }
+                                            onCheckedChange={(checked) =>
+                                              handleOccupationChange(
+                                                occ.id,
+                                                "useInquiredIncome",
+                                                !!checked,
+                                              )
+                                            }
+                                          />
+                                          <Label
+                                            htmlFor={`use-inquired-main-${occ.id}`}
+                                            className="cursor-pointer font-medium"
+                                          >
+                                            ใช้รายได้จากการสอบถาม
+                                          </Label>
                                         </div>
                                       </div>
-                                    )}
+                                    </div>
 
                                     {/* SE Statement Section */}
                                     {seStatementSection}
@@ -6404,54 +6407,54 @@ export function IncomeStep({
                                                   <TableCell className="py-3">
                                                     {item.frequency ===
                                                       "daily" && (
-                                                      <Input
-                                                        type="text"
-                                                        value={
-                                                          item.daysPerMonth ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleUpdateSEIncomeRow(
-                                                            occ.id,
-                                                            idx,
-                                                            {
-                                                              daysPerMonth:
-                                                                e.target.value,
-                                                            },
-                                                          )
-                                                        }
-                                                        placeholder="จำนวนวัน"
-                                                        className="h-9 text-xs bg-gray-50/30"
-                                                      />
-                                                    )}
+                                                        <Input
+                                                          type="text"
+                                                          value={
+                                                            item.daysPerMonth ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleUpdateSEIncomeRow(
+                                                              occ.id,
+                                                              idx,
+                                                              {
+                                                                daysPerMonth:
+                                                                  e.target.value,
+                                                              },
+                                                            )
+                                                          }
+                                                          placeholder="จำนวนวัน"
+                                                          className="h-9 text-xs bg-gray-50/30"
+                                                        />
+                                                      )}
                                                     {item.frequency ===
                                                       "weekly" && (
-                                                      <Input
-                                                        type="text"
-                                                        value={
-                                                          item.weeksPerMonth ||
-                                                          ""
-                                                        }
-                                                        onChange={(e) =>
-                                                          handleUpdateSEIncomeRow(
-                                                            occ.id,
-                                                            idx,
-                                                            {
-                                                              weeksPerMonth:
-                                                                e.target.value,
-                                                            },
-                                                          )
-                                                        }
-                                                        placeholder="จำนวนสัปดาห์"
-                                                        className="h-9 text-xs bg-gray-50/30"
-                                                      />
-                                                    )}
+                                                        <Input
+                                                          type="text"
+                                                          value={
+                                                            item.weeksPerMonth ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleUpdateSEIncomeRow(
+                                                              occ.id,
+                                                              idx,
+                                                              {
+                                                                weeksPerMonth:
+                                                                  e.target.value,
+                                                              },
+                                                            )
+                                                          }
+                                                          placeholder="จำนวนสัปดาห์"
+                                                          className="h-9 text-xs bg-gray-50/30"
+                                                        />
+                                                      )}
                                                   </TableCell>
                                                   <TableCell className="py-3 pr-6">
                                                     <div className="text-right text-sm font-mono font-bold text-gray-600 mt-1">
                                                       {formatNumberWithCommas(
                                                         item.calculatedMonthly ||
-                                                          "0",
+                                                        "0",
                                                       )}
                                                     </div>
                                                   </TableCell>
@@ -6551,7 +6554,7 @@ export function IncomeStep({
                                           </TableHeader>
                                           <TableBody>
                                             {!occ.seCosts ||
-                                            occ.seCosts.length === 0 ? (
+                                              occ.seCosts.length === 0 ? (
                                               <TableRow>
                                                 <TableCell
                                                   colSpan={7}
@@ -6620,27 +6623,27 @@ export function IncomeStep({
                                                         </Select>
                                                         {item.type ===
                                                           "custom" && (
-                                                          <Input
-                                                            type="text"
-                                                            value={
-                                                              item.customType ||
-                                                              ""
-                                                            }
-                                                            onChange={(e) =>
-                                                              handleUpdateSECostRow(
-                                                                occ.id,
-                                                                idx,
-                                                                {
-                                                                  customType:
-                                                                    e.target
-                                                                      .value,
-                                                                },
-                                                              )
-                                                            }
-                                                            placeholder="ระบุชื่อต้นทุน"
-                                                            className="h-9 text-xs bg-gray-50/30"
-                                                          />
-                                                        )}
+                                                            <Input
+                                                              type="text"
+                                                              value={
+                                                                item.customType ||
+                                                                ""
+                                                              }
+                                                              onChange={(e) =>
+                                                                handleUpdateSECostRow(
+                                                                  occ.id,
+                                                                  idx,
+                                                                  {
+                                                                    customType:
+                                                                      e.target
+                                                                        .value,
+                                                                  },
+                                                                )
+                                                              }
+                                                              placeholder="ระบุชื่อต้นทุน"
+                                                              className="h-9 text-xs bg-gray-50/30"
+                                                            />
+                                                          )}
                                                       </div>
                                                     </TableCell>
                                                     <TableCell className="py-3 align-top">
@@ -6726,7 +6729,7 @@ export function IncomeStep({
                                                         value={
                                                           formatNumberWithCommas(
                                                             item.costAmount ??
-                                                              0,
+                                                            0,
                                                           ) || ""
                                                         }
                                                         onChange={(e) =>
@@ -6746,56 +6749,56 @@ export function IncomeStep({
                                                     <TableCell className="py-3 align-top">
                                                       {item.frequency ===
                                                         "daily" && (
-                                                        <Input
-                                                          type="text"
-                                                          value={
-                                                            item.daysPerMonth ||
-                                                            ""
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleUpdateSECostRow(
-                                                              occ.id,
-                                                              idx,
-                                                              {
-                                                                daysPerMonth:
-                                                                  e.target
-                                                                    .value,
-                                                              },
-                                                            )
-                                                          }
-                                                          placeholder="จำนวนวัน"
-                                                          className="h-9 text-xs bg-gray-50/30"
-                                                        />
-                                                      )}
+                                                          <Input
+                                                            type="text"
+                                                            value={
+                                                              item.daysPerMonth ||
+                                                              ""
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleUpdateSECostRow(
+                                                                occ.id,
+                                                                idx,
+                                                                {
+                                                                  daysPerMonth:
+                                                                    e.target
+                                                                      .value,
+                                                                },
+                                                              )
+                                                            }
+                                                            placeholder="จำนวนวัน"
+                                                            className="h-9 text-xs bg-gray-50/30"
+                                                          />
+                                                        )}
                                                       {item.frequency ===
                                                         "weekly" && (
-                                                        <Input
-                                                          type="text"
-                                                          value={
-                                                            item.weeksPerMonth ||
-                                                            ""
-                                                          }
-                                                          onChange={(e) =>
-                                                            handleUpdateSECostRow(
-                                                              occ.id,
-                                                              idx,
-                                                              {
-                                                                weeksPerMonth:
-                                                                  e.target
-                                                                    .value,
-                                                              },
-                                                            )
-                                                          }
-                                                          placeholder="จำนวนสัปดาห์"
-                                                          className="h-9 text-xs bg-gray-50/30"
-                                                        />
-                                                      )}
+                                                          <Input
+                                                            type="text"
+                                                            value={
+                                                              item.weeksPerMonth ||
+                                                              ""
+                                                            }
+                                                            onChange={(e) =>
+                                                              handleUpdateSECostRow(
+                                                                occ.id,
+                                                                idx,
+                                                                {
+                                                                  weeksPerMonth:
+                                                                    e.target
+                                                                      .value,
+                                                                },
+                                                              )
+                                                            }
+                                                            placeholder="จำนวนสัปดาห์"
+                                                            className="h-9 text-xs bg-gray-50/30"
+                                                          />
+                                                        )}
                                                     </TableCell>
                                                     <TableCell className="py-3 pr-4 align-top">
                                                       <div className="text-right text-sm font-mono font-bold text-gray-600 mt-1">
                                                         {formatNumberWithCommas(
                                                           item.calculatedMonthly ||
-                                                            "0",
+                                                          "0",
                                                         )}
                                                       </div>
                                                     </TableCell>
@@ -6858,10 +6861,7 @@ export function IncomeStep({
                                     {/* Net Income Summary Box */}
                                     <div className="mt-6">
                                       <div className="border-t border-border-strong pt-4">
-                                        <div className="flex items-center justify-between bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm">
-                                          <span className="text-sm font-bold">
-                                            รายได้สุทธิต่อเดือน:
-                                          </span>
+                                        <div className="flex flex-col bg-chaiyo-blue/5 text-chaiyo-blue px-6 py-4 rounded-xl border border-chaiyo-blue/20 shadow-sm gap-2">
                                           {(() => {
                                             const totalIncome = (
                                               occ.seIncomes || []
@@ -6891,19 +6891,68 @@ export function IncomeStep({
                                             );
                                             const netIncome =
                                               totalIncome - totalCost;
+                                            
+                                            // TODO: Backend should provide a property like seIncomeMargin to use here
+                                            // Fallback to 0 if not yet available
+                                            const marginPercent = (occ as any).seIncomeMargin || 0;
+                                            const netIncomeMargin = totalIncome * (marginPercent / 100);
+
+                                            if (devRole === "branch-staff") {
+                                              return (
+                                                <div className="flex flex-col gap-3 w-full">
+                                                  <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-bold">
+                                                      รายได้สุทธิต่อเดือน จากการคำนวณ Income Margin:
+                                                    </span>
+                                                    <span
+                                                      className={cn(
+                                                        "text-xl font-bold font-mono tracking-tight",
+                                                        netIncomeMargin < 0
+                                                          ? "text-red-500"
+                                                          : "text-chaiyo-blue",
+                                                      )}
+                                                    >
+                                                      {marginPercent > 0 ? formatNumberWithCommas(netIncomeMargin) : "-"}
+                                                    </span>
+                                                  </div>
+                                                  <div className="border-t border-chaiyo-blue/10 my-0.5"></div>
+                                                  <div className="flex items-center justify-between">
+                                                    <span className="text-sm font-bold">
+                                                      รายได้สุทธิต่อเดือน จากการคำนวณต้นทุนของกิจการ:
+                                                    </span>
+                                                    <span
+                                                      className={cn(
+                                                        "text-xl font-bold font-mono tracking-tight",
+                                                        netIncome < 0
+                                                          ? "text-red-500"
+                                                          : "text-chaiyo-blue",
+                                                      )}
+                                                    >
+                                                      {formatNumberWithCommas(netIncome)}
+                                                    </span>
+                                                  </div>
+                                                </div>
+                                              );
+                                            }
+
                                             return (
-                                              <span
-                                                className={cn(
-                                                  "text-xl font-bold font-mono tracking-tight",
-                                                  netIncome < 0
-                                                    ? "text-red-500"
-                                                    : "text-chaiyo-blue",
-                                                )}
-                                              >
-                                                {formatNumberWithCommas(
-                                                  netIncome,
-                                                )}
-                                              </span>
+                                              <div className="flex items-center justify-between w-full">
+                                                <span className="text-sm font-bold">
+                                                  รายได้สุทธิต่อเดือน:
+                                                </span>
+                                                <span
+                                                  className={cn(
+                                                    "text-xl font-bold font-mono tracking-tight",
+                                                    netIncome < 0
+                                                      ? "text-red-500"
+                                                      : "text-chaiyo-blue",
+                                                  )}
+                                                >
+                                                  {formatNumberWithCommas(
+                                                    netIncome,
+                                                  )}
+                                                </span>
+                                              </div>
                                             );
                                           })()}
                                         </div>
@@ -7466,11 +7515,11 @@ export function IncomeStep({
                                             Number(
                                               occ.cultivationAreaNgan || 0,
                                             ) /
-                                              4 +
+                                            4 +
                                             Number(
                                               occ.cultivationAreaSqWa || 0,
                                             ) /
-                                              400;
+                                            400;
                                           const cycles = Number(
                                             occ.cyclesPerYear || 1,
                                           );
@@ -7481,8 +7530,8 @@ export function IncomeStep({
                                             occ.farmIsHigherThanStandard
                                               ? occ.customerSalesPerRai
                                                 ? Number(
-                                                    occ.customerSalesPerRai,
-                                                  )
+                                                  occ.customerSalesPerRai,
+                                                )
                                                 : std.sales
                                               : std.sales;
                                           const customerCost =
@@ -7522,7 +7571,7 @@ export function IncomeStep({
                                                       type="text"
                                                       value={formatNumberWithCommas(
                                                         occ.customerSalesPerRai ||
-                                                          "",
+                                                        "",
                                                       )}
                                                       onChange={(e) => {
                                                         const cleaned =
@@ -7563,7 +7612,7 @@ export function IncomeStep({
                                                       type="text"
                                                       value={formatNumberWithCommas(
                                                         occ.customerCostPerRai ||
-                                                          "",
+                                                        "",
                                                       )}
                                                       onChange={(e) => {
                                                         const cleaned =
@@ -7687,13 +7736,13 @@ export function IncomeStep({
                                         {(() => {
                                           const produceRows =
                                             occ.produceSummary &&
-                                            occ.produceSummary.length ===
+                                              occ.produceSummary.length ===
                                               FARM_STAGES.length
                                               ? occ.produceSummary
                                               : FARM_STAGES.map((stage) => ({
-                                                  stage,
-                                                  selectedMonths: [],
-                                                }));
+                                                stage,
+                                                selectedMonths: [],
+                                              }));
 
                                           return produceRows.map(
                                             (item: any, rowIdx: number) => {
@@ -8136,7 +8185,7 @@ export function IncomeStep({
                                           (cycle, idx) => {
                                             const std =
                                               LIVESTOCK_STANDARD_PRICES[
-                                                occ.livestockType || "others"
+                                              occ.livestockType || "others"
                                               ] || { sales: 0, cost: 0 };
 
                                             const updateCycle = (
@@ -8176,24 +8225,24 @@ export function IncomeStep({
                                                 } else {
                                                   const finalIsHigher =
                                                     updates.isHigherThanStandard !==
-                                                    undefined
+                                                      undefined
                                                       ? updates.isHigherThanStandard
                                                       : cycle.isHigherThanStandard;
                                                   finalPrice = finalIsHigher
                                                     ? Number(
-                                                        updates.customerPrice !==
-                                                          undefined
-                                                          ? updates.customerPrice
-                                                          : cycle.customerPrice,
-                                                      ) || std.sales
+                                                      updates.customerPrice !==
+                                                        undefined
+                                                        ? updates.customerPrice
+                                                        : cycle.customerPrice,
+                                                    ) || std.sales
                                                     : std.sales;
                                                   finalCost = finalIsHigher
                                                     ? Number(
-                                                        updates.customerCost !==
-                                                          undefined
-                                                          ? updates.customerCost
-                                                          : cycle.customerCost,
-                                                      ) || std.cost
+                                                      updates.customerCost !==
+                                                        undefined
+                                                        ? updates.customerCost
+                                                        : cycle.customerCost,
+                                                    ) || std.cost
                                                     : std.cost;
                                                 }
                                                 const finalQ =
@@ -8205,7 +8254,7 @@ export function IncomeStep({
                                                   ) || 0;
                                                 newRow.netIncome = String(
                                                   (finalPrice - finalCost) *
-                                                    finalQ,
+                                                  finalQ,
                                                 );
                                               } else {
                                                 const finalAfter =
@@ -8240,12 +8289,12 @@ export function IncomeStep({
                                             const effectivePrice =
                                               cycle.isHigherThanStandard
                                                 ? Number(cycle.customerPrice) ||
-                                                  std.sales
+                                                std.sales
                                                 : std.sales;
                                             const effectiveCost =
                                               cycle.isHigherThanStandard
                                                 ? Number(cycle.customerCost) ||
-                                                  std.cost
+                                                std.cost
                                                 : std.cost;
                                             const stdNet =
                                               (std.sales - std.cost) * q;
@@ -8266,7 +8315,7 @@ export function IncomeStep({
                                                     {occ.farmingType !==
                                                       "contract" &&
                                                       occ.livestockUnit !==
-                                                        "cycle" && (
+                                                      "cycle" && (
                                                         <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg border border-border-subtle">
                                                           <Label className="text-[11px] font-bold text-gray-700">
                                                             จำนวนตัว
@@ -8276,7 +8325,7 @@ export function IncomeStep({
                                                               type="text"
                                                               value={formatNumberWithCommas(
                                                                 cycle.quantity ||
-                                                                  "",
+                                                                "",
                                                               )}
                                                               onChange={(e) =>
                                                                 updateCycle({
@@ -8299,36 +8348,36 @@ export function IncomeStep({
                                                   </div>
                                                   {occ.farmingType ===
                                                     "self" && (
-                                                    <div className="flex items-center gap-2 px-3 py-1.5">
-                                                      <Checkbox
-                                                        id={`higher-${occ.id}-${idx}`}
-                                                        checked={
-                                                          cycle.isHigherThanStandard
-                                                        }
-                                                        onCheckedChange={(
-                                                          checked,
-                                                        ) =>
-                                                          updateCycle({
-                                                            isHigherThanStandard:
-                                                              !!checked,
-                                                          })
-                                                        }
-                                                        className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
-                                                      />
-                                                      <Label
-                                                        htmlFor={`higher-${occ.id}-${idx}`}
-                                                        className="text-[11px] leading-none text-gray-700 cursor-pointer font-bold select-none"
-                                                      >
-                                                        กรณีราคาขาย / ต้นทุน
-                                                        ไม่เท่ากับราคากลาง
-                                                      </Label>
-                                                    </div>
-                                                  )}
+                                                      <div className="flex items-center gap-2 px-3 py-1.5">
+                                                        <Checkbox
+                                                          id={`higher-${occ.id}-${idx}`}
+                                                          checked={
+                                                            cycle.isHigherThanStandard
+                                                          }
+                                                          onCheckedChange={(
+                                                            checked,
+                                                          ) =>
+                                                            updateCycle({
+                                                              isHigherThanStandard:
+                                                                !!checked,
+                                                            })
+                                                          }
+                                                          className="h-4 w-4 rounded-md border-gray-300 data-[state=checked]:bg-chaiyo-blue data-[state=checked]:border-chaiyo-blue"
+                                                        />
+                                                        <Label
+                                                          htmlFor={`higher-${occ.id}-${idx}`}
+                                                          className="text-[11px] leading-none text-gray-700 cursor-pointer font-bold select-none"
+                                                        >
+                                                          กรณีราคาขาย / ต้นทุน
+                                                          ไม่เท่ากับราคากลาง
+                                                        </Label>
+                                                      </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="p-5 space-y-4">
                                                   {occ.farmingType ===
-                                                  "self" ? (
+                                                    "self" ? (
                                                     <>
                                                       {AQUATIC_TYPES.includes(
                                                         occ.livestockType || "",
@@ -8355,7 +8404,7 @@ export function IncomeStep({
                                                                     type="text"
                                                                     value={formatNumberWithCommas(
                                                                       cycle.customerPrice ||
-                                                                        "",
+                                                                      "",
                                                                     )}
                                                                     onChange={(
                                                                       e,
@@ -8379,10 +8428,10 @@ export function IncomeStep({
                                                                           String(
                                                                             Math.round(
                                                                               salesVal *
-                                                                                0.85 *
-                                                                                100,
-                                                                            ) /
+                                                                              0.85 *
                                                                               100,
+                                                                            ) /
+                                                                            100,
                                                                           );
                                                                         updateCycle(
                                                                           {
@@ -8414,7 +8463,7 @@ export function IncomeStep({
                                                                     type="text"
                                                                     value={formatNumberWithCommas(
                                                                       cycle.customerCost ||
-                                                                        "",
+                                                                      "",
                                                                     )}
                                                                     onChange={(
                                                                       e,
@@ -8454,9 +8503,9 @@ export function IncomeStep({
                                                                       (Number(
                                                                         cycle.customerCost,
                                                                       ) || 0)) *
-                                                                      (Number(
-                                                                        cycle.quantity,
-                                                                      ) || 0),
+                                                                    (Number(
+                                                                      cycle.quantity,
+                                                                    ) || 0),
                                                                   )}
                                                                 </TableCell>
                                                               </TableRow>
@@ -8496,7 +8545,7 @@ export function IncomeStep({
                                                                       type="text"
                                                                       value={formatNumberWithCommas(
                                                                         cycle.customerPrice ||
-                                                                          "",
+                                                                        "",
                                                                       )}
                                                                       onChange={(
                                                                         e,
@@ -8530,7 +8579,7 @@ export function IncomeStep({
                                                                       type="text"
                                                                       value={formatNumberWithCommas(
                                                                         cycle.customerCost ||
-                                                                          "",
+                                                                        "",
                                                                       )}
                                                                       onChange={(
                                                                         e,
@@ -8600,7 +8649,7 @@ export function IncomeStep({
                                                                 type="text"
                                                                 value={formatNumberWithCommas(
                                                                   cycle.incomeBeforeExpenses ||
-                                                                    "",
+                                                                  "",
                                                                 )}
                                                                 onChange={(e) =>
                                                                   updateCycle({
@@ -8625,7 +8674,7 @@ export function IncomeStep({
                                                                 type="text"
                                                                 value={formatNumberWithCommas(
                                                                   cycle.incomeAfterExpenses ||
-                                                                    "",
+                                                                  "",
                                                                 )}
                                                                 onChange={(e) =>
                                                                   updateCycle({
@@ -8650,7 +8699,7 @@ export function IncomeStep({
                                                                 type="text"
                                                                 value={formatNumberWithCommas(
                                                                   cycle.otherExpenses ||
-                                                                    "",
+                                                                  "",
                                                                 )}
                                                                 onChange={(e) =>
                                                                   updateCycle({
@@ -8673,7 +8722,7 @@ export function IncomeStep({
                                                             <TableCell className="text-sm py-4 text-right pr-4 font-black font-mono text-chaiyo-blue">
                                                               {formatNumberWithCommas(
                                                                 cycle.netIncome ||
-                                                                  "0.00",
+                                                                "0.00",
                                                               )}
                                                             </TableCell>
                                                           </TableRow>
@@ -8785,15 +8834,15 @@ export function IncomeStep({
                                           ];
                                           const livestockScheduleRows =
                                             occ.livestockSchedule &&
-                                            occ.livestockSchedule.length ===
+                                              occ.livestockSchedule.length ===
                                               LIVESTOCK_STAGES.length
                                               ? occ.livestockSchedule
                                               : LIVESTOCK_STAGES.map(
-                                                  (stage) => ({
-                                                    stage,
-                                                    selectedMonths: [],
-                                                  }),
-                                                );
+                                                (stage) => ({
+                                                  stage,
+                                                  selectedMonths: [],
+                                                }),
+                                              );
 
                                           return livestockScheduleRows.map(
                                             (item: any, rowIdx: number) => {
@@ -8978,7 +9027,7 @@ export function IncomeStep({
                                 </TableHeader>
                                 <TableBody>
                                   {!formData.referencePersons ||
-                                  formData.referencePersons.length === 0 ? (
+                                    formData.referencePersons.length === 0 ? (
                                     <TableRow className="hover:bg-transparent border-none">
                                       <TableCell
                                         colSpan={5}
@@ -9151,10 +9200,10 @@ export function IncomeStep({
                                         : `อาชีพเสริม ${occupations.filter((x: IncomeOccupation) => !x.isMain).findIndex((x: IncomeOccupation) => x.id === o.id) + 1}`;
                                       const occName = o.occupationCode
                                         ? OCCUPATIONS.find(
-                                            (oc) =>
-                                              (oc.value || oc.label) ===
-                                              o.occupationCode,
-                                          )?.label
+                                          (oc) =>
+                                            (oc.value || oc.label) ===
+                                            o.occupationCode,
+                                        )?.label
                                         : undefined;
                                       return (
                                         <SelectItem key={o.id} value={o.id}>
@@ -9248,7 +9297,7 @@ export function IncomeStep({
                                     </TableHeader>
                                     <TableBody>
                                       {!occ.referencePersons ||
-                                      occ.referencePersons.length === 0 ? (
+                                        occ.referencePersons.length === 0 ? (
                                         <TableRow className="hover:bg-transparent border-none">
                                           <TableCell
                                             colSpan={5}
@@ -9377,23 +9426,23 @@ export function IncomeStep({
                                                     </Select>
                                                     {ref.relationship ===
                                                       "other" && (
-                                                      <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
-                                                        <Input
-                                                          value={
-                                                            ref.customRelationship ||
-                                                            ""
-                                                          }
-                                                          onChange={(e) =>
-                                                            updateRef(
-                                                              "customRelationship",
-                                                              e.target.value,
-                                                            )
-                                                          }
-                                                          placeholder="โปรดระบุรายละเอียด"
-                                                          className="h-8 text-xs bg-white border-dashed border-gray-300 focus:border-chaiyo-blue"
-                                                        />
-                                                      </div>
-                                                    )}
+                                                        <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
+                                                          <Input
+                                                            value={
+                                                              ref.customRelationship ||
+                                                              ""
+                                                            }
+                                                            onChange={(e) =>
+                                                              updateRef(
+                                                                "customRelationship",
+                                                                e.target.value,
+                                                              )
+                                                            }
+                                                            placeholder="โปรดระบุรายละเอียด"
+                                                            className="h-8 text-xs bg-white border-dashed border-gray-300 focus:border-chaiyo-blue"
+                                                          />
+                                                        </div>
+                                                      )}
                                                   </div>
                                                 </TableCell>
                                                 <TableCell className="py-2 text-center">
@@ -9434,15 +9483,15 @@ export function IncomeStep({
                               (() => {
                                 const sourceRefs =
                                   occ.referenceSource === "main" ||
-                                  occupations.find(
-                                    (o: IncomeOccupation) =>
-                                      o.id === occ.referenceSource,
-                                  )?.isMain
+                                    occupations.find(
+                                      (o: IncomeOccupation) =>
+                                        o.id === occ.referenceSource,
+                                    )?.isMain
                                     ? formData.referencePersons || []
                                     : occupations.find(
-                                        (o: IncomeOccupation) =>
-                                          o.id === occ.referenceSource,
-                                      )?.referencePersons || [];
+                                      (o: IncomeOccupation) =>
+                                        o.id === occ.referenceSource,
+                                    )?.referencePersons || [];
 
                                 const sourceOcc = occupations.find(
                                   (o: IncomeOccupation) =>
@@ -9492,14 +9541,14 @@ export function IncomeStep({
                                                 const relLabel =
                                                   ref.relationship === "other"
                                                     ? ref.customRelationship ||
-                                                      "อื่นๆ"
+                                                    "อื่นๆ"
                                                     : REFERENCE_RELATIONSHIPS.find(
-                                                        (r) =>
-                                                          r.value ===
-                                                          ref.relationship,
-                                                      )?.label ||
-                                                      ref.relationship ||
-                                                      "—";
+                                                      (r) =>
+                                                        r.value ===
+                                                        ref.relationship,
+                                                    )?.label ||
+                                                    ref.relationship ||
+                                                    "—";
                                                 return (
                                                   <TableRow
                                                     key={index}
@@ -9537,14 +9586,14 @@ export function IncomeStep({
                         </div>
                       )}
 
-                    {/* อัพโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
+                    {/* อัปโหลดรูปประกอบกิจการ — hide for unemployed and closed business */}
                     {!!occ.occupationCode && occ.occupationCode !== "UNEMPLOYED" &&
                       occ.businessStatus !== "closed" &&
                       occ.employmentType && (
                         <div className="rounded-xl border border-border-color bg-gray-50/40 p-6 space-y-4">
                           <h4 className="text-base font-bold text-gray-800 flex items-center gap-2 pb-2 border-b border-border-color">
                             <ImagePlus className="w-5 h-5 text-chaiyo-blue" />{" "}
-                            อัพโหลดรูปประกอบกิจการ
+                            อัปโหลดรูปประกอบกิจการ
                           </h4>
 
                           <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
@@ -9566,7 +9615,7 @@ export function IncomeStep({
                                         </span>
                                       </TableHead>
                                       <TableHead className="w-[40%] text-xs">
-                                        ไฟล์ที่อัพโหลด
+                                        ไฟล์ที่อัปโหลด
                                       </TableHead>
                                       <TableHead className="w-[15%] text-right text-xs">
                                         จัดการ
@@ -9724,7 +9773,7 @@ export function IncomeStep({
                                         ประเภทเอกสาร/รูปภาพ
                                       </TableHead>
                                       <TableHead className="w-[40%] text-xs">
-                                        ไฟล์ที่อัพโหลด
+                                        ไฟล์ที่อัปโหลด
                                       </TableHead>
                                       <TableHead className="w-[15%] text-right text-xs">
                                         จัดการ
@@ -9916,7 +9965,7 @@ export function IncomeStep({
                                 <Combobox
                                   options={MOCK_STAFF_LIST.map((s) => ({
                                     value: s.id,
-                                    label: `${s.code} — ${s.name}`,
+                                    label: `${s.name} (${s.code})`,
                                   }))}
                                   value={
                                     formData.workplaceAssessorId ??
@@ -9994,7 +10043,7 @@ export function IncomeStep({
                                               MOCK_STAFF_LIST[0].id),
                                         );
                                         return staff
-                                          ? `${staff.code} — ${staff.name}`
+                                          ? `${staff.name} (${staff.code})`
                                           : "—";
                                       })()}
                                     </div>
@@ -10038,7 +10087,7 @@ export function IncomeStep({
                                     <Combobox
                                       options={MOCK_STAFF_LIST.map((s) => ({
                                         value: s.id,
-                                        label: `${s.code} — ${s.name}`,
+                                        label: `${s.name} (${s.code})`,
                                       }))}
                                       value={occ.workplaceAssessorId ?? ""}
                                       onValueChange={(val) => {
@@ -10165,7 +10214,7 @@ export function IncomeStep({
               </div>
 
               {/* Total Column */}
-              <div className="p-5 flex flex-col justify-center items-center text-center bg-emerald-50/60">
+              <div className="p-5 flex flex-col justify-center items-center text-center">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-sm font-bold text-gray-700">
                     รวมรายได้
@@ -10256,8 +10305,8 @@ export function IncomeStep({
                       : "";
                     const existingMonths = statementMonthDialogBank
                       ? (occupations.find(
-                          (o) => o.id === statementMonthDialogBank.occId,
-                        )?.statementMonths || {})[bankKey] || []
+                        (o) => o.id === statementMonthDialogBank.occId,
+                      )?.statementMonths || {})[bankKey] || []
                       : [];
                     const isAlreadyAdded = existingMonths.includes(month);
                     const fullName = THAI_MONTHS_FULL[idx];
@@ -10335,7 +10384,7 @@ export function IncomeStep({
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
+            <DialogTitle>ไฟล์ที่อัปโหลด</DialogTitle>
           </DialogHeader>
           <DialogBody className="max-h-[60vh] overflow-y-auto">
             <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -10474,8 +10523,8 @@ export function IncomeStep({
                   {THAI_MONTHS_SHORT.map((month, idx) => {
                     const existingMonths = payslipMonthDialogOccId
                       ? occupations.find(
-                          (o) => o.id === payslipMonthDialogOccId,
-                        )?.payslipMonths || []
+                        (o) => o.id === payslipMonthDialogOccId,
+                      )?.payslipMonths || []
                       : [];
                     const isAlreadyAdded = existingMonths.includes(month);
                     const fullName = THAI_MONTHS_FULL[idx];
@@ -10609,8 +10658,8 @@ export function IncomeStep({
                       {THAI_MONTHS_SHORT.map((month, idx) => {
                         const existingMonths = tavi50ItemDialogOccId
                           ? occupations.find(
-                              (o) => o.id === tavi50ItemDialogOccId,
-                            )?.tavi50MonthlyMonths || []
+                            (o) => o.id === tavi50ItemDialogOccId,
+                          )?.tavi50MonthlyMonths || []
                           : [];
                         const isAlreadyAdded = existingMonths.includes(month);
                         const fullName = THAI_MONTHS_FULL[idx];
@@ -10871,7 +10920,7 @@ export function IncomeStep({
           }}
         >
           <DialogHeader>
-            <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
+            <DialogTitle>ไฟล์ที่อัปโหลด</DialogTitle>
           </DialogHeader>
           <DialogBody>
             {(() => {
@@ -10897,7 +10946,7 @@ export function IncomeStep({
                 return (
                   <div className="text-center py-10 text-muted-foreground">
                     <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm">ไม่มีไฟล์ที่อัพโหลด</p>
+                    <p className="text-sm">ไม่มีไฟล์ที่อัปโหลด</p>
                   </div>
                 );
 
@@ -11099,7 +11148,7 @@ export function IncomeStep({
                   </div>
                   <div className="text-left">
                     <p className="font-bold text-gray-800 text-sm leading-tight">
-                      อัพโหลดไฟล์
+                      อัปโหลดไฟล์
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       เลือกไฟล์จากเครื่อง (PDF, JPG, PNG) ไม่เกิน 20MB
@@ -11158,7 +11207,7 @@ export function IncomeStep({
               return (
                 <div>
                   <div className="text-sm font-bold text-gray-700 mb-4">
-                    ไฟล์ที่อัพโหลด ({currentFileList.length})
+                    ไฟล์ที่อัปโหลด ({currentFileList.length})
                   </div>
                   <div className="bg-white rounded-xl border overflow-hidden animate-in fade-in slide-in-from-bottom-2">
                     <div className="max-h-[480px] overflow-y-auto border-t border-border-subtle">
@@ -11258,7 +11307,7 @@ export function IncomeStep({
                                       className={cn(
                                         "h-8 text-xs bg-white",
                                         !doc.name?.trim() &&
-                                          "border-red-500 focus-visible:ring-red-500",
+                                        "border-red-500 focus-visible:ring-red-500",
                                       )}
                                       placeholder="ตั้งชื่อไฟล์"
                                     />
@@ -11284,7 +11333,7 @@ export function IncomeStep({
                                         className={cn(
                                           "h-8 text-xs bg-white w-full max-w-[180px]",
                                           !doc.password?.trim() &&
-                                            "border-red-500 focus-visible:ring-red-500",
+                                          "border-red-500 focus-visible:ring-red-500",
                                         )}
                                       />
                                     ) : (
@@ -11535,120 +11584,120 @@ export function IncomeStep({
                                   )}
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                    <Input
-                                      type="datetime-local"
-                                      value={item.dateTime || ""}
-                                      onChange={(e) =>
-                                        handleEditManualSEStatementItem(
-                                          seStatementDialogContext.occId,
-                                          absoluteIdx,
-                                          "dateTime",
-                                          e.target.value,
-                                        )
-                                      }
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="h-8 !text-xs bg-white font-sans"
-                                    />
+                                  <Input
+                                    type="datetime-local"
+                                    value={item.dateTime || ""}
+                                    onChange={(e) =>
+                                      handleEditManualSEStatementItem(
+                                        seStatementDialogContext.occId,
+                                        absoluteIdx,
+                                        "dateTime",
+                                        e.target.value,
+                                      )
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="h-8 !text-xs bg-white font-sans"
+                                  />
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                    <Input
-                                      value={item.code}
-                                      onChange={(e) =>
-                                        handleEditManualSEStatementItem(
-                                          seStatementDialogContext.occId,
-                                          absoluteIdx,
-                                          "code",
-                                          e.target.value,
-                                        )
-                                      }
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="h-8 !text-xs bg-white min-w-[60px]"
-                                      placeholder="รหัส"
-                                    />
+                                  <Input
+                                    value={item.code}
+                                    onChange={(e) =>
+                                      handleEditManualSEStatementItem(
+                                        seStatementDialogContext.occId,
+                                        absoluteIdx,
+                                        "code",
+                                        e.target.value,
+                                      )
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="h-8 !text-xs bg-white min-w-[60px]"
+                                    placeholder="รหัส"
+                                  />
                                 </TableCell>
                                 <TableCell className="py-2.5">
-                                    <Textarea
-                                      value={item.description}
-                                      onChange={(e) =>
-                                        handleEditManualSEStatementItem(
-                                          seStatementDialogContext.occId,
-                                          absoluteIdx,
-                                          "description",
-                                          e.target.value,
-                                        )
-                                      }
-                                      onClick={(e) => e.stopPropagation()}
-                                      rows={1}
-                                      className="min-h-[32px] !text-xs bg-white resize-none overflow-hidden py-2"
-                                      placeholder="รายละเอียด"
-                                      onInput={(e) => {
-                                        const t =
-                                          e.target as HTMLTextAreaElement;
-                                        t.style.height = "auto";
-                                        t.style.height = t.scrollHeight + "px";
-                                      }}
-                                    />
+                                  <Textarea
+                                    value={item.description}
+                                    onChange={(e) =>
+                                      handleEditManualSEStatementItem(
+                                        seStatementDialogContext.occId,
+                                        absoluteIdx,
+                                        "description",
+                                        e.target.value,
+                                      )
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                    rows={1}
+                                    className="min-h-[32px] !text-xs bg-white resize-none overflow-hidden py-2"
+                                    placeholder="รายละเอียด"
+                                    onInput={(e) => {
+                                      const t =
+                                        e.target as HTMLTextAreaElement;
+                                      t.style.height = "auto";
+                                      t.style.height = t.scrollHeight + "px";
+                                    }}
+                                  />
                                 </TableCell>
                                 <TableCell className="py-2.5 text-right w-[20%]">
-                                    <div
-                                      className="flex items-center gap-1.5 justify-end"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <div className="flex items-center h-8 rounded-md border border-gray-200 bg-gray-100 p-0.5 shrink-0">
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleEditManualSEStatementItem(
-                                              seStatementDialogContext.occId,
-                                              absoluteIdx,
-                                              "type",
-                                              "in",
-                                            )
-                                          }
-                                          className={cn(
-                                            "h-full px-1.5 rounded text-[11px] font-semibold transition-all flex items-center",
-                                            (item.type || "in") === "in"
-                                              ? "bg-emerald-500 text-white shadow-sm"
-                                              : "text-gray-400 hover:text-gray-600",
-                                          )}
-                                        >
-                                          <Plus className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleEditManualSEStatementItem(
-                                              seStatementDialogContext.occId,
-                                              absoluteIdx,
-                                              "type",
-                                              "out",
-                                            )
-                                          }
-                                          className={cn(
-                                            "h-full px-1.5 rounded text-[11px] font-semibold transition-all flex items-center",
-                                            item.type === "out"
-                                              ? "bg-rose-500 text-white shadow-sm"
-                                              : "text-gray-400 hover:text-gray-600",
-                                          )}
-                                        >
-                                          <Minus className="w-3.5 h-3.5" />
-                                        </button>
-                                      </div>
-                                      <Input
-                                        type="text"
-                                        value={formatNumberWithCommas(item.amount)}
-                                        onChange={(e) =>
+                                  <div
+                                    className="flex items-center gap-1.5 justify-end"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="flex items-center h-8 rounded-md border border-gray-200 bg-gray-100 p-0.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
                                           handleEditManualSEStatementItem(
                                             seStatementDialogContext.occId,
                                             absoluteIdx,
-                                            "amount",
-                                            e.target.value.replace(/,/g, ""),
+                                            "type",
+                                            "in",
                                           )
                                         }
-                                        className="h-8 !text-xs text-right bg-white min-w-[70px] w-full"
-                                        placeholder="0.00"
-                                      />
+                                        className={cn(
+                                          "h-full px-1.5 rounded text-[11px] font-semibold transition-all flex items-center",
+                                          (item.type || "in") === "in"
+                                            ? "bg-emerald-500 text-white shadow-sm"
+                                            : "text-gray-400 hover:text-gray-600",
+                                        )}
+                                      >
+                                        <Plus className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleEditManualSEStatementItem(
+                                            seStatementDialogContext.occId,
+                                            absoluteIdx,
+                                            "type",
+                                            "out",
+                                          )
+                                        }
+                                        className={cn(
+                                          "h-full px-1.5 rounded text-[11px] font-semibold transition-all flex items-center",
+                                          item.type === "out"
+                                            ? "bg-rose-500 text-white shadow-sm"
+                                            : "text-gray-400 hover:text-gray-600",
+                                        )}
+                                      >
+                                        <Minus className="w-3.5 h-3.5" />
+                                      </button>
                                     </div>
+                                    <Input
+                                      type="text"
+                                      value={formatNumberWithCommas(item.amount)}
+                                      onChange={(e) =>
+                                        handleEditManualSEStatementItem(
+                                          seStatementDialogContext.occId,
+                                          absoluteIdx,
+                                          "amount",
+                                          e.target.value.replace(/,/g, ""),
+                                        )
+                                      }
+                                      className="h-8 !text-xs text-right bg-white min-w-[70px] w-full"
+                                      placeholder="0.00"
+                                    />
+                                  </div>
                                 </TableCell>
                                 <TableCell className="py-2.5">
                                   <div className="flex items-center gap-2 justify-between">
@@ -11729,20 +11778,20 @@ export function IncomeStep({
                                       </div>
                                     )}
 
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteManualSEStatementItem(
-                                            seStatementDialogContext.occId,
-                                            absoluteIdx,
-                                          );
-                                        }}
-                                        className="h-8 w-8 p-0 shrink-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteManualSEStatementItem(
+                                          seStatementDialogContext.occId,
+                                          absoluteIdx,
+                                        );
+                                      }}
+                                      className="h-8 w-8 p-0 shrink-0 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"

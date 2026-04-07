@@ -948,7 +948,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 <TableHeader className="bg-gray-50/50">
                                                     <TableRow className="hover:bg-transparent">
                                                         <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ <span className="text-red-500 text-sm">*</span></TableHead>
-                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                         <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
@@ -1105,7 +1105,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                     <TableHeader className="bg-gray-50/50">
                                                         <TableRow className="hover:bg-transparent">
                                                             <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ</TableHead>
-                                                            <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                            <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                             <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
@@ -1283,7 +1283,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                             <Dialog open={!!managingPaperDocLabel} onOpenChange={() => setManagingPaperDocLabel("")}>
                                 <DialogContent className="max-w-3xl">
                                     <DialogHeader>
-                                        <DialogTitle>ไฟล์ที่อัพโหลด</DialogTitle>
+                                        <DialogTitle>ไฟล์ที่อัปโหลด</DialogTitle>
                                     </DialogHeader>
                                     <DialogBody className="max-h-[60vh] overflow-y-auto">
                                         <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -1423,7 +1423,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             <TableHeader className="bg-gray-50/50">
                                                 <TableRow className="hover:bg-transparent">
                                                     <TableHead className="w-[45%] text-xs">เอกสาร <span className="text-red-500 text-sm">*</span></TableHead>
-                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                     <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -1503,7 +1503,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                             <TableHeader className="bg-gray-50/50">
                                                 <TableRow className="hover:bg-transparent">
                                                     <TableHead className="w-[45%] text-xs">เอกสาร</TableHead>
-                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                    <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                     <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -1582,7 +1582,7 @@ export function CollateralStep({ formData, setFormData, isExistingCustomer = fal
                                                 <TableHeader className="bg-gray-50/50">
                                                     <TableRow className="hover:bg-transparent">
                                                         <TableHead className="w-[45%] text-xs">เอกสาร</TableHead>
-                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                        <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                         <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                                     </TableRow>
                                                 </TableHeader>

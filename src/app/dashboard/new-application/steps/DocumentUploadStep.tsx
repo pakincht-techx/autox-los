@@ -199,9 +199,9 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0 && uploadingDocId) {
             // Simulate upload by adding the count of selected files
-            setUploads(prev => ({ 
-                ...prev, 
-                [uploadingDocId]: (prev[uploadingDocId] || 0) + e.target.files!.length 
+            setUploads(prev => ({
+                ...prev,
+                [uploadingDocId]: (prev[uploadingDocId] || 0) + e.target.files!.length
             }));
         }
         // Reset input
@@ -213,12 +213,12 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 multiple
-                onChange={handleFileChange} 
+                onChange={handleFileChange}
             />
 
             <div className="flex items-center justify-between">
@@ -242,206 +242,206 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
             <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full flex flex-col lg:flex-row gap-8">
                 <TabsList className="w-full lg:w-72 flex flex-col h-auto justify-start bg-transparent p-0 flex-shrink-0">
                     <LayoutGroup>
-                    {sections.map((section, idx) => {
-                        const sectionUploadCount = section.docs.filter(d => (uploads[d.id] || 0) > 0).length;
-                        const mandatoryDocs = section.docs.filter(d => d.req);
-                        const isCompleted = mandatoryDocs.length > 0 
-                            ? mandatoryDocs.every(d => (uploads[d.id] || 0) > 0)
-                            : sectionUploadCount > 0;
-                        const isActive = activeTab === String(idx);
-                        return (
-                            <TabsTrigger
-                                key={idx}
-                                value={String(idx)}
-                                className={cn(
-                                    "relative w-full justify-start text-left whitespace-normal h-auto px-4 py-3 text-sm rounded-none border-l-[3px] transition-all duration-200 !shadow-none",
-                                    isActive
-                                        ? "border-l-transparent bg-gradient-to-r from-blue-50 to-blue-50/30 text-chaiyo-blue font-semibold"
-                                        : "border-l-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-l-gray-300"
-                                )}
-                            >
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeDocTab"
-                                        className="absolute -left-[3px] top-0 bottom-0 w-[3px] bg-chaiyo-blue"
-                                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                                    />
-                                )}
-                                <div className="flex items-start justify-between w-full gap-2">
-                                    <span className="leading-snug">{section.title.replace(/^\d+\.\s*/, '')}</span>
-                                    {isCompleted && (
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        {sections.map((section, idx) => {
+                            const sectionUploadCount = section.docs.filter(d => (uploads[d.id] || 0) > 0).length;
+                            const mandatoryDocs = section.docs.filter(d => d.req);
+                            const isCompleted = mandatoryDocs.length > 0
+                                ? mandatoryDocs.every(d => (uploads[d.id] || 0) > 0)
+                                : sectionUploadCount > 0;
+                            const isActive = activeTab === String(idx);
+                            return (
+                                <TabsTrigger
+                                    key={idx}
+                                    value={String(idx)}
+                                    className={cn(
+                                        "relative w-full justify-start text-left whitespace-normal h-auto px-4 py-3 text-sm rounded-none border-l-[3px] transition-all duration-200 !shadow-none",
+                                        isActive
+                                            ? "border-l-transparent bg-gradient-to-r from-blue-50 to-blue-50/30 text-chaiyo-blue font-semibold"
+                                            : "border-l-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-l-gray-300"
                                     )}
-                                </div>
-                            </TabsTrigger>
-                        );
-                    })}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeDocTab"
+                                            className="absolute -left-[3px] top-0 bottom-0 w-[3px] bg-chaiyo-blue"
+                                            transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                                        />
+                                    )}
+                                    <div className="flex items-start justify-between w-full gap-2">
+                                        <span className="leading-snug">{section.title.replace(/^\d+\.\s*/, '')}</span>
+                                        {isCompleted && (
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                        )}
+                                    </div>
+                                </TabsTrigger>
+                            );
+                        })}
                     </LayoutGroup>
                 </TabsList>
 
                 <div className="flex-1 overflow-hidden min-w-0">
                     <AnimatePresence mode="wait">
-                    {sections.map((section, idx) => {
-                        return (
-                            <TabsContent key={idx} value={String(idx)} className="m-0 focus-visible:outline-none" forceMount={activeTab === String(idx) ? true : undefined}>
-                                <motion.div
-                                    key={activeTab}
-                                    initial={{ opacity: 0, y: 8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    transition={{ duration: 0.2, ease: "easeOut" }}
-                                >
-                                {section.isViewOnly && section.sourceModule && (
-                                    <div className="mb-6">
-                                        <StatusBanner
-                                            variant="info"
-                                            icon={Info}
-                                            title={`เอกสารเหล่านี้ถูกอัปโหลดจาก ${section.sourceModule}`}
-                                            description={`หากต้องการแก้ไข หรืออัปเดตข้อมูล กรุณาไปที่ ${section.sourceModule}`}
-                                        />
-                                    </div>
-                                )}
-                                {(() => {
-                                    const mandatoryDocs = section.docs.filter(d => d.req);
-                                    const optionalDocs = section.docs.filter(d => !d.req);
-
-                                    const renderDocTable = (title: string, docs: DocumentDoc[], showAddButton: boolean, isMandatory: boolean) => {
-                                        if (docs.length === 0 && !showAddButton) return null;
-
-                                        return (
-                                            <div className="mb-6 last:mb-0">
-                                                <div className="flex justify-between items-center mb-3">
-                                                    <div className="text-sm font-bold text-gray-700">{title}</div>
-                                                    {showAddButton && (
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                const newId = `other_${Date.now()}`;
-                                                                setCustomDocs(prev => [...prev, { id: newId, name: 'เอกสารอื่นๆ', req: false }]);
-                                                            }}
-                                                            className="h-9 gap-1.5 font-medium"
-                                                        >
-                                                            <Plus className="w-4 h-4" />
-                                                            เพิ่มเอกสารอื่นๆ
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                                <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                                    <Table className="table-fixed">
-                                                        <TableHeader className="bg-gray-50/50">
-                                                            <TableRow>
-                                                                <TableHead className={cn("text-xs", section.isViewOnly ? "w-auto" : "w-[400px]")}>
-                                                                    ประเภทเอกสาร{isMandatory && <span className="text-red-500 ml-0.5">*</span>}
-                                                                </TableHead>
-                                                                <TableHead className="text-xs">ไฟล์ที่อัพโหลด</TableHead>
-                                                                {!section.isViewOnly && (
-                                                                    <TableHead className="w-[160px] text-right text-xs">จัดการ</TableHead>
-                                                                )}
-                                                            </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            {docs.length === 0 ? (
-                                                                <TableRow>
-                                                                    <TableCell colSpan={section.isViewOnly ? 2 : 3} className="text-center py-8 text-muted-foreground text-sm">
-                                                                        ไม่มีเอกสารในรายการนี้
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            ) : (
-                                                                docs.map((doc) => {
-                                                                    const fileCount = uploads[doc.id] || 0;
-                                                                    const isUploaded = fileCount > 0;
-                                                                    return (
-                                                                        <TableRow key={doc.id} className="hover:bg-transparent">
-                                                                            <TableCell className="py-4">
-                                                                                <div className="flex items-center gap-3">
-                                                                                    <div className={cn(
-                                                                                        "w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
-                                                                                        isUploaded ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
-                                                                                    )}>
-                                                                                        {isUploaded ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                                                                                    </div>
-                                                                                    {section.isCustom ? (
-                                                                                        <Input
-                                                                                            value={doc.name}
-                                                                                            onChange={(e) => {
-                                                                                                setCustomDocs(prev => prev.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d));
-                                                                                            }}
-                                                                                            className="h-8 text-sm font-medium w-[200px]"
-                                                                                            placeholder="ชื่อเอกสาร"
-                                                                                        />
-                                                                                    ) : (
-                                                                                        <span className="font-medium text-gray-700 text-sm">{doc.name}</span>
-                                                                                    )}
-                                                                                </div>
-                                                                            </TableCell>
-                                                                            <TableCell>
-                                                                                {isUploaded ? (
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() => section.isViewOnly ? handleViewPhotos(doc.id, fileCount) : handleUpload(doc.id)}
-                                                                                        className={cn(
-                                                                                            "flex items-center gap-1.5 text-xs font-medium cursor-pointer",
-                                                                                            section.isViewOnly ? "text-chaiyo-blue hover:text-chaiyo-blue no-underline" : "text-chaiyo-blue hover:underline"
-                                                                                        )}
-                                                                                    >
-                                                                                        <FileText className="w-3.5 h-3.5" />
-                                                                                        {fileCount} ไฟล์
-                                                                                    </button>
-                                                                                ) : (
-                                                                                    <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
-                                                                                )}
-                                                                            </TableCell>
-                                                                            {!section.isViewOnly && (
-                                                                                <TableCell className="text-right">
-                                                                                    <div className="flex items-center justify-end gap-1">
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="outline"
-                                                                                            size="sm"
-                                                                                            onClick={() => handleUpload(doc.id)}
-                                                                                            className="h-8 text-xs gap-1.5 font-medium"
-                                                                                        >
-                                                                                            <Plus className="w-3.5 h-3.5" />
-                                                                                            เพิ่มเอกสาร
-                                                                                        </Button>
-                                                                                        {section.isCustom && (
-                                                                                            <Button
-                                                                                                type="button"
-                                                                                                variant="ghost"
-                                                                                                size="sm"
-                                                                                                onClick={() => setDocToDelete(doc)}
-                                                                                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                                                                                title="ลบเอกสาร"
-                                                                                            >
-                                                                                                <Trash2 className="w-4 h-4" />
-                                                                                            </Button>
-                                                                                        )}
-                                                                                    </div>
-                                                                                </TableCell>
-                                                                            )}
-                                                                        </TableRow>
-                                                                    );
-                                                                })
-                                                            )}
-                                                        </TableBody>
-                                                    </Table>
-                                                </div>
+                        {sections.map((section, idx) => {
+                            return (
+                                <TabsContent key={idx} value={String(idx)} className="m-0 focus-visible:outline-none" forceMount={activeTab === String(idx) ? true : undefined}>
+                                    <motion.div
+                                        key={activeTab}
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -8 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                    >
+                                        {section.isViewOnly && section.sourceModule && (
+                                            <div className="mb-6">
+                                                <StatusBanner
+                                                    variant="info"
+                                                    icon={Info}
+                                                    title={`เอกสารเหล่านี้ถูกอัปโหลดจาก ${section.sourceModule}`}
+                                                    description={`หากต้องการแก้ไข หรืออัปเดตข้อมูล กรุณาไปที่ ${section.sourceModule}`}
+                                                />
                                             </div>
-                                        );
-                                    };
+                                        )}
+                                        {(() => {
+                                            const mandatoryDocs = section.docs.filter(d => d.req);
+                                            const optionalDocs = section.docs.filter(d => !d.req);
 
-                                    return (
-                                        <>
-                                            {renderDocTable("เอกสารบังคับ (Mandatory)", mandatoryDocs, false, true)}
-                                            {renderDocTable(section.isCustom ? "รายการเอกสาร" : "เอกสารทางเลือก (Optional)", optionalDocs, section.isCustom ?? false, false)}
-                                        </>
-                                    );
-                                })()}
-                                </motion.div>
-                            </TabsContent>
-                        );
-                    })}
+                                            const renderDocTable = (title: string, docs: DocumentDoc[], showAddButton: boolean, isMandatory: boolean) => {
+                                                if (docs.length === 0 && !showAddButton) return null;
+
+                                                return (
+                                                    <div className="mb-6 last:mb-0">
+                                                        <div className="flex justify-between items-center mb-3">
+                                                            <div className="text-sm font-bold text-gray-700">{title}</div>
+                                                            {showAddButton && (
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => {
+                                                                        const newId = `other_${Date.now()}`;
+                                                                        setCustomDocs(prev => [...prev, { id: newId, name: 'เอกสารอื่นๆ', req: false }]);
+                                                                    }}
+                                                                    className="h-9 gap-1.5 font-medium"
+                                                                >
+                                                                    <Plus className="w-4 h-4" />
+                                                                    เพิ่มเอกสารอื่นๆ
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                        <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
+                                                            <Table className="table-fixed">
+                                                                <TableHeader className="bg-gray-50/50">
+                                                                    <TableRow>
+                                                                        <TableHead className={cn("text-xs", section.isViewOnly ? "w-auto" : "w-[400px]")}>
+                                                                            ประเภทเอกสาร{isMandatory && <span className="text-red-500 ml-0.5">*</span>}
+                                                                        </TableHead>
+                                                                        <TableHead className="text-xs">ไฟล์ที่อัปโหลด</TableHead>
+                                                                        {!section.isViewOnly && (
+                                                                            <TableHead className="w-[160px] text-right text-xs">จัดการ</TableHead>
+                                                                        )}
+                                                                    </TableRow>
+                                                                </TableHeader>
+                                                                <TableBody>
+                                                                    {docs.length === 0 ? (
+                                                                        <TableRow>
+                                                                            <TableCell colSpan={section.isViewOnly ? 2 : 3} className="text-center py-8 text-muted-foreground text-sm">
+                                                                                ไม่มีเอกสารในรายการนี้
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    ) : (
+                                                                        docs.map((doc) => {
+                                                                            const fileCount = uploads[doc.id] || 0;
+                                                                            const isUploaded = fileCount > 0;
+                                                                            return (
+                                                                                <TableRow key={doc.id} className="hover:bg-transparent">
+                                                                                    <TableCell className="py-4">
+                                                                                        <div className="flex items-center gap-3">
+                                                                                            <div className={cn(
+                                                                                                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
+                                                                                                isUploaded ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
+                                                                                            )}>
+                                                                                                {isUploaded ? <CheckCircle2 className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                                                                                            </div>
+                                                                                            {section.isCustom ? (
+                                                                                                <Input
+                                                                                                    value={doc.name}
+                                                                                                    onChange={(e) => {
+                                                                                                        setCustomDocs(prev => prev.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d));
+                                                                                                    }}
+                                                                                                    className="h-8 text-sm font-medium w-[200px]"
+                                                                                                    placeholder="ชื่อเอกสาร"
+                                                                                                />
+                                                                                            ) : (
+                                                                                                <span className="font-medium text-gray-700 text-sm">{doc.name}</span>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </TableCell>
+                                                                                    <TableCell>
+                                                                                        {isUploaded ? (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => section.isViewOnly ? handleViewPhotos(doc.id, fileCount) : handleUpload(doc.id)}
+                                                                                                className={cn(
+                                                                                                    "flex items-center gap-1.5 text-xs font-medium cursor-pointer",
+                                                                                                    section.isViewOnly ? "text-chaiyo-blue hover:text-chaiyo-blue no-underline" : "text-chaiyo-blue hover:underline"
+                                                                                                )}
+                                                                                            >
+                                                                                                <FileText className="w-3.5 h-3.5" />
+                                                                                                {fileCount} ไฟล์
+                                                                                            </button>
+                                                                                        ) : (
+                                                                                            <span className="text-xs text-muted-foreground italic">ยังไม่มีไฟล์</span>
+                                                                                        )}
+                                                                                    </TableCell>
+                                                                                    {!section.isViewOnly && (
+                                                                                        <TableCell className="text-right">
+                                                                                            <div className="flex items-center justify-end gap-1">
+                                                                                                <Button
+                                                                                                    type="button"
+                                                                                                    variant="outline"
+                                                                                                    size="sm"
+                                                                                                    onClick={() => handleUpload(doc.id)}
+                                                                                                    className="h-8 text-xs gap-1.5 font-medium"
+                                                                                                >
+                                                                                                    <Plus className="w-3.5 h-3.5" />
+                                                                                                    เพิ่มเอกสาร
+                                                                                                </Button>
+                                                                                                {section.isCustom && (
+                                                                                                    <Button
+                                                                                                        type="button"
+                                                                                                        variant="ghost"
+                                                                                                        size="sm"
+                                                                                                        onClick={() => setDocToDelete(doc)}
+                                                                                                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                                                        title="ลบเอกสาร"
+                                                                                                    >
+                                                                                                        <Trash2 className="w-4 h-4" />
+                                                                                                    </Button>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </TableCell>
+                                                                                    )}
+                                                                                </TableRow>
+                                                                            );
+                                                                        })
+                                                                    )}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            };
+
+                                            return (
+                                                <>
+                                                    {renderDocTable("เอกสารบังคับ (Mandatory)", mandatoryDocs, false, true)}
+                                                    {renderDocTable(section.isCustom ? "รายการเอกสาร" : "เอกสารทางเลือก (Optional)", optionalDocs, section.isCustom ?? false, false)}
+                                                </>
+                                            );
+                                        })()}
+                                    </motion.div>
+                                </TabsContent>
+                            );
+                        })}
                     </AnimatePresence>
                 </div>
             </Tabs>

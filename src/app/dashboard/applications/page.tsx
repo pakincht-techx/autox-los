@@ -24,7 +24,7 @@ const MOCK_DATA: Application[] = [
         id: "mock-4",
         applicationNo: "25690317TLTDL0009",
         applicantName: "สมศักดิ์ ที่ดินทอง",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "17/03/2569 09:00",
         requestedAmount: 500000,
         status: "Draft",
@@ -35,7 +35,7 @@ const MOCK_DATA: Application[] = [
         id: "mock-1",
         applicationNo: "25680313ULCPL0001",
         applicantName: "สมชาย ใจดี",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "13/03/2569 09:00",
         requestedAmount: 20000,
         status: "Draft",
@@ -46,7 +46,7 @@ const MOCK_DATA: Application[] = [
         id: "mock-2",
         applicationNo: "25680313ULCPL0002",
         applicantName: "สมชาย ใจดี",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "13/03/2569 09:00",
         requestedAmount: 20000,
         status: "In Review",
@@ -57,7 +57,7 @@ const MOCK_DATA: Application[] = [
         id: "mock-3",
         applicationNo: "25680313ULCPL0003",
         applicantName: "สมชาย ใจดี",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "13/03/2569 09:00",
         requestedAmount: 20000,
         status: "Draft",
@@ -68,7 +68,7 @@ const MOCK_DATA: Application[] = [
         id: "1",
         applicationNo: "25690101ULCRL0001",
         applicantName: "สมชาย ใจดี",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "01/10/2569 09:00",
         requestedAmount: 500000,
         status: "Approved",
@@ -80,7 +80,7 @@ const MOCK_DATA: Application[] = [
         id: "2",
         applicationNo: "25690102TLTDL0002",
         applicantName: "วิภาวดี รักษ์ไทย",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "02/10/2569 08:30",
         requestedAmount: 120000,
         status: "In Review",
@@ -92,7 +92,7 @@ const MOCK_DATA: Application[] = [
         id: "3",
         applicationNo: "25690103ULCRL0003",
         applicantName: "กมล คนขยัน",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "03/10/2569 10:15",
         requestedAmount: 35000,
         status: "In Review",
@@ -104,7 +104,7 @@ const MOCK_DATA: Application[] = [
         id: "4",
         applicationNo: "25690104TLTKL0004",
         applicantName: "ดาริน สวยงาม",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "04/10/2569 13:45",
         requestedAmount: 850000,
         status: "Draft",
@@ -115,7 +115,7 @@ const MOCK_DATA: Application[] = [
         id: "5",
         applicationNo: "25690105ULCRL0005",
         applicantName: "เอกชัย มั่นคง",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "05/10/2569 11:00",
         requestedAmount: 45000,
         status: "Rejected",
@@ -126,7 +126,7 @@ const MOCK_DATA: Application[] = [
         id: "6",
         applicationNo: "25690106ULCRL0006",
         applicantName: "มานะ อดทน",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "06/10/2569 14:20",
         requestedAmount: 200000,
         status: "In Review",
@@ -137,7 +137,7 @@ const MOCK_DATA: Application[] = [
         id: "7",
         applicationNo: "25690107ULCRL0007",
         applicantName: "ประภาส เจริญดี",
-        makerName: "สมหญิง ใจดี",
+        makerName: "สมหญิง ใจดี (y1008001)",
         submissionDate: "07/10/2569 09:30",
         requestedAmount: 350000,
         status: "Sent Back",
@@ -148,12 +148,23 @@ const MOCK_DATA: Application[] = [
         id: "8",
         applicationNo: "25690108TLTDL0008",
         applicantName: "สุนีย์ แสงทอง",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "08/10/2569 16:00",
         requestedAmount: 180000,
         status: "Sent Back",
         productType: "สินเชื่อโฉนดที่ดิน",
         lastActionTime: "08/10/2569 15:25"
+    },
+    {
+        id: "mock-5",
+        applicationNo: "25690318ULCRL0010",
+        applicantName: "สมหมาย ปลายฝัน",
+        makerName: "สมหญิง ใจดี (y1008001)",
+        submissionDate: "18/03/2569 10:00",
+        requestedAmount: 150000,
+        status: "Approved",
+        productType: "สินเชื่อจำนำทะเบียนรถยนต์",
+        lastActionTime: "18/03/2569 14:30"
     },
 ];
 
@@ -233,6 +244,7 @@ export default function ApplicationsPage() {
                 { label: "ทั้งหมด", value: "all" },
                 { label: "แบบร่าง", value: "Draft" },
                 { label: "ส่งกลับ", value: "Sent Back" },
+                { label: "อนุมัติ", value: "Approved" },
             ]
             : [
                 { label: "ทั้งหมด", value: "all" },
@@ -240,7 +252,7 @@ export default function ApplicationsPage() {
             ];
 
     const excludedStatuses: ApplicationStatus[] = devRole === 'branch-staff'
-        ? ['Approved', 'Rejected', 'Cancelled', 'In Review']
+        ? ['Rejected', 'Cancelled', 'In Review']
         : ['Approved', 'Rejected', 'Cancelled', 'Draft', 'Sent Back'];
 
     const filteredData = MOCK_DATA.filter((app) => {
@@ -323,39 +335,43 @@ export default function ApplicationsPage() {
                         <p className="text-sm text-muted-foreground">จัดการและตรวจสอบรายการใบสมัครสินเชื่อทั้งหมดของคุณ</p>
                     </div>
 
-                    <Link href="/dashboard/pre-question">
-                        <Button className="active:scale-95 transition-all shadow-sm gap-2">
-                            <Plus className="w-4 h-4" />
-                            เช็คราคา/สร้างใบสมัครใหม่
-                        </Button>
-                    </Link>
+                    {devRole === 'branch-staff' && (
+                        <Link href="/dashboard/pre-question">
+                            <Button className="active:scale-95 transition-all shadow-sm gap-2">
+                                <Plus className="w-4 h-4" />
+                                เช็คราคา/สร้างใบสมัครใหม่
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Filters & Search */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <Tabs
-                        value={currentTab}
-                        onValueChange={(value) => { setCurrentTab(value); setCurrentPage(1); }}
-                    >
-                        <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl relative">
-                            {tabs.map((tab) => (
-                                <TabsTrigger
-                                    key={tab.value}
-                                    value={tab.value}
-                                    className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-transparent data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none z-10"
-                                >
-                                    {currentTab === tab.value && (
-                                        <motion.div
-                                            layoutId="active-tab-pill"
-                                            className="absolute inset-0 bg-white rounded-lg shadow-sm"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                                        />
-                                    )}
-                                    <span className="relative z-20">{tab.label}</span>
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
-                    </Tabs>
+                <div className={cn("flex flex-wrap items-center gap-4", devRole === 'branch-staff' ? "justify-between" : "justify-start")}>
+                    {devRole === 'branch-staff' && (
+                        <Tabs
+                            value={currentTab}
+                            onValueChange={(value) => { setCurrentTab(value); setCurrentPage(1); }}
+                        >
+                            <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl relative">
+                                {tabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.value}
+                                        value={tab.value}
+                                        className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-transparent data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none z-10"
+                                    >
+                                        {currentTab === tab.value && (
+                                            <motion.div
+                                                layoutId="active-tab-pill"
+                                                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                                            />
+                                        )}
+                                        <span className="relative z-20">{tab.label}</span>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </Tabs>
+                    )}
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         <div className="relative w-full sm:w-72">

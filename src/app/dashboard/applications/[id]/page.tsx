@@ -5,7 +5,7 @@ import { useSidebar } from "@/components/layout/SidebarContext";
 import { ApplicationStatus } from "@/components/applications/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2, Home, AlertCircle } from "lucide-react";
+import { Phone, MessageCircle, User, Pencil, Star, FileText, Check, ShieldCheck, Gift, Car, Wallet, Coins, Users, Plus, ThumbsUp, ThumbsDown, Undo2, Eye, AlertTriangle, ShieldAlert, ClipboardCheck, MessageSquare, Paperclip, CreditCard, Upload, CircleCheck, Circle, RefreshCw, Send, Loader2, ChevronLeft, ChevronRight, Building2, Home, AlertCircle, FileSignature, FileSearch } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,6 +21,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/Dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -52,194 +62,12 @@ const getStatusLabel = (status: ApplicationStatus) => {
     }
 };
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
-
-const BASE_MOCK_APP = {
-    id: "1",
-    applicationNo: "25680313ULCPL0001",
-    applicantName: "สมชาย ใจดี",
-    applicantNickname: "ชาย",
-    applicantInitials: "JS",
-    status: "Draft" as ApplicationStatus,
-    phone: "080-000-0000",
-    applicantAge: 35,
-    lastActionTime: "14-03-2569 10:30",
-
-    // Section 2: Detail cards
-    customerType: "ปกติ",
-    collateralType: "รถมอเตอร์ไซต์",
-    incomePerMonth: 25000,
-    debtPerMonth: 8500,
-    guarantorCount: 1,
-    refinanceCount: 1,
-    uploadedDocCount: 5,
-    acceptedConsentCount: 3,
-
-    // Module completion status
-    moduleStatus: {
-        customerInfo: true,
-        collateral: true,
-        loanDetail: true,
-        income: true,
-        debt: true,
-        guarantor: true,
-        refinance: true,
-        verifyAddress: true,
-        documents: true,
-        consent: false,
-    } as Record<string, boolean>,
-
-    // Loan detail
-    loanProductLabel: "ULCR",
-    loanProductName: "จำนำรถมอเตอร์ไซต์ผ่อนรายเดือน",
-    loanAmount: 20000,
-    interestRate: 24,
-    term: 60,
-    installment: 3000,
-    insurance: {
-        company: "วิริยะประกันภัย",
-        logo: "/insurance-logo/Property 1=Viriya.png",
-        tier: "ชั้น 1",
-        premium: 20000,
-        coverage: 500000,
-        repairType: "ซ่อมศูนย์",
-    },
-    totalInstallmentWithInsurance: 4000,
-    maxLoanAmount: 440000,
-    maxInstallment: 12656,
-
-    // Section 3: History log
-    historyLog: [
-        {
-            date: "13 มี.ค. 2569",
-            time: "10:30 น.",
-            title: "สร้างใบสมัคร",
-            team: "พนักงานสาขา",
-            result: "",
-            comment: undefined as string | undefined,
-            attachments: undefined as { name: string; url: string }[] | undefined,
-        },
-    ],
-};
-
-/** Returns mock app data based on the mockCase query param (1, 2, or 3). */
-function getMockApp(mockCase: string | null) {
-    switch (mockCase) {
-        case '1': // Draft — only customer info filled (Normal)
-            return {
-                ...BASE_MOCK_APP,
-                applicationNo: "25680313ULCPL0001",
-                collateralType: "",
-                incomePerMonth: 0,
-                debtPerMonth: 0,
-                guarantorCount: 0,
-                uploadedDocCount: 0,
-                acceptedConsentCount: 0,
-                moduleStatus: {
-                    customerInfo: true,
-                    collateral: false,
-                    loanDetail: false,
-                    income: false,
-                    debt: false,
-                    guarantor: false,
-                    documents: false,
-                    consent: false,
-                },
-            };
-        case '2': // In Review — only customer info filled (Softblock)
-            return {
-                ...BASE_MOCK_APP,
-                applicationNo: "25680313ULCPL0002",
-                status: "In Review" as ApplicationStatus,
-                collateralType: "",
-                incomePerMonth: 0,
-                debtPerMonth: 0,
-                guarantorCount: 0,
-                uploadedDocCount: 0,
-                acceptedConsentCount: 0,
-                moduleStatus: {
-                    customerInfo: true,
-                    collateral: false,
-                    loanDetail: false,
-                    income: false,
-                    debt: false,
-                    guarantor: false,
-                    documents: false,
-                    consent: false,
-                },
-            };
-        case '3': // Draft — all sections filled
-            return {
-                ...BASE_MOCK_APP,
-                applicationNo: "25680313ULCPL0003",
-            };
-        case '4': // Draft — Land collateral, all sections filled
-            return {
-                ...BASE_MOCK_APP,
-                id: "mock-4",
-                applicationNo: "25690317TLTDL0009",
-                applicantName: "สมศักดิ์ ที่ดินทอง",
-                applicantInitials: "สท",
-                status: "Draft" as ApplicationStatus,
-                phone: "081-234-5678",
-                applicantAge: 42,
-                lastActionTime: "17-03-2569 10:00",
-                customerType: "ปกติ",
-                collateralType: "โฉนดที่ดิน",
-                incomePerMonth: 30000,
-                debtPerMonth: 5000,
-                guarantorCount: 1,
-                refinanceCount: 0,
-                uploadedDocCount: 3,
-                acceptedConsentCount: 2,
-                moduleStatus: {
-                    customerInfo: true,
-                    collateral: true,
-                    loanDetail: true,
-                    income: true,
-                    debt: true,
-                    guarantor: true,
-                    refinance: false,
-                    documents: true,
-                    consent: false,
-                },
-                loanProductLabel: "TLTD",
-                loanProductName: "ที่ดิน (จำนำ) ผ่อนรายเดือน",
-                loanAmount: 500000,
-                interestRate: 15,
-                term: 120,
-                installment: 8075,
-                insurance: {
-                    company: "เทเวศประกันภัย",
-                    logo: "",
-                    tier: "",
-                    premium: 5000,
-                    coverage: 500000,
-                    repairType: "",
-                },
-                totalInstallmentWithInsurance: 8075,
-                maxLoanAmount: 750000,
-                maxInstallment: 12113,
-                historyLog: [
-                    {
-                        date: "17 มี.ค. 2569",
-                        time: "09:00 น.",
-                        title: "สร้างใบสมัคร",
-                        team: "พนักงานสาขา",
-                        result: "",
-                        comment: undefined as string | undefined,
-                        attachments: undefined as { name: string; url: string }[] | undefined,
-                    },
-                ],
-            };
-        default:
-            return BASE_MOCK_APP;
-    }
-}
+import { BASE_MOCK_APP, getMockApp } from "@/lib/mockApplications";
 
 // ─── Page Component ──────────────────────────────────────────────────────────
 
-export default function ApplicationDetailPage({ params }: { params: { id: string } }) {
+export default function ApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = React.use(params);
     const router = useRouter();
     const { setBreadcrumbs, setRightContent, devRole, setHideNavButtons, setHideSaveDraftButton, setOnBack } = useSidebar();
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -256,7 +84,8 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const reasonCodes = mockCase === '2'
         ? ['S01', 'S03']
         : (searchParams.get('reasons')?.split(',').filter(Boolean) || []);
-    const app = getMockApp(mockCase);
+    const app = getMockApp(mockCase, id);
+    const isAccepted = searchParams.get('accepted') === 'true' || searchParams.get('signed') === 'true' || app.isLoanAccepted;
 
     // ── Derive view mode from source + role ───────────────────────────────
     // from=my → maker (editable)
@@ -268,7 +97,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
 
     // ── Status: approver/readonly defaults to "In Review", maker keeps Draft
     const [currentStatus, setCurrentStatus] = useState<ApplicationStatus>(
-        viewMode === 'maker' ? app.status : 'In Review'
+        app.status === 'Approved' ? 'Approved' : (viewMode === 'maker' ? app.status : 'In Review')
     );
     const canEdit = viewMode === 'maker' && !['In Review', 'Approved', 'Rejected', 'Cancelled'].includes(currentStatus);
 
@@ -280,6 +109,8 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
     const [historyLog, setHistoryLog] = useState(app.historyLog);
     const [customerStatusOverride, setCustomerStatusOverride] = useState<string | null>(null);
     const [softblockDetailOpen, setSoftblockDetailOpen] = useState(false);
+    const [verifyDocsDialogOpen, setVerifyDocsDialogOpen] = useState(false);
+    const [unacceptedDocsDialogOpen, setUnacceptedDocsDialogOpen] = useState(false);
 
     // ── Set breadcrumbs + right content ──────────────────────────────────
     useEffect(() => {
@@ -360,6 +191,20 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                     <MessageSquare className="w-4 h-4 mr-1.5" /> ให้ความเห็น
                                 </Button>
                             )}
+                            {currentStatus === 'Approved' && (
+                                <Button
+                                    className="bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white font-bold shadow-sm"
+                                    onClick={() => {
+                                        if (!isAccepted) {
+                                            setUnacceptedDocsDialogOpen(true);
+                                        } else {
+                                            setVerifyDocsDialogOpen(true);
+                                        }
+                                    }}
+                                >
+                                    <FileSearch className="w-4 h-4 mr-1.5" /> ตรวจสอบเอกสาร
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -403,6 +248,96 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                 <div className="flex gap-8 items-start">
                     {/* ── Left column: Module list ── */}
                     <div className="flex-1 min-w-0 space-y-5">
+                        {/* ═══ APPROVED LOAN PACKAGE CARD ═══ */}
+                        {currentStatus === 'Approved' && (() => {
+                            const fmt = (n: number) => n.toLocaleString('th-TH');
+                            return (
+                                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    {/* Card Header */}
+                                    <div className={cn("px-6 py-4 flex items-center justify-between", isAccepted ? "bg-status-approved" : "bg-chaiyo-blue")}>
+                                        <div className="flex items-center gap-3">
+                                            <CircleCheck className="w-5 h-5 text-white shrink-0" />
+                                            <p className="text-base font-bold text-white">{isAccepted ? "ลูกค้ายืนยันรับสินเชื่อแล้ว" : "สินเชื่อได้รับการอนุมัติ"}</p>
+                                        </div>
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            className={cn(
+                                                "font-bold shadow-sm cursor-pointer border border-transparent hover:bg-gray-50",
+                                                isAccepted ? "bg-white text-status-approved hover:text-status-approved" : "bg-white text-chaiyo-blue hover:text-chaiyo-blue"
+                                            )}
+                                            onClick={() => router.push(isAccepted ? `/dashboard/applications/${id}/confirm-loan?mode=view` : `/dashboard/applications/${id}/confirm-loan`)}
+                                        >
+                                            {isAccepted ? "ดูรายละเอียด" : "ตรวจสอบข้อมูล"}
+                                        </Button>
+                                    </div>
+
+                                    {/* Loan Details Section */}
+                                    <div className="px-6 py-5 space-y-5">
+                                        <div>
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">รายละเอียดสินเชื่อ</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                    <p className="text-xs text-gray-500 mb-1">วงเงินอนุมัติ</p>
+                                                    <p className="text-xl font-bold text-gray-900 tracking-tight">{fmt(app.loanAmount)} <span className="text-sm font-semibold text-gray-500">บาท</span></p>
+                                                </div>
+                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                    <p className="text-xs text-gray-500 mb-1">อัตราดอกเบี้ย</p>
+                                                    <p className="text-xl font-bold text-gray-900 tracking-tight">{app.interestRate}% <span className="text-sm font-semibold text-gray-500">ต่อปี</span></p>
+                                                </div>
+                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                    <p className="text-xs text-gray-500 mb-1">ข้อมูลสินเชื่อ</p>
+                                                    <p className="text-sm font-bold text-gray-900">{app.loanProductName}</p>
+                                                </div>
+                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                    <p className="text-xs text-gray-500 mb-1">ระยะเวลาผ่อน</p>
+                                                    <p className="text-xl font-bold text-gray-900 tracking-tight">{app.term} <span className="text-sm font-semibold text-gray-500">เดือน</span></p>
+                                                    <p className="text-xs text-gray-400 mt-0.5">ค่างวด {fmt(app.installment)} บาท/เดือน</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Insurance Section */}
+                                        {app.insurance && app.insurance.company && (
+                                            <div>
+                                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">รายละเอียดประกัน</p>
+                                                <div className="bg-gray-50 rounded-xl p-4">
+                                                    <div className="flex items-center gap-4">
+                                                        {app.insurance.logo && (
+                                                            <div className="w-11 h-11 rounded-full border border-gray-100 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                                                                <img src={app.insurance.logo} alt={app.insurance.company} className="w-8 h-8 object-contain" />
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-bold text-gray-900">{app.insurance.company}</p>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                {app.insurance.tier && (
+                                                                    <span className="text-xs text-gray-500">{app.insurance.tier}</span>
+                                                                )}
+                                                                {app.insurance.repairType && (
+                                                                    <>
+                                                                        <span className="text-gray-300">•</span>
+                                                                        <span className="text-xs text-gray-500">{app.insurance.repairType}</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-xs text-gray-500">เบี้ยประกัน</p>
+                                                            <p className="text-sm font-bold text-gray-900">{fmt(app.insurance.premium)} บาท</p>
+                                                        </div>
+                                                        <div className="text-right shrink-0 pl-4 border-l border-gray-100">
+                                                            <p className="text-xs text-gray-500">วงเงินคุ้มครอง</p>
+                                                            <p className="text-sm font-bold text-gray-900">{fmt(app.insurance.coverage)} บาท</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
                         {/* Group 1: รายละเอียดใบสมัคร */}
                         <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดใบสมัคร</p>
@@ -494,6 +429,21 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 )}
                             </div>
                         </div>
+
+                        {/* Group 4: สัญญา */}
+                        {currentStatus === 'Approved' && (
+                            <div>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">สัญญา</p>
+                                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    <ModuleRow
+                                        title="สัญญาทั้งหมด"
+                                        icon={<FileSignature className="w-4 h-4" />}
+                                        completionStatus="completed"
+                                        onView={() => router.push(`/dashboard/applications/${id}/contract`)}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* ── Right column: Contact info ── */}
@@ -505,7 +455,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                 <div className="space-y-2.5">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-gray-500">พนักงาน</span>
-                                        <span className="text-xs font-semibold text-gray-800">สมหญิง จริงใจ - 108001</span>
+                                        <span className="text-xs font-semibold text-gray-800">สมหญิง จริงใจ (y1008001)</span>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-gray-500">สาขา</span>
@@ -893,6 +843,50 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* Verify Documents Confirmation Dialog */}
+                <AlertDialog open={verifyDocsDialogOpen} onOpenChange={setVerifyDocsDialogOpen}>
+                    <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>ยืนยันการส่งตรวจสอบเอกสาร</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                คุณต้องการส่งใบสมัครนี้ไปให้ทีมปฏิบัติการ (Operation Team) เพื่อตรวจสอบสัญญาและเอกสารที่อัปโหลดใช่หรือไม่?
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel className="min-w-[104px]">ยกเลิก</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={() => {
+                                    setVerifyDocsDialogOpen(false);
+                                    toast.success("ส่งให้ทีมปฏิบัติการตรวจสอบเอกสารเรียบร้อยแล้ว");
+                                }}
+                                className="min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                            >
+                                ยืนยันการส่ง
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Unaccepted Loan Warning Dialog */}
+                <AlertDialog open={unacceptedDocsDialogOpen} onOpenChange={setUnacceptedDocsDialogOpen}>
+                    <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>ไม่สามารถส่งตรวจสอบเอกสารได้</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                กรุณาให้ลูกค้ายืนยันการขอสินเชื่อ และอัปโหลดสัญญาให้เรียบร้อย ก่อนทำการส่งตรวจสอบเอกสาร
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogAction
+                                onClick={() => setUnacceptedDocsDialogOpen(false)}
+                                className="min-w-[104px] bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
+                            >
+                                ตกลง
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );
@@ -1003,7 +997,7 @@ function ModuleRow({
     };
 
     return (
-        <div 
+        <div
             onClick={onEdit || onView ? handleClick : undefined}
             className={cn(
                 "flex items-center justify-between px-4 py-3.5 group transition-colors",
@@ -1138,12 +1132,12 @@ function IncompleteModulesDialog({
                         กรุณากรอกข้อมูลให้ครบทุกรายการก่อนส่งใบสมัคร
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <DialogBody>
                     <div className="space-y-0 mt-4">
                         {incompleteModules.map((module, index) => (
-                            <div 
-                                key={index} 
+                            <div
+                                key={index}
                                 onClick={() => {
                                     onOpenChange(false);
                                     router.push(`/dashboard/new-application/${applicationNo}/${module.path}?state=draft`);
@@ -1163,7 +1157,7 @@ function IncompleteModulesDialog({
                 </DialogBody>
 
                 <DialogFooter className="mt-6 sm:justify-end">
-                    <Button 
+                    <Button
                         variant="outline"
                         className="min-w-[104px]"
                         onClick={() => onOpenChange(false)}

@@ -24,11 +24,11 @@ interface VerifyAddressStepProps {
 }
 
 const MOCK_STAFF_LIST = [
-    { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
-    { id: "S002", code: "S002", name: "สุดา รักงาน", phone: "089-876-5432" },
-    { id: "S003", code: "S003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
-    { id: "S004", code: "S004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
-    { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
+    { id: "y1008001", code: "y1008001", name: "สมชาย ใจดี", phone: "081-234-5678" },
+    { id: "y1008002", code: "y1008002", name: "สุดา รักงาน", phone: "089-876-5432" },
+    { id: "y1008003", code: "y1008003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
+    { id: "y1008004", code: "y1008004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
+    { id: "y1008005", code: "y1008005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
 const MismatchHint = ({ show }: { show: boolean }) => (
@@ -277,7 +277,7 @@ export function VerifyAddressStep({ formData, setFormData }: VerifyAddressStepPr
                                 <Combobox
                                     options={MOCK_STAFF_LIST.map(s => ({
                                         value: s.id,
-                                        label: `${s.code} — ${s.name}`,
+                                        label: `${s.name} (${s.code})`,
                                     }))}
                                     value={assessorId}
                                     onValueChange={(val) => {

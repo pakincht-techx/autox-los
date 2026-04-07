@@ -96,7 +96,7 @@ function NewApplicationLayoutInner({ children }: { children: React.ReactNode }) 
             'guarantors': 'ผู้ค้ำ',
             'refinance': 'รีไฟแนนซ์',
             'verify-address': 'ตรวจสอบที่อยู่',
-            'consent': 'การให้ความยินยอม',
+            'consent': isReadonly ? 'การให้ความยินยอม' : 'ส่งใบสมัคร',
         };
         const pathSlug = pathname.split('/').pop() || '';
         const currentStepTitle = applicationStepIndex >= 0

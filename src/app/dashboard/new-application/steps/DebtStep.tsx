@@ -157,11 +157,11 @@ const GUARANTOR_DEBT_TYPES = [
 
 // Mock staff list — replace with API data in production
 const MOCK_STAFF_LIST = [
-    { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
-    { id: "S002", code: "S002", name: "สุดา รักงาน", phone: "089-876-5432" },
-    { id: "S003", code: "S003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
-    { id: "S004", code: "S004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
-    { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
+    { id: "y1008001", code: "y1008001", name: "สมชาย ใจดี", phone: "081-234-5678" },
+    { id: "y1008002", code: "y1008002", name: "สุดา รักงาน", phone: "089-876-5432" },
+    { id: "y1008003", code: "y1008003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
+    { id: "y1008004", code: "y1008004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
+    { id: "y1008005", code: "y1008005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
 export function DebtStep({ formData, setFormData, isExistingCustomer = false, isGuarantor = false }: DebtStepProps) {
@@ -1326,12 +1326,7 @@ export function DebtStep({ formData, setFormData, isExistingCustomer = false, is
                             </div>
 
                             {/* Net Remaining Column */}
-                            <div className={cn(
-                                "p-5 flex flex-col justify-center items-center text-center",
-                                Number(formData.totalIncome || 0) - Number(formData.totalDebt || 0) < 0
-                                    ? "bg-red-50/60"
-                                    : "bg-emerald-50/60"
-                            )}>
+                            <div className="p-5 flex flex-col justify-center items-center text-center">
                                 <div className="flex items-center gap-2 mb-2">
                                     <span className="text-sm font-bold text-gray-700">รายได้คงเหลือ</span>
                                 </div>

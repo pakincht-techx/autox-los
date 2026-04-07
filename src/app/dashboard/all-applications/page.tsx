@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 import { ApplicationTable, SortKey, SortDirection } from "@/components/applications/ApplicationTable";
 import { Application, ApplicationStatus } from "@/components/applications/types";
 import { useSidebar, DevRole } from "@/components/layout/SidebarContext";
@@ -21,7 +22,7 @@ const MOCK_DATA: Application[] = [
         id: "b1",
         applicationNo: "25690101ULCRL0001",
         applicantName: "สมชาย ใจดี",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "01/10/2569 08:15",
         requestedAmount: 500000,
         status: "Approved",
@@ -33,7 +34,7 @@ const MOCK_DATA: Application[] = [
         id: "b2",
         applicationNo: "25690105ULCRL0005",
         applicantName: "เอกชัย มั่นคง",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "05/10/2569 10:30",
         requestedAmount: 45000,
         status: "Rejected",
@@ -45,7 +46,7 @@ const MOCK_DATA: Application[] = [
         id: "b3",
         applicationNo: "25690110ULCRL0010",
         applicantName: "จันทร์ แสงงาม",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "10/10/2569 09:45",
         requestedAmount: 320000,
         status: "Approved",
@@ -57,7 +58,7 @@ const MOCK_DATA: Application[] = [
         id: "b4",
         applicationNo: "25690112TLTDL0012",
         applicantName: "พิมพ์ใจ รักสวย",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "12/10/2569 14:00",
         requestedAmount: 150000,
         status: "Cancelled",
@@ -68,7 +69,7 @@ const MOCK_DATA: Application[] = [
         id: "b5",
         applicationNo: "25690115TLTKL0015",
         applicantName: "วิทยา เก่งกล้า",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "15/10/2569 11:20",
         requestedAmount: 780000,
         status: "Approved",
@@ -79,7 +80,7 @@ const MOCK_DATA: Application[] = [
         id: "b6",
         applicationNo: "25690118ULCRL0018",
         applicantName: "อรุณ ศรีสวัสดิ์",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "18/10/2569 13:30",
         requestedAmount: 60000,
         status: "Rejected",
@@ -90,7 +91,7 @@ const MOCK_DATA: Application[] = [
         id: "b7",
         applicationNo: "25690120ULCRL0020",
         applicantName: "ธนพล เจริญผล",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "20/10/2569 07:50",
         requestedAmount: 420000,
         status: "Approved",
@@ -101,7 +102,7 @@ const MOCK_DATA: Application[] = [
         id: "b8",
         applicationNo: "25690122ULCRL0022",
         applicantName: "นิตยา อ่อนน้อม",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "22/10/2569 15:45",
         requestedAmount: 90000,
         status: "Cancelled",
@@ -112,7 +113,7 @@ const MOCK_DATA: Application[] = [
         id: "b9",
         applicationNo: "25690125TLTDL0025",
         applicantName: "ปราโมทย์ ใจเย็น",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "25/10/2569 09:00",
         requestedAmount: 250000,
         status: "Rejected",
@@ -123,7 +124,7 @@ const MOCK_DATA: Application[] = [
         id: "b10",
         applicationNo: "25690128ULCRL0028",
         applicantName: "สุดา แก้วมณี",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "28/10/2569 16:15",
         requestedAmount: 650000,
         status: "Approved",
@@ -134,7 +135,7 @@ const MOCK_DATA: Application[] = [
         id: "b11",
         applicationNo: "25690130ULCRL0030",
         applicantName: "วิชัย อดทน",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "30/10/2569 10:00",
         requestedAmount: 400000,
         status: "In Review",
@@ -145,7 +146,7 @@ const MOCK_DATA: Application[] = [
         id: "b12",
         applicationNo: "25690201ULCRL0032",
         applicantName: "กมล พงษ์เจริญ",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "01/11/2569 09:30",
         requestedAmount: 350000,
         status: "Draft",
@@ -156,7 +157,7 @@ const MOCK_DATA: Application[] = [
         id: "b13",
         applicationNo: "25690203TLTDL0034",
         applicantName: "รัตนา สุขสม",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "03/11/2569 14:15",
         requestedAmount: 180000,
         status: "Draft",
@@ -167,7 +168,7 @@ const MOCK_DATA: Application[] = [
         id: "b14",
         applicationNo: "25690205ULCRL0036",
         applicantName: "ประยุทธ์ แสนดี",
-        makerName: "สมหญิง จริงใจ",
+        makerName: "สมหญิง จริงใจ (y1008001)",
         submissionDate: "05/11/2569 11:00",
         requestedAmount: 520000,
         status: "Sent Back",
@@ -179,7 +180,7 @@ const MOCK_DATA: Application[] = [
         id: "b15",
         applicationNo: "25690207ULCRL0038",
         applicantName: "สุวรรณี ทองคำ",
-        makerName: "กานต์ สว่างใจ",
+        makerName: "กานต์ สว่างใจ (y1008001)",
         submissionDate: "07/11/2569 08:45",
         requestedAmount: 75000,
         status: "Sent Back",
@@ -353,30 +354,32 @@ export default function AllApplicationsPage() {
                 </div>
 
                 {/* Filters & Search */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <Tabs
-                        value={currentTab}
-                        onValueChange={(value) => { setCurrentTab(value); setCurrentPage(1); }}
-                    >
-                        <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl relative">
-                            {tabs.map((tab) => (
-                                <TabsTrigger
-                                    key={tab.value}
-                                    value={tab.value}
-                                    className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-transparent data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none z-10"
-                                >
-                                    {currentTab === tab.value && (
-                                        <motion.div
-                                            layoutId="all-apps-active-tab-pill"
-                                            className="absolute inset-0 bg-white rounded-lg shadow-sm"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                                        />
-                                    )}
-                                    <span className="relative z-20">{tab.label}</span>
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
-                    </Tabs>
+                <div className={cn("flex flex-wrap items-center gap-4", devRole === 'branch-staff' ? "justify-between" : "justify-start")}>
+                    {devRole === 'branch-staff' && (
+                        <Tabs
+                            value={currentTab}
+                            onValueChange={(value) => { setCurrentTab(value); setCurrentPage(1); }}
+                        >
+                            <TabsList className="h-auto p-1 bg-gray-50/50 border border-border-subtle rounded-xl relative">
+                                {tabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.value}
+                                        value={tab.value}
+                                        className="relative px-4 py-1.5 text-xs font-bold rounded-lg data-[state=active]:bg-transparent data-[state=active]:text-chaiyo-blue data-[state=active]:shadow-none z-10"
+                                    >
+                                        {currentTab === tab.value && (
+                                            <motion.div
+                                                layoutId="all-apps-active-tab-pill"
+                                                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                                            />
+                                        )}
+                                        <span className="relative z-20">{tab.label}</span>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </Tabs>
+                    )}
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         <div className="relative w-full sm:w-72">

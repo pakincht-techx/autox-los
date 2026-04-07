@@ -12,6 +12,7 @@ export interface Application {
     previousProcessorName?: string;
     lastActionTime?: string;
     avatarUrl?: string; // Added for consistency
+    isLoanAccepted?: boolean;
 }
 
 export type ActionPriority = 'High' | 'Medium' | 'Low';

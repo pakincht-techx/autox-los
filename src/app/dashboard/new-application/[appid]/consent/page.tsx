@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { ShieldAlert, ChevronDown, User, Loader2, FileText, Send } from "lucide-react";
+import { ShieldAlert, ChevronDown, User, Loader2, FileText, Send, XCircle, CheckCircle } from "lucide-react";
 import { StatusBanner } from "@/components/ui/StatusBanner";
+import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSidebar } from "@/components/layout/SidebarContext";
 import {
     Dialog,
@@ -16,6 +17,16 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/Dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 // ─── Consent Content Data ───────────────────────────────────────────────────
@@ -51,6 +62,8 @@ const CONSENT_DATA = [
 
 export default function ConsentStepPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isReadonly = searchParams.get('state') === 'readonly';
     const { setHideSaveDraftButton } = useSidebar();
     
     // Step State (0 = T&C, 1 = Marketing, 2 = Insurance)
@@ -65,6 +78,9 @@ export default function ConsentStepPage() {
     // Maker Submission Modal State
     const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // Decline Dialog
+    const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false);
 
     const checkScrollable = () => {
         if (scrollRef.current) {
@@ -119,15 +135,16 @@ export default function ConsentStepPage() {
         }
     };
 
-    const handleBack = () => {
-        if (currentStep > 0) {
-            setCurrentStep(prev => prev - 1);
-            if (scrollRef.current) {
-                scrollRef.current.scrollTop = 0;
-            }
+    const handleDecline = () => {
+        if (CONSENT_DATA[currentStep].mandatory) {
+            setIsDeclineDialogOpen(true);
         } else {
-            // Cancel / Go back to main
-            router.push("/dashboard/applications");
+            setIsAcceptedState(prev => {
+                const next = [...prev];
+                next[currentStep] = false;
+                return next;
+            });
+            handleNext();
         }
     };
 
@@ -197,8 +214,49 @@ export default function ConsentStepPage() {
         );
     }
 
+    if (isReadonly) {
+        const READONLY_DATA = [
+            { title: "ข้อกำหนดและเงื่อนไข (Terms & Conditions)", version: "v1.0.0", status: "accepted" },
+            { title: "ความยินยอมทางการตลาด (Marketing Consent)", version: "v1.2.0", status: "accepted" },
+            { title: "ความยินยอมการประกันภัย (Insurance Consent)", version: "v1.1.0", status: "accepted" },
+            { title: "ความยินยอมในการเปิดเผยข้อมูลส่วนบุคคล (PDPA Consent)", version: "v2.0.0", status: "declined" }
+        ];
+
+        return (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500 pb-20 mt-4">
+                <div className="flex flex-col mb-6 mt-2">
+                    <h2 className="text-2xl font-bold text-gray-800">การให้ความยินยอม</h2>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
+                    {READONLY_DATA.map((item, index) => (
+                        <div key={index} className="flex items-center justify-between p-5 border-b border-gray-100 last:border-0 hover:bg-gray-50/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-bold text-gray-800">{item.title}</span>
+                                <span className="text-[10px] font-medium bg-gray-100 text-gray-500 px-2.5 py-0.5 rounded-full">{item.version}</span>
+                            </div>
+                            <div>
+                                {item.status === 'accepted' ? (
+                                    <Badge variant="success" className="px-3 py-1 gap-1.5 font-bold rounded-full">
+                                        <CheckCircle className="w-3.5 h-3.5" />
+                                        <span>ยอมรับแล้ว</span>
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="danger" className="px-3 py-1 gap-1.5 font-bold rounded-full">
+                                        <XCircle className="w-3.5 h-3.5" />
+                                        <span>ปฏิเสธ</span>
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div key={currentStep} className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-right-8 duration-500 pb-20 mt-4">
+        <div key={currentStep} className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500 pb-20 mt-4">
             {/* Staff Instruction Banner */}
             <StatusBanner
                 variant="orange"
@@ -267,33 +325,59 @@ export default function ConsentStepPage() {
             </div>
 
             <div className="flex pt-4 flex-col sm:flex-row gap-4 justify-end mt-8">
-                <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    className="min-w-[120px] font-bold h-12 rounded-xl"
-                >
-                    ย้อนกลับ
-                </Button>
-                <Button
-                    onClick={handleNext}
-                    disabled={!canProceed}
-                    className={cn(
-                        "min-w-[120px] transition-all font-bold h-12 rounded-xl border-none shadow-sm",
-                        canProceed
-                            ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white shadow-blue-200"
-                            : "bg-gray-200 text-gray-400 opacity-80 shadow-none cursor-not-allowed"
-                    )}
-                >
-                    {currentStep === CONSENT_DATA.length - 1 ? (
-                        <>
-                            <Send className="w-4 h-4 mr-2" />
-                            ยืนยันและส่งใบสมัคร
-                        </>
-                    ) : (
-                        "ถัดไป"
-                    )}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                        variant="outline"
+                        onClick={handleDecline}
+                        disabled={currentConsent.mandatory && !hasRead}
+                        className={cn(
+                            "min-w-[200px] h-12 rounded-xl font-bold transition-colors",
+                            isAccepted
+                                ? "text-gray-400 bg-gray-50 border-gray-200"
+                                : "text-gray-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 border-gray-300 bg-white"
+                        )}
+                    >
+                        <XCircle className="w-5 h-5 mr-2" />
+                        ไม่ยินยอม
+                    </Button>
+                    <Button
+                        onClick={handleNext}
+                        disabled={!canProceed}
+                        className={cn(
+                            "min-w-[200px] h-12 transition-all rounded-xl font-bold",
+                            canProceed
+                                ? "bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white shadow-blue-200"
+                                : "bg-gray-200 text-gray-400 shadow-none hover:bg-gray-200 cursor-not-allowed"
+                        )}
+                    >
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        ยินยอม
+                    </Button>
+                </div>
             </div>
+
+            <AlertDialog open={isDeclineDialogOpen} onOpenChange={setIsDeclineDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ยืนยันการปฏิเสธ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            หากคุณปฏิเสธการให้ความยินยอม คุณจะไม่สามารถดำเนินการสมัครสินเชื่อต่อได้
+                            ต้องการปฏิเสธและกลับหน้าหลักใช่หรือไม่?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="min-w-[120px] font-bold shadow-none">
+                            ยกเลิก
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => router.push("/dashboard/applications")}
+                            className="bg-red-600 hover:bg-red-700 text-white min-w-[120px] font-bold shadow-none"
+                        >
+                            ยืนยันการปฏิเสธ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

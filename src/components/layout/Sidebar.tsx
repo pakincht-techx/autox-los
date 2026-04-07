@@ -53,6 +53,15 @@ const branchInfo = {
     region: 'กรุงเทพมหานคร 2'
 };
 
+const roleDisplayMap: Record<string, string> = {
+    'branch-staff': 'พนักงานสาขา',
+    'legal-team': 'ทีม Legal',
+    'district-checker': 'เขต/ภาค Checker',
+    'rcco-checker': 'RCCO Checker',
+    'rcco-approver': 'RCCO Approver',
+    'credit-committee': 'คณะอนุมัติสินเชื่อ'
+};
+
 const navigationGroups = [
     {
         title: "จัดการ",
@@ -165,8 +174,8 @@ export function Sidebar() {
                     {!isCollapsed && (
                         <>
                             <div className="flex-1 overflow-hidden text-left">
-                                <p className="text-xs font-semibold text-white truncate">{mockUser.name}</p>
-                                <p className="text-[10px] text-white/60 truncate">{devRole === 'branch-staff' ? 'พนักงานสาขา' : 'ทีม Legal'}</p>
+                                <p className="text-xs font-semibold text-white truncate">{mockUser.name} (y1008001)</p>
+                                <p className="text-[10px] text-white/60 truncate">{roleDisplayMap[devRole] || 'พนักงานสาขา'}</p>
                             </div>
                         </>
                     )}
@@ -282,11 +291,7 @@ export function Sidebar() {
                     <div className="grid gap-4 py-4 px-6">
                         <div className="grid grid-cols-5 items-center gap-4">
                             <Label className="col-span-2 text-left text-muted-foreground">พนักงาน</Label>
-                            <div className="col-span-3 font-medium">1234567</div>
-                        </div>
-                        <div className="grid grid-cols-5 items-center gap-4">
-                            <Label className="col-span-2 text-left text-muted-foreground">ชื่อ-สกุล</Label>
-                            <div className="col-span-3 font-medium">นางสาวสมหญิง จริงใจ</div>
+                            <div className="col-span-3 font-medium">นางสาวสมหญิง จริงใจ (y1008001)</div>
                         </div>
                         <div className="grid grid-cols-5 items-center gap-4">
                             <Label className="col-span-2 text-left text-muted-foreground">ตำแหน่ง</Label>

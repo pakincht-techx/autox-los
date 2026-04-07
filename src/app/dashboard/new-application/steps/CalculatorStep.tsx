@@ -539,7 +539,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            รายละเอียดวงเงินและระยะเวลาผ่อน
+                                รายละเอียดวงเงินและระยะเวลาผ่อน
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6 px-6 pb-6 pt-5">
@@ -801,7 +801,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            ประกันภัย
+                                ประกันภัย
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="px-6 pb-6 pt-5 space-y-4">
@@ -1084,104 +1084,104 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                 </CardHeader>
                                 <CardContent className="p-6 flex flex-col space-y-5">
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {/* ── Card 1: Loan Info + Insurance ── */}
-                                    <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
-                                        <div className="mb-2">
-                                            <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
-                                                {displayLoanCode}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-500">วงเงิน</span>
-                                                <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* ── Card 1: Loan Info + Insurance ── */}
+                                        <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col">
+                                            <div className="mb-2">
+                                                <span className="px-2 py-0.5 rounded-full bg-[#0d005f] text-white text-[10px] font-bold tracking-wider">
+                                                    {displayLoanCode}
+                                                </span>
                                             </div>
-                                        </div>
-                                        {(hasInsurance || hasPaInsurance) && (
-                                            <>
-                                                <div className="w-full h-px bg-gray-100 my-4"></div>
-                                                <div className="space-y-4">
-                                                    {selectedInsurances.map(id => {
-                                                        const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
-                                                        if (!option) return null;
-                                                        return (
-                                                            <div key={id}>
-                                                                <div className="flex items-center gap-2.5 mb-3">
-                                                                    {option.logo ? (
-                                                                        <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
-                                                                            <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                            <h3 className="text-lg font-bold text-foreground mb-3 leading-tight">{displayLoanName}</h3>
+                                            <div className="space-y-2.5">
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-gray-500">วงเงิน</span>
+                                                    <span className="font-bold text-foreground">{amount.toLocaleString()} บาท</span>
+                                                </div>
+                                            </div>
+                                            {(hasInsurance || hasPaInsurance) && (
+                                                <>
+                                                    <div className="w-full h-px bg-gray-100 my-4"></div>
+                                                    <div className="space-y-4">
+                                                        {selectedInsurances.map(id => {
+                                                            const option = INSURANCE_OPTIONS.find(opt => opt.id === id);
+                                                            if (!option) return null;
+                                                            return (
+                                                                <div key={id}>
+                                                                    <div className="flex items-center gap-2.5 mb-3">
+                                                                        {option.logo ? (
+                                                                            <img src={option.logo} alt={option.company} className="w-8 h-8 object-contain rounded-full bg-white border border-gray-50" />
+                                                                        ) : (
+                                                                            <div className="w-8 h-8 rounded-full bg-[#0d005f] flex items-center justify-center text-white">
+                                                                                <ShieldCheck className="w-4 h-4" strokeWidth={2} />
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
+                                                                            <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
                                                                         </div>
-                                                                    )}
+                                                                    </div>
+                                                                    <div className="space-y-2.5">
+                                                                        <div className="flex justify-between items-center text-sm">
+                                                                            <span className="text-gray-500">ค่าเบี้ยประกัน</span>
+                                                                            <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {hasPaInsurance && (
+                                                            <div>
+                                                                <div className="flex items-center gap-2.5 mb-3">
+                                                                    <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
                                                                     <div>
-                                                                        <p className="font-bold text-foreground text-sm">{option.company || option.label}</p>
-                                                                        <p className="text-xs text-gray-400">{option.tier ? `ชั้น ${option.tier}` : ''}{option.repairType ? ` · ซ่อม${option.repairType}` : ''}</p>
+                                                                        <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
+                                                                        <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
                                                                     </div>
                                                                 </div>
                                                                 <div className="space-y-2.5">
                                                                     <div className="flex justify-between items-center text-sm">
                                                                         <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                        <span className="font-bold text-foreground">+{option.price.toLocaleString()} บาท</span>
+                                                                        <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        );
-                                                    })}
-                                                    {hasPaInsurance && (
-                                                        <div>
-                                                            <div className="flex items-center gap-2.5 mb-3">
-                                                                <img src="/insurance-logo/Property 1=Theves.png" alt="เทเวศประกันภัย" className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                <div>
-                                                                    <p className="font-bold text-foreground text-sm">เทเวศประกันภัย</p>
-                                                                    <p className="text-xs text-gray-400">ประกันอุบัติเหตุส่วนบุคคล · {paInsuranceCoverageMonths} เดือน</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2.5">
-                                                                <div className="flex justify-between items-center text-sm">
-                                                                    <span className="text-gray-500">ค่าเบี้ยประกัน</span>
-                                                                    <span className="font-bold text-foreground">+{PA_INSURANCE_PREMIUM.toLocaleString()} บาท</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
 
-                                    {/* ── Card 2: Summary ── */}
-                                    <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
-                                        <div className="space-y-2.5">
-                                            <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
-                                                <div>
-                                                    <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
-                                                    {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
-                                                    <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                        {/* ── Card 2: Summary ── */}
+                                        <div className="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-center gap-4">
+                                            <div className="space-y-2.5">
+                                                <div className="flex justify-between items-end p-4 rounded-xl bg-blue-50/50 border border-blue-100">
+                                                    <div>
+                                                        <span className="font-bold text-chaiyo-blue text-sm">วงเงินสุทธิ</span>
+                                                        {hasInsurance && <p className="text-[11px] text-gray-500 mt-0.5">*รวมวงเงินและเบี้ยประกัน</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="font-black text-chaiyo-blue text-2xl">{netAmount.toLocaleString()}</span>
+                                                        <span className="text-xs font-bold text-chaiyo-blue/60 ml-1">บาท</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="border-t border-gray-100 pt-5">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="text-gray-500 text-sm font-semibold">
-                                                        {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
-                                                    </p>
+                                            <div className="border-t border-gray-100 pt-5">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <p className="text-gray-500 text-sm font-semibold">
+                                                            {localPaymentMethod === 'bullet' ? 'ยอดชำระเมื่อครบกำหนด' : 'ค่าผ่อนต่อเดือน'}
+                                                        </p>
+                                                    </div>
+                                                    <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
+                                                        {localPaymentMethod === 'bullet'
+                                                            ? (amount + totalInterest).toLocaleString()
+                                                            : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
+                                                    </span>
                                                 </div>
-                                                <span className="text-foreground text-lg font-bold bg-gray-50 px-3 py-1 rounded-lg">
-                                                    {localPaymentMethod === 'bullet'
-                                                        ? (amount + totalInterest).toLocaleString()
-                                                        : Math.ceil(monthlyPayment).toLocaleString()} บาท{localPaymentMethod !== 'bullet' ? '/เดือน' : ''}
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                                 </CardContent>
                             </Card>
                         );
@@ -1307,212 +1307,212 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                     </div>
                                 );
                             })() : (
-                            <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
-                                {/* Sidebar Filters */}
-                                <div className="w-full md:w-56 bg-white border-r border-gray-100 overflow-y-auto shrink-0 shadow-sm flex flex-col">
-                                    <div className="p-4 bg-gray-50/50 border-b border-gray-100 shrink-0">
-                                        <h3 className="font-bold text-sm text-gray-700 flex items-center justify-between">
-                                            ตัวกรอง
-                                            {(filterTier.length > 0 || filterRepairType.length > 0 || filterCompany.length > 0) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-6 px-2 text-[10px] text-chaiyo-blue"
-                                                    onClick={() => {
-                                                        setFilterTier([]);
-                                                        setFilterRepairType([]);
-                                                        setFilterCompany([]);
-                                                    }}
-                                                >
-                                                    ล้างทั้งหมด
-                                                </Button>
-                                            )}
-                                        </h3>
-                                    </div>
-                                    <Accordion type="multiple" defaultValue={["tier", "repair", "company"]} className="w-full px-2 mt-2">
-                                        <AccordionItem value="tier" className="border-b-0 px-2">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">ชั้นประกัน</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {['1', '2+', '3+'].map(tier => (
-                                                        <div key={tier} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`tier-${tier}`}
-                                                                checked={filterTier.includes(tier)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterTier([...filterTier, tier]);
-                                                                    } else {
-                                                                        setFilterTier(filterTier.filter(t => t !== tier));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            <Label htmlFor={`tier-${tier}`} className="cursor-pointer text-sm text-gray-600">ชั้น {tier}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-
-                                        <AccordionItem value="repair" className="border-b-0 px-2 border-t border-gray-100 mt-2">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">การซ่อม</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {[
-                                                        { value: 'ศูนย์', label: 'ซ่อมศูนย์' },
-                                                        { value: 'อู่', label: 'ซ่อมอู่' }
-                                                    ].map(repair => (
-                                                        <div key={repair.value} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`repair-${repair.value}`}
-                                                                checked={filterRepairType.includes(repair.value)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterRepairType([...filterRepairType, repair.value]);
-                                                                    } else {
-                                                                        setFilterRepairType(filterRepairType.filter(r => r !== repair.value));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            <Label htmlFor={`repair-${repair.value}`} className="cursor-pointer text-sm text-gray-600">{repair.label}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-
-                                        <AccordionItem value="company" className="border-b-0 px-2 border-t border-gray-100 mt-2 pb-4">
-                                            <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">บริษัทประกัน</AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="space-y-2.5">
-                                                    {uniqueCompanies.map(comp => comp && (
-                                                        <div key={comp} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`comp-${comp}`}
-                                                                checked={filterCompany.includes(comp)}
-                                                                onCheckedChange={(checked) => {
-                                                                    if (checked) {
-                                                                        setFilterCompany([...filterCompany, comp]);
-                                                                    } else {
-                                                                        setFilterCompany(filterCompany.filter(c => c !== comp));
-                                                                    }
-                                                                }}
-                                                                className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
-                                                            />
-                                                            {companyLogoMap[comp] && (
-                                                                <img src={companyLogoMap[comp]} alt={comp} className="w-5 h-5 object-contain rounded shrink-0" />
-                                                            )}
-                                                            <Label htmlFor={`comp-${comp}`} className="cursor-pointer text-sm text-gray-600">{comp}</Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    </Accordion>
-                                </div>
-
-                                {/* Main Content - Tables */}
-                                <div className="flex-1 overflow-y-auto space-y-8">
-                                    {/* Car Insurance Table */}
-                                    {(selectedProduct === 'car' || selectedProduct === 'truck') && (
-                                        <div className="space-y-4">
-
-
-                                            <div className="bg-white rounded-none border-y border-gray-200">
-                                                <Table>
-                                                    <TableHeader className="bg-gray-50/80 sticky top-0 z-10">
-                                                        <TableRow className="hover:bg-transparent">
-                                                            <TableHead className="w-[50px]"></TableHead>
-                                                            <TableHead className="font-medium text-gray-400 text-xs">บริษัทประกัน</TableHead>
-                                                            <TableHead className="text-right font-medium text-gray-400 text-xs">ทุนประกันภัย</TableHead>
-                                                            <TableHead className="text-right font-medium text-gray-400 text-xs">ค่าเบี้ยประกัน</TableHead>
-                                                            <TableHead className="text-center font-medium text-gray-400 text-xs">การซ่อม</TableHead>
-                                                            <TableHead className="w-[120px]"></TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {filteredCarInsurances.length > 0 ? (
-                                                            filteredCarInsurances.map(option => (
-                                                                <TableRow
-                                                                    key={option.id}
-                                                                    className={cn(
-                                                                        "cursor-pointer transition-colors group",
-                                                                        draftInsurances.includes(option.id) ? "bg-blue-50/50 hover:bg-blue-50/80" : "hover:bg-gray-50/80"
-                                                                    )}
-                                                                    onClick={() => {
-                                                                        const current = draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car');
-                                                                        if (current === option.id) {
-                                                                            setDraftInsurances(draftInsurances.filter(id => id !== option.id));
+                                <div className="flex-1 overflow-hidden flex flex-col md:flex-row bg-gray-50/30">
+                                    {/* Sidebar Filters */}
+                                    <div className="w-full md:w-56 bg-white border-r border-gray-100 overflow-y-auto shrink-0 shadow-sm flex flex-col">
+                                        <div className="p-4 bg-gray-50/50 border-b border-gray-100 shrink-0">
+                                            <h3 className="font-bold text-sm text-gray-700 flex items-center justify-between">
+                                                ตัวกรอง
+                                                {(filterTier.length > 0 || filterRepairType.length > 0 || filterCompany.length > 0) && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 px-2 text-[10px] text-chaiyo-blue"
+                                                        onClick={() => {
+                                                            setFilterTier([]);
+                                                            setFilterRepairType([]);
+                                                            setFilterCompany([]);
+                                                        }}
+                                                    >
+                                                        ล้างทั้งหมด
+                                                    </Button>
+                                                )}
+                                            </h3>
+                                        </div>
+                                        <Accordion type="multiple" defaultValue={["tier", "repair", "company"]} className="w-full px-2 mt-2">
+                                            <AccordionItem value="tier" className="border-b-0 px-2">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">ชั้นประกัน</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {['1', '2+', '3+'].map(tier => (
+                                                            <div key={tier} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`tier-${tier}`}
+                                                                    checked={filterTier.includes(tier)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterTier([...filterTier, tier]);
                                                                         } else {
-                                                                            const others = draftInsurances.filter(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type !== 'car');
-                                                                            setDraftInsurances([...others, option.id]);
+                                                                            setFilterTier(filterTier.filter(t => t !== tier));
                                                                         }
                                                                     }}
-                                                                >
-                                                                    <TableCell className="py-4">
-                                                                        <RadioGroup value={draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car') || ""}>
-                                                                            <RadioGroupItem
-                                                                                value={option.id}
-                                                                                id={`tbl-${option.id}`}
-                                                                                className="border-gray-300 text-chaiyo-blue group-hover:border-chaiyo-blue/50 data-[state=checked]:border-chaiyo-blue pointer-events-none"
-                                                                            />
-                                                                        </RadioGroup>
-                                                                    </TableCell>
-                                                                    <TableCell className="font-medium text-gray-800 py-4">
-                                                                        <div className="flex items-center gap-3">
-                                                                            {option.logo && (
-                                                                                <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
-                                                                            )}
-                                                                            <div className="flex flex-col">
-                                                                                <span className="text-[15px]">{option.company}</span>
-                                                                                <span className="text-[11px] text-gray-500 mt-0.5">{option.label}</span>
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                <Label htmlFor={`tier-${tier}`} className="cursor-pointer text-sm text-gray-600">ชั้น {tier}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+
+                                            <AccordionItem value="repair" className="border-b-0 px-2 border-t border-gray-100 mt-2">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">การซ่อม</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {[
+                                                            { value: 'ศูนย์', label: 'ซ่อมศูนย์' },
+                                                            { value: 'อู่', label: 'ซ่อมอู่' }
+                                                        ].map(repair => (
+                                                            <div key={repair.value} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`repair-${repair.value}`}
+                                                                    checked={filterRepairType.includes(repair.value)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterRepairType([...filterRepairType, repair.value]);
+                                                                        } else {
+                                                                            setFilterRepairType(filterRepairType.filter(r => r !== repair.value));
+                                                                        }
+                                                                    }}
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                <Label htmlFor={`repair-${repair.value}`} className="cursor-pointer text-sm text-gray-600">{repair.label}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+
+                                            <AccordionItem value="company" className="border-b-0 px-2 border-t border-gray-100 mt-2 pb-4">
+                                                <AccordionTrigger className="text-sm font-semibold hover:no-underline py-3">บริษัทประกัน</AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="space-y-2.5">
+                                                        {uniqueCompanies.map(comp => comp && (
+                                                            <div key={comp} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`comp-${comp}`}
+                                                                    checked={filterCompany.includes(comp)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        if (checked) {
+                                                                            setFilterCompany([...filterCompany, comp]);
+                                                                        } else {
+                                                                            setFilterCompany(filterCompany.filter(c => c !== comp));
+                                                                        }
+                                                                    }}
+                                                                    className="border-gray-300 data-[state=checked]:border-chaiyo-blue data-[state=checked]:bg-chaiyo-blue data-[state=checked]:text-white"
+                                                                />
+                                                                {companyLogoMap[comp] && (
+                                                                    <img src={companyLogoMap[comp]} alt={comp} className="w-5 h-5 object-contain rounded shrink-0" />
+                                                                )}
+                                                                <Label htmlFor={`comp-${comp}`} className="cursor-pointer text-sm text-gray-600">{comp}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        </Accordion>
+                                    </div>
+
+                                    {/* Main Content - Tables */}
+                                    <div className="flex-1 overflow-y-auto space-y-8">
+                                        {/* Car Insurance Table */}
+                                        {(selectedProduct === 'car' || selectedProduct === 'truck') && (
+                                            <div className="space-y-4">
+
+
+                                                <div className="bg-white rounded-none border-y border-gray-200">
+                                                    <Table>
+                                                        <TableHeader className="bg-gray-50/80 sticky top-0 z-10">
+                                                            <TableRow className="hover:bg-transparent">
+                                                                <TableHead className="w-[50px]"></TableHead>
+                                                                <TableHead className="font-medium text-gray-400 text-xs">บริษัทประกัน</TableHead>
+                                                                <TableHead className="text-right font-medium text-gray-400 text-xs">ทุนประกันภัย</TableHead>
+                                                                <TableHead className="text-right font-medium text-gray-400 text-xs">ค่าเบี้ยประกัน</TableHead>
+                                                                <TableHead className="text-center font-medium text-gray-400 text-xs">การซ่อม</TableHead>
+                                                                <TableHead className="w-[120px]"></TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {filteredCarInsurances.length > 0 ? (
+                                                                filteredCarInsurances.map(option => (
+                                                                    <TableRow
+                                                                        key={option.id}
+                                                                        className={cn(
+                                                                            "cursor-pointer transition-colors group",
+                                                                            draftInsurances.includes(option.id) ? "bg-blue-50/50 hover:bg-blue-50/80" : "hover:bg-gray-50/80"
+                                                                        )}
+                                                                        onClick={() => {
+                                                                            const current = draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car');
+                                                                            if (current === option.id) {
+                                                                                setDraftInsurances(draftInsurances.filter(id => id !== option.id));
+                                                                            } else {
+                                                                                const others = draftInsurances.filter(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type !== 'car');
+                                                                                setDraftInsurances([...others, option.id]);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <TableCell className="py-4">
+                                                                            <RadioGroup value={draftInsurances.find(id => INSURANCE_OPTIONS.find(opt => opt.id === id)?.type === 'car') || ""}>
+                                                                                <RadioGroupItem
+                                                                                    value={option.id}
+                                                                                    id={`tbl-${option.id}`}
+                                                                                    className="border-gray-300 text-chaiyo-blue group-hover:border-chaiyo-blue/50 data-[state=checked]:border-chaiyo-blue pointer-events-none"
+                                                                                />
+                                                                            </RadioGroup>
+                                                                        </TableCell>
+                                                                        <TableCell className="font-medium text-gray-800 py-4">
+                                                                            <div className="flex items-center gap-3">
+                                                                                {option.logo && (
+                                                                                    <img src={option.logo} alt={option.company || ''} className="w-8 h-8 object-contain rounded-md shrink-0" />
+                                                                                )}
+                                                                                <div className="flex flex-col">
+                                                                                    <span className="text-[15px]">{option.company}</span>
+                                                                                    <span className="text-[11px] text-gray-500 mt-0.5">{option.label}</span>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </TableCell>
-                                                                    <TableCell className="text-right font-mono py-4 text-[14px]">{option.coverage?.toLocaleString()}</TableCell>
-                                                                    <TableCell className="text-right font-mono font-bold text-chaiyo-blue py-4 text-[15px]">{option.price.toLocaleString()}</TableCell>
-                                                                    <TableCell className="text-center py-4">
-                                                                        <Badge variant="outline" className={cn(
-                                                                            "font-normal",
-                                                                            option.repairType === 'ศูนย์' ? "bg-blue-50 text-chaiyo-blue border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"
-                                                                        )}>
-                                                                            ซ่อม{option.repairType}
-                                                                        </Badge>
-                                                                    </TableCell>
-                                                                    <TableCell className="py-4 text-right">
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="h-8 text-xs font-medium text-gray-600 border-gray-200 hover:bg-gray-50"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setDetailInsuranceId(option.id);
-                                                                            }}
-                                                                        >
-                                                                            ดูรายละเอียด
-                                                                        </Button>
+                                                                        </TableCell>
+                                                                        <TableCell className="text-right font-mono py-4 text-[14px]">{option.coverage?.toLocaleString()}</TableCell>
+                                                                        <TableCell className="text-right font-mono font-bold text-chaiyo-blue py-4 text-[15px]">{option.price.toLocaleString()}</TableCell>
+                                                                        <TableCell className="text-center py-4">
+                                                                            <Badge variant="outline" className={cn(
+                                                                                "font-normal",
+                                                                                option.repairType === 'ศูนย์' ? "bg-blue-50 text-chaiyo-blue border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"
+                                                                            )}>
+                                                                                ซ่อม{option.repairType}
+                                                                            </Badge>
+                                                                        </TableCell>
+                                                                        <TableCell className="py-4 text-right">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                className="h-8 text-xs font-medium text-gray-600 border-gray-200 hover:bg-gray-50"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setDetailInsuranceId(option.id);
+                                                                                }}
+                                                                            >
+                                                                                ดูรายละเอียด
+                                                                            </Button>
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                ))
+                                                            ) : (
+                                                                <TableRow>
+                                                                    <TableCell colSpan={6} className="h-32 text-center text-gray-500">
+                                                                        ไม่พบข้อมูลประกันภัยที่ตรงกับเงื่อนไขการกรอง
                                                                     </TableCell>
                                                                 </TableRow>
-                                                            ))
-                                                        ) : (
-                                                            <TableRow>
-                                                                <TableCell colSpan={6} className="h-32 text-center text-gray-500">
-                                                                    ไม่พบข้อมูลประกันภัยที่ตรงกับเงื่อนไขการกรอง
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
+                                                            )}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
 
+                                    </div>
                                 </div>
-                            </div>
                             )}
 
                             {/* Footer - only show on list view */}
@@ -1573,7 +1573,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                     <Card className="border-border-strong overflow-hidden animate-in fade-in duration-500">
                         <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                             <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            รายละเอียดบัญชีรับโอนเงินกู้
+                                รายละเอียดบัญชีรับโอนเงินกู้
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-1 px-6 pb-6 pt-5">
@@ -1581,7 +1581,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center justify-between mb-2">
                                     <Label className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                        อัพโหลดหน้าสมุดบัญชีธนาคาร
+                                        อัปโหลดหน้าสมุดบัญชีธนาคาร
                                     </Label>
                                 </div>
                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
@@ -1589,7 +1589,7 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                         <TableHeader className="bg-gray-50/50">
                                             <TableRow className="hover:bg-transparent">
                                                 <TableHead className="w-[45%] text-xs">ประเภทเอกสาร/รูปภาพ <span className="text-red-500 text-sm">*</span></TableHead>
-                                                <TableHead className="w-[40%] text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                <TableHead className="w-[40%] text-xs">ไฟล์ที่อัปโหลด</TableHead>
                                                 <TableHead className="w-[15%] text-right text-xs">จัดการ</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -1633,9 +1633,9 @@ export function CalculatorStep({ onNext, formData, setFormData, onBack, hideNavi
                                                                 "h-8 text-xs gap-1.5 font-medium relative",
                                                                 bookBankFile ? "w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-50" : ""
                                                             )}
-                                                            title={bookBankFile ? "ลบไฟล์" : "อัพโหลดไฟล์"}
+                                                            title={bookBankFile ? "ลบไฟล์" : "อัปโหลดไฟล์"}
                                                         >
-                                                            {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัพโหลดไฟล์</>}
+                                                            {bookBankFile ? <Trash2 className="w-4 h-4" /> : <><Plus className="w-3.5 h-3.5" /> อัปโหลดไฟล์</>}
                                                         </Button>
                                                         {!bookBankFile && (
                                                             <input

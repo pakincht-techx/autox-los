@@ -121,7 +121,7 @@ export function ApplicationActivitySidebar({
 }: Pick<ApplicationHeaderProps, 'status' | 'onApprove' | 'onReject' | 'onStatusChange' | 'isExpanded' | 'onToggleExpand'>) {
     // Current user role mock - in real app, this would come from an auth context
     const userRole: string = 'Admin'; // 'Maker', 'Checker', or 'Admin'
-    const currentUserName = 'สมหมาย มุ่งมั่น';
+    const currentUserName = 'สมหมาย มุ่งมั่น (y1008001)';
     const currentUserPosition = 'ผู้ช่วยผู้จัดการสาขา';
 
     // Feedback form state
@@ -198,7 +198,7 @@ export function ApplicationActivitySidebar({
             id: '2',
             title: 'ยื่นใบสมัคร (Submitted)',
             description: 'ยืนยันข้อมูลและส่งพิจารณา',
-            actor: 'สมหญิง ใจดี',
+            actor: 'สมหญิง ใจดี (y1008001)',
             position: 'พนักงานสาขา',
             date: wasEverReached('In Review') ? '01/10/2566' : '-',
             time: wasEverReached('In Review') ? '11:45' : '-',
@@ -212,7 +212,7 @@ export function ApplicationActivitySidebar({
             id: '1',
             title: 'สร้างใบสมัคร',
             description: 'สร้างร่างใบสมัครสินเชื่อเข้าระบบ',
-            actor: 'สมหญิง ใจดี',
+            actor: 'สมหญิง ใจดี (y1008001)',
             position: 'พนักงานสาขา',
             date: '01/10/2566',
             time: '10:30',

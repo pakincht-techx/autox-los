@@ -37,6 +37,7 @@ Reference the `@theme` block in `globals.css` for all color tokens:
 - Always use **shadcn UI** components from `@/components/ui/` instead of creating custom HTML elements.
 - If a component variant doesn't exist (e.g., `Alert` with `warning`), add the variant to the shadcn component rather than building a custom div.
 - **No shadows on buttons.** All buttons must have `shadow-none` — no `box-shadow` of any kind. Keep a flat, clean button aesthetic across the entire design system.
+- **Keep default component styles.** Rely on the default styles provided by the design system (e.g. `variant="outline"`, `variant="ghost"`) and do NOT add custom Tailwind classes for colors, sizes, or hover states.
 
 ## Dialogs
 
@@ -51,7 +52,7 @@ Reference the `@theme` block in `globals.css` for all color tokens:
   | `default` (omit prop) | `max-w-lg` (~512px) | Simple confirmations, small forms |
   | `lg` | `max-w-3xl` (~768px) | Tables, multi-column content |
   | `xl` | `max-w-6xl` (~1152px) | Full-width previews, complex layouts |
-- **Generic titles & descriptions only.** Dialog titles and descriptions must be static/generic text. Do **not** interpolate dynamic content (e.g., document type names, entity names, IDs) into `DialogTitle`, `AlertDialogTitle`, `DialogDescription`, or `AlertDialogDescription`. For example, use `ไฟล์ที่อัพโหลด` instead of `ไฟล์ที่อัพโหลด — {label}`.
+- **Generic titles & descriptions only.** Dialog titles and descriptions must be static/generic text. Do **not** interpolate dynamic content (e.g., document type names, entity names, IDs) into `DialogTitle`, `AlertDialogTitle`, `DialogDescription`, or `AlertDialogDescription`. For example, use `ไฟล์ที่อัปโหลด` instead of `ไฟล์ที่อัปโหลด — {label}`.
 - **All footer buttons must be `font-bold`.**
 - **No shadows on buttons** inside dialogs — use `shadow-none`.
 

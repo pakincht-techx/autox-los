@@ -33,11 +33,11 @@ interface RefinanceStepProps {
 
 // Mock staff list for assessor
 const MOCK_STAFF_LIST = [
-    { id: "S001", code: "S001", name: "สมชาย ใจดี", phone: "081-234-5678" },
-    { id: "S002", code: "S002", name: "สุดา รักงาน", phone: "089-876-5432" },
-    { id: "S003", code: "S003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
-    { id: "S004", code: "S004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
-    { id: "S005", code: "S005", name: "ปรียา สุขสม", phone: "092-777-8899" },
+    { id: "y1008001", code: "y1008001", name: "สมชาย ใจดี", phone: "081-234-5678" },
+    { id: "y1008002", code: "y1008002", name: "สุดา รักงาน", phone: "089-876-5432" },
+    { id: "y1008003", code: "y1008003", name: "วิชัย มุ่งดี", phone: "090-111-2233" },
+    { id: "y1008004", code: "y1008004", name: "มานี ตั้งใจ", phone: "086-444-5566" },
+    { id: "y1008005", code: "y1008005", name: "ปรียา สุขสม", phone: "092-777-8899" },
 ];
 
 // Mock finance company options
@@ -133,7 +133,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
             <Card className="border-border-strong">
                 <CardHeader className="bg-blue-50/50 border-b border-border-strong pb-4">
                     <CardTitle className="text-lg flex items-center gap-2 text-chaiyo-blue">
-                            ข้อมูลสินเชื่อเดิม
+                        ข้อมูลสินเชื่อเดิม
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-6 pb-6 pt-6 space-y-6">
@@ -285,7 +285,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                     {/* กรณีมีบัตรกดเงินสด และ Application */}
                     <div className="space-y-4">
                         <h4 className="text-sm font-bold text-gray-700">
-                            กรณีมีบัตรกดเงินสด และ Application
+                            กรณีมีบัตรกดเงินสด หรือแอปกดเงิน
                         </h4>
 
                         <div className="space-y-4 pl-1">
@@ -309,7 +309,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                         onCheckedChange={(checked) => setHasApplication(!!checked)}
                                     />
                                     <Label htmlFor="hasApplication" className="text-sm font-medium text-gray-700 cursor-pointer">
-                                        มี Application
+                                        มีแอปกดเงิน
                                     </Label>
                                 </div>
                             </div>
@@ -324,13 +324,13 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-amber-800">
-                                            คำแนะนำสำหรับพนักงาน — กรณีลูกค้ามีบัตรกดเงินสด หรือ มี App หรือทั้งคู่
+                                            คำแนะนำสำหรับพนักงาน — กรณีลูกค้ามีบัตรกดเงินสด หรือ มีแอปกดเงิน
                                         </p>
                                         <ol className="text-sm text-amber-700 mt-2 leading-relaxed list-decimal list-inside space-y-1">
-                                            <li>ให้ลูกค้าโทรศัพท์มือถือ ติดต่อเจ้าหน้าที่ Call Center เจ้าหนี้เดิม (เช่น เงินติดล้อ 0880880880)</li>
-                                            <li>ให้เปิด Speaker Phone แจ้งยกเลิกบัตร / App. ด้วยตนเอง</li>
-                                            <li>พนักงานต้องได้ยินเสียงเจ้าหน้าที่ Call Center &quot;แจ้งว่าได้ยกเลิกบัตร หรือ ยกเลิก App. แล้ว&quot;</li>
-                                            <li>หลังจากนั้นให้ลูกค้าทำลายบัตรด้วยตนเอง ต่อหน้าพนักงาน</li>
+                                            <li>ให้ลูกค้าโทรติดต่อ เจ้าหน้าที่ Call Center เจ้าหนี้เดิม</li>
+                                            <li>ให้เปิดลำโพงโทรศัพท์ แจ้งยกเลิกบัตร / แอปกดเงิน ด้วยตนเอง</li>
+                                            <li>พนักงานต้องได้ยินเสียงเจ้าหน้าที่ Call Center แจ้งว่า &quot;ได้ยกเลิกบัตร หรือ ยกเลิกแอปกดเงินแล้ว&quot;</li>
+                                            <li>หลังจากนั้นให้ลูกค้าทำลายบัตร และลบแอปกดเงินด้วยตนเอง ต่อหน้าพนักงาน</li>
                                         </ol>
                                     </div>
                                 </div>
@@ -340,7 +340,7 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                         {(hasCashCard || hasApplication) && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-xl animate-in fade-in slide-in-from-top-1 duration-200">
                                 <p className="text-sm text-red-700 font-medium leading-relaxed">
-                                    *** กรณีลูกค้ามีบัตรกดเงินสด แต่ไม่ได้นำบัตรติดตัวมาด้วย <span className="font-bold">ห้ามรับทำสินเชื่อเด็ดขาด</span> ต้องให้ลูกค้านำบัตรมาแสดงกับพนักงาน เพื่อแจ้งยกเลิกบัตรกดเงินสด และทำลายบัตรต่อหน้าพนักงาน (คำสั่งที่ 145/2566)
+                                    *** กรณีลูกค้ามีบัตรกดเงินสด แต่ไม่ได้นำบัตรติดตัวมาด้วย <span className="font-bold">ห้ามรับทำสินเชื่อเด็ดขาด</span> ต้องให้ลูกค้านำบัตรมาแสดงกับพนักงาน เพื่อแจ้งยกเลิกบัตรกดเงินสด และทำลายบัตรต่อหน้าพนักงาน
                                 </p>
                             </div>
                         )}
@@ -353,12 +353,12 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-amber-800">
-                                            คำแนะนำสำหรับพนักงาน — กรณีลูกค้าแจ้งว่าไม่มีบัตรกดเงินสด และไม่มี App.
+                                            คำแนะนำสำหรับพนักงาน — กรณีลูกค้าแจ้งว่าไม่มีบัตรกดเงินสด และไม่มีแอปกดเงิน
                                         </p>
                                         <ol className="text-sm text-amber-700 mt-2 leading-relaxed list-decimal list-inside space-y-1">
-                                            <li>ให้ลูกค้าโทรศัพท์ ติดต่อเจ้าหน้าที่ Call Center เจ้าหนี้เดิม (เช่น เงินติดล้อ 0880880880)</li>
-                                            <li>ให้เปิด Speaker Phone และให้ลูกค้าสอบถามเจ้าหน้าที่ Call Center ว่าตนเองมีบัตร / App. หรือไม่</li>
-                                            <li>พนักงานต้องได้ยินเจ้าหน้าที่ Call Center &quot;แจ้งว่าลูกค้าไม่มีบัตรกดเงินสด / App.&quot;</li>
+                                            <li>ให้ลูกค้าโทรศัพท์ ติดต่อเจ้าหน้าที่ Call Center เจ้าหนี้เดิม</li>
+                                            <li>ให้เปิดลำโพงโทรศัพท์ และให้ลูกค้าสอบถามเจ้าหน้าที่ Call Center ว่าตนเองมีบัตรกดเงินสด หรือ แอปกดเงิน หรือไม่</li>
+                                            <li>พนักงานต้องได้ยินเจ้าหน้าที่ Call Center &quot;แจ้งว่าลูกค้าไม่มีบัตรกดเงินสด หรือ แอปกดเงิน&quot;</li>
                                         </ol>
                                     </div>
                                 </div>
@@ -534,7 +534,8 @@ export function RefinanceStep({ formData, setFormData }: RefinanceStepProps) {
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                                 <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
                                     <p className="text-sm text-red-700 font-medium leading-relaxed">
-                                        *** หากผู้กู้มีสินเชื่อหลายประเภทกับ Finance เดิม เช่น ผู้กู้มีสินเชื่อจำนำเล่มทะเบียน และมีสินเชื่ออื่นที่ผูกกับรถที่นำมาขอสินเชื่อ Refinance (สินเชื่อหมุนเวียน, สินเชื่อบุคคล) <span className="font-bold">ห้ามรับทำสินเชื่อเด็ดขาด</span>
+                                        *** หากผู้กู้มีสินเชื่อหลายประเภทกับ สถาบันการเงิน/ไฟแนนซ์เดิม เช่น ผู้กู้มีสินเชื่อจำนำทะเบียน และมีสินเชื่ออื่นที่ผูกกับหลักประกัน
+                                        ที่นำมาขอสินเชื่อ รีไฟแนนซ์ (สินเชื่อหมุนเวียน, สินเชื่อบุคคล) <span className="font-bold">ห้ามรับทำสินเชื่อเด็ดขาด</span>
                                     </p>
                                 </div>
 
