@@ -622,7 +622,7 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                         {/* Group 2: รายละเอียดสินเชื่อ */}
                         <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">รายละเอียดสินเชื่อ</p>
-                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-100">
                                 <ModuleRow
                                     title="รายละเอียดสินเชื่อ"
                                     icon={<FileText className="w-4 h-4" />}
@@ -630,6 +630,14 @@ export default function ApplicationDetailPage({ params }: { params: { id: string
                                     onEdit={canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=draft`) : undefined}
                                     onView={!canEdit ? () => router.push(`/dashboard/new-application/${app.applicationNo}/loan-calculator?state=readonly`) : undefined}
                                 />
+                                {devRole === 'rcco-checker' && (
+                                    <ModuleRow
+                                        title="Watchlist"
+                                        icon={<Star className="w-4 h-4" />}
+                                        completionStatus="incomplete"
+                                        onView={() => router.push(`/dashboard/applications/${params.id}/watchlist`)}
+                                    />
+                                )}
                             </div>
                         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { FileText, CheckCircle2, Plus, Info, X, Trash2, Download } from "lucide-react";
+import { FileText, CheckCircle2, Plus, Info, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
@@ -144,6 +144,13 @@ const documentSections: DocumentSection[] = [
 
 export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStepProps) {
     const [uploads, setUploads] = useState<Record<string, number>>({
+        // Identity verification
+        id_card_borrower: 1,
+        id_card_guarantor: 1,
+        house_reg_borrower: 1,
+        house_reg_guarantor: 1,
+        name_change_borrower: 1,
+        // Collateral photos
         photo_rear_selfie: 1,
         photo_front_hood: 2,
         photo_front_left45: 1,
@@ -152,16 +159,28 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
         photo_rear_right45: 1,
         photo_interior_console: 3,
         photo_chassis: 1,
+        // Loan verification
+        reg_book_front: 1,
+        reg_book_detail: 1,
+        reg_book_center: 1,
+        reg_book_tax: 1,
+        reg_book_officer: 1,
+        initial_check: 1,
+        tax_sign: 1,
+        dlt_web_check: 1,
+        // Loan approval
+        bank_account: 1,
+        customer_ability: 1,
     });
     const [activeTab, setActiveTab] = useState("0");
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
     const [customDocs, setCustomDocs] = useState<DocumentDoc[]>([]);
+    const [rccoCustomDocs, setRccoCustomDocs] = useState<DocumentDoc[]>([]);
     const [docToDelete, setDocToDelete] = useState<DocumentDoc | null>(null);
+    const [docGroupToDelete, setDocGroupToDelete] = useState<'custom' | 'rcco' | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadingDocId, setUploadingDocId] = useState<string | null>(null);
-    const [showDownloadDialog, setShowDownloadDialog] = useState(false);
-    const [selectedGroups, setSelectedGroups] = useState<Record<number, boolean>>({});
 
     const sections = useMemo(() => {
         return documentSections.map(section => {
@@ -223,20 +242,6 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
 
             <div className="flex items-center justify-between">
                 <Label className="text-xl font-bold text-gray-900">เอกสารประกอบการสมัคร</Label>
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                        const allChecked: Record<number, boolean> = {};
-                        sections.forEach((_, idx) => { allChecked[idx] = true; });
-                        setSelectedGroups(allChecked);
-                        setShowDownloadDialog(true);
-                    }}
-                    className="h-9 gap-1.5 font-medium"
-                >
-                    <Download className="w-4 h-4" />
-                    ดาวน์โหลดเอกสารทั้งหมด
-                </Button>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full flex flex-col lg:flex-row gap-8">
@@ -305,38 +310,35 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                     const mandatoryDocs = section.docs.filter(d => d.req);
                                     const optionalDocs = section.docs.filter(d => !d.req);
 
-                                    const renderDocTable = (title: string, docs: DocumentDoc[], showAddButton: boolean, isMandatory: boolean) => {
-                                        if (docs.length === 0 && !showAddButton) return null;
+                                    const renderDocTable = (title: string, docs: DocumentDoc[], onAddDoc?: () => void, isMandatory: boolean = false, docGroup?: 'custom' | 'rcco') => {
+                                        if (docs.length === 0 && !onAddDoc) return null;
 
                                         return (
                                             <div className="mb-6 last:mb-0">
                                                 <div className="flex justify-between items-center mb-3">
                                                     <div className="text-sm font-bold text-gray-700">{title}</div>
-                                                    {showAddButton && (
+                                                    {onAddDoc && (
                                                         <Button
                                                             type="button"
                                                             variant="outline"
-                                                            onClick={() => {
-                                                                const newId = `other_${Date.now()}`;
-                                                                setCustomDocs(prev => [...prev, { id: newId, name: 'เอกสารอื่นๆ', req: false }]);
-                                                            }}
+                                                            onClick={onAddDoc}
                                                             className="h-9 gap-1.5 font-medium"
                                                         >
                                                             <Plus className="w-4 h-4" />
-                                                            เพิ่มเอกสารอื่นๆ
+                                                            เพิ่มเอกสาร
                                                         </Button>
                                                     )}
                                                 </div>
                                                 <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                                    <Table className="table-fixed">
+                                                    <Table>
                                                         <TableHeader className="bg-gray-50/50">
                                                             <TableRow>
-                                                                <TableHead className={cn("text-xs", section.isViewOnly ? "w-auto" : "w-[400px]")}>
+                                                                <TableHead className="text-xs flex-1 min-w-0">
                                                                     ประเภทเอกสาร{isMandatory && <span className="text-red-500 ml-0.5">*</span>}
                                                                 </TableHead>
-                                                                <TableHead className="text-xs">ไฟล์ที่อัพโหลด</TableHead>
+                                                                <TableHead className="text-xs w-32 text-center">ไฟล์ที่อัพโหลด</TableHead>
                                                                 {!section.isViewOnly && (
-                                                                    <TableHead className="w-[160px] text-right text-xs">จัดการ</TableHead>
+                                                                    <TableHead className="w-40 text-right text-xs">จัดการ</TableHead>
                                                                 )}
                                                             </TableRow>
                                                         </TableHeader>
@@ -353,8 +355,8 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                                                     const isUploaded = fileCount > 0;
                                                                     return (
                                                                         <TableRow key={doc.id} className="hover:bg-transparent">
-                                                                            <TableCell className="py-4">
-                                                                                <div className="flex items-center gap-3">
+                                                                            <TableCell className="py-4 min-w-0">
+                                                                                <div className="flex items-center gap-3 min-w-0">
                                                                                     <div className={cn(
                                                                                         "w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
                                                                                         isUploaded ? "bg-green-50 text-emerald-600" : "bg-gray-100 text-gray-400"
@@ -367,25 +369,25 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                                                                             onChange={(e) => {
                                                                                                 setCustomDocs(prev => prev.map(d => d.id === doc.id ? { ...d, name: e.target.value } : d));
                                                                                             }}
-                                                                                            className="h-8 text-sm font-medium w-[200px]"
+                                                                                            className="h-8 text-sm font-medium flex-1 min-w-0"
                                                                                             placeholder="ชื่อเอกสาร"
                                                                                         />
                                                                                     ) : (
-                                                                                        <span className="font-medium text-gray-700 text-sm">{doc.name}</span>
+                                                                                        <span className="font-medium text-gray-700 text-sm truncate">{doc.name}</span>
                                                                                     )}
                                                                                 </div>
                                                                             </TableCell>
-                                                                            <TableCell>
+                                                                            <TableCell className="text-center py-4">
                                                                                 {isUploaded ? (
                                                                                     <button
                                                                                         type="button"
                                                                                         onClick={() => section.isViewOnly ? handleViewPhotos(doc.id, fileCount) : handleUpload(doc.id)}
                                                                                         className={cn(
-                                                                                            "flex items-center gap-1.5 text-xs font-medium cursor-pointer",
+                                                                                            "inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer whitespace-nowrap",
                                                                                             section.isViewOnly ? "text-chaiyo-blue hover:text-chaiyo-blue no-underline" : "text-chaiyo-blue hover:underline"
                                                                                         )}
                                                                                     >
-                                                                                        <FileText className="w-3.5 h-3.5" />
+                                                                                        <FileText className="w-3.5 h-3.5 flex-shrink-0" />
                                                                                         {fileCount} ไฟล์
                                                                                     </button>
                                                                                 ) : (
@@ -393,25 +395,30 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                                                                 )}
                                                                             </TableCell>
                                                                             {!section.isViewOnly && (
-                                                                                <TableCell className="text-right">
-                                                                                    <div className="flex items-center justify-end gap-1">
-                                                                                        <Button
-                                                                                            type="button"
-                                                                                            variant="outline"
-                                                                                            size="sm"
-                                                                                            onClick={() => handleUpload(doc.id)}
-                                                                                            className="h-8 text-xs gap-1.5 font-medium"
-                                                                                        >
-                                                                                            <Plus className="w-3.5 h-3.5" />
-                                                                                            เพิ่มเอกสาร
-                                                                                        </Button>
+                                                                                <TableCell className="text-right py-4">
+                                                                                    <div className="flex items-center justify-end gap-1 flex-shrink-0">
+                                                                                        {section.isCustom && (
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="outline"
+                                                                                                size="sm"
+                                                                                                onClick={() => handleUpload(doc.id)}
+                                                                                                className="h-8 text-xs gap-1.5 font-medium whitespace-nowrap"
+                                                                                            >
+                                                                                                <Plus className="w-3.5 h-3.5 flex-shrink-0" />
+                                                                                                เพิ่มเอกสาร
+                                                                                            </Button>
+                                                                                        )}
                                                                                         {section.isCustom && (
                                                                                             <Button
                                                                                                 type="button"
                                                                                                 variant="ghost"
                                                                                                 size="sm"
-                                                                                                onClick={() => setDocToDelete(doc)}
-                                                                                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                                                                onClick={() => {
+                                                                                                    setDocToDelete(doc);
+                                                                                                    setDocGroupToDelete(docGroup || 'custom');
+                                                                                                }}
+                                                                                                className="h-8 w-8 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
                                                                                                 title="ลบเอกสาร"
                                                                                             >
                                                                                                 <Trash2 className="w-4 h-4" />
@@ -431,10 +438,36 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                         );
                                     };
 
+                                    if (section.isCustom) {
+                                        return (
+                                            <>
+                                                {renderDocTable(
+                                                    "รายการเอกสาร",
+                                                    optionalDocs,
+                                                    () => {
+                                                        const newId = `other_${Date.now()}`;
+                                                        setCustomDocs(prev => [...prev, { id: newId, name: 'เอกสารอื่นๆ', req: false }]);
+                                                    },
+                                                    false,
+                                                    'custom'
+                                                )}
+                                                {renderDocTable(
+                                                    "รายการเอกสาร จาก RCCO",
+                                                    rccoCustomDocs,
+                                                    () => {
+                                                        const newId = `rcco_${Date.now()}`;
+                                                        setRccoCustomDocs(prev => [...prev, { id: newId, name: 'เอกสาร RCCO', req: false }]);
+                                                    },
+                                                    false,
+                                                    'rcco'
+                                                )}
+                                            </>
+                                        );
+                                    }
                                     return (
                                         <>
-                                            {renderDocTable("เอกสารบังคับ (Mandatory)", mandatoryDocs, false, true)}
-                                            {renderDocTable(section.isCustom ? "รายการเอกสาร" : "เอกสารทางเลือก (Optional)", optionalDocs, section.isCustom ?? false, false)}
+                                            {renderDocTable("เอกสารบังคับ (Mandatory)", mandatoryDocs, undefined, true)}
+                                            {renderDocTable("เอกสารทางเลือก (Optional)", optionalDocs, undefined, false)}
                                         </>
                                     );
                                 })()}
@@ -514,7 +547,7 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
             )}
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={docToDelete !== null} onOpenChange={(open: boolean) => !open && setDocToDelete(null)}>
+            <AlertDialog open={docToDelete !== null} onOpenChange={(open: boolean) => !open && (setDocToDelete(null), setDocGroupToDelete(null))}>
                 <AlertDialogContent onCloseAutoFocus={(e: Event) => e.preventDefault()}>
                     <AlertDialogHeader>
                         <AlertDialogTitle>ยืนยันการลบเอกสาร</AlertDialogTitle>
@@ -527,7 +560,11 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                         <AlertDialogAction
                             onClick={() => {
                                 if (docToDelete) {
-                                    setCustomDocs(prev => prev.filter(d => d.id !== docToDelete.id));
+                                    if (docGroupToDelete === 'rcco') {
+                                        setRccoCustomDocs(prev => prev.filter(d => d.id !== docToDelete.id));
+                                    } else {
+                                        setCustomDocs(prev => prev.filter(d => d.id !== docToDelete.id));
+                                    }
                                     setUploads(prev => {
                                         const next = { ...prev };
                                         delete next[docToDelete.id];
@@ -535,6 +572,7 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                                     });
                                 }
                                 setDocToDelete(null);
+                                setDocGroupToDelete(null);
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white"
                         >
@@ -544,69 +582,6 @@ export function DocumentUploadStep({ formData, setFormData }: DocumentUploadStep
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Download All Dialog */}
-            <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>ดาวน์โหลดเอกสาร</DialogTitle>
-                        <DialogDescription>เลือกกลุ่มเอกสารที่ต้องการดาวน์โหลด</DialogDescription>
-                    </DialogHeader>
-                    <DialogBody>
-                        <div className="space-y-1">
-                            {/* Select All */}
-                            <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-100 mb-1">
-                                <Checkbox
-                                    checked={sections.length > 0 && sections.every((_, idx) => selectedGroups[idx])}
-                                    onCheckedChange={(checked) => {
-                                        const updated: Record<number, boolean> = {};
-                                        sections.forEach((_, idx) => { updated[idx] = !!checked; });
-                                        setSelectedGroups(updated);
-                                    }}
-                                />
-                                <span className="text-sm font-semibold text-gray-900">เลือกทั้งหมด</span>
-                            </label>
-                            {sections.map((section, idx) => (
-                                <label
-                                    key={idx}
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                >
-                                    <Checkbox
-                                        checked={!!selectedGroups[idx]}
-                                        onCheckedChange={(checked) => {
-                                            setSelectedGroups(prev => ({ ...prev, [idx]: !!checked }));
-                                        }}
-                                    />
-                                    <span className="text-sm text-gray-700">{section.title}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </DialogBody>
-                    <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowDownloadDialog(false)}
-                        >
-                            ยกเลิก
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                // Simulate download action
-                                const groupsToDownload = sections
-                                    .filter((_, idx) => selectedGroups[idx])
-                                    .map(s => s.title);
-                                console.log('Downloading groups:', groupsToDownload);
-                                setShowDownloadDialog(false);
-                            }}
-                            disabled={!Object.values(selectedGroups).some(v => v)}
-                        >
-                            <Download className="w-4 h-4" />
-                            ดาวน์โหลด
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

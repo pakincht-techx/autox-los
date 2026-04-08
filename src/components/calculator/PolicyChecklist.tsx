@@ -6,12 +6,14 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/Table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/Table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody, DialogFooter } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/Textarea";
 import { Label } from "@/components/ui/Label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { useSidebar } from "@/components/layout/SidebarContext";
 
 // Policy row types
@@ -498,7 +500,7 @@ function SectionHeader({ label, note }: { label: string; note?: string }) {
 function PlaceholderRow() {
     return (
         <TableRow className="hover:bg-gray-50/50 transition-colors">
-            <TableCell colSpan={4} className="px-4 py-4 text-center">
+            <TableCell colSpan={5} className="px-4 py-4 text-center">
                 <span className="text-sm text-gray-400">รอกำหนด Policy</span>
             </TableCell>
         </TableRow>
@@ -508,30 +510,24 @@ function PlaceholderRow() {
 function SectionHeaderWithColumns() {
     return (
         <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[25%]">
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[18%]">
                 เกณฑ์
             </TableCell>
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[35%]">
-                ข้อมูล
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[20%]">
+                ข้อมูลและผลตรวจสอบสาขา
             </TableCell>
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 text-center w-[20%]">
-                ผลตรวจสอบสาขา
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[12%]">
             </TableCell>
-            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 text-center w-[20%]">
-                ผลตรวจสอบ RC
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[20%]">
+                ข้อมูลและผลตรวจสอบ RCCO
+            </TableCell>
+            <TableCell className="px-4 py-3.5 text-sm font-bold text-gray-700 w-[12%]">
             </TableCell>
         </TableRow>
     );
 }
 
 function PolicyRowsWithColumns({ rows }: { rows: PolicyRow[] }) {
-    const compareValues = (branch: string | string[], rc: string | string[]): boolean => {
-        if (Array.isArray(branch) && Array.isArray(rc)) {
-            return JSON.stringify(branch) === JSON.stringify(rc);
-        }
-        return branch === rc;
-    };
-
     const renderValue = (value: string | string[]): React.ReactNode => {
         if (Array.isArray(value)) {
             return value.map((line, i) => {
@@ -555,56 +551,25 @@ function PolicyRowsWithColumns({ rows }: { rows: PolicyRow[] }) {
     return (
         <>
             {rows.map((row) => {
-                const isSameValue = compareValues(row.branchInfo || "", row.rcInput || "");
-
                 return (
                     <TableRow
                         key={row.id}
                         className="hover:bg-gray-50/50 transition-colors"
                     >
-                        <TableCell className="px-4 py-3 text-sm text-gray-500 w-[25%]">
+                        <TableCell className="px-4 py-3 text-sm text-gray-500 w-[18%]">
                             {row.policy}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-sm w-[35%]">
-                            <div className="flex flex-col gap-2">
-                                {isSameValue ? (
-                                    renderValue(row.branchInfo || "")
-                                ) : (
-                                    <>
-                                        {/* Branch value with strikethrough */}
-                                        <div className="flex flex-col gap-1">
-                                            {Array.isArray(row.branchInfo) ? (
-                                                row.branchInfo.map((line, i) => {
-                                                    const colonIdx = line.indexOf(':');
-                                                    if (colonIdx > -1) {
-                                                        const label = line.slice(0, colonIdx + 1);
-                                                        const val = line.slice(colonIdx + 1).trim();
-                                                        return (
-                                                            <div key={i} className="flex gap-1">
-                                                                <span className="text-gray-300 font-normal line-through">{label}</span>
-                                                                <span className="text-gray-400 font-semibold line-through">{val}</span>
-                                                            </div>
-                                                        );
-                                                    }
-                                                    return <div key={i} className="text-gray-400 font-semibold line-through">{line}</div>;
-                                                })
-                                            ) : (
-                                                <span className="text-gray-400 font-semibold line-through">{row.branchInfo}</span>
-                                            )}
-                                        </div>
-                                        {/* RCCO value */}
-                                        <div className="flex flex-col gap-1">
-                                            {renderValue(row.rcInput || "")}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                        <TableCell className="px-4 py-3 text-sm w-[20%]">
+                            {renderValue(row.branchInfo || "")}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-sm text-center w-[20%]">
-                            <ResultBadge result={row.branchResult} />
+                        <TableCell className="px-4 py-3 text-sm text-center w-[12%]">
+                            {row.branchResult && <ResultBadge result={row.branchResult} />}
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-sm text-center w-[20%]">
-                            <ResultBadge result={row.rcResult} />
+                        <TableCell className="px-4 py-3 text-sm w-[20%]">
+                            {renderValue(row.rcInput || "")}
+                        </TableCell>
+                        <TableCell className="px-4 py-3 text-sm text-center w-[12%]">
+                            {row.rcResult && <ResultBadge result={row.rcResult} />}
                         </TableCell>
                     </TableRow>
                 );
@@ -634,11 +599,51 @@ export function PolicyChecklist() {
 
     const [isOpen, setIsOpen] = useState(false);
     const [isFailedDialogOpen, setIsFailedDialogOpen] = useState(false);
-    const [waiverStatus, setWaiverStatus] = useState<string>("");
-    const [waiverReason, setWaiverReason] = useState("");
     const [waiverSubmitted, setWaiverSubmitted] = useState(false);
-    const [rccoWaiverStatus, setRccoWaiverStatus] = useState<string>("");
-    const [rccoWaiverReason, setRccoWaiverReason] = useState("");
+
+    // Store waiver info per failed row
+    const [waiverData, setWaiverData] = useState<Record<string, {
+        branchStatus: string;
+        branchReason: string;
+        rccoStatus: string;
+        rccoReason: string;
+        rccoPosition: string;
+        rccoAdditionalCriteria: boolean;
+    }>>({});
+
+    // Track expanded accordion items
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+
+    const toggleExpanded = (rowId: string) => {
+        const newExpanded = new Set(expandedItems);
+        if (newExpanded.has(rowId)) {
+            newExpanded.delete(rowId);
+        } else {
+            newExpanded.add(rowId);
+        }
+        setExpandedItems(newExpanded);
+    };
+
+    const updateWaiverData = (rowId: string, field: string, value: string) => {
+        setWaiverData(prev => ({
+            ...prev,
+            [rowId]: {
+                ...prev[rowId],
+                [field]: value
+            }
+        }));
+    };
+
+    const getWaiverData = (rowId: string) => {
+        return waiverData[rowId] || {
+            branchStatus: "",
+            branchReason: "",
+            rccoStatus: "",
+            rccoReason: "",
+            rccoPosition: "",
+            rccoAdditionalCriteria: false
+        };
+    };
 
     return (
         <>
@@ -715,7 +720,7 @@ export function PolicyChecklist() {
                                                 {hasVerificationColumns ? (
                                                     <>
                                                         <TableRow className="bg-gray-50 hover:bg-gray-50 border-t-4 border-gray-50">
-                                                            <TableCell colSpan={4} className="px-4 py-3.5">
+                                                            <TableCell colSpan={5} className="px-4 py-3.5">
                                                                 <span className="text-sm font-bold text-gray-700">
                                                                     ข้อมูลผู้ค้ำประกัน คนที่ {index + 1} - {guarantor.name}
                                                                 </span>
@@ -792,107 +797,258 @@ export function PolicyChecklist() {
                 <DialogContent size="lg" className="flex flex-col max-h-[90vh]">
                     <DialogHeader className="flex-shrink-0 border-b border-border-strong pb-4">
                         <DialogTitle className="text-gray-900">ขออนุโลม</DialogTitle>
-                        <DialogDescription>กรุณาระบุเหตุผลประกอบการพิจารณาให้สำนักงานใหญ่ เพื่ออธิบายว่าถึงแม้ลูกค้าไม่ผ่านเกณฑ์ที่กำหนด แต่มีเหตุผลสมควรที่จะอนุมัติได้</DialogDescription>
+                        <DialogDescription>พิจารณาแต่ละรายการและระบุเหตุผลการขออนุโลม</DialogDescription>
                     </DialogHeader>
                     <DialogBody className="flex-1 overflow-y-auto">
-                        <div className="space-y-6 pb-2 pt-1">
-                            {/* Table List */}
-                            <div className="border border-border-strong rounded-xl overflow-hidden bg-white">
-                                <Table>
-                                    <TableHeader className="bg-gray-50/50">
-                                        <TableRow>
-                                            <TableHead className="w-[25%] text-xs">รายการ</TableHead>
-                                            <TableHead className="w-[25%] text-xs">ข้อมูลลูกค้า</TableHead>
-                                            <TableHead className="w-[35%] text-xs">อำนาจอนุโลม</TableHead>
-                                            <TableHead className="w-[15%] text-xs text-center">สถานะ</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {failedRows.map((row, idx) => (
-                                            <TableRow key={idx} className="hover:bg-gray-50/50 transition-colors">
-                                                <TableCell className="text-sm font-medium">{row.policy}</TableCell>
-                                                <TableCell className="text-sm text-gray-600">
-                                                    {Array.isArray(row.customerInfo) ? row.customerInfo.join(', ') : row.customerInfo}
-                                                </TableCell>
-                                                <TableCell className="text-sm text-gray-600">
-                                                    {row.waiverAuthority || '-'}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <Badge variant="danger">ไม่ผ่าน</Badge>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                        <div className="space-y-3 pb-2 pt-1">
+                            {/* Accordion for each failed item */}
+                            {failedRows.map((row) => {
+                                const data = getWaiverData(row.id);
+                                const isExpanded = expandedItems.has(row.id);
 
-                            {/* Branch Staff Waiver Options */}
-                            <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                <div className="font-semibold text-sm text-blue-900">ข้อมูลการขออนุโลมจากสาขา</div>
-
-                                <Label className="text-sm font-bold text-gray-900">การขออนุโลม <span className="text-red-500">*</span></Label>
-                                <RadioGroup
-                                    value={waiverStatus}
-                                    onValueChange={isRCCOChecker ? undefined : setWaiverStatus}
-                                    className="flex gap-6"
-                                    disabled={isRCCOChecker}
-                                >
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="ขออนุโลม" id="waiver-yes" disabled={isRCCOChecker} />
-                                        <Label htmlFor="waiver-yes" className={`font-normal cursor-pointer text-sm ${isRCCOChecker ? 'text-gray-400' : ''}`}>ขออนุโลม</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="ไม่ขออนุโลม" id="waiver-no" disabled={isRCCOChecker} />
-                                        <Label htmlFor="waiver-no" className={`font-normal cursor-pointer text-sm ${isRCCOChecker ? 'text-gray-400' : ''}`}>ไม่ขออนุโลม</Label>
-                                    </div>
-                                </RadioGroup>
-
-                                {waiverStatus === "ขออนุโลม" && (
-                                    <div className="space-y-2 animate-in fade-in duration-300">
-                                        <Label className="text-sm font-bold text-gray-900">เหตุผลที่ขออนุโลม <span className="text-red-500">*</span></Label>
-                                        <Textarea
-                                            placeholder="กรอกเหตุผลที่ขออนุโลม..."
-                                            value={waiverReason}
-                                            onChange={(e) => isRCCOChecker ? null : setWaiverReason(e.target.value)}
-                                            disabled={isRCCOChecker}
-                                            className={`min-h-[100px] bg-white border-gray-200 ${isRCCOChecker ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* RCCO Checker Waiver Options */}
-                            {isRCCOChecker && (
-                                <div className="space-y-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-                                    <div className="font-semibold text-sm text-amber-900">ข้อมูลการขออนุโลมจาก RCCO Checker</div>
-
-                                    <div>
-                                        <Label className="text-sm font-bold text-gray-900">การขออนุโลม <span className="text-red-500">*</span></Label>
-                                        <RadioGroup value={rccoWaiverStatus} onValueChange={setRccoWaiverStatus} className="flex gap-6 mt-2">
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="ขออนุโลม" id="rcco-waiver-yes" />
-                                                <Label htmlFor="rcco-waiver-yes" className="font-normal cursor-pointer text-sm">ขออนุโลม</Label>
+                                return (
+                                    <div
+                                        key={row.id}
+                                        className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+                                    >
+                                        {/* Accordion Header */}
+                                        <button
+                                            onClick={() => toggleExpanded(row.id)}
+                                            className="w-full px-4 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors border-b border-gray-100"
+                                        >
+                                            <div className="flex items-center gap-3 text-left flex-1">
+                                                <ChevronDown
+                                                    className={cn(
+                                                        "w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0",
+                                                        isExpanded && "rotate-180"
+                                                    )}
+                                                />
+                                                <div className="flex-1">
+                                                    <div className="text-sm font-semibold text-gray-900">
+                                                        {row.policy}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-0.5">
+                                                        {Array.isArray(row.customerInfo)
+                                                            ? row.customerInfo.join(' • ')
+                                                            : row.customerInfo}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center space-x-2">
-                                                <RadioGroupItem value="ไม่ขออนุโลม" id="rcco-waiver-no" />
-                                                <Label htmlFor="rcco-waiver-no" className="font-normal cursor-pointer text-sm">ไม่ขออนุโลม</Label>
-                                            </div>
-                                        </RadioGroup>
-                                    </div>
+                                            <Badge variant="danger" className="flex-shrink-0">
+                                                ไม่ผ่าน
+                                            </Badge>
+                                        </button>
 
-                                    {rccoWaiverStatus === "ขออนุโลม" && (
-                                        <div className="space-y-2 animate-in fade-in duration-300">
-                                            <Label className="text-sm font-bold text-gray-900">เหตุผลที่ขออนุโลม <span className="text-red-500">*</span></Label>
-                                            <Textarea
-                                                placeholder="กรอกเหตุผลที่ขออนุโลม..."
-                                                value={rccoWaiverReason}
-                                                onChange={(e) => setRccoWaiverReason(e.target.value)}
-                                                className="min-h-[100px] bg-white border-gray-200"
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        {/* Accordion Body */}
+                                        {isExpanded && (
+                                            <div className="px-4 py-4 bg-gray-50/50 space-y-4 animate-in fade-in duration-300">
+                                                {/* Waiver Authority */}
+                                                {row.waiverAuthority && (
+                                                    <div className="p-3 bg-blue-50 rounded border border-blue-100">
+                                                        <div className="text-xs font-semibold text-blue-900 mb-1">
+                                                            อำนาจอนุโลม
+                                                        </div>
+                                                        <div className="text-sm text-blue-800">
+                                                            {row.waiverAuthority}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Branch Staff Waiver Section */}
+                                                <div className="p-3 bg-blue-50 rounded border border-blue-200 space-y-3">
+                                                    <div className="font-semibold text-sm text-blue-900">
+                                                        ข้อมูลการขออนุโลมจากสาขา
+                                                    </div>
+
+                                                    <RadioGroup
+                                                        value={data.branchStatus}
+                                                        onValueChange={(value) =>
+                                                            isRCCOChecker
+                                                                ? null
+                                                                : updateWaiverData(row.id, "branchStatus", value)
+                                                        }
+                                                        className="flex gap-6"
+                                                        disabled={isRCCOChecker}
+                                                    >
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem
+                                                                value="ขออนุโลม"
+                                                                id={`branch-yes-${row.id}`}
+                                                                disabled={isRCCOChecker}
+                                                            />
+                                                            <Label
+                                                                htmlFor={`branch-yes-${row.id}`}
+                                                                className={`font-normal cursor-pointer text-sm ${
+                                                                    isRCCOChecker
+                                                                        ? "text-gray-400"
+                                                                        : ""
+                                                                }`}
+                                                            >
+                                                                ขออนุโลม
+                                                            </Label>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <RadioGroupItem
+                                                                value="ไม่ขออนุโลม"
+                                                                id={`branch-no-${row.id}`}
+                                                                disabled={isRCCOChecker}
+                                                            />
+                                                            <Label
+                                                                htmlFor={`branch-no-${row.id}`}
+                                                                className={`font-normal cursor-pointer text-sm ${
+                                                                    isRCCOChecker
+                                                                        ? "text-gray-400"
+                                                                        : ""
+                                                                }`}
+                                                            >
+                                                                ไม่ขออนุโลม
+                                                            </Label>
+                                                        </div>
+                                                    </RadioGroup>
+
+                                                    {data.branchStatus === "ขออนุโลม" && (
+                                                        <div className="space-y-2 animate-in fade-in duration-300">
+                                                            <Label className="text-sm font-semibold text-gray-900">
+                                                                เหตุผลที่ขออนุโลม{" "}
+                                                                <span className="text-red-500">*</span>
+                                                            </Label>
+                                                            <Textarea
+                                                                placeholder="กรอกเหตุผลที่ขออนุโลม..."
+                                                                value={data.branchReason}
+                                                                onChange={(e) =>
+                                                                    isRCCOChecker
+                                                                        ? null
+                                                                        : updateWaiverData(
+                                                                              row.id,
+                                                                              "branchReason",
+                                                                              e.target.value
+                                                                          )
+                                                                }
+                                                                disabled={isRCCOChecker}
+                                                                className={`min-h-[80px] bg-white border-gray-200 text-sm ${
+                                                                    isRCCOChecker
+                                                                        ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                                                                        : ""
+                                                                }`}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* RCCO Checker Waiver Section */}
+                                                {isRCCOChecker && (
+                                                    <div className="p-3 bg-amber-50 rounded border border-amber-200 space-y-3">
+                                                        <div className="font-semibold text-sm text-amber-900">
+                                                            ข้อมูลการขออนุโลมจาก RCCO Checker
+                                                        </div>
+
+                                                        <RadioGroup
+                                                            value={data.rccoStatus}
+                                                            onValueChange={(value) =>
+                                                                updateWaiverData(row.id, "rccoStatus", value)
+                                                            }
+                                                            className="flex gap-6"
+                                                        >
+                                                            <div className="flex items-center space-x-2">
+                                                                <RadioGroupItem
+                                                                    value="ขออนุโลม"
+                                                                    id={`rcco-yes-${row.id}`}
+                                                                />
+                                                                <Label
+                                                                    htmlFor={`rcco-yes-${row.id}`}
+                                                                    className="font-normal cursor-pointer text-sm"
+                                                                >
+                                                                    ขออนุโลม
+                                                                </Label>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <RadioGroupItem
+                                                                    value="ไม่ขออนุโลม"
+                                                                    id={`rcco-no-${row.id}`}
+                                                                />
+                                                                <Label
+                                                                    htmlFor={`rcco-no-${row.id}`}
+                                                                    className="font-normal cursor-pointer text-sm"
+                                                                >
+                                                                    ไม่ขออนุโลม
+                                                                </Label>
+                                                            </div>
+                                                        </RadioGroup>
+
+                                                        {data.rccoStatus === "ขออนุโลม" && (
+                                                            <div className="space-y-3 animate-in fade-in duration-300">
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm font-semibold text-gray-900">
+                                                                        เหตุผลที่ขออนุโลม{" "}
+                                                                        <span className="text-red-500">*</span>
+                                                                    </Label>
+                                                                    <Textarea
+                                                                        placeholder="กรอกเหตุผลที่ขออนุโลม..."
+                                                                        value={data.rccoReason}
+                                                                        onChange={(e) =>
+                                                                            updateWaiverData(
+                                                                                row.id,
+                                                                                "rccoReason",
+                                                                                e.target.value
+                                                                            )
+                                                                        }
+                                                                        className="min-h-[80px] bg-white border-gray-200 text-sm"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <Label className="text-sm font-semibold text-gray-900">
+                                                                        ระบุตำแหน่งขออนุโลม{" "}
+                                                                        <span className="text-red-500">*</span>
+                                                                    </Label>
+                                                                    <Select
+                                                                        value={data.rccoPosition}
+                                                                        onValueChange={(value) =>
+                                                                            updateWaiverData(row.id, "rccoPosition", value)
+                                                                        }
+                                                                    >
+                                                                        <SelectTrigger className="bg-white">
+                                                                            <SelectValue placeholder="เลือกตำแหน่งขออนุโลม" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            <SelectItem value="ผู้บริหารระดับสูง">ผู้บริหารระดับสูง</SelectItem>
+                                                                            <SelectItem value="ผู้บริหารระดับกลาง">ผู้บริหารระดับกลาง</SelectItem>
+                                                                            <SelectItem value="หัวหน้าฝ่าย">หัวหน้าฝ่าย</SelectItem>
+                                                                            <SelectItem value="เจ้าหน้าที่อื่นๆ">เจ้าหน้าที่อื่นๆ</SelectItem>
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+
+                                                                <div className="flex items-center space-x-2 p-2 bg-white rounded border border-gray-200">
+                                                                    <Checkbox
+                                                                        id={`criteria-${row.id}`}
+                                                                        checked={data.rccoAdditionalCriteria}
+                                                                        onCheckedChange={(checked) => {
+                                                                            setWaiverData(prev => ({
+                                                                                ...prev,
+                                                                                [row.id]: {
+                                                                                    ...prev[row.id],
+                                                                                    rccoAdditionalCriteria: checked as boolean
+                                                                                }
+                                                                            }));
+                                                                        }}
+                                                                    />
+                                                                    <Label
+                                                                        htmlFor={`criteria-${row.id}`}
+                                                                        className="font-normal cursor-pointer text-sm text-gray-900"
+                                                                    >
+                                                                        มีหลักเกณฑ์นอกเหนือ
+                                                                    </Label>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </DialogBody>
                     <DialogFooter className="flex-shrink-0 border-t border-border-strong pt-4 mt-4">
@@ -905,11 +1061,7 @@ export function PolicyChecklist() {
                         </Button>
                         <Button
                             className="min-w-[120px] font-bold shadow-none bg-chaiyo-blue hover:bg-chaiyo-blue/90 text-white"
-                            disabled={
-                                isRCCOChecker
-                                    ? !rccoWaiverStatus || (rccoWaiverStatus === "ขออนุโลม" && !rccoWaiverReason.trim())
-                                    : !waiverStatus || (waiverStatus === "ขออนุโลม" && !waiverReason.trim())
-                            }
+                            disabled={failedRows.length === 0}
                             onClick={() => {
                                 setWaiverSubmitted(true);
                                 setIsFailedDialogOpen(false);
